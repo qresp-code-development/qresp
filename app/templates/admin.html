@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+
+    {% from "_formhelpers.html" import render_field %}
+    <form method="post" action="admin">
+        <dl>
+            {{ render_field(form.hostname) }}
+            {{ render_field(form.port) }}
+            {{ render_field(form.username) }}
+            {{ render_field(form.password) }}
+            {{ render_field(form.dbname) }}
+            {{ render_field(form.collection) }}
+            {{ render_field(form.isSSL) }}
+        </dl>
+        <input type="submit" value="Go">
+    </form>
+
+
+
+{% endblock %}

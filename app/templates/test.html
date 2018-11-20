@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- <link rel="stylesheet" href="css/bootstrap-social.css"> -->
+
+    <!-- need for bootstrap -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <!-- required for bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <!-- custom for all -->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+    <!-- Only use for search pages with categories silviomoreto.github.io/bootstrap-select -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+</head>
+<body>
+
+
+<!-- search -->
+<div class="row search-area">
+    <div class="col-md-12">
+        <div class="input-group" id="adv-search">
+            <input type="text" class="form-control" placeholder="Search all"/>
+            <div class="input-group-btn">
+                <div class="btn-group" role="group">
+                    <div class="dropdown dropdown-lg">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span
+                                class="caret"></span></button>
+                        <div class="dropdown-menu dropdown-menu-right" role="menu" id="menu">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-group">
+                                    <label for="filter">Sort by</label>
+                                    <select class="form-control">
+                                        <option value="0" selected>Username</option>
+                                        <option value="1">Date Uploaded</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filter">Order:</label>
+                                    <select class="form-control">
+                                        <option value="0" selected>Ascending</option>
+                                        <option value="1">Descending</option>
+                                    </select>
+                                </div>
+                                <!-- category script -->
+                                <div class="form-group">
+                                    <label for="filter">Search in Category</label>
+                                    <select class="selectpicker" multiple>
+                                        <option>Mustard</option>
+                                        <option>Ketchup</option>
+                                        <option>Relish</option>
+                                    </select>
+                                </div>
+                                <!-- end category script -->
+                                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"
+                                                                                    aria-hidden="true"></span></button>
+                            </form>
+                        </div>
+
+                    </div>
+                    <button type="button" class="btn btn-primary"><span class="glyphicon glyphicon-search"
+                                                                        aria-hidden="true"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- end search -->
+
+
+<!-- category script -->
+<div class="form-group">
+    <label for="filter">Search in Category</label>
+    <select class="selectpicker" multiple>
+        <option>Mustard</option>
+        <option>Ketchup</option>
+        <option>Relish</option>
+    </select>
+</div>
+<!-- end category script -->
+
+
+<script>
+    $('body').on('click', function (e) {
+        var target = $(event.target),
+            $parent = target.parents('.bootstrap-select');
+
+        if ($parent.length) {
+            e.stopPropagation();
+            $parent.toggleClass('open');
+        } else {
+            $('.bootstrap-select').removeClass('open');
+        }
+    });
+</script>
+</body>
+</html>
