@@ -256,7 +256,7 @@ function buildChartTables(chartDetails, paperDetails) {
                                 + $.trim(row.number)
                                 + "</h6></div></div>";
 
-                            chartInfo += "<div id='toolbar'><div style='width: 80%; float: left;'>";
+                            chartInfo += "<div id='toolbar'><div style='width: 100%; float: left; margin-bottom: 15px;'>";
                             chartInfo += "<div class='button-icon'></div>";
                             chartInfo += "<ul class='icons-charts'>";
                             var imageFileName = $.trim(row.imageFile);
@@ -296,17 +296,25 @@ function buildChartTables(chartDetails, paperDetails) {
                                     .trim(paperDetails._PaperDetails__downloadPath)
                                 + "' title='Download the data source for the chart from this Endpoint' target='_blank'><img src='/static/images/download-icon.png' alt='download'></a></li>";
 
-                            var workflows = "<img data-workflow='"
+                            var workflows = ($
+                                .trim(paperDetails._PaperDetails__id) == "") ? ""
+                                : "<li><a href='javascript:void'><img data-workflow='"
                                 + paperDetails._PaperDetails__id
                                 + ","
                                 + $.trim(row.id)
-                                + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#examplemodal' class='workflowimg' style='height: 35px; width: 35px; cursor: pointer;' alt='workflow'>";
+                                + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#examplemodal' class='workflowimg' alt='workflow'></a></li>";
 
-                            chartInfo += datatree + downloads + notebooks + "</ul></div><div style='width: 20%;float: right;'> " + workflows + "</div></div>";
+                            // var workflows = "<img data-workflow='"
+                            //     + paperDetails._PaperDetails__id
+                            //     + ","
+                            //     + $.trim(row.id)
+                            //     + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#examplemodal' class='workflowimg' style='height: 35px; width: 35px; cursor: pointer;' alt='workflow'>";
+
+                            chartInfo += datatree + workflows +downloads + notebooks + "</ul></div>";
                             return chartInfo;
 
                         },
-                        "width": "40%"
+                        "width": "50%"
                     },
                     {
                         "data": "number",
@@ -331,10 +339,9 @@ function buildChartTables(chartDetails, paperDetails) {
                     },
                     {
                         "data": "kind",
-                        "visible": true,
-                        "searchable": true,
-                        "sortable": true,
-                        "width": "10%"
+                        "visible": false,
+                        "searchable": false,
+                        "sortable": false,
                     },
                     {
                         "data": "files",
@@ -510,7 +517,7 @@ function bindWorkflow(workflowDetails, isChart) {
     var FontColorSelection = function (value) {
         switch (value) {
             case colors.red:
-                return "white";
+                return "black";
                 break;
             case colors.blue:
                 return "black";
@@ -532,7 +539,7 @@ function bindWorkflow(workflowDetails, isChart) {
     var ShapeSelection = function (value) {
         switch (value) {
             case colors.red:
-                return "ellipse";
+                return "dot";
                 break;
             case colors.blue:
                 return "diamond";
@@ -546,6 +553,17 @@ function bindWorkflow(workflowDetails, isChart) {
             case colors.orange:
                 return "square";
                 break;
+        }
+    };
+
+    var DotSelection = function (value) {
+        switch (value) {
+            case colors.red:
+                return 20;
+                break;
+            default:
+                return 35;
+
         }
     };
 
@@ -619,7 +637,7 @@ function bindWorkflow(workflowDetails, isChart) {
                     id: index,
                     //label : '<b>' + val.nodelabel + '</b>',
                     shape: ShapeSelection(index.charAt(0)),
-                    size: 35,
+                    size: DotSelection(index.charAt(0)),
                     color: ColorSelection(index.charAt(0)),
                     title: val.toolTip,
                     info: val.details,
@@ -721,8 +739,8 @@ function bindWorkflow(workflowDetails, isChart) {
     var step = 95;
     legendNodes.add({
         id: 1000,
-        x: x,
-        y: y + step + 10,
+        x: x + 10,
+        y: y + step + 30,
         label: 'Nodes',
         shape: 'text',
         size: 30,
@@ -745,23 +763,15 @@ function bindWorkflow(workflowDetails, isChart) {
             label: 'External',
             group: 'External',
             title: '<b>External:</b><br>The external node represents content that was used within the paper, but not generated within the paper. A reference/link is not required but recommended.',
-            size: 20,
-            shape: 'ellipse',
+            size: 10,
+            shape: 'dot',
             color: 'red',
             fixed: true,
             physics: false,
             chosen: {
                 label: false,
                 node: changeChosenLegendNodeSize
-            },
-            font: {
-                multi: true,
-                color: '#ffffff',
-                bold: {
-                    color: '#ffffff'
-                }
-            },
-
+            }
         });
 
     legendNodes

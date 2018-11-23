@@ -326,7 +326,7 @@ tr:focus .custom-icon-bar {
 }
 
 .icons-charts.open li {
-    width: 33%;
+    width: 25%;
     display: inline-block;
     padding-top: 2px;
 }

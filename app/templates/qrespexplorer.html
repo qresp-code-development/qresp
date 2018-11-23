@@ -2,14 +2,13 @@
 
 {% block page_content %}
     <!-- Header -->
-    <header class="bg-primary text-white text-center" style="padding-top:3rem;padding-bottom: 3rem;">
+    <div class="bg-primary text-center" style="padding-top:3rem;padding-bottom: 3rem;">
         <div class="container">
-            <img class="img-fluid mb-5 d-block mx-auto" src="static/images/qresp-logo.png" alt="">
+            <div class="row">
                 <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
                     <h2 class="text-black-444 pt-0 text-center">Choose server to search for papers</h2>
                     <form action="{{ url_for('search') }}" method="post">
                         <select name="serversList" id="serversList" class="selectpicker show-tick form-control"
-                                style="border: solid 2px #ccc;"
                                 data-width="auto" data-actions-box="true" multiple data-live-search="true">
                             {% for server in serverslist %}
                                 <option value="{{ server.qresp_server_url }}">{{ server.qresp_server_url }}</option>
@@ -20,8 +19,15 @@
                         </button>
                     </form>
                 </div>
-            <h3 class="text-uppercase mb-0" style="color:#800000;font-family: Agency FB;">Qresp | Explorer allows you to
-                search for paper contents and to view and download the data organized in the paper.</h3>
+            </div>
+             <div class="row">
+                <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+                <div style="padding-top: 3rem;">
+                    <p class="text-uppercase mb-0" style="text-align: justify;font-size: 40px;">Qresp | Explorer allows you to
+                    search for paper contents and to view and download the data organized in the paper.</p>
+                </div>
+                </div>
+             </div>
         </div>
-    </header>
+    </div>
 {% endblock %}

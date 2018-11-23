@@ -1,10 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base_curator.html" %}
 
-</body>
-</html>
+{% block page_content %}
+    <!-- Header -->
+        <div class="container h-75">
+            <div class="row align-items-center h-75">
+                <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+                   <p>
+                        Qresp | Curator accesses the folder that contains your research data and collects information about: <br/>
+                   </p>
+
+                    <ul style="font-size:20px; text-align: justify;">
+                        <li>Data location & access</li>
+                        <li>Data content</li>
+                        <li>Paper details</li>
+                    </ul>
+                    <p>
+					    As a result of the curation process, Qresp generates a metadata file that describes your paper using the JSON (JavaScript Object Notation) syntax. The file may be downloaded or sent to a document-oriented database (Step 7).
+				    </p>
+                    <p>
+                        If you want to resume a previously interrupted curation process, please upload the JSON metadata file below, otherwise leave it blank and click continue.
+                    </p>
+                     <span class="input-group-btn">
+                        <input type="button" id="btnExplorer"
+                               name="general_search_button" value="Start from scratch"
+                               class="btn btn-theme-colored btn-lg m-0" title="Start from scratch."
+                               style="font-weight: bold; height: 45px;" onclick="window.location='/curatordetails';" >
+                     <input type="button" id="btnCurator"
+                               name="general_search_button" value="Resume"
+                               class="btn btn-theme-colored btn-lg m-0" title="Continue with existing JSON file."
+                               style="font-weight: bold; height: 45px;" onclick="openUploadSection();" >
+                    </span>
+                </div>
+
+            </div>
+             <div class="row pt-2" id="uploadDiv" style="display: none;">
+                <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+                    <input type="file" id="my_file" class="pb-3" title="Select a file">
+    				<textarea id="myTextArea" cols=135 rows=30 placeholder="Upload/Paste Here A JSON File"></textarea>
+                    <div class="pt-4">
+                        <span class="input-group-btn">
+                            <input type="button" id="save"
+                                   name="general_search_button"
+                                   class="btn btn-theme-colored btn-lg m-0" title="Parses the JSON file and auto fills fields in the next steps."
+                                   onclick="parseJSON('POST');"
+                                   value="Continue" >
+                        </span>
+                    </div>
+                </div>
+             </div>
+        </div>
+    <script src="{{ url_for('static', filename='./javascript/modules/qrespcurator.js') }}"></script>
+
+{% endblock %}

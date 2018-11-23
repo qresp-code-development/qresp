@@ -117,6 +117,8 @@ h5, h6, p {
 
 p {
     line-height: 1.42857143;
+    font-size:20px;
+    text-align: justify;
 }
 
 p, pre, ul, ol, dl, dd, blockquote, address, table, fieldset, form {

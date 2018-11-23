@@ -34,9 +34,29 @@ def handle_invalid_usage(error):
 @app.route('/')
 @app.route('/index')
 def index():
-    serverslist = Servers()
-    return render_template('index.html', serverslist=serverslist.getServersList())
+    """
+    Fetches the homepage
+    :return:
+    """
+    return render_template('index.html')
 
+# Fetches list of qresp servers for the explorer
+@app.route('/qrespexplorer')
+def qrespexplorer():
+    """
+    Fetches the explorer homepage
+    """
+    serverslist = Servers()
+    return render_template('qrespexplorer.html', serverslist=serverslist.getServersList())
+
+# Fetches the curator homepage
+@app.route('/qrespcurator')
+def qrespcurator():
+    """
+    Fetches the curator homepage
+    """
+    serverslist = Servers()
+    return render_template('qrespcurator.html')
 
 # Fetches list of qresp servers
 @app.route('/test')
