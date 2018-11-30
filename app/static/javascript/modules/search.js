@@ -18,17 +18,7 @@ $(function () {
     var publicationList = [];
 
 
-    // $('#collectionList').change(function () {
-    //     collectionList.push($(this).find("option:selected").text());
-    // });
-    // $('#authorsList').change(function () {
-    //     authorsList.push($(this).find("option:selected").text());
-    // });
-    // $('#publicationList').change(function () {
-    //     publicationList.push($(this).find("option:selected").text());
-    // });
-
-    $('.filtersearch').click(function (e) {
+   $('.filtersearch').click(function (e) {
 
         var location_url = document.location.href;
         var search_url = '/searchWord';
@@ -49,7 +39,6 @@ $(function () {
             authorsList: JSON.stringify(authorsList),
             publicationList: JSON.stringify(publicationList)
         }, function (data) {
-            console.log("check>>", data);
             buildTable(data['allpaperslist']);
             $('#qresp-logo').hide('slow', function () {
                 $('#qresp-logo').remove();
@@ -101,7 +90,7 @@ function buildTable(allPapers) {
                 "sortable": true,
                 "width": "95%",
                 "render": function (data, type, row, meta) {
-                    var title = "<div id='titleId'><p style='font-size:17px;color:#1a0dab;font-weight:bold;'>";
+                    var title = "<div id='titleId'><p style='font-size:18px;color:#1a0dab;font-weight:bold;'>";
                     //title
                     var link = "<a href='/paperdetails/" + row["_Search__id"] + "' class='alltab'>";
                     title += link + data + "</a></p>";
@@ -234,7 +223,6 @@ function buildTable(allPapers) {
             }
         ],
         "search": {
-            // "search" : "Type here...",
             "caseInsensitive": true,
             "regex": false,
             "smart": true

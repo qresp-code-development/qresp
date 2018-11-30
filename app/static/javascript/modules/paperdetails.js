@@ -37,7 +37,6 @@ $(function () {
     });
 
     $('#PaperSection').on('click', '#btnMint', function () {
-        window.location.href = "mint.jsp";
         return false;
     });
     $('#PaperSection').on('click', '#btnCite', function () {
@@ -302,7 +301,7 @@ function buildChartTables(chartDetails, paperDetails) {
                                 + paperDetails._PaperDetails__id
                                 + ","
                                 + $.trim(row.id)
-                                + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#examplemodal' class='workflowimg' alt='workflow'></a></li>";
+                                + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#chartWorkflowModalMode' class='workflowimg' alt='workflow'></a></li>";
 
                             // var workflows = "<img data-workflow='"
                             //     + paperDetails._PaperDetails__id
@@ -483,7 +482,6 @@ function buildDatasetTables(datasetDetails, paperDetails) {
 
 
 function bindWorkflow(workflowDetails, isChart) {
-    console.log("Chh>", workflowDetails);
     var colors = {
         "red": "h",
         "blue": "t",

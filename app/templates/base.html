@@ -82,7 +82,7 @@
 <body>
 <nav class="navbar navbar-expand-lg bg-secondary text-uppercase" id="mainNav">
     <div class="container">
-        <a class="navbar-brand js-scroll-trigger" href="/"><img
+        <a class="navbar-brand js-scroll-trigger" href="/qrespexplorer"><img
                 src="{{ url_for('static', filename='./images/Exploration-logo.png') }}" alt="Qresp Exploration"
                 style="width:235px;"></a>
         <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary rounded" type="button"
@@ -108,7 +108,6 @@
 </nav>
 
 
-
 {% block content %}
     <div class="container">
         {% for message in get_flashed_messages() %}
@@ -118,10 +117,12 @@
             </div>
         {% endfor %}
     </div>
-    {% block page_content %}{% endblock %}
+     <div class="container" style="padding-top:6rem;padding-bottom: 6rem;">
+     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        {% block page_content %}{% endblock %}
+     </div>
 
 {% endblock %}
-
 
 <!-- Footer -->
 <footer class="footer text-center">
@@ -152,6 +153,13 @@
     </div>
 </div>
 
+<script type="text/javascript">
+    $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 
 </body>
+
+
 </html>

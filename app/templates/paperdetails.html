@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 
 {% block page_content %}
-    <div class="container" style="padding-top:2rem;padding-bottom: 2rem;">
         <div class="row">
             <div class="col-md-12">
-                <h3 class="pt-0"><p id="lblTitle"></p></h3>
+                <h3 class="pt-0"><p id="lblTitle" style="font-size: 22px;"></p></h3>
                 <p id="lblAuthor"></p>
                 <p id="lblTags"></p>
                 <div class="paper-col-info"><label style="float: left">Collection(s): &nbsp;</label>
@@ -186,7 +185,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script src="{{ url_for('static', filename='./javascript/modules/paperdetails.js') }}"></script>
 

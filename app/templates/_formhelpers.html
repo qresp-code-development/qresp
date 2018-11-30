@@ -1,6 +1,16 @@
 {% macro render_field(field) %}
-    <dt>{{ field.label }}
-    <dd>{{ field(**kwargs)|safe }}
+    <div class="form-group row">
+     {% if field.flags.required %}
+         <label class="col-sm-2 col-form-label">{{ field.label }}<span style="color: red;">*</span> </label>
+    {% else %}
+         <label class="col-sm-2 col-form-label">{{ field.label }}</label>
+    {% endif %}
+    <div class="col-sm-10">
+         {% if field.type != "RadioField" %}
+            {{ field(class_='form-control',title=field.description,**{'data-toggle': 'tooltip'}) }}
+           {% else %}
+             {{ field(title=field.description,**{'data-toggle': 'tooltip'}) }}
+        {% endif %}
         {% if field.errors %}
             <ul class=errors>
                 {% for error in field.errors %}
@@ -8,5 +18,35 @@
                 {% endfor %}
             </ul>
         {% endif %}
-    </dd>
+    </div>
+    </div>
+{% endmacro %}
+
+{% macro render_field_curate(field) %}
+
+        <tr>
+            <td style="padding-bottom: 1rem;">
+                {% if field.flags.required %}
+                    <label class="col-form-label">{{ field.label }}<span style="color: red;">*</span> </label>
+                {% else %}
+                    <label class="col-form-label">{{ field.label }}</label>
+                {% endif %}
+            </td>
+            <td style="padding-bottom: 1rem; width: 100%;" colspan="3">
+                {% if field.type != "RadioField" %}
+                {{ field(class_='form-control',title=field.description,**{'data-toggle': 'tooltip'}) }}
+               {% else %}
+                 {{ field(title=field.description,**{'data-toggle': 'tooltip'}) }}
+            {% endif %}
+            {% if field.errors %}
+                <ul class=errors>
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            </td>
+        </tr>
+
 {% endmacro %}
