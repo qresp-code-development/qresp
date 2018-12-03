@@ -15,11 +15,7 @@ function toggleOnOff(state,service){
 }
 
 $(document).ready(function () {
-	$("#navbar>li.is-active").removeClass("is-active");
-	$("#detailsid").addClass("is-complete");
-	$("#welcomeid").addClass("is-complete");
-	$("#serverid").addClass("is-complete");
-	$("#projectid").addClass("is-active");
+
     toggleOnOff(false,"http_service_path");
 	toggleOnOff(false,"git_service");
 	toggleOnOff(false,"globus_service_path");
@@ -28,43 +24,40 @@ $(document).ready(function () {
 });
 
 function saveProjectPath(){
-	var path = $("#path").val();
+	var treedata = $('.tree-form').serializeArray();
+	var searchdata = getFormData(treedata);
 	$.ajax({
 		method: 'POST',
-		url: '/project',
+		url: '/projectPath',
 		dataType: "json",
 		contentType: "application/json ; charset=utf-8",
-		data: JSON.stringify(path),
+		data: JSON.stringify(searchdata),
 		success: function (data) {
+				console.log("d>>",data);
 				$("#path").val(data.fileServerPath);
-				if(data.fileServerPath.length>0){
+				if(data.projectPath.fileServerPath.length>0){
 					toggleOnOff(true,"http_service_path");
 				}
-				if(data.gitPath.length>0){
+				if(data.projectPath.gitPath.length>0){
 					toggleOnOff(true,"git_service");
 				}
-				if(data.downloadPath.length>0){
+				if(data.projectPath.downloadPath.length>0){
 					toggleOnOff(true,"globus_service_path");
 				}
 				$("#navbar>li.is-active").removeClass("is-active");
+				$("#detailsid").addClass("is-complete");
+				$("#welcomeid").addClass("is-complete");
+				$("#serverid").addClass("is-complete");
 				$("#projectid").addClass("is-active");
 		}
 	});
 }
 
-// else {
-// 				if(data.projectPath.isConfigFile === "N"){
-// 					var r = window.confirm("Are you sure you want to curate the paper "+data.projectPath.projectName);
-// 				}
-// 				$("#projectid").addClass("is-complete");
-// 				$("#curateid").addClass("is-active");
-// 				$("#curateid a").removeClass("disabled");
-// 				$("#curateid span").removeClass("disabled");
-// 			}
 
 
 function callTree(){
-	var searchdata = $("#path").val();
+	var treedata = $('.tree-form').serializeArray();
+	var searchdata = getFormData(treedata);
 	$.ajax({
 		method: 'POST',
 		url: '/getTreeInfo',
@@ -142,4 +135,13 @@ function callTree(){
 		}
 	});
 
+}
+
+function getFormData(formdata){
+		var unindexed_array = formdata;
+		var indexed_array = {};
+		$.map(unindexed_array, function(n, i){
+			indexed_array[n['name']] = n['value'];
+		});
+		return indexed_array;
 }

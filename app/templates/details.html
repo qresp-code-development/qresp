@@ -3,17 +3,17 @@
 {% block page_content %}
 
     {% from "_formhelpers.html" import render_field %}
-    <div class="card text-center">
+    <div class="card">
         <div class="card-body">
-            <h3 data-toggle="tooltip" title="Connect to a mongo database" class="card-title"> Identify who is curating the paper </h3>
+            <h3 data-toggle="tooltip" title="Connect to a mongo database" class="card-title" style="text-align: center;"> Identify who is curating the paper </h3>
                     <form method="post" action="details">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Name<span style="color: red;">*</span>  </label>
+                                <label class="col-sm-12 col-form-label">Name<span style="color: red;">*</span>  </label>
                                 <div class="col-sm-4">
                                     {{ form.firstName(class_='form-control',title=form.firstName.description,**{'data-toggle': 'tooltip'}) }}
                                 </div>
-                                <div class="col-sm-2">
+                                <div class="col-sm-4">
                                     {{ form.middleName(class_='form-control',title=form.middleName.description,**{'data-toggle': 'tooltip'}) }}
                                 </div>
                                 <div class="col-sm-4">

@@ -41,24 +41,21 @@ class AdminForm(Form):
     isSSL = RadioField('IsSSL?', choices=[('Yes', 'Yes'), ('No', 'No')], default='No',description='Is database SSL protected?')
 
 class ConfigForm(Form):
-    httpService = RadioField('Is there a HTTP service running on the server?', description='Enter Hostname of remote server where paper content is organized and located e.g. midway.rcc.uchicago.edu')
-    gitService = RadioField('Is there a Git service running on the server?',description='Enter your username to establish a SSH connection to the remote server')
-    globusService = RadioField('Is there a Globus service running on the server?',description='Enter your password associated to the username')
-    downloadPath = StringField('Database Name',description='Name of mongo database')
-    fileServerPath = HiddenField()
-    notebookPath = HiddenField()
-    folderAbsolutePath = HiddenField()
-    gitPath = HiddenField()
+    httpService = RadioField('Is there a HTTP service running on the server?', choices=[('Yes', 'Yes'), ('No', 'No')], default='No', description='e.g. https://notebook.rcc.uchicago.edu/files')
+    gitService = RadioField('Is there a Git service running on the server?',choices=[('Yes', 'Yes'), ('No', 'No')], default='No')
+    globusService = RadioField('Is there a Globus service running on the server?',choices=[('Yes', 'Yes'), ('No', 'No')], default='No',description='e.g. https://www.globus.org/app/transfer?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path=')
+    downloadPath = StringField('Download Path',description='The Globus service allows to download the paper content using gridFTP.')
+    fileServerPath = StringField('File Server Path', description='If a HTTP service is running on the server, a URL may be associated to the paper content. This URL is only required by Qresp | Exploration to view images & download files using a web browser.')
 
 class NameForm(Form):
     firstName = StringField(validators=[validators.DataRequired()],description='e.g. John',render_kw={"placeholder": "Enter first name"})
-    middleName = StringField(description='e.g. L.',render_kw={"placeholder": "middle name"})
+    middleName = StringField(description='e.g. L.',render_kw={"placeholder": "Enter middle name"})
     lastName = StringField(validators=[validators.DataRequired()], description='e.g. Doe',render_kw={"placeholder": "Enter last name"})
 
 class DetailsForm(Form):
-    firstName = StringField(validators=[validators.DataRequired()],description='e.g. John',render_kw={"placeholder": "Enter first name"})
-    middleName = StringField(description='e.g. L.',render_kw={"placeholder": "middle name"})
-    lastName = StringField(validators=[validators.DataRequired()], description='e.g. Doe',render_kw={"placeholder": "Enter last name"})
+    firstName = StringField('First Name',validators=[validators.DataRequired()],description='e.g. John',render_kw={"placeholder": "Enter first name"})
+    middleName = StringField('Middle Name',description='e.g. L.',render_kw={"placeholder": "middle name"})
+    lastName = StringField('Last Name',validators=[validators.DataRequired()], description='e.g. Doe',render_kw={"placeholder": "Enter last name"})
     emailId = EmailField('Email Address', description='e.g. john.doe@company.com',render_kw={"placeholder": "Enter your email address"})
     affiliation = StringField('Affiliation', description='e.g. Department of Chem, University of XYZ',render_kw={"placeholder": "Enter your university"})
 
@@ -66,6 +63,8 @@ class ServerForm(Form):
     serverName = StringField('Server Name', [validators.DataRequired("Please enter hostname of server")], description='Enter Hostname of remote server where paper content is organized and located e.g. midway.rcc.uchicago.edu',render_kw={"placeholder": "Enter hostname of server"})
     username = StringField('Username', [validators.DataRequired("Please enter username of server")], description='Enter your username to establish a SSH connection to the remote server',render_kw={"placeholder": "Enter username to login"})
     password = PasswordField('Password', [validators.DataRequired("Please enter password of server")], description='Enter your password associated to the username',render_kw={"placeholder": "Enter password to login"})
+    isDUOAuth = RadioField('Is 2FA DUO authorized?', choices=[('Yes', 'Yes'), ('No', 'No')], default='Yes',description='Is server 2FA DUO authorized?')
+
 
 class ProjectForm(Form):
     downloadPath = HiddenField()
@@ -77,6 +76,7 @@ class ProjectForm(Form):
     insertedBy = FormField(DetailsForm)
     isPublic = BooleanField()
     timestamp = DateTimeField()
+    serverPath = HiddenField()
 
 class InfoForm(Form):
     PIs = FieldList(FormField(NameForm), label='Principal Investigator(s)', description='Enter PI(s)', min_entries=1, validators=[validators.DataRequired()])

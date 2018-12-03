@@ -3,16 +3,15 @@
 {% block page_content %}
 
     {% from "_formhelpers.html" import render_field %}
-    <div class="card text-center">
+    <div class="card">
         <div class="card-body">
-            <h3 data-toggle="tooltip" title="Connect to a mongo database" class="card-title"> Connect to the server where the paper content is located </h3>
-            <div class="row align-items-center">
-                <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+            <h3 data-toggle="tooltip" title="Connect to a mongo database" class="card-title text-center"> Connect to the server where the paper content is located </h3>
                     <form method="post" action="server">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         {{ render_field(form.serverName) }}
                         {{ render_field(form.username) }}
                         {{ render_field(form.password) }}
+                        {{ render_field(form.isDUOAuth) }}
                        <span class="input-group-btn">
                             <input type="submit" id="btnServer"
                                    value="Continue"
@@ -24,8 +23,6 @@
                                    style="font-weight: bold; height: 45px;" onclick="window.location='/project';">
                        </span>
                     </form>
-                </div>
-            </div>
         </div>
     </div>
     <script src="{{ url_for('static', filename='./javascript/modules/server.js') }}"></script>

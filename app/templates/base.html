@@ -76,15 +76,24 @@
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery.lazyload.min.js') }}"></script>
 
     <script src="{{ url_for('static', filename='./javascript/vendor/vis.min.js') }}"></script>
+     <style>
+        .nav-item::after{content:'';display:block;width:0px;height:2px;background:#fec400;transition: 0.2s;}
+        .nav-item:hover::after{width:100%;}
+        .navbar-dark .navbar-nav .active > .nav-link, .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .nav-link.show, .navbar-dark .navbar-nav .show > .nav-link,.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover{color:#fec400;}
+        .nav-link{padding:15px 5px;transition:0.2s;}
+        .active{background:#c40306;}
 
+        .dropdown-item.active, .dropdown-item:active{color:#212529;}
+        .dropdown-item:focus, .dropdown-item:hover{background:#fec400;}
+    </style>
 
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-secondary text-uppercase" id="mainNav">
     <div class="container">
-        <a class="navbar-brand js-scroll-trigger" href="/qrespexplorer"><img
-                src="{{ url_for('static', filename='./images/Exploration-logo.png') }}" alt="Qresp Exploration"
-                style="width:235px;"></a>
+        <a class="navbar-brand js-scroll-trigger" href="/qrespexplorer">        <a class="navbar-brand js-scroll-trigger" href="/"><img
+                src="{{ url_for('static', filename='./images/Qresp-logo.png') }}" alt="Qresp"
+                style="width:100px;"></a>
         <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary rounded" type="button"
                 data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive"
                 aria-expanded="false" aria-label="Toggle navigation">
@@ -93,8 +102,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item mx-0 mx-lg-1 active">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">EXPLORER</a>
+                </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/">HOME</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">CURATOR</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
                     <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger">DOCUMENTATION</a>

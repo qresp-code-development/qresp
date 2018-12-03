@@ -23,4 +23,23 @@ $(function () {
            });
          event.preventDefault();
     });
+
+     $('input[name=httpService]').on( "change", function() {
+         var test = $(this).val();
+         if(test=='Yes') {
+             $('#httpServicepath').show();
+         }else{
+             $('#httpServicepath').hide();
+         }
+    });
+
+      $('input[name=globusService]').on( "change", function() {
+         var test = $(this).val();
+         if(test=='Yes') {
+             $('#globusServicepath').show();
+         }else{
+             $('#globusServicepath').hide();
+         }
+    });
+
 });

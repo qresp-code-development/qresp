@@ -1,4 +1,5 @@
 import traceback
+import ast
 
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from datetime import timedelta
@@ -11,7 +12,7 @@ from .views import *
 from .util import *
 
 qresp_config = {}
-
+ftp_dict = {}
 
 class InvalidUsage(Exception):
     status_code = 400
@@ -81,7 +82,9 @@ def uploadFile():
     print(paperform.data)
     session["paper"] = paperform.data
     session["details"] = paperform.info.insertedBy.data
-    print(session.get("details"))
+    session["serverPath"] = paperform.info.serverPath.data
+    session["fileServerPath"] = paperform.info.fileServerPath.data
+    session["charts"] = paperform.charts.data
     # except Exception as e:
     #     flash("Could not parse JSON "+ str(e))
     return jsonify(out="done")
@@ -108,14 +111,17 @@ def server():
     """
     form = ServerForm(request.form)
     if request.method == 'POST' and form.validate():
-        print("details",session["details"])
-        session["server"] = form.data
-        return redirect(url_for('project'))
-    elif session.get("server"):
-        serverForm = session.get("server")
-        form = ServerForm(**serverForm)
+        try:
+            sftp = ConnectToServer(form.serverName.data,form.username.data,form.password.data,form.isDUOAuth.data,"1")
+            session["sftpclient"] = form.username.data
+            ftp_dict[form.username.data] = sftp.getSftp()
+            return redirect(url_for('project'))
+        except Exception as e:
+            flash("Could not connect to server. Plase try again!"+str(e))
+            render_template('server.html', form=form)
     return render_template('server.html', form=form)
 
+@csrf.exempt
 @app.route('/project', methods=['POST', 'GET'])
 def project():
     """ This method helps in connecting to the server.
@@ -123,72 +129,60 @@ def project():
     """
     form = ProjectForm(request.form)
     if session.get("project"):
-        projForm = session.get("project")
-        projectForm = ProjectForm(**projForm)
-        form = projectForm
-    elif session.get("server"):
-        listObjects = []
-        serverForm = session.get("server")
-        serverform = ServerForm(**serverForm)
-        servername = serverform.serverName.data
-        username = serverform.username.data
-        password = serverform.password.data
-        content_path = form.fileServerPath.data
-        try:
-            if content_path:
-                if "/" in content_path:
-                    form.ProjectName.data = content_path.rsplit("/", 1)[1]
-                else:
-                    form.ProjectName.data = content_path
-                path =content_path
-            else:
-                path = "."
-            openFileToReadConfig(str(path.rsplit("/", 1)[0]), "qresp.ini", servername, username, password, form)
-        except Exception as e:
-            flash("Could not connect to server "+str(e))
-    return render_template('project.html', fileServerPath=form.fileServerPath.data,gitPath=form.gitPath.data, downloadPath=form.downloadPath.data)
+        session["project"] = form.data
+    elif session.get("fileServerPath"):
+        form.fileServerPath = session.get("fileServerPath")
+    return render_template('project.html', form=form)
 
+@csrf.exempt
+@app.route('/projectPath', methods=['POST', 'GET'])
+def projectPath():
+    """ This method helps in connecting to the server.
+    :return: template project.html
+    """
+    form = ProjectForm(request.form)
+    ftpclient = session["sftpclient"]
+    ftp = ftp_dict[ftpclient]
+    if request.method == 'POST' and form.validate():
+        print("here",ftp)
+        dtree = Dtree(ftp, form.fileServerPath.data.rsplit("/", 1)[0], session)
+        dtree.fetchForTree()
+    elif session.get("project"):
+        session["project"] = form.data
+    elif session.get("fileServerPath"):
+        form.fileServerPath = session.get("fileServerPath")
+    return jsonify({'projectPath': form.data})
+
+@csrf.exempt
 @app.route('/getTreeInfo', methods=['POST', 'GET'])
 def getTreeInfo():
     """
     Renders the Tree containing Project Information which is 'SSH'ed with the remote directory.
     :return:
     """
-    path = request.get_json()
+    pathDetails = request.get_json()
     listObjects = []
+    services = []
+    ftpclient = session["sftpclient"]
+    ftp = ftp_dict[ftpclient]
+    if 'path' in pathDetails and 'curate' in pathDetails:
+        content_path = pathDetails['path']
+    elif 'path' in pathDetails and 'curate' not in pathDetails:
+        content_path = pathDetails['path']
+        if content_path:
+            session["fileServerPath"] = pathDetails['path']
+        else:
+            content_path = "."
+    else:
+        content_path = session["fileServerPath"]
     try:
-        sessionServerForm = session.get("server")
-        serverform = ServerForm(**sessionServerForm)
-        servername = serverform.serverName.data
-        username = serverform.username.data
-        password = serverform.password.data
-        ssh = connectToServer(servername,username,password)
-        ftp = ssh.open_sftp()
-        for f in ftp.listdir_attr(path):
-            dataFile = DirectoryTree()
-            lstatout = str(f).split()[0]
-            file = str(f).split()[8]
-            if "qresp.ini" in file:
-                projForm = session.get("project")
-                projectForm = ProjectForm(**projForm)
-                services = openFileToReadConfig(path, "qresp.ini", servername, username, password, projectForm)
-            dataFile.title = file
-            parent = path.split("/")
-            parentName = parent[len(parent) - 1]
-            dataFile.key = path + "/" + file
-            dataFile.id = file
-            relPath = str(path + "/" + file).split(parentName, 1)[1]
-            dataFile.parent = parentName + "/" + relPath
-            if 'd' in lstatout:
-                prev = file
-                dataFile.folder = "true"
-                dataFile.lazy = 'true'
-            listObjects.append(dataFile.__dict__)
-        ssh.close()
+        dtree = Dtree(ftp,content_path,session)
+        listObjects = dtree.fetchForTree()
+        services = dtree.fetchServices()
     except Exception as e:
-        flash("You have no access rights. Please recheck your credentials.")
-        ssh.close()
-    return jsonify(listObjects=listObjects)
+        print(e)
+        flash("You have no access rights. Please recheck your credentials. "+str(e))
+    return jsonify({'listObjects': listObjects, 'services': services})
 
 @app.route('/curate', methods=['POST', 'GET'])
 def curate():
@@ -334,6 +328,112 @@ def scripts():
                 session["scripts"] = deepcopy(scriptList)
         return jsonify(scriptList = scriptList)
     return jsonify(data=scriptform.errors)
+
+
+@csrf.exempt
+@app.route('/workflow', methods=['POST', 'GET'])
+def workflow():
+    """Collects and Returns values needed for the Workflow section.
+	:return: Information of the various nodes and edges - Dictionary
+	"""
+
+    if request.method == 'GET':
+        return render_template('workflow.html')
+
+    workflowsave = request.json
+    workflow = WorkflowCreator()
+    if "charts" in session:
+        for chart in session["charts"]:
+            try:
+                fileServerPath = session["fileServerPath"]
+                projectName = session["ProjectName"]
+                img = '<img src="' + fileServerPath + "/" + projectName + "/" + chart.imageFile + '" width="250px;" height="250px;"/>'
+                caption = "<b> Image: </b>" + img
+            except:
+                caption = ""
+            workflow.addChart(chart.saveas, caption)
+    if "tools" in session:
+        for tool in session["tools"]:
+            pack = ""
+            try:
+                pack = "<b> Package Name: </b>" + tool.packageName
+            except(IndexError, KeyError, ValueError):
+                try:
+                    pack = "<b> Facility Name: </b>" + tool.facilityName + " <br/> <b>Measurement: </b>" + tool.measurement
+                except(IndexError, KeyError, ValueError):
+                    pack = ""
+            workflow.addTool(tool.saveas, pack)
+    if "datasets" in session:
+        for dataset in session["datasets"]:
+            readme = ""
+            try:
+                readme = "<b> ReadMe: </b>" + dataset.readme
+            except(IndexError, KeyError, ValueError):
+                readme = ""
+            workflow.addDataset(dataset.saveas, readme)
+
+    if "scripts" in session:
+        for script in session["scripts"]:
+            readme = ""
+            try:
+                readme = "<b> ReadMe: </b>" + script.readme
+            except(IndexError, KeyError, ValueError):
+                readme = ""
+            workflow.addScript(script.saveas, readme)
+
+    if "heads" in session:
+        for head in session["heads"]:
+            readme = ""
+            try:
+                readme = "<b>ReadMe:</b>" + head.readme
+            except(IndexError, KeyError, ValueError):
+                readme = ""
+            #saveas = head.split("*")
+            try:
+                workflow.addHead(head.id, readme, head.URLs)
+            except:
+                workflow.addHead(head.id, readme)
+
+    if "edges" in session:
+        for edge in session["edges"]:
+            workflow.addEdge(edge)
+
+    try:
+        listConn = str(workflowsave[0])
+        session["edges"] = workflowsave[0]
+        for edge in workflowsave[0]:
+            workflow.addEdge(edge)
+    except(IndexError, KeyError, ValueError):
+        listConn = ""
+    try:
+        heads = HeadForm(request.form)
+        headInfo = str(workflowsave[1])
+        headList = []
+        for head in ast.literal_eval(headInfo):
+            hinfo = head.split("*")
+            try:
+                if hinfo[1] and not hinfo[1].isspace():
+                    heads.readme.data = str(hinfo[1]).strip('b>')
+            except(IndexError, KeyError, ValueError):
+                print("No readme")
+            try:
+                if hinfo[2] and not hinfo[2].isspace():
+                        heads.URLs.data = str(info).strip()
+            except(IndexError, KeyError, ValueError):
+                print("No Url")
+            headList.append(heads)
+        session["heads"] = heads
+    except(IndexError, KeyError, ValueError):
+        headInfo = ""
+    return jsonify({'workflow': workflow.__dict__})
+
+
+
+
+
+
+
+
 
 # @csrf.exempt
 # @app.route('/workflow', methods=['POST', 'GET'])
@@ -527,21 +627,18 @@ def admin():
     return render_template('admin.html', form=form,verifyform =verifyform )
 
 # Fetches list of qresp admin
+@csrf.exempt
 @app.route('/config', methods=['POST', 'GET'])
 def config():
     """ This method helps in connecting to the mongo database.
     :return:
     """
-    global qresp_config
-    form = AdminForm(request.form)
-    ##### To be removed ###########
-    form.hostname.data = "paperstack.uchicago.edu"
-    form.port.data = "27017"
-    form.username.data = "qresp_user_explorer"
-    form.password.data = "qresp_pwd"
-    form.dbname.data = "explorer"
-    form.collection.data = "paper"
-    return render_template('qrespconfig.html', form=form)
+    form = ConfigForm(request.form)
+    app.config['qresp_config']['fileServerPath'] = 'https://notebook.rcc.uchicago.edu/files'
+    app.config['qresp_config']['downloadPath'] = 'https://www.globus.org/app/transfer?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path='
+    verifyform = PassCodeForm(request.form)
+
+    return render_template('config.html', form=form,verifyform =verifyform)
 
 
 # Fetches search options after selecting server

@@ -1,11 +1,11 @@
 {% macro render_field(field) %}
     <div class="form-group row">
      {% if field.flags.required %}
-         <label class="col-sm-2 col-form-label">{{ field.label }}<span style="color: red;">*</span> </label>
+         <label class="col-sm-12 col-form-label">{{ field.label }}<span style="color: red;">*</span> </label>
     {% else %}
-         <label class="col-sm-2 col-form-label">{{ field.label }}</label>
+         <label class="col-sm-12 col-form-label">{{ field.label }}</label>
     {% endif %}
-    <div class="col-sm-10">
+    <div class="col-sm-12">
          {% if field.type != "RadioField" %}
             {{ field(class_='form-control',title=field.description,**{'data-toggle': 'tooltip'}) }}
            {% else %}

@@ -663,7 +663,7 @@
 	}
 
 
-	function callWorkflow(type, listconn) {
+	function callWorkflow(listconn) {
 		var plist = [];
 		if (listconn.length > 0) {
 			plist.push(listconn);
@@ -676,23 +676,24 @@
 			contentType: "application/json ; charset=utf-8",
 			data: JSON.stringify(plist),
 			success: function (data) {
-				var diverror = $('#errors');
-				diverror.empty();
-				if (type == "POST") {
-					$("#navbar>li.is-active").removeClass("is-active");
-					$("#workflowid").addClass("is-complete");
-					$("#publishid").addClass("is-active");
-					$("#publishid a").removeClass("disabled");
-					$("#publishid span").removeClass("disabled");
-				} else {
-					$("#navbar>li.is-active").removeClass("is-active");
-					$("#curateid").addClass("is-complete");
-					$("#workflowid a").removeClass("disabled");
-					$("#workflowid").addClass("is-active");
-					$("#workflowid span").removeClass("disabled");
 
-					bindChartWorkflow(data.workflow);
-				}
+				bindChartWorkflow(data.workflow);
+
+				// if (type == "POST") {
+				// 	$("#navbar>li.is-active").removeClass("is-active");
+				// 	$("#workflowid").addClass("is-complete");
+				// 	$("#publishid").addClass("is-active");
+				// 	$("#publishid a").removeClass("disabled");
+				// 	$("#publishid span").removeClass("disabled");
+				// } else {
+				// 	$("#navbar>li.is-active").removeClass("is-active");
+				// 	$("#curateid").addClass("is-complete");
+				// 	$("#workflowid a").removeClass("disabled");
+				// 	$("#workflowid").addClass("is-active");
+				// 	$("#workflowid span").removeClass("disabled");
+                //
+				// 	bindChartWorkflow(data.workflow);
+				// }
 			}
 		});
 	}
@@ -724,7 +725,7 @@
 		}
 
 		if (check){
-			callWorkflow("POST", connections);
+			callWorkflow(connections);
 		}
 		else
 			return;
@@ -751,6 +752,6 @@
 
 
 	$(function () {
-		callWorkflow("GET", connections);
+		callWorkflow(connections);
 	});
 
