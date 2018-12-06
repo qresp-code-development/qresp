@@ -118,7 +118,7 @@ function buildTable(allPapers) {
 
 
                     //Icons
-                    title += "<div id='toolbar'>";
+                    title += "<div id='toolbar' style='margin-top: 10px;margin-bottom: 10px;'>";
                     title += "<div class='button-icon'></div>";
                     title += "<ul class='icons'>";
                     var charts = "<li><a href='/paperdetails/" + row["_Search__id"] + "' title='Charts' class='charttab'><img src='static/images/figures.png' alt='charts' style='margin-bottom:2px;'></a></li>";

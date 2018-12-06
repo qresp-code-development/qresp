@@ -353,13 +353,10 @@
 							y: y + hid * step,
 							id: "h" + headNum.toString(),
 							label: value[0],
-
 							shape : ShapeSelection("h"),
-							size: 23,
+							size: 10,
 							color: ColorSelection("h"),
 							title: value[1],
-
-
 							chosen: {
 								label: false,
 								node: changeChosenNodeSize
@@ -537,25 +534,18 @@
 		nodes1.add({
 			id: 1001,
 			x: x,
-			y: y + step + 20,
+			y: y + step + 10,
 			label: 'External',
-			shape : ShapeSelection("h"),
 			title: 'The external node represents <br> content that was used <br> within the paper, <br> but documented elsewhere. <br> A reference/link is <br> typically provided.',
 			color: 'red',
-			size: 23,
+            size: 10,
+            shape: 'dot',
 			fixed: true,
 			physics: false,
 			chosen: {
 				label: false,
 				node: changeChosenLegendNodeSize
-			},
-			font: {
-				multi: true,
-				color: '#ffffff',
-				bold: {
-					color: '#ffffff'
-				}
-			},
+			}
 		});
 		nodes1.add({
 			id: 1002,
@@ -583,7 +573,6 @@
 			title: 'The Script Node represents <br> the use of user-defined <br> procedures e.g. to analyze <br> or post-process datasets.',
 			color: 'green',
 			size: 23,
-
 			fixed: true,
 			physics: false,
 			chosen: {
@@ -663,7 +652,7 @@
 	}
 
 
-	function callWorkflow(listconn) {
+	function callWorkflow(listconn,type) {
 		var plist = [];
 		if (listconn.length > 0) {
 			plist.push(listconn);
@@ -677,8 +666,11 @@
 			data: JSON.stringify(plist),
 			success: function (data) {
 
-				bindChartWorkflow(data.workflow);
-
+				if(type === "GET") {
+                    bindChartWorkflow(data.workflow);
+                }else{
+					window.href = '/publish';
+				}
 				// if (type == "POST") {
 				// 	$("#navbar>li.is-active").removeClass("is-active");
 				// 	$("#workflowid").addClass("is-complete");
@@ -725,7 +717,7 @@
 		}
 
 		if (check){
-			callWorkflow(connections);
+			callWorkflow(connections,"POST");
 		}
 		else
 			return;
@@ -752,6 +744,14 @@
 
 
 	$(function () {
-		callWorkflow(connections);
+		callWorkflow(connections,"GET");
+		$("#navbar>li.is-active").removeClass("is-active");
+		$("#detailsid").addClass("is-complete");
+		$("#welcomeid").addClass("is-complete");
+		$("#serverid").addClass("is-complete");
+		$("#projectid").addClass("is-complete");
+		$("#curateid").addClass("is-complete");
+		$("#workflowid").addClass("is-active");
+
 	});
 

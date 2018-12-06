@@ -15,6 +15,254 @@ $(function () {
 		$(this).repeatable_fields();
 	});
 
+    //TREE
+
+function getFormData(formdata){
+    var unindexed_array = formdata;
+    var indexed_array = {};
+    $.map(unindexed_array, function(n, i){
+        indexed_array[n['name']] = n['value'];
+    });
+    return indexed_array;
+}
+
+    var treedata = $('.tree-form').serializeArray();
+    var searchdata = getFormData(treedata);
+
+
+$.ajax({
+	method: 'POST',
+	url: '/getTreeInfo',
+	dataType: "json",
+    async:"false",
+	contentType: "application/json ; charset=utf-8",
+	data: JSON.stringify(searchdata),
+	success: function (data) {
+		console.log(data);
+		$("#tree").fancytree({
+			checkbox: true,
+			selectMode: 3,
+			persist: {
+				expandLazy: false,
+				overrideSource: false,
+				store: "cookie", // force using cookies!
+			},
+			source: data.listObjects,
+			lazyLoad: function (event, data) {
+			    var treedata = $('.tree-form').serializeArray();
+                var searchdata = {};
+                var node = data.node;
+                searchdata["folderAbsolutePath"] = node.key;
+				data.result = $.ajax({
+					url: '/getTreeInfo',
+					method: 'POST',
+					dataType: "json",
+					contentType: "application/json ; charset=utf-8",
+					data: JSON.stringify(searchdata),
+					cache: false,
+					success: function (resp) {
+						node.addChildren(resp.listObjects);
+						node.fixSelection3AfterClick();
+						node.toggleExpanded();
+					}
+				});
+			},
+
+			select: function (event, data) {
+				// Get a list of all selected nodes, and convert to a key array:
+				var selKeys = $.map(data.tree.getSelectedNodes(), function (node) {
+					return node.key;
+				});
+				$("#echoSelection3").text(selKeys.join(", "));
+				// Get a list of all selected TOP nodes
+				var selRootNodes = data.tree.getSelectedNodes(true);
+				// ... and convert to a key array:
+				var selRootKeys = $.map(selRootNodes, function (node) {
+					return node.key;
+				});
+				$("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
+				$("#echoSelectionRoots3").text(selRootNodes.join(", "));
+			},
+			dblclick: function (event, data) {
+				data.node.toggleSelected();
+			},
+			keydown: function (event, data) {
+				if (event.which === 32) {
+					data.node.toggleSelected();
+					return false;
+				}
+			},
+		});
+	},
+	failure: function (errMsg) {
+		alert(JSON.stringify(errMsg.toString()));
+	}
+});
+$("#btnToggleSelect").click(function () {
+	$("#tree").fancytree("getRootNode").visit(function (node) {
+		node.toggleSelected();
+	});
+	return false;
+});
+$("#btnDeselectAll").click(function () {
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+	return false;
+});
+$("#btnSelectAll").click(function () {
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(true);
+	});
+	return false;
+});
+
+$('input[type=text]').bind("keyup focusin", function () {
+    $('#tree').addClass('disabledtree');
+});
+
+//copy from tree
+$('form[name="info"] #mainnotebookfile').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="info"] #mainnotebookfile').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$('form[name="charts"] #imageFile').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="charts"] #imageFile').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$('form[name="charts"] #files').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="charts"] #files').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$('form[name="charts"] #notebookFile').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="charts"] #notebookFile').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$('form[name="tools"] #patches').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="tools"] #patches').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+
+$('form[name="datasets"] #files').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="datasets"] #files').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$('form[name="scripts"] #files').bind("keyup focusin", function () {
+	$('#tree').removeClass('disabledtree');
+	var values = []
+	$("#tree").fancytree("getTree").visit(function (node) {
+		if (node.selected) {
+			if (node.folder != "true") {
+				var keypath = node.key;
+				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
+				values.push(path);
+				var copiedcontent = values.slice();
+				$('form[name="scripts"] #files').val(copiedcontent);
+			}
+		}
+	});
+	$("#tree").fancytree("getTree").visit(function (node) {
+		node.setSelected(false);
+	});
+});
+
+$(".disabler").bind("keyup focusin", function () {
+	$('#tree').fancytree('getTree').visit(function (node) {
+		node.setSelected(false);
+	});
+	$('#tree').addClass('disabledtree');
+});
+
     $("div[data-toggle=fieldset]").each(function() {
         var $this = $(this);
             //Add new entry
@@ -39,7 +287,6 @@ $(function () {
 
         //Remove row
         $this.find("button[data-toggle=fieldset-remove-row]").click(function() {
-            console.log("here",$this.find("#piTable tr").length);
             if($this.find("#piTable tr").length > 1) {
                 var thisRow = $(this).closest("tr");
                 thisRow.remove();
@@ -47,7 +294,6 @@ $(function () {
         }); //End remove row
 
         });
-
 
     $("div[data-toggle=fieldset-charts]").each(function() {
         var $this = $(this);
@@ -73,8 +319,39 @@ $(function () {
 
         //Remove row
         $this.find("button[data-toggle=fieldset-remove-row-charts]").click(function() {
-            console.log("here",$this.find("#extraTableCharts tr").length);
             if($this.find("#extraTableCharts tr").length > 1) {
+                var thisRow = $(this).closest("tr");
+                thisRow.remove();
+            }
+        }); //End remove row
+
+        });
+
+    $("div[data-toggle=author-fieldset-toggle]").each(function() {
+        var $this = $(this);
+            //Add new entry
+        $this.find("button[data-toggle=fieldset-add-row-author]").click(function() {
+            var target = $($(this).data("target"))
+            console.log(target);
+            var oldrow = target.find("#authorTable tr:last");
+            console.log(oldrow);
+            var row = oldrow.clone(true, true);
+            console.log(row);
+            console.log(row.find(":input"));
+            var elem_id = row.find(":input")[0].id;
+            var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
+            row.attr('data-id', elem_num);
+            row.find(":input").each(function() {
+                console.log(this);
+                var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
+                $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
+            });
+            oldrow.after(row);
+        }); //End add new entry
+
+        //Remove row
+        $this.find("button[data-toggle=fieldset-remove-row-authors]").click(function() {
+            if($this.find("#authorTable tr").length > 1) {
                 var thisRow = $(this).closest("tr");
                 thisRow.remove();
             }
@@ -192,6 +469,11 @@ $(function () {
             return false; // Keep close.bs.alert event from removing from DOM
         }
 
+        function toggleAlertError(){
+            $(".alert-danger").toggleClass('fade in');
+            return false; // Keep close.bs.alert event from removing from DOM
+        }
+
         $('#bsalert').on('close.bs.alert', toggleAlert)
 
     // Inject our CSRF token into our AJAX request.
@@ -228,26 +510,12 @@ $(function () {
                 success: function (data) {
                     console.log(data);
                     toggleAlert();  // display the returned data in the console.
-                    $('#ChartForm')[0].reset();
-                    $("#chartbuttons tr").remove();
-                    $("#chartbuttons").append("<tr></tr>")
-                    $.each(data['chartList'], function( index, value ) {
-                        var col = document.createElement('td');
-                        var element = document.createElement('input');
-                        element.type = 'button';
-                        element.value = value.saveas;
-                        element.id = 'btnChartSave';
-                        var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "charts");';
-                        element.setAttribute('onclick',onclick);
-                        element.setAttribute('class','btn btn-theme-colored btn-lg m-0');
-                        element.setAttribute('style','font-weight: bold');
-                        col.append(element);
-                        $('#chartbuttons tr:first').append(col);
-                    });
+                    createChartList(data['chartList']);
                 }
             });
             e.preventDefault(); // block the traditional submission of the form.
     });
+
 
     //Tools
      $('form[name="tools"] input[name=kind]').on( "change", function() {
@@ -264,23 +532,12 @@ $(function () {
                 data: $('#ToolForm').serialize(), // serializes the form's elements.
                 success: function (data) {
                     console.log(data);
-                    toggleAlert();  // display the returned data in the console.
-                    $('#ToolForm')[0].reset();
-                    $("#toolbuttons tr").remove();
-                    $("#toolbuttons").append("<tr></tr>")
-                    $.each(data['toolList'], function( index, value ) {
-                        var col = document.createElement('td');
-                        var element = document.createElement('input');
-                        element.type = 'button';
-                        element.value = value.saveas;
-                        element.id = 'btnToolSave';
-                        var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "tools");';
-                        element.setAttribute('onclick',onclick);
-                        element.setAttribute('class','btn btn-theme-colored btn-lg m-0');
-                        element.setAttribute('style','font-weight: bold');
-                        col.append(element);
-                        $('#toolbuttons tr:first').append(col);
-                    });
+                    if("errors" in data){
+                        toggleAlertError();
+                    }else {
+                        toggleAlert();  // display the returned data in the console.
+                        createToolList(data['toolList']);
+                    }
                 }
             });
             e.preventDefault(); // block the traditional submission of the form.
@@ -296,22 +553,7 @@ $(function () {
                 success: function (data) {
                     console.log(data);
                     toggleAlert();  // display the returned data in the console.
-                    $('#DatasetForm')[0].reset();
-                    $("#datasetbuttons tr").remove();
-                    $("#datasetbuttons").append("<tr></tr>")
-                    $.each(data['datasetList'], function( index, value ) {
-                        var col = document.createElement('td');
-                        var element = document.createElement('input');
-                        element.type = 'button';
-                        element.value = value.saveas;
-                        element.id = 'btnDatasetSave';
-                        var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "datasets");';
-                        element.setAttribute('onclick',onclick);
-                        element.setAttribute('class','btn btn-theme-colored btn-lg m-0');
-                        element.setAttribute('style','font-weight: bold');
-                        col.append(element);
-                        $('#datasetbuttons tr:first').append(col);
-                    });
+                    createDatasetList(data['datasetList']);
                 }
             });
             e.preventDefault(); // block the traditional submission of the form.
@@ -325,30 +567,43 @@ $(function () {
                 url: url,
                 data: $('#ScriptForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
+                   console.log(data);
                     toggleAlert();  // display the returned data in the console.
-                    $('#ScriptForm')[0].reset();
-                    $("#scriptbuttons tr").remove();
-                    $("#scriptbuttons").append("<tr></tr>")
-                    $.each(data['scriptList'], function( index, value ) {
-                        var col = document.createElement('td');
-                        var element = document.createElement('input');
-                        element.type = 'button';
-                        element.value = value.saveas;
-                        element.id = 'btnScriptSave';
-                        var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "scripts");';
-                        element.setAttribute('onclick',onclick);
-                        element.setAttribute('class','btn btn-theme-colored btn-lg m-0');
-                        element.setAttribute('style','font-weight: bold');
-                        col.append(element);
-                        $('#scriptbuttons tr:first').append(col);
-                    });
+                    createScriptList(data['scriptList']);
                 }
             });
             e.preventDefault(); // block the traditional submission of the form.
     });
 
-});
+    $('#ReferenceForm').submit(function (e) {
+        var url = "reference";
+         $.ajax({
+                type: "POST",
+                url: url,
+                data: $('#ReferenceForm').serialize(), // serializes the form's elements.
+                success: function (data) {
+                    console.log(data);
+                    toggleAlert();  // display the returned data in the console.
+                }
+            });
+            e.preventDefault(); // block the traditional submission of the form.
+        });
+
+    $('#DocumentationForm').submit(function (e) {
+        var url = "documentation";
+         $.ajax({
+                type: "POST",
+                url: url,
+                data: $('#DocumentationForm').serialize(), // serializes the form's elements.
+                success: function (data) {
+                    console.log(data);
+                    toggleAlert();  // display the returned data in the console.
+                }
+            });
+            e.preventDefault(); // block the traditional submission of the form.
+        });
+
+    });
 
 function fillValues(obj,type) {
     if(type === 'charts') {
@@ -360,13 +615,13 @@ function fillValues(obj,type) {
         $('form[name="charts"] #notebookFile').val(obj.notebookFile);
         $('form[name="charts"] #properties').val(obj.properties);
         $('form[name="charts"] #saveas').val(obj.saveas);
-        $.each(obj.extraFields, function( index, value ) {
-            $('#extraFields-'+index+'-extrakey').val(value[index].extrakey);
-            $('#extraFields-'+index+'-extravalue').val(value[index].extravalue);
+        $.each(obj.extraChartFields, function( index, value ) {
+            $('#extraChartFields-'+index+'-extrakey').val(value.extrakey);
+            $('#extraChartFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
     else if(type === 'tools') {
-        $('form[name="tools"] input[name=kind][value="' + obj.kind + '"]').prop('checked', true);
+        $('form[name="tools"] input[name=kind][value="' + obj.kind + '"]').prop('checked', true).change();
         $('form[name="tools"] #packageName').val(obj.packageName);
         $('form[name="tools"] #URLs').val(obj.URLs);
         $('form[name="tools"] #version').val(obj.version);
@@ -376,30 +631,172 @@ function fillValues(obj,type) {
         $('form[name="tools"] #facilityName').val(obj.facilityName);
         $('form[name="tools"] #measurement').val(obj.measurement);
         $('form[name="tools"] #saveas').val(obj.saveas);
-        $.each(obj.extraFields, function( index, value ) {
-            $('#extraFields-'+index+'-extrakey').val(value[index].extrakey);
-            $('#extraFields-'+index+'-extravalue').val(value[index].extravalue);
+        $.each(obj.extraToolFields, function( index, value ) {
+            $('#extraToolFields-'+index+'-extrakey').val(value.extrakey);
+            $('#extraToolFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
      else if(type === 'datasets') {
-        $('#files').val(obj.files);
-        $('#readme').val(obj.readme);
-        $('#URLs').val(obj.URLs);
-        $('#saveas').val(obj.saveas);
-        $.each(obj.extraFields, function( index, value ) {
-            $('#extraFields-'+index+'-extrakey').val(value[index].extrakey);
-            $('#extraFields-'+index+'-extravalue').val(value[index].extravalue);
+        $('form[name="datasets"] #files').val(obj.files);
+        $('form[name="datasets"] #readme').val(obj.readme);
+        $('form[name="datasets"] #URLs').val(obj.URLs);
+        $('form[name="datasets"] #saveas').val(obj.saveas);
+        $.each(obj.extraDatasetFields, function( index, value ) {
+            $('#extraDatasetFields-'+index+'-extrakey').val(value.extrakey);
+            $('#extraDatasetFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
      else if(type === 'scripts') {
-        $('#files').val(obj.files);
-        $('#readme').val(obj.readme);
-        $('#URLs').val(obj.URLs);
-        $('#saveas').val(obj.saveas);
-        $.each(obj.extraFields, function( index, value ) {
-            $('#extraFields-'+index+'-extrakey').val(value[index].extrakey);
-            $('#extraFields-'+index+'-extravalue').val(value[index].extravalue);
+        $('form[name="scripts"] #files').val(obj.files);
+        $('form[name="scripts"] #readme').val(obj.readme);
+        $('form[name="scripts"] #URLs').val(obj.URLs);
+        $('form[name="scripts"] #saveas').val(obj.saveas);
+        $.each(obj.extraScriptFields, function( index, value ) {
+            $('#extraScriptFields-'+index+'-extrakey').val(value.extrakey);
+            $('#extraScriptFields-'+index+'-extravalue').val(value.extravalue);
         });
+    }
+    else if(type === 'reference') {
+        $('form[name="reference"] input[name=kind][value="' + obj.kind + '"]').prop('checked', true).change();
+        $('form[name="reference"] #DOI').val(obj.DOI);
+        $('form[name="reference"] #title').val(obj.title);
+        $('form[name="reference"] #journal').val(obj.journal.fullName);
+        $.each(obj.authors, function( index, value ) {
+            $("div[data-toggle=author-fieldset-toggle]").each(function() {
+                var $this = $(this);
+                //Add new entry
+                $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
+            });
+            $('#authors-'+index+'-firstName').val(value.firstName);
+            $('#authors-'+index+'-middleName').val(value.middleName);
+            $('#authors-'+index+'-lastName').val(value.lastName);
+        });
+        $('form[name="reference"] #URLs').val(obj.URLs);
+        $('form[name="reference"] #school').val(obj.school);
+        $('form[name="reference"] #year').val(obj.year);
+        $('form[name="reference"] #volume').val(obj.volume);
+        $('form[name="reference"] #publishedAbstract').val(obj.publishedAbstract);
+        $('form[name="reference"] #page').val(obj.page);
+
     }
 }
 
+    function createChartList(data){
+        $('#ChartForm')[0].reset();
+        $("#chartbuttons div").remove();
+        var col = document.createElement('div');
+        col.setAttribute('class','form-group row');
+        $("#chartbuttons").append(col);
+        $.each(data, function( index, value ) {
+            var element = document.createElement('input');
+            element.type = 'button';
+            if(value.saveas) {
+                element.value = value.saveas;
+            }
+            else{
+                element.value = value.id;
+            }
+            element.id = 'btnChartFetch';
+            var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "charts");';
+            element.setAttribute('onclick',onclick);
+            element.setAttribute('class','btn btn-theme-colored btn-lg m-1');
+            element.setAttribute('style','font-weight: bold');
+            col.append(element);
+            $('#chartbuttons div:first').append(col);
+        });
+    }
+
+    function createToolList(data){
+        $('#ToolForm')[0].reset();
+        $("#toolbuttons div").remove();
+        var col = document.createElement('div');
+        col.setAttribute('class','form-group row');
+        $("#toolbuttons").append(col);
+        $.each(data, function( index, value ) {
+            var element = document.createElement('input');
+            element.type = 'button';
+            if(value.saveas) {
+                element.value = value.saveas;
+            }
+            else{
+                element.value = value.id;
+            }
+            element.id = 'btnToolFetch';
+            var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "tools");';
+            element.setAttribute('onclick',onclick);
+            element.setAttribute('class','btn btn-theme-colored btn-lg m-1');
+            element.setAttribute('style','font-weight: bold');
+            col.append(element);
+            $('#toolbuttons div:first').append(col);
+        });
+        $('form[name="tools"] input[name=kind][value="software"]').prop('checked', true).change();
+    }
+
+    function createDatasetList(data){
+           $('#DatasetForm')[0].reset();
+            $("#datasetbuttons div").remove();
+             var col = document.createElement('div');
+            col.setAttribute('class','form-group row');
+            $("#datasetbuttons").append(col);
+            $.each(data, function( index, value ) {
+                var element = document.createElement('input');
+                element.type = 'button';
+                if(value.saveas) {
+                    element.value = value.saveas;
+                }
+                else{
+                    element.value = value.id;
+                }
+                element.id = 'btnDatasetFetch';
+                var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "datasets");';
+                element.setAttribute('onclick',onclick);
+                element.setAttribute('class','btn btn-theme-colored btn-lg m-1');
+                element.setAttribute('style','font-weight: bold');
+                col.append(element);
+                $('#datasetbuttons div:first').append(col);
+            });
+    }
+
+     function createScriptList(data){
+           $('#ScriptForm')[0].reset();
+            $("#scriptbuttons div").remove();
+            var col = document.createElement('div');
+            col.setAttribute('class','form-group row');
+            $("#scriptbuttons").append(col);
+            $.each(data, function( index, value ) {
+                var element = document.createElement('input');
+                element.type = 'button';
+                if(value.saveas) {
+                    element.value = value.saveas;
+                }
+                else{
+                    element.value = value.id;
+                }
+                element.id = 'btnScriptFetch';
+                var onclick = 'javascript: fillValues(' + JSON.stringify(value) + ', "scripts");';
+                element.setAttribute('onclick',onclick);
+                element.setAttribute('class','btn btn-theme-colored btn-lg m-1');
+                element.setAttribute('style','font-weight: bold');
+                col.append(element);
+                $('#scriptbuttons div:first').append(col);
+            });
+    }
+    
+    function fetchDOI(doi) {
+        console.log("DOI>>",doi);
+        $.ajax({
+                type: "POST",
+                url: "/fetchReferenceDOI",
+                data: JSON.stringify({"doi":doi}), // serializes the form's elements.
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    console.log("data>>DOI>>",data);
+                    if("errors" in data){
+                        console.log("recheck your DOI");
+                    }else {
+                        fillValues(data['fetchDOI'], "reference"); // display the returned data in the console.
+                    }
+                }
+        });
+    }

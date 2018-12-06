@@ -5,7 +5,7 @@
     {% from "_formhelpers.html" import render_field %}
     <div class="card">
         <div class="card-body">
-            <h3 data-toggle="tooltip" title="Connect to a mongo database" class="card-title" style="text-align: center;"> Identify who is curating the paper </h3>
+            <h3 data-toggle="tooltip" title="This step defines the identity of the person that is using Qresp | Curator to generate metadata." class="card-title" style="text-align: center;"> Identify who is curating the paper </h3>
                     <form method="post" action="details">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group row">
