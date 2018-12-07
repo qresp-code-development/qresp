@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <div class="container text-center">
+            <div class="col-md-12 col-lg-12 p-20 md-text-center">
+                <h2 class="text-black-444 pt-0 text-center">Found {{ allPapersSize }} papers </h2>
+                <h2 class="text-black-444 pt-0 text-center"> Refine your search results </h2>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            <input type="text" id="searchWord" data-height="45px"
+                                   class="form-control input-lg"
+                                   placeholder="Enter your search here..." title="Search here" name="search" value=""
+                                   style="height: 45px;">
+                            <span class="input-group-btn">
+                                                <input type="button" id="btnSearch"
+                                                       name="general_search_button" value="Search"
+                                                       class="btn btn-theme-colored btn-lg m-0 filtersearch"
+                                                       style="font-weight: bold; height: 45px;">
+                                        </span>
+                        </div>
+                    </div>
+                    <div id="conn_options" class="text-center col-md-8 col-md-offset-2">
+                        <a href="javascript:void(0);" id="more-less-options-button"
+                           style="color: #357ebd;float:left;margin-top: 5px;"> Advanced Search >> </a>
+                    </div>
+                </div>
+                <form action="{{ url_for('search') }}" id="searchForm" name="searchForm" method="post"
+                      style="display:none;">
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label for="txtPaperTitle">Paper Title:</label>
+                            <input
+                                    id="txtPaperTitle" name="txtPaperTitle"
+                                    class="form-control column_filter"
+                                    placeholder="Enter Paper Title" type="text">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtDOI">DOI:</label>
+                            <input id="txtDOI"
+                                   name="txtDOI" class="form-control column_filter"
+                                   placeholder="Enter Paper DOI" type="text">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtTags">Tags:</label>
+                            <input id="txtTags"
+                                   name="txtTags" class="form-control column_filter"
+                                   placeholder="Enter Tags" type="text">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label style="display: block">Collection:</label>
+                            <select name="collectionList" id="collectionList" multiple="multiple"
+                                    class="selectpicker show-tick form-control collList" data-width="100%"
+                                    data-actions-box="true" multiple data-live-search="true">
+                                {% for collection in collectionlist %}
+                                    <option value="{{ collection }}">{{ collection }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlAuthor" style="display: block">Paper Author(s):</label>
+                            <select name="authorsList" id="authorsList" multiple="multiple"
+                                    class="selectpicker show-tick form-control" data-width="100%"
+                                    data-actions-box="true" multiple data-live-search="true">
+                                {% for author in authorslist %}
+                                    <option value="{{ author }}">{{ author }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlPublishedIn" style="display: block">Published In:</label>
+                            <select name="publicationList" id="publicationList"
+                                    class="selectpicker show-tick form-control" data-width="100%"
+                                    data-actions-box="true" multiple data-live-search="true">
+                                {% for publication in publicationlist %}
+                                    <option value="{{ publication }}">{{ publication }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-default btn-theme-colored btn-lg m-0 filtersearch"
+                            id="search-filter-btn"><i
+                            class="fa fa-search" style="color: white;"></i></button>
+                </form>
+            </div>
+    </div>
+
+    <div class="container" id="paperContainer" style="display: none;">
+        <hr/>
+        <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center" style="padding-top: 2rem;padding-bottom: 2rem;">
+            <div id="divPapers">
+                <table id="tblPapers" class="display" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Paper Id</th>
+                        <th>Title</th>
+                        <th>Tag(s)</th>
+                        <th>Collections(s)</th>
+                        <th>Author(s)</th>
+                        <th>Publication</th>
+                        <th>Abstract</th>
+                        <th>DOI</th>
+                        <th>Server Path</th>
+                        <th>Folder Absolute Path</th>
+                        <th>File Server Path</th>
+                        <th>Download Path</th>
+                        <th>Notebook Path</th>
+                        <th>Notebook File</th>
+                        <th>Year</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Paper Id</th>
+                        <th>Title</th>
+                        <th>Tag(s)</th>
+                        <th>Collections(s)</th>
+                        <th>Author(s)</th>
+                        <th>Publication</th>
+                        <th>Abstract</th>
+                        <th>DOI</th>
+                        <th>Server Path</th>
+                        <th>Folder Absolute Path</th>
+                        <th>File Server Path</th>
+                        <th>Download Path</th>
+                        <th>Notebook Path</th>
+                        <th>Notebook File</th>
+                        <th>Year</th>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='./javascript/modules/search.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base_curator.html" %}
+
+{% block page_content %}
+    <!-- Header -->
+        <div class="card">
+                <div class="card-body">
+                   <p>
+                        Qresp | Curator has generated the metadata file. <br/>
+					    An email with a link has been sent to your email address(Inbox/Spam folder). <br/>
+					    Please click on the link to publish the metadata to the Qresp | Explorer.
+
+                   </p>
+                </div>
+            </div>
+
+    <script type="text/javascript">
+    $("#navbar>li.is-active").removeClass("is-active");
+		$("#detailsid").addClass("is-complete");
+		$("#welcomeid").addClass("is-complete");
+		$("#serverid").addClass("is-complete");
+		$("#projectid").addClass("is-complete");
+		$("#curateid").addClass("is-complete");
+		$("#workflowid").addClass("is-complete");
+		$("#publishid").addClass("is-complete");
+		$("acknowledgementid").addClass("is-active");
+
+    </script>
+
+{% endblock %}

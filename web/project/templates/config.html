@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+
+    {% from "_formhelpers.html" import render_field %}
+<style>
+     ul{
+         float: left;
+     }
+    </style>
+    <div class="card text-center">
+        <div class="card-body">
+             <div id="passcodesection">
+                <h3 data-toggle="tooltip" title="Connect to a mongo database"> Enter Passcode </h3>
+                <form method="post" id="passcodeform" action="verifyPasscode">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    {{ render_field(verifyform.passcode) }}
+                    <span class="input-group-btn">
+                                <input type="button" id="btnPasscode"
+                                       name="general_search_button" value="Submit"
+                                       class="btn btn-theme-colored btn-lg m-0" title="Verify passcode"
+                                       style="font-weight: bold; height: 45px;">
+                    </span>
+                </form>
+            </div>
+            <div id="mongoconnection" style="display: none;">
+            <h3 data-toggle="tooltip" title="Connect to a mongo database"> Configure your Qresp Service </h3>
+            <form method="post" action="config">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {{ render_field(form.httpService) }}
+                 <div id="httpServicepath" style="display: none;">
+                    {{ render_field(form.fileServerPath) }}
+                </div>
+                {{ render_field(form.gitService) }}
+                {{ render_field(form.globusService) }}
+                 <div id="globusServicepath" style="display: none;">
+                    {{ render_field(form.downloadPath) }}
+                </div>
+
+
+                <span class="input-group-btn">
+                            <input type="submit" id="btn"
+                                   name="general_search_button" value="Register"
+                                   class="btn btn-theme-colored btn-lg m-0" title="Start from scratch."
+                                   style="font-weight: bold; height: 45px;">
+                </span>
+            </form>
+            </div>
+        </div>
+    </div>
+
+        <script src="{{ url_for('static', filename='./javascript/modules/admin.js') }}"></script>
+
+
+{% endblock %}

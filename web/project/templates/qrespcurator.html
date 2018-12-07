@@ -1,0 +1,87 @@
+{% extends "base_curator.html" %}
+
+{% block page_content %}
+    <!-- Header -->
+        <div class="card">
+                <div class="card-body">
+                   <p>
+                        Qresp | Curator accesses the folder that contains your research data and collects information about:
+                        <ul style="font-size: 17px;">
+                            <li>Data location & access</li>
+                            <li>Data content</li>
+                            <li>Paper details</li>
+                        </ul>
+
+                   </p>
+
+
+                    <p>
+					    As a result of the curation process, Qresp generates a metadata file that describes your paper using the JSON (JavaScript Object Notation) syntax. The file may be downloaded or sent to a document-oriented database (Step 7).
+				    </p>
+                    <p>
+                        If you want to resume a previously interrupted curation process, please upload the JSON metadata file below, otherwise leave it blank and click continue.
+                    </p>
+                     <span class="input-group-btn">
+                        <input type="button" id="btnExplorer"
+                               name="general_search_button" value="Start from scratch"
+                               class="btn btn-theme-colored btn-lg m-0" title="Start from scratch."
+                               style="font-weight: bold; height: 45px;" onclick="window.location='/details';" >
+                     <input type="button" id="btnCurator"
+                               name="general_search_button" value="Resume"
+                               class="btn btn-theme-colored btn-lg m-0" title="Continue with existing JSON file."
+                               style="font-weight: bold; height: 45px;" data-toggle='modal' data-target='#uploadModal' >
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">Upload/Paste JSON File</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid pt-80 pb-10">
+                            <div class="row">
+                                  <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+                                        <input type="file" id="my_file" class="pb-3" title="Select a file">
+                                        <textarea id="myTextArea" cols=100 rows=25 placeholder="Upload/Paste Here A JSON File"></textarea>
+                                        <div class="pt-4">
+                                            <span class="input-group-btn">
+                                                <input type="button" id="btnParse"
+                                                       name="btnParse"
+                                                       class="btn btn-theme-colored btn-lg m-0" title="Parses the JSON file and auto fills fields in the next steps."
+                                                       value="Continue"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    <script src="{{ url_for('static', filename='./javascript/modules/qrespcurator.js') }}"></script>
+    <script type="text/javascript">
+    var csrf_token = "{{ csrf_token() }}";
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+            }
+        }
+    });
+</script>
+
+{% endblock %}
