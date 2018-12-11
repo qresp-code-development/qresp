@@ -1,12 +1,11 @@
 import paramiko     #Provides SSH functionality
-import getpass      #Allows for secure prompting and collection of the user password
-import os           #Used to setup the Paramiko log file
-import logging      #Used to setup the Paramiko log file
 import socket       #This method requires that we create our own socket
 import re
 import requests
 import json
+import subprocess
 from copy import deepcopy
+from jsonschema import Draft4Validator
 from .views import ReferenceForm,ChartForm,DatasetForm,ToolForm,ScriptForm,HeadForm
 
 class DirectoryTree:
@@ -21,7 +20,50 @@ class DirectoryTree:
     source = ""
 
 
+class Servers():
+    """Class providing information about servers for federated search.
+    """
+    def __init__(self):
+        self.__headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
+        self.__urlString = "https://paperstack.uchicago.edu/static/qresp_servers.json"
+        self.__schemaString = "https://paperstack.uchicago.edu/static/v1_0.json"
+
+    def getServersList(self):
+        url = requests.get(self.__urlString, headers=self.__headers, verify = False)
+        data = json.loads(url.text)
+        return data
+
+    def validateSchema(self,coll_data):
+        exceptions = []
+        try:
+            url = requests.get(self.__schemaString, headers=self.__headers, verify = False)
+            schema_coll_data = json.loads(url.text)
+            a = Draft4Validator(schema_coll_data)
+            for error in sorted(a.iter_errors(coll_data), key=str):
+                print("errors, ",error)
+                try:
+                    exp = str(error.absolute_path[2]) + " is missing in " + str(error.absolute_path[0]) + str(
+                        error.absolute_path[1])
+                    exceptions.append(exp)
+                except IndexError:
+                    try:
+                        exp = str(error.message) + " in " + str(error.absolute_path[0]) + " "+ str(error.absolute_path[1])
+                        exceptions.append(exp)
+                    except IndexError:
+                        try:
+                            exp = str(error.message) + " in " + str(error.absolute_path[0])
+                            exceptions.append(exp)
+                        except IndexError:
+                            exceptions.append(str(error.message))
+        except:
+            exceptions.append("Could not fetch schema")
+        print(exceptions)
+        return exceptions
+
 class ConnectToServer():
+    """  Class connecting to remote server with DUO login
+    """
     def __init__(self,servername,username,password,isDUO,choice):
         # Global variables are used to store these data because they're sent to the server by a callback
         self.__user = username
@@ -33,7 +75,13 @@ class ConnectToServer():
         self.connectToServer()
 
     def inter_handler(self,title, instructions, prompt_list):
-
+        """
+        Handler for remote server in curator
+        :param title:
+        :param instructions:
+        :param prompt_list:
+        :return:
+        """
 
         resp = []  #Initialize the response container
 
@@ -90,6 +138,8 @@ class ConnectToServer():
         return self.__ftp
 
 class Dtree():
+    """ Class to build server tree
+    """
     def __init__(self,ftp,path,session):
         self.__services = []
         self.__listObjects = []
@@ -129,6 +179,7 @@ class Dtree():
                     if "http_service_path" in servicename:
                         if servicepath:
                             self.session["fileServerPath"] = servicepath
+                            self.session["notebookPath"] = servicepath
                             self.__services.append("http_service_path")
                     elif "globus_service_path" in servicename:
                         if servicepath:
@@ -161,6 +212,8 @@ class Dtree():
 
 
 class FetchDOI():
+    """ Fetches information using DOI
+    """
     def __init__(self,doi):
         self.__doi = doi
 
@@ -188,17 +241,11 @@ class FetchDOI():
             kind = "Journal"
             title = ""
             journalFull = ""
-            journalAbbr = ""
             volume = ""
             page = ""
             year = 0
-            publishedDate = ""
-            receivedDate = ""
             publishedAbstract = ""
             url = ""
-            authorfnamelist = ""
-            authormnamelist = ""
-            authorlnamelist = ""
             personList = []
             for resp in response.keys():
                 if self.find_word(str(resp).strip(), "title"):
@@ -251,21 +298,26 @@ class FetchDOI():
             ref.title.data = title
             ref.DOI.data = self.__doi
         except Exception as e:
-            print("e>",e)
+            print(e)
             raise IOError
         return ref
 
 
 class GenerateIDs():
+    """ Generates Ids to charts, datasets,scripts,heads
+    """
     def __init__(self,session):
         self.session = session
         self.types = ["charts","tools","datasets","scripts","heads"]
         for type in self.types:
-            self.generateIDs(session.get(type),type)
+            listItems = session.get(type)
+            if listItems:
+                self.generateIDs(listItems,type)
 
     def generateIDs(self,listItems,type):
         formList = []
         form = None
+        index = 0
         for item in listItems:
             if "charts" in type:
                 form = ChartForm(**item)
@@ -277,10 +329,65 @@ class GenerateIDs():
                 form = ScriptForm(**item)
             elif "heads" in type:
                 form = HeadForm(**item)
-            index = 0
             if not form.id.data:
                 form.id.data = type[0] + str(index)
                 index = index + 1
-            print("IDs>>",form.data)
             formList.append(form.data)
         self.session[type] = deepcopy(formList)
+
+
+class ConvertToList():
+    """ Util method to convert URLs and files from string object to list object
+    """
+    def __init__(self,paper):
+        self.converToList = []
+        self.paper = paper
+
+    def fetchConvertedList(self):
+        paperdata = self.paper
+        for chart in paperdata['charts']:
+            if isinstance(chart['files'],str):
+                chart['files'] = chart['files'].split(",")
+            if isinstance(chart['properties'],str):
+                chart['properties'] = chart['properties'].split(",")
+        for tool in paperdata['tools']:
+            if isinstance(tool['URLs'], str):
+                tool['URLs'] = tool['URLs'].split(",")
+            if isinstance(tool['patches'], str):
+                tool['patches'] = tool['patches'].split(",")
+        for dataset in paperdata['datasets']:
+            if isinstance(dataset['files'], str):
+                dataset['files'] = dataset['files'].split(",")
+            if isinstance(dataset['URLs'], str):
+                dataset['URLs'] = dataset['URLs'].split(",")
+        for script in paperdata['scripts']:
+            if isinstance(script['files'], str):
+                script['files'] = script['files'].split(",")
+            if isinstance(script['URLs'], str):
+                script['URLs'] = script['URLs'].split(",")
+        for head in paperdata['heads']:
+            if isinstance(head['URLs'], str):
+                head['URLs'] = head['URLs'].split(",")
+        return paperdata
+
+
+class SendEmail():
+    """Email Class
+    """
+    def __init__(self,fromaddress,toaddress):
+        self.__fromaddress = fromaddress
+        self.__toaddress = toaddress
+        self.send_mail()
+
+
+    def sendDescriptorToServer(self):
+        """ Sends email to server
+        :return: object: sends descriptor to server
+        """
+        url = self.__servername + "/sendEmail"
+        payload = {'metadata': json.load(self.__data), 'emailId': self.__fromaddress, 'servername': self.__servername}
+        headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
+        response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
+        return response
+
+

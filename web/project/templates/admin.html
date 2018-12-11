@@ -9,10 +9,10 @@
      }
     </style>
 
-    <div class="card text-center">
+    <div class="card">
         <div class="card-body">
             <div id="passcodesection">
-                <h3 data-toggle="tooltip" title="Connect to a mongo database"> Enter Passcode </h3>
+                <h3 data-toggle="tooltip" title="Enter passcode set at runtime" class="text-center"> Enter Passcode </h3>
                 <form method="post" id="passcodeform" action="verifyPasscode">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     {{ render_field(verifyform.passcode) }}
@@ -25,7 +25,7 @@
                 </form>
             </div>
             <div id="mongoconnection" style="display: none;">
-                <h3 data-toggle="tooltip" title="Connect to a mongo database"> Connect to Mongo Database </h3>
+                <h3 data-toggle="tooltip" title="Connect to a mongo database" class="text-center"> Connect to Mongo Database </h3>
                 <form method="post" action="admin">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     {{ render_field(form.hostname) }}

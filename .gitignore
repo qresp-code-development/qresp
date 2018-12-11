@@ -1,2 +1,4 @@
 venv/
 .idea/
+web/papers/
+web/flask_session/

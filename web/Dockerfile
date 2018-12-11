@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code into the container
 COPY . /home/flask/app/web
+COPY project/static  /usr/src/app/web/project/static
 
 RUN chown -R flask:flaskgroup /home/flask
 

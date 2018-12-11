@@ -148,7 +148,7 @@ class ReferenceForm(Form):
     page = StringField('Page', [validators.DataRequired()], description='Enter page number of journal', render_kw={"placeholder": "Enter page number"})
     publishedAbstract = StringField('Abstract', [validators.DataRequired()], description='Enter abstract', render_kw={"placeholder": "Enter abstract"})
     volume = StringField('Volume', [validators.DataRequired()], description='Enter volume of journal', render_kw={"placeholder": "Enter volume number"})
-    year = StringField('Year', [validators.DataRequired()], description='Enter year', render_kw={"placeholder": "Enter year"})
+    year = IntegerField('Year', [validators.DataRequired()], description='Enter year', render_kw={"placeholder": "Enter year"})
     URLs = StringField(label='URLs', description='Enter link(s) of the paper',render_kw={"placeholder": "Enter paper Urls"})
     school = StringField('School', description='Enter name of school where dissertation was presented', render_kw={"placeholder": "Enter name of school"})
 
@@ -165,7 +165,7 @@ class VersionsForm(Form):
 class HeadForm(Form):
     id = HiddenField('Id')
     readme = StringField('Description',description='Describe your external resource', render_kw={"placeholder": "Describe external resource"})
-    URLs = FieldList(StringField(),description='Enter URLs for the external resource')
+    URLs = StringField('URLs',description='Enter URLs for the external resource')
 
 class PublishForm(Form):
     server = SelectField('Qresp Server',choices=[], validators=[validators.DataRequired()],description='Select the Address of the Database. Qresp automatically inserts the metadata file in the database')

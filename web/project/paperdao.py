@@ -1,11 +1,7 @@
 import re
 
 from .db import *
-from .modules.paper import *
-from .modules.paperdetails import *
-from .modules.search import *
-from .modules.workflowinfo import *
-from .modules.workflownodeinfo import *
+from .models import *
 
 
 class PaperDAO(MongoDBConnection):
@@ -59,23 +55,16 @@ class PaperDAO(MongoDBConnection):
                 Q(reference__title=searchRegWord) | Q(reference__publishedAbstract=searchRegWord) |
                 Q(tags=searchRegWord) | Q(collections=searchRegWord) | Q(reference__authors__firstName=searchWord) |
                 Q(reference__authors__lastName=searchWord))
-            print("fpaper>", filteredPaper)
             allFilteredSearchObjects = self.__filtersearchedPaper(filteredPaper)
         else:
             searchquery = Q()
             if paperTitle.strip():
-                # regTitle = '.*' + paperTitle + '.*'
-                # searchTitleWord = re.compile(regTitle, re.IGNORECASE)
                 searchTitleQuery = Q(reference__title__icontains=paperTitle)
                 searchquery = searchquery & searchTitleQuery
             if doi.strip():
-                # regdoi = '.*' + doi + '.*'
-                # searchdoi = re.compile(regdoi, re.IGNORECASE)
                 searchdoiquery = Q(reference__DOI__icontains=doi)
                 searchquery = searchquery & searchdoiquery
             if tags.strip():
-                # tags = '.*' + tags + '.*'
-                # searchtags = re.compile(tags, re.IGNORECASE)
                 searchtagquery = Q(tags__icontains=tags)
                 searchquery = searchquery & searchtagquery
             if len(collectionList) > 0:
@@ -83,7 +72,6 @@ class PaperDAO(MongoDBConnection):
                 searchquery = searchquery & searchcollectionquery
             if len(authorsList) > 0:
                 lastnamelist = [name.split(" ")[1] for name in authorsList]
-                print(lastnamelist)
                 searchauthorquery = Q(reference__authors__lastName__in=lastnamelist)
                 searchquery = searchquery & searchauthorquery
             if len(publicationList) > 0:
@@ -97,12 +85,20 @@ class PaperDAO(MongoDBConnection):
         return allFilteredSearchObjects
 
     def getAllSearchObjects(self):
-        """
-        Produces all search objects
-        :return:
+        """ Produces all search objects
+        :return: list: all Search objects
         """
         allSearchobjects = self.__filtersearchedPaper(Paper.objects())
         return allSearchobjects
+
+    def insertIntoQueue(self,paperdata):
+        """ Inserts into queue"""
+        paper = Paper(**paperdata)
+        paper.switch_collection('queued')
+        paper.save()
+
+
+
 
     def __filtersearchedPaper(self, filteredPaper):
         """
@@ -136,7 +132,6 @@ class PaperDAO(MongoDBConnection):
         :param paperid:
         :return: object: Details of paper
         """
-        print(paperid)
         paperDetailsObject = Paper.objects.filter(id=str(paperid))
         paperDetails = PaperDetails()
         paper = paperDetailsObject[0]
@@ -175,10 +170,8 @@ class PaperDAO(MongoDBConnection):
         self.workflowinfo.paperTitle = paper.reference.title
         self.workflowinfo.edges = paper.workflow.edges
         for node in paper.workflow.nodes:
-            print(node)
             self.__insertWorkflowNodeDetails(node, paper)
         self.workflowinfo.workflowType = "paper: " + paper.reference.title
-        print(self.workflowinfo.__dict__)
         return self.workflowinfo.__dict__
 
     def getWorkflowForChartDetails(self, paperid, chartid):
@@ -192,7 +185,6 @@ class PaperDAO(MongoDBConnection):
         self.workflowinfo.paperTitle = paper.reference.title
         self.__insertWorkflowNodeDetails(chartid, paper)
         self.__addEdgeToWorkflowForChart(chartid, paper)
-        print(self.workflowinfo.__dict__)
         return self.workflowinfo.__dict__
 
     def __addEdgeToWorkflowForChart(self, chartid, paper):
@@ -202,11 +194,9 @@ class PaperDAO(MongoDBConnection):
         """
         for edge in paper.workflow.edges:
             if chartid in edge[1]:
-                print("here")
                 self.workflowinfo.edges.append(edge)
                 self.__addNodeToWorkflowForChart(paper, edge)
             else:
-                print("here")
                 self.hasvisited.append(edge[1])
                 if self.__hasPath(edge[1], chartid, paper.workflow):
                     self.workflowinfo.edges.append(edge)
@@ -274,8 +264,6 @@ class PaperDAO(MongoDBConnection):
                     toollinks = self.__getLinks(tool.URLs)
                     tooldetails = self.__getTooltipForTools(tool)
                     toolfiles = self.__getFiles(tool.files, paper.info.fileServerPath)
-                    print("tool>", tool.__dict__)
-                    print("tool>>>>>>", tool.files)
                     workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
                     details.append(workflowtools)
                     workflownodeinfo.details = details
@@ -319,10 +307,6 @@ class PaperDAO(MongoDBConnection):
                     scriptlinks = self.__getLinks(script.URLs)
                     scriptdetails = self.__getTooltipForNode(script, node)
                     scriptfiles = self.__getFiles(script.files, paper.info.fileServerPath)
-                    # if "extraFields" in script.__dict__:
-                    #     print("hereeeeeee>>",script.__dict__)
-                    #     print(script)
-                    #     extrascriptfields = self.__getExtraFields(script)
                     workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
                     details.append(workflowscripts)
                     workflownodeinfo.details = details
