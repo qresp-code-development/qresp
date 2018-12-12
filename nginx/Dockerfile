@@ -3,3 +3,6 @@ RUN rm /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/
 RUN rm /etc/nginx/conf.d/default.conf
 COPY family_recipes.conf /etc/nginx/conf.d/
+RUN mkdir -p /etc/certs
+COPY paperstack_uchicago_edu_cert.cer /etc/certs
+COPY paperstack.uchicago.edu.key /etc/certs

@@ -4,17 +4,21 @@ services:
   web:
     restart: always
     build: ./web
+    environment:
+      - HOST_ADDR=<insert IP address>
+      - FROM_ADDR=<insert your email address>
+      - KEY=<insert key>
     expose:
-      - "8000"
+      - "8080"
     volumes:
       - /usr/src/app/web/project/static
-    command: /usr/local/bin/gunicorn -w 2 -b :8000 project:app
+    command: /usr/local/bin/gunicorn -w 2 -b :8080 project:app
     
   nginx:
     restart: always
     build: ./nginx
     ports:
-      - "8080:8080"
+      - "443:443"
     volumes:
       - /www/static
     volumes_from:

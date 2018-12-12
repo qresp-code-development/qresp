@@ -1,11 +1,12 @@
 import traceback
-import os
 from flask import render_template, request, flash, redirect, url_for, jsonify, session, Response
 from datetime import timedelta,datetime
 from project import csrf
 from project import app
-import schedule
+from flask_cors import CORS
 
+import schedule
+import os
 
 from .paperdao import *
 from .views import *
@@ -66,6 +67,7 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
+    print("here")
     return render_template('index.html')
 
 @app.route('/qrespexplorer')
@@ -768,3 +770,8 @@ def sendmail():
         dao.insertIntoQueue(paper)
     except Exception as e:
         print(e)
+
+def main():
+    app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
+    CORS(app)
+    app.run(port=80, debug=False)
