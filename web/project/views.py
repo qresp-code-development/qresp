@@ -1,7 +1,8 @@
 from wtforms import Form, StringField, PasswordField, RadioField, IntegerField, HiddenField, FieldList, FormField, BooleanField, DateTimeField, TextAreaField, SelectField
 from wtforms import validators
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import DataRequired, Optional, required
+from wtforms.validators import DataRequired, Optional
+
 
 class RequiredIf(DataRequired):
     """Validator which makes a field required if another field is set and has a truthy value.
@@ -32,8 +33,8 @@ class PassCodeForm(Form):
     passcode = PasswordField('Passcode',[validators.DataRequired()],description='Enter passcode to change mongo database details')
 
 class AdminForm(Form):
-    hostname = StringField('Database Hostname', [validators.DataRequired("Please enter Hostname of the mongo database.")],description='Hostname of the mongo database')
-    port = IntegerField('Port No.',description='Port No of database')
+    hostname = StringField('Database Hostname', [validators.DataRequired("Please enter Hostname of the mongo database.")],description='Hostname of the mongo database',render_kw={"placeholder": "Enter hostname to connect to database"})
+    port = IntegerField('Port No.',description='Port No of database',render_kw={"placeholder": "Enter port number to connect to database"})
     username = StringField('Username', [validators.DataRequired("Please enter username to connect to database.")],description='Authorized user name to connect database',render_kw={"placeholder": "Enter username to connect to database"})
     password = PasswordField('Password', [validators.DataRequired("Please enter password to connect to database.")],description='Password to connect to database',render_kw={"placeholder": "Enter password to connect to database "})
     dbname = StringField('Database Name', [validators.DataRequired("Please enter name of database.")],description='Name of mongo database',render_kw={"placeholder": "Enter name of mongo database"})

@@ -326,6 +326,7 @@ class PaperDetails(object):
         self.scripts = []
         self.tools = []
         self.year = 0
+        self.timeStamp = ""
 
     @property
     def id(self):
@@ -510,6 +511,14 @@ class PaperDetails(object):
     @heads.setter
     def heads(self, val):
         self.__heads = val
+
+    @property
+    def timeStamp(self):
+        return self.__timeStamp
+
+    @timeStamp.setter
+    def timeStamp(self, val):
+        self.__timeStamp = val
 
 class WorkflowInfo:
     """Collects info for workflow

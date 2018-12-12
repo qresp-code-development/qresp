@@ -863,3 +863,28 @@ function bindWorkflow(workflowDetails, isChart) {
         mynetwork.getElementsByTagName("canvas")[0].style.cursor = 'pointer';
     }
 }
+
+function createGoogleDatasetsScript(paperDetails){
+     var auth = []
+     $.each(paperDetails._PaperDetails__authors, function(i,item) {
+         var name = item.firstName + " "+ item.lastName;
+         auth.push({"@type":"Person","name":name});
+     });
+     var value = {
+         "@context": "http://schema.org/",
+         "@type": "Dataset",
+         "dateCreated": paperDetails._PaperDetails__timeStamp,
+         "name": paperDetails._PaperDetails__title,
+         "description": paperDetails._PaperDetails__abstract,
+         "url": window.location.href,
+         "keywords": paperDetails._PaperDetails__tags,
+         "publisher": {"@type": "Organization","name": "Qresp"},
+         "creator": auth,
+         "version":"1",
+         "identifier":paperDetails._PaperDetails__cite
+     };
+     var script = document.createElement('script');
+     script.type = 'application/ld+json';
+     script.innerHTML = JSON.stringify(value);
+     document.getElementsByTagName('head')[0].appendChild(script);
+}

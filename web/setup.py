@@ -33,7 +33,8 @@ setup(
         'python-dateutil',
         'expiringdict',
         'schedule',
-        'wtforms'
+        'wtforms',
+        'flask-sitemap'
       ],
     include_package_data=True
 )

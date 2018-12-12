@@ -1,12 +1,14 @@
-import paramiko     #Provides SSH functionality
-import socket       #This method requires that we create our own socket
-import re
-import requests
 import json
-import subprocess
+import re
+import socket  # This method requires that we create our own socket
 from copy import deepcopy
+
+import paramiko  # Provides SSH functionality
+import requests
 from jsonschema import Draft4Validator
-from .views import ReferenceForm,ChartForm,DatasetForm,ToolForm,ScriptForm,HeadForm
+
+from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
+
 
 class DirectoryTree:
     """Class Providing Constants for Directory Tree.

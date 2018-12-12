@@ -74,7 +74,12 @@
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery-plugin-collection.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/theme/custom.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery.lazyload.min.js') }}"></script>
-
+    <script type="text/javascript">
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+        ga('create', 'UA-126882431-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'> </script>
     <script src="{{ url_for('static', filename='./javascript/vendor/vis.min.js') }}"></script>
      <style>
         .nav-item::after{content:'';display:block;width:0px;height:2px;background:#fec400;transition: 0.2s;}

@@ -1,16 +1,17 @@
+import os
 import traceback
-from flask import render_template, request, flash, redirect, url_for, jsonify, session, Response
-from datetime import timedelta,datetime
-from project import csrf
-from project import app
-from flask_cors import CORS
+from datetime import timedelta, datetime
 
 import schedule
-import os
+from flask import render_template, request, flash, redirect, url_for, jsonify, session
+from project import csrf
+from project import app
+from project import ext
+from flask_cors import CORS
 
 from .paperdao import *
-from .views import *
 from .util import *
+from .views import *
 
 qresp_config = {}
 ftp_dict = {}
@@ -67,8 +68,30 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
-    print("here")
     return render_template('index.html')
+
+@ext.register_generator
+def index():
+    # Not needed if you set SITEMAP_INCLUDE_RULES_WITHOUT_PARAMS=True
+    yield 'index', {}
+    yield 'qrespexplorer', {}
+    yield 'paperdetails', {'paperid': '594186a91bd40fd4f2ce1aa0'}, {}
+    yield 'paperdetails', {'paperid': '5bb12835096ace7a9d8eb97d'}, {}
+    yield 'paperdetails', {'paperid': '5b3441242986382db00fab92'}, {}
+    yield 'paperdetails', {'paperid': '5b33a02629863800f82e297c'}, {}
+    yield 'paperdetails', {'paperid': '5b339eb029863800f82e297b'}, {}
+    yield 'paperdetails', {'paperid': '5b0ef8381f87c63760acb909'}, {}
+    yield 'paperdetails', {'paperid': '5a5e4e933a2c122ca8e9cd92'}, {}
+    yield 'paperdetails', {'paperid': '5ad8df0650cefd3974d05a83'}, {}
+    yield 'paperdetails', {'paperid': '5a5e437e3a2c122ca8e9cd75'}, {}
+    yield 'paperdetails', {'paperid': '5950fbfc1bd40f6cb67fb939'}, {}
+    yield 'paperdetails', {'paperid': '5992072a7590617df5a88a85'}, {}
+    yield 'paperdetails', {'paperid': '5983afce759061384c1aae48'}, {}
+    yield 'paperdetails', {'paperid': '594c507f1bd40f5ebf185fde'}, {}
+    yield 'paperdetails', {'paperid': '594c50671bd40f5e9b5c043b'}, {}
+    yield 'paperdetails', {'paperid': '594c504a1bd40f5e7819a0aa'}, {}
+
+
 
 @app.route('/qrespexplorer')
 def qrespexplorer():
@@ -650,6 +673,7 @@ def admin():
     """ This method helps in connecting to the mongo database.
     """
     form = AdminForm(request.form)
+    form.port.data = "27017"
     verifyform = PassCodeForm(request.form)
     if request.method == 'POST' and form.validate():
         flash('Connected')

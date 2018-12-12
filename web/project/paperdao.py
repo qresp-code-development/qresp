@@ -157,6 +157,7 @@ class PaperDAO(MongoDBConnection):
         paperDetails.workflows = paper.workflow
         paperDetails.heads = paper.heads
         paperDetails.cite = paper.info.doi
+        paperDetails.timeStamp = paper.info.timeStamp
         return paperDetails.__dict__
 
     def getWorkflowDetails(self, paperid):
