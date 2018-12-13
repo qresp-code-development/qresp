@@ -343,13 +343,11 @@
 					nodeId = nodeId + 1;
 					hid = hid + 1;
 					var value = val.split("*");
-					console.log("headInfo0>",value)
 					if(value[2] !== undefined){
 						headInfo.push("h" + headNum.toString()+"*"+value[1]+"*"+value[2]);
 					}else{
 						headInfo.push("h" + headNum.toString()+"*"+value[1]);
 					}
-					console.log("headInfoList0>",headInfo)
 					nodes.add([{
 							x: x,
 							y: y + hid * step,
@@ -445,7 +443,6 @@
 				}
 			}
 			headInfo = result;
-			console.log('clicked nodes nodes: ', headInfo);
 			callback(data);
         }
 
@@ -667,9 +664,7 @@
 			contentType: "application/json ; charset=utf-8",
 			data: JSON.stringify(plist),
 			success: function (data) {
-				console.log("data>>",type,data);
 				if(type === "GET") {
-					console.log("workflow>>",data.workflow);
                     bindChartWorkflow(data.workflow);
                 }else{
 					window.location = '/publish';

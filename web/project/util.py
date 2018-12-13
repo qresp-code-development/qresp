@@ -1,13 +1,15 @@
 import json
 import re
 import socket  # This method requires that we create our own socket
+import subprocess
 from copy import deepcopy
-
+import time
 import paramiko  # Provides SSH functionality
 import requests
 from jsonschema import Draft4Validator
 
 from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
+
 
 
 class DirectoryTree:
@@ -376,20 +378,35 @@ class ConvertToList():
 class SendEmail():
     """Email Class
     """
-    def __init__(self,fromaddress,toaddress):
+    def __init__(self,servername,fromaddress,toaddress):
+        self.__servername = servername
         self.__fromaddress = fromaddress
         self.__toaddress = toaddress
-        self.send_mail()
 
 
-    def sendDescriptorToServer(self):
+    def sendDescriptorToServer(self,data):
         """ Sends email to server
         :return: object: sends descriptor to server
         """
-        url = self.__servername + "/sendEmail"
-        payload = {'metadata': json.load(self.__data), 'emailId': self.__fromaddress, 'servername': self.__servername}
+        url = self.__servername + "/getDescriptor"
+        payload = {'metadata': data, 'emailId': self.__fromaddress, 'servername': self.__servername}
         headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
         response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
         return response
+
+    def callEmailScript(self):
+        """ Sends email to given address """
+        print("In call email")
+        try:
+            mail_cmd = 'project/sendMailToUser.sh'
+            link = str(self.__servername) + "/insertPaper?emailId=" + self.__toaddress
+            print("link>>",link)
+            proc2 = subprocess.Popen([str(mail_cmd), self.__fromaddress,self.__toaddress, link], stdout=subprocess.PIPE, stderr=subprocess.PIPE,executable='/bin/bash')
+        except Exception as e:
+            print("Sending mail failed",e)
+            # content = {'Error': 'Email Id invalid'}
+            return False
+        return True
+
 
 

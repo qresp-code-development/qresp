@@ -38,7 +38,6 @@ $.ajax({
 	contentType: "application/json ; charset=utf-8",
 	data: JSON.stringify(searchdata),
 	success: function (data) {
-		console.log(data);
 		$("#tree").fancytree({
 			checkbox: true,
 			selectMode: 3,
@@ -268,17 +267,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#piTable tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -300,17 +294,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row-charts]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#extraTableCharts tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -332,17 +321,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row-author]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#authorTable tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -365,17 +349,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row-tools]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#extraTableTools tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -384,7 +363,6 @@ $(".disabler").bind("keyup focusin", function () {
 
         //Remove row
         $this.find("button[data-toggle=fieldset-remove-row-tools]").click(function() {
-            console.log("here",$this.find("#extraTableTools tr").length);
             if($this.find("#extraTableTools tr").length > 1) {
                 var thisRow = $(this).closest("tr");
                 thisRow.remove();
@@ -399,17 +377,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row-scripts]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#extraTableScripts tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -418,8 +391,7 @@ $(".disabler").bind("keyup focusin", function () {
 
         //Remove row
         $this.find("button[data-toggle=fieldset-remove-row-scripts]").click(function() {
-            console.log("here",$this.find("#extraTableScripts tr").length);
-            if($this.find("#extraTableScripts tr").length > 1) {
+           if($this.find("#extraTableScripts tr").length > 1) {
                 var thisRow = $(this).closest("tr");
                 thisRow.remove();
             }
@@ -433,17 +405,12 @@ $(".disabler").bind("keyup focusin", function () {
             //Add new entry
         $this.find("button[data-toggle=fieldset-add-row-datasets]").click(function() {
             var target = $($(this).data("target"))
-            console.log(target);
             var oldrow = target.find("#extraTableDatasets tr:last");
-            console.log(oldrow);
             var row = oldrow.clone(true, true);
-            console.log(row);
-            console.log(row.find(":input"));
             var elem_id = row.find(":input")[0].id;
             var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
             row.attr('data-id', elem_num);
             row.find(":input").each(function() {
-                console.log(this);
                 var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + (elem_num) + '-');
                 $(this).attr('name', id).attr('id', id).val('').removeAttr("checked");
             });
@@ -452,7 +419,6 @@ $(".disabler").bind("keyup focusin", function () {
 
         //Remove row
         $this.find("button[data-toggle=fieldset-remove-row-datasets]").click(function() {
-            console.log("here",$this.find("#extraTableDatasets tr").length);
             if($this.find("#extraTableDatasets tr").length > 1) {
                 var thisRow = $(this).closest("tr");
                 thisRow.remove();
@@ -493,7 +459,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#InfoForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     toggleAlert();  // display the returned data in the console.
                 }
             });
@@ -508,7 +473,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#ChartForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     toggleAlert();  // display the returned data in the console.
                     createChartList(data['chartList']);
                 }
@@ -531,7 +495,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#ToolForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     if("errors" in data){
                         toggleAlertError();
                     }else {
@@ -551,7 +514,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#DatasetForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     toggleAlert();  // display the returned data in the console.
                     createDatasetList(data['datasetList']);
                 }
@@ -567,7 +529,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#ScriptForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                   console.log(data);
                     toggleAlert();  // display the returned data in the console.
                     createScriptList(data['scriptList']);
                 }
@@ -582,7 +543,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#ReferenceForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     toggleAlert();  // display the returned data in the console.
                 }
             });
@@ -596,7 +556,6 @@ $(".disabler").bind("keyup focusin", function () {
                 url: url,
                 data: $('#DocumentationForm').serialize(), // serializes the form's elements.
                 success: function (data) {
-                    console.log(data);
                     toggleAlert();  // display the returned data in the console.
                 }
             });
@@ -607,7 +566,6 @@ $(".disabler").bind("keyup focusin", function () {
 
 function fillValues(obj,type) {
     if(type === 'charts') {
-        $('form[name="charts"] input[name=kind][value="' + obj.kind + '"]').prop('checked', true);
         $('form[name="charts"] #caption').val(obj.caption);
         $('form[name="charts"] #number').val(obj.number);
         $('form[name="charts"] #files').val(obj.files);
@@ -665,11 +623,15 @@ function fillValues(obj,type) {
             $("div[data-toggle=author-fieldset-toggle]").each(function() {
                 var $this = $(this);
                 //Add new entry
-                $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
+                if(value.firstName) {
+                    $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
+                }
             });
-            $('#authors-'+index+'-firstName').val(value.firstName);
-            $('#authors-'+index+'-middleName').val(value.middleName);
-            $('#authors-'+index+'-lastName').val(value.lastName);
+        });
+        $.each(obj.authors, function( index, value ) {
+            $('#authors-' + index + '-firstName').val(value.firstName);
+            $('#authors-' + index + '-middleName').val(value.middleName);
+            $('#authors-' + index + '-lastName').val(value.lastName);
         });
         $('form[name="reference"] #URLs').val(obj.URLs);
         $('form[name="reference"] #school').val(obj.school);
@@ -783,7 +745,6 @@ function fillValues(obj,type) {
     }
     
     function fetchDOI(doi) {
-        console.log("DOI>>",doi);
         $.ajax({
                 type: "POST",
                 url: "/fetchReferenceDOI",
@@ -791,7 +752,6 @@ function fillValues(obj,type) {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    console.log("data>>DOI>>",data);
                     if("errors" in data){
                         console.log("recheck your DOI");
                     }else {

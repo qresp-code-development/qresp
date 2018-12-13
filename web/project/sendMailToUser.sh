@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-#!/bin/sh
+#!/bin/bash
 echo "Starting script for Sending Email"
 echo $HOST_ADDR
 FROM_ADDR=$1

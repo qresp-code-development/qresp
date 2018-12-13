@@ -25,8 +25,7 @@
                            style="color: #357ebd;float:left;margin-top: 5px;"> Advanced Search >> </a>
                     </div>
                 </div>
-                <form action="{{ url_for('search') }}" id="searchForm" name="searchForm" method="post"
-                      style="display:none;">
+                <form action="{{ url_for('search') }}" id="searchForm" name="searchForm" method="post" style="display: none;">
                     <div class="row">
                         <div class="form-group col-md-4">
                             <label for="txtPaperTitle">Paper Title:</label>
@@ -88,7 +87,7 @@
             </div>
     </div>
 
-    <div class="container" id="paperContainer" style="display: none;">
+    <div class="container" id="paperContainer">
         <hr/>
         <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center" style="padding-top: 2rem;padding-bottom: 2rem;">
             <div id="divPapers">
@@ -136,8 +135,12 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='./javascript/modules/search.js') }}"></script>
+    <script type="text/javascript">
+        var allPapersList = {{ allpaperslist | tojson }};
+        buildTable(allPapersList);
+     </script>
 <script src="{{ url_for('static', filename='./javascript/vendor/vis.min.js') }}"></script>
-        <script type="text/javascript">
+    <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
         ga('create', 'UA-126882431-1', 'auto');
         ga('send', 'pageview');

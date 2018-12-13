@@ -91,10 +91,9 @@ class PaperDAO(MongoDBConnection):
         allSearchobjects = self.__filtersearchedPaper(Paper.objects())
         return allSearchobjects
 
-    def insertIntoQueue(self,paperdata):
+    def insertIntoPapers(self,paperdata):
         """ Inserts into queue"""
         paper = Paper(**paperdata)
-        paper.switch_collection('queued')
         paper.save()
 
 
@@ -112,7 +111,8 @@ class PaperDAO(MongoDBConnection):
             search.title = paper.reference.title
             search.tags = paper.tags
             search.collections = paper.collections
-            search.authors = paper.reference.authors
+            search.authors = [authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
+            search.authors = ", ".join(search.authors)
             search.publication = paper.reference.journal.fullName + " " + paper.reference.volume + ", " + paper.reference.page
             search.abstract = paper.reference.publishedAbstract
             search.doi = paper.reference.DOI
@@ -139,7 +139,8 @@ class PaperDAO(MongoDBConnection):
         paperDetails.title = paper.reference.title
         paperDetails.tags = paper.tags
         paperDetails.collections = paper.collections
-        paperDetails.authors = paper.reference.authors
+        paperDetails.authors = [authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
+        paperDetails.authors = ", ".join(paperDetails.authors)
         paperDetails.publication = paper.reference.journal.fullName + " " + paper.reference.volume + ", " + paper.reference.page
         paperDetails.abstract = paper.reference.publishedAbstract
         paperDetails.doi = paper.reference.DOI

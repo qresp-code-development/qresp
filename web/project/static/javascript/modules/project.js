@@ -35,7 +35,6 @@ $("#Searchbtn").on("click",function () {
 function saveProjectPath(type){
     var treedata = $('.tree-form').serializeArray();
     var searchdata = getFormData(treedata);
-    console.log("saveProjectPath0>>",searchdata);
     $.ajax({
         method: 'POST',
         url: '/setproject',
@@ -45,7 +44,6 @@ function saveProjectPath(type){
         data: JSON.stringify(searchdata),
 		success: function (data) {
         	if(type === 'POST'){
-        		console.log("type",type);
         		if(typeof data.services !== 'undefined'){
                     data.services.forEach(function(element) {
                         if (element){
@@ -54,7 +52,6 @@ function saveProjectPath(type){
                     });
                 }
 				if(data.isConfigFile === "N"){
-					console.log("dd",data.isConfigFile);
 					var r = window.confirm("Are you sure you want to curate the paper at the location"+data.folderAbsolutePath);
 					if (r != true) {
 						return;
@@ -69,7 +66,6 @@ function saveProjectPath(type){
                         }
                     });
                 }
-                console.log("saveProjectPath1>>", data);
                 $("#folderAbsolutePath").val(data.folderAbsolutePath);
                 window.location = '/project';
             }
@@ -83,7 +79,6 @@ function saveProjectPath(type){
 function callTreeData(){
     var treedata = $('.tree-form').serializeArray();
     var searchdata = getFormData(treedata);
-    console.log("callTreeData0>",searchdata);
     $.ajax({
         method: 'POST',
         url: '/getTreeInfo',

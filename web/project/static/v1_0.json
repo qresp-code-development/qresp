@@ -73,7 +73,6 @@
           "caption",
           "id",
           "imageFile",
-          "kind",
           "number",
           "properties",
           "saveas"
@@ -153,16 +152,6 @@
             "default": "",
             "examples": [
               "charts/figure1/fig1.png"
-            ],
-            "pattern": "^(.*)$"
-          },
-          "kind": {
-            "$id": "#/properties/charts/items/properties/kind",
-            "type": ["string"],
-            "title": "The Kind Schema",
-            "default": "",
-            "examples": [
-              "figure"
             ],
             "pattern": "^(.*)$"
           },
@@ -514,15 +503,6 @@
           "required": [
             "firstName",
             "lastName"
-          ]
-        },
-        "isPublic": {
-          "$id": "#/properties/info/properties/isPublic",
-          "type": "boolean",
-          "title": "The Ispublic Schema",
-          "default": false,
-          "examples": [
-            true
           ]
         },
         "notebookFile": {

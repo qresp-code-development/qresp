@@ -97,10 +97,11 @@ function buildTable(allPapers) {
 
                     //authors
                     var temp = "";
-                    $.each(row["_Search__authors"], function (i, item) {
-                        temp += item['firstName'] + " " + item['lastName'] + ", ";
-                    });
-                    temp = temp.replace(/,\s*$/, "");
+                    // $.each(row["_Search__authors"], function (i, item) {
+                    //     temp += item['firstName'] + " " + item['lastName'] + ", ";
+                    // });
+                    // temp = temp.replace(/,\s*$/, "");
+                    temp = row["_Search__authors"]
                     title += "<p>" + temp + "</p>";
 
                     //published In

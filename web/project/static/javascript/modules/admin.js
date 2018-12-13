@@ -12,7 +12,6 @@ $(function () {
                url: "verifyPasscode", //"servlet/charts", //"./data/PaperDetails.json"
                data: $('#passcodeform').serialize(),
                success: function (data) {
-                   console.log(data);
                    if(data.msg === "success" ){
                        $("#passcodesection").toggle();
                         $("#mongoconnection").toggle();

@@ -15,9 +15,18 @@ WORKDIR /home/flask/app/web
 COPY requirements.txt /home/flask/app/web
 RUN pip install --no-cache-dir -r requirements.txt
 
+
+
 # Copy the source code into the container
 COPY . /home/flask/app/web
 COPY project/static  /usr/src/app/web/project/static
+
+RUN chmod +x -R project/sendMailToUser.sh
+#RUN apt-get update && apt-get install -y vim
+#RUN apt-get update && apt-get install -y netcat
+#RUN apt-get install -y libio-socket-ssl-perl
+
+
 
 RUN chown -R flask:flaskgroup /home/flask
 

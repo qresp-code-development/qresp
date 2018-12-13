@@ -68,6 +68,9 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
+    dbAdmin = MongoDBConnection.getDB(hostname="", port=27017,
+                                      username="", password="",
+                                      dbname="", collection="", isssl="")
     return render_template('index.html')
 
 @ext.register_generator
@@ -602,9 +605,16 @@ def publish():
                                        serverslist.getServersList()]
                 return render_template('publish.html', form=form)
             else:
+                with open("papers/" + projectName + "/data.json", "r") as jsonData:
+                    sendmail = SendEmail(form.server.data,form.emailId.data,None)
+                    response = sendmail.sendDescriptorToServer(json.load(jsonData))
                 return redirect('acknowledgement')
         except Exception as e:
-            flash("Could not publish, Please fill all mandatory fields "+str(e))
+            print(e)
+            form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
+                                   serverslist.getServersList()]
+            flash("Could not publish"+str(e))
+            return render_template('publish.html', form=form)
     return render_template('publish.html', form=form)
 
 
@@ -633,7 +643,6 @@ def download():
     paperform = PaperForm(PIs = PIs, charts = charts, collections=collections, datasets = datasets, info = projectForm.data,
                           reference = reference, scripts =scripts, tools = tools,
                           tags = tags,versions =versions, workflow=workflow,heads=heads,schema='http://paperstack.uchicago.edu/v1_0.json',version=1)
-    print(paperform.data)
     paperdict = ConvertToList(paperform.data)
     paperdata = paperdict.fetchConvertedList()
     if not os.path.exists("papers/"+projectName):
@@ -676,14 +685,16 @@ def admin():
     form.port.data = "27017"
     verifyform = PassCodeForm(request.form)
     if request.method == 'POST' and form.validate():
-        flash('Connected')
         try:
-            dbAdmin = MongoDBConnection(hostname=form.hostname.data, port=int(form.port.data),
+            dbAdmin = MongoDBConnection.getDB(hostname=form.hostname.data, port=int(form.port.data),
                                         username=form.username.data, password=form.password.data,
                                         dbname=form.dbname.data, collection=form.collection.data, isssl=form.isSSL.data)
-            return redirect(url_for('qrespexplorer'))
-        except ConnectionError as e:
+            paperCollectionlist = Paper.objects.get_unique_values('collections')
+        except Exception as e:
+            flash('Could not connect to server, \n ' + str(e))
             raise InvalidUsage('Could not connect to server, \n ' + str(e), status_code=410)
+        flash('Connected')
+        return redirect(url_for('qrespexplorer'))
     return render_template('admin.html', form=form,verifyform =verifyform )
 
 # Fetches list of qresp admin
@@ -709,16 +720,20 @@ def search():
     :return: template: search.html
     """
     try:
-        db = MongoDBConnection()
         dao = PaperDAO()
+        allpaperslist = dao.getAllFilteredSearchObjects("", "", "", "", "", "", "")
+        print(allpaperslist)
+        if not allpaperslist:
+            allpaperslist = []
         return render_template('search.html',
                                collectionlist=dao.getCollectionList(), authorslist=dao.getAuthorList(),
-                               publicationlist=dao.getPublicationList(), allPapersSize=len(dao.getAllSearchObjects()))
+                               publicationlist=dao.getPublicationList(), allPapersSize=len(dao.getAllSearchObjects()),
+                               allpaperslist = allpaperslist)
     except Exception as e:
         print(e)
         print(traceback.format_exc())
         flash('Error in search. ' + str(e))
-        return render_template('search.html')
+        return render_template('search.html',allpaperslist=[])
 
 
 # Fetches search word options after selecting server
@@ -765,8 +780,8 @@ def paperdetails(paperid):
 
 # Fetches workflow of chart based on user click
 @csrf.exempt
-@app.route('/charworkflow', methods=['POST', 'GET'])
-def charworkflow():
+@app.route('/chartworkflow', methods=['POST', 'GET'])
+def chartworkflow():
     """  Fetching chart workflow content
     :return: object: chartworkflow
     """
@@ -783,17 +798,42 @@ def charworkflow():
         flash('Error in paperdetails. ' + str(e))
 
 @csrf.exempt
-@app.route('/sendmail', methods=['POST'])
-def sendmail():
+@app.route('/getDescriptor', methods=['POST'])
+def getDescriptor():
     try:
-        dao = PaperDAO()
         data = request.get_json()
-        from_address = data.get("from_address")
-        to_address = data.get("to_address")
-        paper = data.get("paperdata")
-        dao.insertIntoQueue(paper)
+        from_address = "datadev@lists.uchicago.edu"
+        to_address = data.get("emailId")
+        paper = data.get("metadata")
+        server = data.get("servername")
+        session[to_address] = paper
+        sendemail = SendEmail(server,from_address,to_address)
+        resp = sendemail.callEmailScript()
+        if not resp:
+            print("Error")
+            content = {'Error': 'Could not send, invalid email Id'}
+            return jsonify(content),400
     except Exception as e:
-        print(e)
+        print("Error in sending email", e)
+        content = {'Error':'Could not send, invalid email Id'}
+        return jsonify(content),400
+    content = {"Success":"Sent email"}
+    return jsonify(content),200
+
+@csrf.exempt
+@app.route('/insertPaper', methods=['GET'])
+def insertPaper():
+    try:
+        from_address = request.args.get("from_address")
+        data = session.get(from_address)
+        dao = PaperDAO()
+        dao.insertIntoPapers(data)
+    except Exception as e:
+        print("Exception in insertion,", e)
+        content = {'Error': 'Could not insert'}
+    content = {'Success': 'Inserted'}
+    return jsonify(content)
+
 
 def main():
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'

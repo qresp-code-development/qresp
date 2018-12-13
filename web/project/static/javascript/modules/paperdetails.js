@@ -59,7 +59,7 @@ $(function () {
             var strvalues = values.split(',');
             var paperid = strvalues[0];
             var chartid = strvalues[1];
-            $.getJSON('/charworkflow', {
+            $.getJSON('/chartworkflow', {
                 paperid: paperid,
                 chartid: chartid
             }, function (data) {
@@ -116,15 +116,14 @@ $(function () {
 //Builds first half of page i.e. paper details
 function buildPaperInfo(paperDetails) {
     //title
-    console.log(paperDetails);
     $("#lblTitle").html(paperDetails._PaperDetails__title);
 
     //authors
-    var authors = "by ";
-    $.each(paperDetails._PaperDetails__authors, function (i, item) {
-        authors += item.firstName + " " + item.lastName + ", ";
-    });
-    authors = authors.replace(/,\s*$/, "");
+    var authors = "by " + paperDetails._PaperDetails__authors ;
+    // $.each(paperDetails._PaperDetails__authors, function (i, item) {
+    //     authors += item.firstName + " " + item.lastName + ", ";
+    // });
+    // authors = authors.replace(/,\s*$/, "");
     $("#lblAuthor").html(authors);
 
     //cite
@@ -231,7 +230,6 @@ function buildChartTables(chartDetails, paperDetails) {
                         "sortable": false,
                         "searchable": false,
                         "render": function (data, type, row) {
-                            console.log(row);
                             var chartInfo = "<div class='span2'><a rel='prettyPhoto' title='" + $.trim(row.kind) + " "
                                 + $.trim(row.number)
                                 + ": "

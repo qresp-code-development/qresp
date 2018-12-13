@@ -94,7 +94,6 @@ class ExtraForm(Form):
 
 class ChartForm(Form):
     id = HiddenField('Id')
-    kind = RadioField('Kind', choices=[('figure', 'Figure'), ('table', 'Table')], default='figure',description='Select Figure or Table', id='ckind')
     caption = StringField('Caption',[validators.DataRequired("Please enter caption")], description='Enter chart caption',render_kw={"placeholder": "Enter chart caption"})
     number = StringField('Number',[validators.DataRequired("Please enter number")], description='Enter chart number',render_kw={"placeholder": "Enter chart number"})
     files = StringField(label='Files', description='Enter file name(s) containing the data displayed in the chart (e.g. a file in CSV format). Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter file names used to construct Chart"})
