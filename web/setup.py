@@ -34,7 +34,8 @@ setup(
         'expiringdict',
         'schedule',
         'wtforms',
-        'flask-sitemap'
+        'flask-sitemap',
+        'flask_oauth'
       ],
     include_package_data=True
 )

@@ -1,5 +1,5 @@
 import re
-
+import traceback
 from .db import *
 from .models import *
 
@@ -92,10 +92,13 @@ class PaperDAO(MongoDBConnection):
         return allSearchobjects
 
     def insertIntoPapers(self,paperdata):
-        """ Inserts into queue"""
+        """ Inserts into collection"""
+        listoftitles = [paper.reference.title for paper in Paper.objects()]
+        if paperdata['reference']['title'] in listoftitles:
+            return None
         paper = Paper(**paperdata)
         paper.save()
-
+        return str(paper.id)
 
 
 
@@ -167,14 +170,18 @@ class PaperDAO(MongoDBConnection):
         :param paperid: Id of paper to construct workflow
         :return: object: workflow details
         """
-        paperDetailsObject = Paper.objects.filter(id=str(paperid))
-        paper = paperDetailsObject[0]
-        self.workflowinfo.paperTitle = paper.reference.title
-        self.workflowinfo.edges = paper.workflow.edges
-        for node in paper.workflow.nodes:
-            self.__insertWorkflowNodeDetails(node, paper)
-        self.workflowinfo.workflowType = "paper: " + paper.reference.title
-        return self.workflowinfo.__dict__
+        try:
+            paperDetailsObject = Paper.objects.filter(id=str(paperid))
+            paper = paperDetailsObject[0]
+            self.workflowinfo.paperTitle = paper.reference.title
+            self.workflowinfo.edges = paper.workflow.edges
+            for node in paper.workflow.nodes:
+                self.__insertWorkflowNodeDetails(node, paper)
+            self.workflowinfo.workflowType = "paper: " + paper.reference.title
+            return self.workflowinfo.__dict__
+        except Exception as e:
+            print(e)
+
 
     def getWorkflowForChartDetails(self, paperid, chartid):
         """
@@ -241,106 +248,109 @@ class PaperDAO(MongoDBConnection):
         :param nodeInfo:
         :return:
         """
-        if "h" in node:
-            for head in paper.heads:
-                if node in str(head.id):
-                    workflownodeinfo = WorkflowNodeInfo()
-                    workflownodeinfo.toolTip = "<p><b>External " + head.id + "</b>: <i>" + head.readme + "</i></p>"
-                    details = []
-                    details.append("Head " + node)
-                    details.append("<p><i>" + head.readme + "</i></p>" + self.__getLinks(head.URLs))
-                    workflownodeinfo.details = details
-                    workflownodeinfo.hasNotebookFile = False
-                    if head.saveas:
-                        workflownodeinfo.nodelabel = head.saveas
-                    else:
-                        workflownodeinfo.nodelabel = node
-                    self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-        elif "t" in node:
-            for tool in paper.tools:
-                if node in str(tool.id):
-                    workflownodeinfo = WorkflowNodeInfo()
-                    workflownodeinfo.toolTip = self.__getTooltipForTools(tool)
-                    details = []
-                    details.append("Tool " + node)
-                    toollinks = self.__getLinks(tool.URLs)
-                    tooldetails = self.__getTooltipForTools(tool)
-                    toolfiles = self.__getFiles(tool.files, paper.info.fileServerPath)
-                    workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
-                    details.append(workflowtools)
-                    workflownodeinfo.details = details
-                    if tool.saveas:
-                        workflownodeinfo.nodelabel = tool.saveas
-                    else:
-                        workflownodeinfo.nodelabel = node
-                    workflownodeinfo.hasNotebookFile = False
-                    self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
+        try:
+            if "h" in node:
+                for head in paper.heads:
+                    if node in str(head.id):
+                        workflownodeinfo = WorkflowNodeInfo()
+                        workflownodeinfo.toolTip = "<p><b>External " + head.id + "</b>: <i>" + head.readme + "</i></p>"
+                        details = []
+                        details.append("Head " + node)
+                        details.append("<p><i>" + head.readme + "</i></p>" + self.__getLinks(head.URLs))
+                        workflownodeinfo.details = details
+                        workflownodeinfo.hasNotebookFile = False
+                        if head.saveas:
+                            workflownodeinfo.nodelabel = head.saveas
+                        else:
+                            workflownodeinfo.nodelabel = node
+                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
+            elif "t" in node:
+                for tool in paper.tools:
+                    if node in str(tool.id):
+                        workflownodeinfo = WorkflowNodeInfo()
+                        workflownodeinfo.toolTip = self.__getTooltipForTools(tool)
+                        details = []
+                        details.append("Tool " + node)
+                        toollinks = self.__getLinks(tool.URLs)
+                        tooldetails = self.__getTooltipForTools(tool)
+                        toolfiles = self.__getFiles(tool.files, paper.info.fileServerPath)
+                        workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
+                        details.append(workflowtools)
+                        workflownodeinfo.details = details
+                        if tool.saveas:
+                            workflownodeinfo.nodelabel = tool.saveas
+                        else:
+                            workflownodeinfo.nodelabel = node
+                        workflownodeinfo.hasNotebookFile = False
+                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
 
-        elif "d" in node:
-            for dataset in paper.datasets:
-                if node in str(dataset.id):
-                    workflownodeinfo = WorkflowNodeInfo()
-                    workflownodeinfo.toolTip = self.__getTooltipForNode(dataset, node)
-                    details = []
-                    extradatasetfields = ""
-                    details.append("Dataset " + node)
-                    datasetlinks = self.__getLinks(dataset.URLs)
-                    datasetdetails = self.__getTooltipForNode(dataset, node)
-                    datasetfiles = self.__getFiles(dataset.files, paper.info.fileServerPath)
-                    # extradatasetfields = self.__getExtraFields(dataset)
-                    workflowdatasets = datasetdetails + datasetlinks + datasetfiles + extradatasetfields
-                    details.append(workflowdatasets)
-                    workflownodeinfo.details = details
-                    if dataset.saveas:
-                        workflownodeinfo.nodelabel = dataset.saveas
-                    else:
-                        workflownodeinfo.nodelabel = node
-                    workflownodeinfo.hasNotebookFile = False
-                    self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
+            elif "d" in node:
+                for dataset in paper.datasets:
+                    if node in str(dataset.id):
+                        workflownodeinfo = WorkflowNodeInfo()
+                        workflownodeinfo.toolTip = self.__getTooltipForNode(dataset, node)
+                        details = []
+                        extradatasetfields = ""
+                        details.append("Dataset " + node)
+                        datasetlinks = self.__getLinks(dataset.URLs)
+                        datasetdetails = self.__getTooltipForNode(dataset, node)
+                        datasetfiles = self.__getFiles(dataset.files, paper.info.fileServerPath)
+                        # extradatasetfields = self.__getExtraFields(dataset)
+                        workflowdatasets = datasetdetails + datasetlinks + datasetfiles + extradatasetfields
+                        details.append(workflowdatasets)
+                        workflownodeinfo.details = details
+                        if dataset.saveas:
+                            workflownodeinfo.nodelabel = dataset.saveas
+                        else:
+                            workflownodeinfo.nodelabel = node
+                        workflownodeinfo.hasNotebookFile = False
+                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
 
-        elif "s" in node:
-            for script in paper.scripts:
-                if node in str(script.id):
-                    workflownodeinfo = WorkflowNodeInfo()
-                    workflownodeinfo.toolTip = self.__getTooltipForNode(script, node)
-                    details = []
-                    extrascriptfields = ""
-                    details.append("Script " + node)
-                    scriptlinks = self.__getLinks(script.URLs)
-                    scriptdetails = self.__getTooltipForNode(script, node)
-                    scriptfiles = self.__getFiles(script.files, paper.info.fileServerPath)
-                    workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
-                    details.append(workflowscripts)
-                    workflownodeinfo.details = details
-                    if script.saveas:
-                        workflownodeinfo.nodelabel = script.saveas
-                    else:
-                        workflownodeinfo.nodelabel = node
-                    workflownodeinfo.hasNotebookFile = False
-                    self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
+            elif "s" in node:
+                for script in paper.scripts:
+                    if node in str(script.id):
+                        workflownodeinfo = WorkflowNodeInfo()
+                        workflownodeinfo.toolTip = self.__getTooltipForNode(script, node)
+                        details = []
+                        extrascriptfields = ""
+                        details.append("Script " + node)
+                        scriptlinks = self.__getLinks(script.URLs)
+                        scriptdetails = self.__getTooltipForNode(script, node)
+                        scriptfiles = self.__getFiles(script.files, paper.info.fileServerPath)
+                        workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
+                        details.append(workflowscripts)
+                        workflownodeinfo.details = details
+                        if script.saveas:
+                            workflownodeinfo.nodelabel = script.saveas
+                        else:
+                            workflownodeinfo.nodelabel = node
+                        workflownodeinfo.hasNotebookFile = False
+                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
 
-        elif "c" in node:
-            for chart in paper.charts:
-                if node in str(chart.id):
-                    workflownodeinfo = WorkflowNodeInfo()
-                    workflownodeinfo.toolTip = self.__getTooltipForNode(chart, node, paper.info.fileServerPath)
-                    details = []
-                    extrachartfields = ""
-                    details.append("Chart " + node)
-                    chartlinks = self.__getLinks(chart.properties, "charts")
-                    chartdetails = self.__getTooltipForNode(chart, node, paper.info.fileServerPath)
-                    chartfiles = self.__getFiles(chart.files, paper.info.fileServerPath)
-                    # extrachartfields = self.__getExtraFields(chart)
-                    workflowcharts = chartdetails + chartlinks + chartfiles + extrachartfields
-                    details.append(workflowcharts)
-                    workflownodeinfo.details = details
-                    if chart.saveas:
-                        workflownodeinfo.nodelabel = chart.saveas
-                    else:
-                        workflownodeinfo.nodelabel = node
-                    workflownodeinfo.hasNotebookFile = False
-                    self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-                    self.workflowinfo.workflowType = chart.kind + " " + chart.number + " of " + paper.reference.title
+            elif "c" in node:
+                for chart in paper.charts:
+                    if node in str(chart.id):
+                        workflownodeinfo = WorkflowNodeInfo()
+                        workflownodeinfo.toolTip = self.__getTooltipForNode(chart, node, paper.info.fileServerPath)
+                        details = []
+                        extrachartfields = ""
+                        details.append("Chart " + node)
+                        chartlinks = self.__getLinks(chart.properties, "charts")
+                        chartdetails = self.__getTooltipForNode(chart, node, paper.info.fileServerPath)
+                        chartfiles = self.__getFiles(chart.files, paper.info.fileServerPath)
+                        # extrachartfields = self.__getExtraFields(chart)
+                        workflowcharts = chartdetails + chartlinks + chartfiles + extrachartfields
+                        details.append(workflowcharts)
+                        workflownodeinfo.details = details
+                        if chart.saveas:
+                            workflownodeinfo.nodelabel = chart.saveas
+                        else:
+                            workflownodeinfo.nodelabel = node
+                        workflownodeinfo.hasNotebookFile = False
+                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
+                        self.workflowinfo.workflowType = chart.number + " of " + paper.reference.title
+        except Exception as e:
+            print(e)
 
     def __getLinks(self, urls, properties=None):
         links = ""
@@ -393,7 +403,7 @@ class PaperDAO(MongoDBConnection):
             tooltip = "<p><b>Script " + node.id + "</b>: <i>" + node.readme + "</i>"
         elif "c" in workflowtype:
             tooltip = "<p><img src='" + fileServerPath + "/" + node.imageFile + "' class='img-responsive img-thumbnail'></p><p><b>" \
-                      + node.kind + " " + node.number + ": </b><i>" + node.caption + "</i></p>"
+                      + node.number + ": </b><i>" + node.caption + "</i></p>"
         return tooltip
 
     def __getExtraFields(self, node):
@@ -403,3 +413,4 @@ class PaperDAO(MongoDBConnection):
                 for extrafieldkey, extrafieldval in hashkey.items():
                     extraFieldValues = extraFieldValues + "<p><b>" + extrafieldkey + ": </b><br>" + ", " + extrafieldval + "</p>"
         return extraFieldValues
+

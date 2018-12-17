@@ -4,9 +4,9 @@ $(document).ready(function () {
 	$("#welcomeid").addClass("is-complete");
 	$("#serverid").addClass("is-active");
 	$("#btnServer").on("click",function () {
-		var isDUO = $('input[name=isDUOAuth]').val()
+		var isDUO = $('input[name=isDUOAuth]:checked').val();
 		if("Yes" === isDUO){
-			$(".alert-success").toggleClass('fade in');
+			$(".alert-success").addClass('fade in');
 		}
     });
 });

@@ -3,14 +3,6 @@ from pymongo import errors
 
 from project import app
 
-
-# class Singleton:
-#     _shared_state = {}
-#
-#     def __init__(self):
-#         self.__dict__ = self._shared_state
-
-
 class MongoDBConnection():
     """Class representing connection to Mongo database
 

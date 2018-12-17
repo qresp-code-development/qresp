@@ -87,7 +87,7 @@ h6, .h6 {
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    font-family: 'Agency FB', 'Montserrat', serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 700;
     line-height: 1.42857143;
     color: #333333;
@@ -2604,7 +2604,7 @@ section > .container, section > .container-fluid {
 .form-control {
     border-radius: 0;
     box-shadow: none;
-    height: 45px;
+    height: 50px;
 }
 
 #searchToggle .form-control {
@@ -5237,7 +5237,7 @@ table.no-border td {
 }
 
 .btn-lg {
-    font-size: 14px;
+    font-size: 17px;
     padding: 10px 26px;
 }
 

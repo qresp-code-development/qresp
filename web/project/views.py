@@ -83,7 +83,7 @@ class ProjectForm(Form):
 
 class InfoForm(Form):
     PIs = FieldList(FormField(NameForm), label='Principal Investigator(s)', description='Enter PI(s)', min_entries=1, validators=[validators.DataRequired()])
-    collections = StringField(label='PaperStack',validators = [validators.DataRequired("Please enter keywords")], description='Enter Keyword(s) (e.g: DFT, organic materials, charge transfer): they facilitate paper searches using Qresp | Explorer',render_kw={"placeholder": "Enter collection to which project belongs"})
+    collections = StringField(label='PaperStack',validators = [validators.DataRequired("Please enter keywords")], description='Enter name(s) defining group of papers (e.g. according to source of fundings)',render_kw={"placeholder": "Enter collection to which project belongs"})
     tags = StringField(label='Keywords',validators = [validators.DataRequired("Please enter keywords")], description='Enter Keyword(s) (e.g: DFT, organic materials, charge transfer): they facilitate paper searches using Qresp | Explorer',render_kw={"placeholder": "Enter tags for the project"})
     mainnotebookfile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
     doi = StringField('DOI',description='DOI minted by Qresp',render_kw={'readonly': True})
@@ -101,7 +101,7 @@ class ChartForm(Form):
     notebookFile = StringField('Notebook File', description='Enter the name of the notebook file used to generate the chart. Use the Paper Content widget (on the left) to fill this field. Allowed format is ipynb',render_kw={"placeholder": "Enter Notebook file"})
     properties = StringField(label='Keywords',validators= [validators.DataRequired("Please enter properties")], description='Enter keyword(s) for the content displayed in the chart. e.g. potential energy surface, band gap',render_kw={"placeholder": "Enter Keywords"})
     saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the chart', render_kw={"placeholder": "Save Chart as"})
-    extraChartFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1)
+    extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraChartFields')
 
 
 class ToolForm(Form):
@@ -116,7 +116,7 @@ class ToolForm(Form):
     facilityName = StringField('Facility Name',  validators = [RequiredIf(kind='Experiment')], description='Enter name of the facility where the experiment was conducted (e.g. Argonne Advanced Photon Source)', render_kw={"placeholder": "Enter Facility name for experiment tools"})
     measurement = StringField('Measurement',  validators = [RequiredIf(kind='Experiment')], description='Enter type of measurement (e.g. soft X-ray Photoemission)', render_kw={"placeholder": "Enter measurement for experiment tools"})
     saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the tool', render_kw={"placeholder": "Save tool as"})
-    extraToolFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1)
+    extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraToolFields')
 
 class DatasetForm(Form):
     id = HiddenField('Id')
@@ -124,15 +124,15 @@ class DatasetForm(Form):
     readme = StringField('Description', [validators.DataRequired()], description='Enter a summary about the content of the dataset',render_kw={"placeholder": "Enter descriptions For dataset"})
     URLs = StringField(label='URLs', description='Enter link(s) to the URL of the dataset, if available',render_kw={"placeholder": "Enter Urls for dataset"})
     saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the dataset', render_kw={"placeholder": "Save dataset as"})
-    extraDatasetFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1)
+    extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraDatasetFields')
 
 class ScriptForm(Form):
     id = HiddenField('Id')
     files = StringField(label='Files', validators = [validators.DataRequired()], description='Enter file names to identify the script. Use the Paper Content widget (on the left) to fill this field (e.g. Script/scriptA.py). If you list a folder name, all documents of the folder belong to the script',render_kw={"placeholder": "Enter files for script"})
-    readme = StringField('Description', [validators.DataRequired()], description='Enter name of the package (e.g. WEST)',render_kw={"placeholder": "Enter description for script"})
+    readme = StringField('Description', [validators.DataRequired()], description='Enter a summary about the content of the script',render_kw={"placeholder": "Enter description for script"})
     URLs = StringField(label='URLs', description='Enter link(s) to the URL of the script, if available',render_kw={"placeholder": "Enter Urls for script"})
-    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the tool', render_kw={"placeholder": "Save script as"})
-    extraScriptFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1)
+    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the script', render_kw={"placeholder": "Save script as"})
+    extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraScriptFields')
 
 class JournalForm(Form):
     abbrevName = StringField('Abbreviation',description='Enter short Journal Name')

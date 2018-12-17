@@ -76,7 +76,7 @@
         </style>
     <div class="card">
         <div class="card-body">
-            <h3 data-toggle="tooltip" class="card-title"> Generate Workflow </h3>
+            <h3 data-toggle="tooltip" class="card-title" data-placement="left" title="This step defines the workflow of the paper. A workflow represents how the content of the paper was created. Use the Edit Button in the canvas to add: Add External Node , or to Add Node Connection. The type of nodes are listed on the right. (Hover over the node for hints)."> Generate Workflow </h3>
                     <form method="post" action="workflow">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div id="node-popUp">
@@ -106,11 +106,11 @@
                                    title="Adds a free flow to the nodes and edges. This may disperse the nodes zoom in or zoom out as per need."
                                    id="Movement" value="Rearrange" onclick="addPhysics();"
                                    class="btn btn-theme-colored btn-lg m-2"
-                                   style="font-weight: bold; height: 45px;">
+                                   style="font-weight: bold; height: 50px;">
                             <input type="button" class="btn btn-theme-colored btn-lg m-2"
                                    title="Continue to Step 7."
                                    id="Save"
-                                   value="Continue" style="font-weight: bold; height: 45px;"
+                                   value="Continue" style="font-weight: bold; height: 50px;"
                                    onclick="connectedNodes('POST');">
 
                         </span>

@@ -60,43 +60,43 @@
     <script async src='https://www.google-analytics.com/analytics.js'> </script>
 
      <style>
-        .nav-item::after{content:'';display:block;width:0px;height:2px;background:#fec400;transition: 0.2s;}
+        .nav-item::after{content:'';display:block;width:0px;height:2px;background:#ffffff;transition: 0.2s;}
         .nav-item:hover::after{width:100%;}
         .navbar-dark .navbar-nav .active > .nav-link, .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .nav-link.show, .navbar-dark .navbar-nav .show > .nav-link,.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover{color:#fec400;}
         .nav-link{padding:15px 5px;transition:0.2s;}
         .active{background:#c40306;}
 
         .dropdown-item.active, .dropdown-item:active{color:#212529;}
-        .dropdown-item:focus, .dropdown-item:hover{background:#fec400;}
+        .dropdown-item:focus, .dropdown-item:hover{background:#ffffff;}
     </style>
 
 
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-secondary text-uppercase" id="mainNav">
+<nav class="navbar navbar-expand-lg bg-secondary" id="mainNav">
     <div class="container">
         <a class="navbar-brand js-scroll-trigger" href="/"><img
                 src="{{ url_for('static', filename='./images/Qresp-logo.png') }}" alt="Qresp"
-                style="width:100px;"></a>
-        <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary rounded" type="button"
+                style="width:130px;"></a>
+        <button class="navbar-toggler navbar-toggler-right bg-primary rounded" type="button"
                 data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive"
                 aria-expanded="false" aria-label="Toggle navigation">
             Menu
             <i class="fas fa-bars"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto" style="font-size: 18px;">
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">EXPLORER</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">Explorer</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">CURATOR</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">Curator</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="http://qresp.org/" target="_blank">DOCUMENTATION</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="http://qresp.org/" target="_blank">Documentation</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">CONTACT US</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">Contact us</a>
                 </li>
             </ul>
         </div>
@@ -115,11 +115,11 @@
         {% endfor %}
     </div>
      <!-- Header -->
-    <div class="bg-primary text-white text-center pt-4 pb-4">
+    <div class="bg-primary text-white text-center pt-4 pb-4" style="min-height: 75vh;">
         <div class="container">
             <img class="img-fluid mb-5 d-block mx-auto" src="static/images/qresp-poster.png" alt="">
             <div class="pt-4">
-                <h3 class="text-uppercase mb-0">The open source software Qresp "Curation and Exploration of Reproducible Scientific Papers" facilitates the organization, annotation and exploration of data presented in scientific papers.</h3>
+                <h4 class="mb-0">The open source software Qresp "Curation and Exploration of Reproducible Scientific Papers" facilitates the organization, annotation and exploration of data presented in scientific papers.</h4>
             </div>
             <div class="row pt-4 pb-4">
                 <div class="col-md-12">
@@ -127,11 +127,11 @@
                                 <input type="button" id="btnExplorer"
                                        name="general_search_button" value="Explorer"
                                        class="btn btn-theme-colored btn-lg m-0 filtersearch"
-                                       style="font-weight: bold; height: 45px;" onclick="window.location='/qrespexplorer';" >
+                                       style="font-weight: bold; height: 50px;" onclick="window.location='/qrespexplorer';" >
                              <input type="button" id="btnCurator"
                                        name="general_search_button" value="Curator"
                                        class="btn btn-theme-colored btn-lg m-0 filtersearch"
-                                       style="font-weight: bold; height: 45px;" onclick="window.location='/qrespcurator';" >
+                                       style="font-weight: bold; height: 50px;" onclick="window.location='/qrespcurator';" >
                         </span>
                     </div>
                 </div>

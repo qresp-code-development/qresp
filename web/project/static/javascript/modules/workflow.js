@@ -352,7 +352,7 @@
 							x: x,
 							y: y + hid * step,
 							id: "h" + headNum.toString(),
-							label: value[0],
+							label: "h" + headNum.toString(),
 							shape : ShapeSelection("h"),
 							size: 10,
 							color: ColorSelection("h"),

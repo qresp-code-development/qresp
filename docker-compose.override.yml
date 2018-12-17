@@ -8,9 +8,11 @@ services:
     environment:
       - FLASK_APP=run.py
       - FLASK_DEBUG=1
-      - HOST_ADDR=<insert IP address>
-      - FROM_ADDR=<insert your email address>
       - KEY=<insert key>
+      - GOOGLE_CLIENT_ID=<insert google client id>
+      - GOOGLE_CLIENT_SECRET=<insert secret key>
+      - REDIRECT_URI=<insert redirect uri>
+
     volumes:
       - ./web/:/usr/src/app/web
     command: flask run --host=0.0.0.0 --port 8080

@@ -7,6 +7,8 @@ from flask import render_template, request, flash, redirect, url_for, jsonify, s
 from project import csrf
 from project import app
 from project import ext
+
+
 from flask_cors import CORS
 
 from .paperdao import *
@@ -109,7 +111,6 @@ def qrespcurator():
     """
     return render_template('qrespcurator.html')
 
-# Fetches the curator homepage
 @csrf.exempt
 @app.route('/uploadFile',methods=['POST','GET'])
 def uploadFile():
@@ -496,8 +497,8 @@ def workflow():
             caption = "<b> Image: </b>" + img
         except Exception as e:
             caption = ""
-        nodesList.append(chart["saveas"])
-        workflow.addChart(chart["saveas"], caption)
+        nodesList.append(chart["id"])
+        workflow.addChart(chart["id"], caption)
     for tool in session.get("tools",[]):
         pack = ""
         try:
@@ -507,33 +508,30 @@ def workflow():
                 pack = "<b> Facility Name: </b>" + tool["facilityName"] + " <br/> <b>Measurement: </b>" + tool["measurement"]
             except:
                 pack = ""
-        nodesList.append(tool["saveas"])
-        workflow.addTool(tool["saveas"], pack)
+        nodesList.append(tool["id"])
+        workflow.addTool(tool["id"], pack)
     for dataset in session.get("datasets",[]):
         readme = ""
         try:
             readme = "<b> ReadMe: </b>" + dataset["readme"]
         except:
             readme = ""
-        nodesList.append(dataset["saveas"])
-        workflow.addDataset(dataset["saveas"], readme)
+        nodesList.append(dataset["id"])
+        workflow.addDataset(dataset["id"], readme)
     for script in session.get("scripts",[]):
-        readme = ""
         try:
             readme = "<b> ReadMe: </b>" + script["readme"]
         except:
             readme = ""
         if not script["saveas"]:
             script["saveas"] = script["id"]
-        nodesList.append(script["saveas"])
-        workflow.addScript(script["saveas"], readme)
+        nodesList.append(script["id"])
+        workflow.addScript(script["id"], readme)
     for head in session.get("heads",[]):
-        readme = ""
         try:
             readme = head["readme"]
         except:
             readme = ""
-        #saveas = head.split("*")
         try:
             nodesList.append(head["id"])
             workflow.addHead(head["id"], readme, head["URLs"])
@@ -558,18 +556,17 @@ def workflow():
         for head in headInfo:
             hinfo = head.split("*")
             nodesList.append(hinfo[0])
+            heads.id.data = hinfo[0]
             try:
                 if hinfo[1]:
                     heads.readme.data = str(hinfo[1])
             except Exception as e:
                 print(e)
-                print("No readme")
             try:
                 if hinfo[2]:
                     heads.URLs.data = str(hinfo[2]).strip()
             except Exception as e:
                 print(e)
-                print("No Url")
             headList.append(heads.data)
         session["heads"] = headList
         nodesList = list(set(nodesList))
@@ -577,8 +574,8 @@ def workflow():
         session["workflow"] = workflowinfo.data
     except Exception as e:
         print(e)
-        headInfo = ""
     return jsonify({'workflow': workflow.__dict__})
+
 
 # Fetches list of qresp servers for the explorer
 @csrf.exempt
@@ -588,35 +585,88 @@ def publish():
     """
     form = PublishForm(request.form)
     serverslist = Servers()
+    form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
+                           serverslist.getServersList()]
     error = []
-    if request.method == 'GET':
-        try:
-            form.server.choices = [(qrespserver['qresp_server_url'],qrespserver['qresp_server_url']) for qrespserver in serverslist.getServersList()]
-        except:
-            flash("Could not connect to server")
-    elif request.method == 'POST':
+    if request.method == 'POST':
         projectName = session.get("ProjectName")
         try:
             with open("papers/"+projectName+"/data.json", "r") as jsonData:
                 error = serverslist.validateSchema(json.load(jsonData))
             if len(error)>0:
                 flash(error)
-                form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
-                                       serverslist.getServersList()]
                 return render_template('publish.html', form=form)
             else:
-                with open("papers/" + projectName + "/data.json", "r") as jsonData:
-                    sendmail = SendEmail(form.server.data,form.emailId.data,None)
-                    response = sendmail.sendDescriptorToServer(json.load(jsonData))
-                return redirect('acknowledgement')
+                session['publishserver'] = form.server.data
+                session['emailAddress'] = form.emailId.data
+                googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'], app.config['SCOPE'])
+                google = googleauth.getGoogleAuth()
+                auth_url, state = google.authorization_url(app.config['AUTH_URI'], access_type='offline')
+                session['oauth_state'] = state
+                return redirect(auth_url)
         except Exception as e:
-            print(e)
-            form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
-                                   serverslist.getServersList()]
-            flash("Could not publish"+str(e))
+            flash("Could not publish. No project found "+str(e))
             return render_template('publish.html', form=form)
     return render_template('publish.html', form=form)
 
+
+@csrf.exempt
+@app.route('/oauth2callback')
+def authorized():
+    form = PublishForm()
+    serverslist = Servers()
+    form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
+                           serverslist.getServersList()]
+    if 'error' in request.args:
+        if request.args.get('error') == 'access_denied':
+            print('denied access.')
+        return render_template('publish.html', form=form)
+    if 'code' not in request.args and 'state' not in request.args:
+        print('denied access.')
+        return render_template('publish.html', form=form)
+    googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'])
+    google = googleauth.getGoogleAuth(state=session['oauth_state'])
+    try:
+        token = google.fetch_token(
+            app.config['TOKEN_URI'],
+            client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+            authorization_response=request.url)
+    except Exception as e:
+        print(e)
+        flash(e)
+        return 'HTTPError occurred.'
+    try:
+        googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'])
+        google = googleauth.getGoogleAuth(token=token)
+        resp = google.get(app.config['USER_INFO'])
+        if resp.status_code == 200:
+            user_data = resp.json()
+            emailAddress = session.get('emailAddress')
+            server = session.get("publishserver")
+            if user_data['email'] in emailAddress:
+                try:
+                    projectName = session.get("ProjectName")
+                    with open("papers/" + projectName + "/data.json", "r") as jsonData:
+                        senddescriptor = SendDescriptor(server)
+                        response = senddescriptor.sendDescriptorToServer(json.load(jsonData))
+                        if response.status_code == 400:
+                            flash("Paper already exists")
+                            return render_template('publish.html', form=form)
+                        else:
+                            paperdata = response.json()
+                            return redirect(server+"/paperdetails/"+paperdata["paperid"])
+                except Exception as e:
+                    print(e)
+                    flash('No paper found')
+                    return render_template('publish.html', form=form)
+                return render_template('publish.html', form=form)
+            else:
+                flash('Unauthorized access. Could not verify your email address')
+    except Exception as e:
+        print(e)
+        flash('Unauthorized access. Could not verify your email address')
+        return render_template('publish.html', form=form)
+    return render_template('publish.html', form=form)
 
 @csrf.exempt
 @app.route('/download', methods=['POST', 'GET'])
@@ -636,7 +686,20 @@ def download():
     heads = session.get("heads")
     projectName = session.get("ProjectName","unknown")
     pubdate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    projectForm = ProjectForm(downloadPath = session.get("downloadPath"),fileServerPath = session.get("fileServerPath"),notebookPath = session.get("notebookPath"),
+    fileServerPath = session.get("fileServerPath")
+    notebookPath = session.get("notebookPath")
+    downloadPath = session.get("downloadPath")
+    projectName = session.get("ProjectName")
+    if projectName:
+        if projectName not in fileServerPath:
+            fileServerPath = fileServerPath + "/" +projectName
+        if projectName not in notebookPath:
+            notebookPath = notebookPath + "/" +projectName
+        if projectName not in downloadPath:
+            downloadPath = downloadPath + projectName
+
+
+    projectForm = ProjectForm(downloadPath = downloadPath,fileServerPath = fileServerPath,notebookPath = notebookPath,
                               folderAbsolutePath = session.get("folderAbsolutePath"),ProjectName = session.get("ProjectName"),gitPath = session.get("gitPath"),
                               insertedBy = session.get("insertedBy"),isPublic = session.get("isPublic"),timeStamp = pubdate,
                               serverPath = session.get("serverPath"),notebookFile = session.get("notebookFile"),doi = session.get("doi"))
@@ -708,7 +771,6 @@ def config():
     app.config['qresp_config']['fileServerPath'] = 'https://notebook.rcc.uchicago.edu/files'
     app.config['qresp_config']['downloadPath'] = 'https://www.globus.org/app/transfer?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path='
     verifyform = PassCodeForm(request.form)
-
     return render_template('config.html', form=form,verifyform =verifyform)
 
 
@@ -722,7 +784,6 @@ def search():
     try:
         dao = PaperDAO()
         allpaperslist = dao.getAllFilteredSearchObjects("", "", "", "", "", "", "")
-        print(allpaperslist)
         if not allpaperslist:
             allpaperslist = []
         return render_template('search.html',
@@ -776,6 +837,10 @@ def paperdetails(paperid):
     except Exception as e:
         print(e)
         flash('Error in paperdetails. ' + str(e))
+        paperdetail = []
+        workflowdetail = []
+        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
+
 
 
 # Fetches workflow of chart based on user click
@@ -798,42 +863,37 @@ def chartworkflow():
         flash('Error in paperdetails. ' + str(e))
 
 @csrf.exempt
-@app.route('/getDescriptor', methods=['POST'])
+@app.route('/getDescriptor', methods=['POST','GET'])
 def getDescriptor():
     try:
         data = request.get_json()
-        from_address = "datadev@lists.uchicago.edu"
-        to_address = data.get("emailId")
         paper = data.get("metadata")
-        server = data.get("servername")
-        session[to_address] = paper
-        sendemail = SendEmail(server,from_address,to_address)
-        resp = sendemail.callEmailScript()
-        if not resp:
-            print("Error")
-            content = {'Error': 'Could not send, invalid email Id'}
-            return jsonify(content),400
+        try:
+            dao = PaperDAO()
+            paperid = dao.insertIntoPapers(paper)
+            if not paperid:
+                content = {"Error":"Paper already exists"}
+                return jsonify(content),400
+            else:
+                content = {"paperid": paperid}
+                return jsonify(content), 200
+        except Exception as e:
+            print("Exception in insertion,", e)
+            content = {'Error': 'Could not insert'}
+            return jsonify(content)
+        content = {'Success': 'Inserted'}
+        return jsonify(content),200
     except Exception as e:
-        print("Error in sending email", e)
-        content = {'Error':'Could not send, invalid email Id'}
+        print("Cannot get descriptor", e)
+        content = {'Error':'Could not insert, Cannot get descriptor'}
         return jsonify(content),400
-    content = {"Success":"Sent email"}
     return jsonify(content),200
 
-@csrf.exempt
-@app.route('/insertPaper', methods=['GET'])
-def insertPaper():
-    try:
-        from_address = request.args.get("from_address")
-        data = session.get(from_address)
-        dao = PaperDAO()
-        dao.insertIntoPapers(data)
-    except Exception as e:
-        print("Exception in insertion,", e)
-        content = {'Error': 'Could not insert'}
-    content = {'Success': 'Inserted'}
-    return jsonify(content)
-
+@app.route('/mint')
+def mint():
+    """ Fetches the mint page
+    """
+    return render_template('mint.html')
 
 def main():
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'

@@ -9,7 +9,7 @@
          {% if field.type != "RadioField" %}
             {{ field(class_='form-control',title=field.description,**{'data-toggle': 'tooltip'}) }}
            {% else %}
-             {{ field(title=field.description,**{'data-toggle': 'tooltip'}) }}
+             {{ field(title=field.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
         {% endif %}
         {% if field.errors %}
             <ul class=errors>
@@ -36,7 +36,7 @@
                 {% if field.type != "RadioField" %}
                 {{ field(class_='form-control',title=field.description,**{'data-toggle': 'tooltip'}) }}
                {% else %}
-                 {{ field(title=field.description,**{'data-toggle': 'tooltip'}) }}
+                 {{ field(title=field.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
             {% endif %}
             {% if field.errors %}
                 <ul class=errors>

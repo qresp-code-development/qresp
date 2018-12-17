@@ -749,6 +749,7 @@ fieldset[disabled] .btn-gray.btn-theme-colored.focus {
     color: #fff !important;
     background-color: #800000 !important;
     border-color: #800000 !important;
+    font-family: 'Open Sans', sans-serif;;
 }
 
 .btn-theme-colored:focus,

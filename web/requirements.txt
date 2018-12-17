@@ -22,3 +22,4 @@ Werkzeug==0.14.1
 WTForms==2.2.1
 schedule
 flask-sitemap
+requests_oauthlib

@@ -36,9 +36,10 @@ $(function () {
         $(this).next(".icons-charts").toggleClass("open");
     });
 
-    $('#PaperSection').on('click', '#btnMint', function () {
-        return false;
-    });
+    $('#PaperSection').on('click','#btnMint',function(){
+                window.location.href = "/mint";
+                return false;
+            });
     $('#PaperSection').on('click', '#btnCite', function () {
         $(this).toggle();
         $(this).next("#doiText").toggle();
@@ -230,7 +231,7 @@ function buildChartTables(chartDetails, paperDetails) {
                         "sortable": false,
                         "searchable": false,
                         "render": function (data, type, row) {
-                            var chartInfo = "<div class='span2'><a rel='prettyPhoto' title='" + $.trim(row.kind) + " "
+                            var chartInfo = "<div class='span2'><a rel='prettyPhoto' title='"
                                 + $.trim(row.number)
                                 + ": "
                                 + $.trim(row.caption)
@@ -249,7 +250,7 @@ function buildChartTables(chartDetails, paperDetails) {
                                 + "' title='"
                                 + $.trim(row.caption)
                                 + "' style='background-image: url(/static/images/transparent.gif);' ></a><div class='text-center'><h6>"
-                                + $.trim(row.kind) + " "
+                                + " "
                                 + $.trim(row.number)
                                 + "</h6></div></div>";
 
@@ -278,12 +279,11 @@ function buildChartTables(chartDetails, paperDetails) {
                                 }
                             }
                             var notebooks = ($
-                                .trim(paperDetails._PaperDetails__notebookFile) == "") ? ""
+                                .trim(row.notebookFile) == "") ? ""
                                 : "<li><a href='"
                                 + notebookPath
                                 + "/"
-                                + $
-                                    .trim(paperDetails._PaperDetails__notebookFile)
+                                + $.trim(row.notebookFile)
                                 + "' title='View the Jupyter Notebook' target='_blank' ><img src='/static/images/jupyter.png' alt='jupyter'></a></li>";
 
                             var downloads = ($
@@ -333,12 +333,6 @@ function buildChartTables(chartDetails, paperDetails) {
                         "width": "20%",
                         "searchable": true,
                         "visible": true
-                    },
-                    {
-                        "data": "kind",
-                        "visible": false,
-                        "searchable": false,
-                        "sortable": false,
                     },
                     {
                         "data": "files",
@@ -864,9 +858,9 @@ function bindWorkflow(workflowDetails, isChart) {
 
 function createGoogleDatasetsScript(paperDetails){
      var auth = []
-     $.each(paperDetails._PaperDetails__authors, function(i,item) {
-         var name = item.firstName + " "+ item.lastName;
-         auth.push({"@type":"Person","name":name});
+     var autharray =  paperDetails._PaperDetails__authors.split(",");
+     $.each(autharray, function(i,item) {
+         auth.push({"@type":"Person","name":item});
      });
      var value = {
          "@context": "http://schema.org/",

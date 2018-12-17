@@ -65,44 +65,43 @@
     <script src="{{ url_for('static', filename='./javascript/vendor/repeatable-fields.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery.fancytree.js') }}"></script>
 
-    <style>
-.nav-item::after{content:'';display:block;width:0px;height:2px;background:#fec400;transition: 0.2s;}
-.nav-item:hover::after{width:100%;}
-.navbar-dark .navbar-nav .active > .nav-link, .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .nav-link.show, .navbar-dark .navbar-nav .show > .nav-link,.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover{color:#fec400;}
-.nav-link{padding:15px 5px;transition:0.2s;}
-.active{background:#c40306;}
+     <style>
+        .nav-item::after{content:'';display:block;width:0px;height:2px;background:#ffffff;transition: 0.2s;}
+        .nav-item:hover::after{width:100%;}
+        .navbar-dark .navbar-nav .active > .nav-link, .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .nav-link.show, .navbar-dark .navbar-nav .show > .nav-link,.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover{color:#fec400;}
+        .nav-link{padding:15px 5px;transition:0.2s;}
+        .active{background:#c40306;}
 
-.dropdown-item.active, .dropdown-item:active{color:#212529;}
-.dropdown-item:focus, .dropdown-item:hover{background:#fec400;}
-{#.active{text-decoration: underline;}#}
+        .dropdown-item.active, .dropdown-item:active{color:#212529;}
+        .dropdown-item:focus, .dropdown-item:hover{background:#ffffff;}
     </style>
 
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-secondary text-uppercase" id="mainNav">
+<nav class="navbar navbar-expand-lg bg-secondary" id="mainNav">
     <div class="container">
-        <a class="navbar-brand js-scroll-trigger" href="/qrespcurator">        <a class="navbar-brand js-scroll-trigger" href="/"><img
+        <a class="navbar-brand js-scroll-trigger" href="/"><img
                 src="{{ url_for('static', filename='./images/Qresp-logo.png') }}" alt="Qresp"
-                style="width:100px;"></a></a>
-        <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary rounded" type="button"
+                style="width:130px;"></a></a>
+        <button class="navbar-toggler navbar-toggler-right bg-primary rounded" type="button"
                 data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive"
                 aria-expanded="false" aria-label="Toggle navigation">
             Menu
             <i class="fas fa-bars"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
-             <ul class="navbar-nav ml-auto">
+             <ul class="navbar-nav ml-auto" style="font-size: 18px;">
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">EXPLORER</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">Explorer</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1 active">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">CURATOR</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">Curator</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="http://qresp.org/" target="_blank">DOCUMENTATION</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="http://qresp.org/" target="_blank">Documentation</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
-                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">CONTACT US</a>
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">Contact us</a>
                 </li>
             </ul>
         </div>
@@ -110,39 +109,39 @@
 </nav>
 <div id="navigation" class="navigation" style="padding-top: 3rem;">
      <ul id="navbar" class="progress-tracker progress-tracker--text progress-tracker--center">
-											<li id="welcomeid" class="progress-step tooltipster" title="Welcome To Qresp Curator.">
+											<li id="welcomeid" data-toggle="tooltip" class="progress-step tooltipster" title="Welcome To Qresp Curator.">
 												<a href="/qrespcurator" id="welcome"><span class="progress-marker">1</span></a>
 												<span class="progress-text">
 													Start
 												</span>
 											</li>
 
-											<li id="detailsid" class="progress-step tooltipster" title="Provide details of the curator.">
+											<li id="detailsid" data-toggle="tooltip" class="progress-step tooltipster" title="Provide details of the curator.">
 												<a href="/details" id="details"><span class="progress-marker">2</span></a>
 												<span class="progress-text">
 													Enter Your Details
 												</span>
 											</li>
 
-											<li id="serverid" class="progress-step tooltipster" title="Provide details of the local/remote server which hosts your research data.">
+											<li id="serverid" data-toggle="tooltip" class="progress-step tooltipster" title="Provide details of the local/remote server which hosts your research data.">
 												<a href="/server" class="disabled" id="server"><span class="progress-marker disabled">3</span></a>
 												<span class="progress-text disabled">
 													Connect to Server
 												</span>
 											</li>
-											<li id="projectid" class="progress-step tooltipster" title="Data Tree to navigate to your project root and http links to share your data.">
+											<li id="projectid" data-toggle="tooltip" class="progress-step tooltipster" title="Data Tree to navigate to your project root and http links to share your data.">
 												<a href="/project" class="disabled" id="project"><span class="progress-marker disabled">4</span></a>
 												<span class="progress-text disabled">
 													Access Paper Content
 												</span>
 											</li>
-											<li id="curateid" class="progress-step tooltipster" title="Curate your project by filling all the fields from the drop down menu.">
+											<li id="curateid" data-toggle="tooltip" class="progress-step tooltipster" title="Curate your project by filling all the fields from the drop down menu.">
 												<a href="/curate" class="disabled" id="curate"><span class="progress-marker disabled">5</span></a>
 												<span class="progress-text disabled">
 													Tag Paper Content
 												</span>
 											</li>
-											<li id="workflowid" class="progress-step tooltipster" title="Construct the workflow for your project by connecting various nodes with edges.">
+											<li id="workflowid" data-toggle="tooltip" class="progress-step tooltipster" title="Construct the workflow for your project by connecting various nodes with edges.">
 												<a href="/workflow" class="disabled" id="workflow"><span class="progress-marker disabled">6</span></a>
 												<span class="progress-text disabled">
 													Define Workflow
@@ -150,15 +149,15 @@
 
 											</li>
 
-											<li id="publishid" class="progress-step tooltipster" title="Download the metadata you have created.">
+											<li id="publishid" data-toggle="tooltip" class="progress-step tooltipster" title="Download the metadata you have created.">
 												<a href="/publish" class="disabled" id="publish"><span class="progress-marker disabled">7</span></a>
 												<span class="progress-text disabled">
 													Download & Publish Metadata
 												</span>
 
 											</li>
-											<li id="acknowledgementid" class="progress-step tooltipster" title="Acknowledgement of receipt and completion of the Qresp Curator process.">
-												<a href="/acknowledgement" class="disabled" id="acknowledgement"><span class="progress-marker disabled">8</span></a>
+											<li id="acknowledgementid" data-toggle="tooltip" class="progress-step tooltipster" title="Acknowledgement of receipt and completion of the Qresp Curator process.">
+												<a href="/acknowledgement" style="pointer-events: none;" id="acknowledgement"><span class="progress-marker disabled">8</span></a>
 												<span class="progress-text disabled">
 													Finish
 												</span>
@@ -169,7 +168,7 @@
 
 {% block content %}
 
-    <div class="container" style="padding-top:3rem;padding-bottom: 6rem;">
+    <div class="container" style="padding-top:3rem;padding-bottom: 6rem;min-height: 75vh;">
         {% for message in get_flashed_messages() %}
             <div class="alert alert-warning">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>

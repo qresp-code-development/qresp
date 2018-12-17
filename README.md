@@ -24,4 +24,4 @@ Download source code and change the environment variable docker-compose and dock
 
 Alternatively you can execute :
 
-     docker run qrespcontainer/qresp:v1 
+     docker run qrespcontainer/qresp:latest

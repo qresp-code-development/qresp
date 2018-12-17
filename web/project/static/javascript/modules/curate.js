@@ -573,9 +573,9 @@ function fillValues(obj,type) {
         $('form[name="charts"] #notebookFile').val(obj.notebookFile);
         $('form[name="charts"] #properties').val(obj.properties);
         $('form[name="charts"] #saveas').val(obj.saveas);
-        $.each(obj.extraChartFields, function( index, value ) {
-            $('#extraChartFields-'+index+'-extrakey').val(value.extrakey);
-            $('#extraChartFields-'+index+'-extravalue').val(value.extravalue);
+        $.each(obj.extraFields, function( index, value ) {
+            $('form[name="charts"] #extraFields-'+index+'-extrakey').val(value.extrakey);
+            $('form[name="charts"] #extraFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
     else if(type === 'tools') {
@@ -589,9 +589,9 @@ function fillValues(obj,type) {
         $('form[name="tools"] #facilityName').val(obj.facilityName);
         $('form[name="tools"] #measurement').val(obj.measurement);
         $('form[name="tools"] #saveas').val(obj.saveas);
-        $.each(obj.extraToolFields, function( index, value ) {
-            $('#extraToolFields-'+index+'-extrakey').val(value.extrakey);
-            $('#extraToolFields-'+index+'-extravalue').val(value.extravalue);
+        $.each(obj.extraFields, function( index, value ) {
+            $('form[name="tools"] #extraFields-'+index+'-extrakey').val(value.extrakey);
+            $('form[name="tools"] #extraFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
      else if(type === 'datasets') {
@@ -599,9 +599,9 @@ function fillValues(obj,type) {
         $('form[name="datasets"] #readme').val(obj.readme);
         $('form[name="datasets"] #URLs').val(obj.URLs);
         $('form[name="datasets"] #saveas').val(obj.saveas);
-        $.each(obj.extraDatasetFields, function( index, value ) {
-            $('#extraDatasetFields-'+index+'-extrakey').val(value.extrakey);
-            $('#extraDatasetFields-'+index+'-extravalue').val(value.extravalue);
+        $.each(obj.extraFields, function( index, value ) {
+            $('form[name="datasets"] #extraFields-'+index+'-extrakey').val(value.extrakey);
+            $('form[name="datasets"] #extraFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
      else if(type === 'scripts') {
@@ -609,9 +609,9 @@ function fillValues(obj,type) {
         $('form[name="scripts"] #readme').val(obj.readme);
         $('form[name="scripts"] #URLs').val(obj.URLs);
         $('form[name="scripts"] #saveas').val(obj.saveas);
-        $.each(obj.extraScriptFields, function( index, value ) {
-            $('#extraScriptFields-'+index+'-extrakey').val(value.extrakey);
-            $('#extraScriptFields-'+index+'-extravalue').val(value.extravalue);
+        $.each(obj.extraFields, function( index, value ) {
+            $('form[name="scripts"] #extraFields-'+index+'-extrakey').val(value.extrakey);
+            $('form[name="scripts"] #extraFields-'+index+'-extravalue').val(value.extravalue);
         });
     }
     else if(type === 'reference') {
@@ -622,17 +622,17 @@ function fillValues(obj,type) {
         $.each(obj.authors, function( index, value ) {
             $("div[data-toggle=author-fieldset-toggle]").each(function() {
                 var $this = $(this);
-                //Add new entry
-                if(value.firstName) {
+                 if(value.firstName) {
                     $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
+                    // $this.find("button[data-toggle=fieldset-remove-row-authors]").trigger('click');
+                     $('#authors-' + index + '-firstName').val(value.firstName);
+                    $('#authors-' + index + '-middleName').val(value.middleName);
+                    $('#authors-' + index + '-lastName').val(value.lastName);
                 }
             });
         });
-        $.each(obj.authors, function( index, value ) {
-            $('#authors-' + index + '-firstName').val(value.firstName);
-            $('#authors-' + index + '-middleName').val(value.middleName);
-            $('#authors-' + index + '-lastName').val(value.lastName);
-        });
+
+
         $('form[name="reference"] #URLs').val(obj.URLs);
         $('form[name="reference"] #school').val(obj.school);
         $('form[name="reference"] #year').val(obj.year);

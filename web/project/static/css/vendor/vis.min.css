@@ -329,7 +329,7 @@ div.vis-tooltip {
 	pointer-events: none;
 	z-index: 5;
 	white-space: pre-line;
-	width: 20%;
+	width: 70%;
 }
 
 #divLegend div.vis-tooltip {

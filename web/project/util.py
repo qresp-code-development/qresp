@@ -1,12 +1,12 @@
 import json
 import re
 import socket  # This method requires that we create our own socket
-import subprocess
 from copy import deepcopy
-import time
 import paramiko  # Provides SSH functionality
 import requests
 from jsonschema import Draft4Validator
+from requests_oauthlib import OAuth2Session
+
 
 from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
 
@@ -375,38 +375,37 @@ class ConvertToList():
         return paperdata
 
 
-class SendEmail():
-    """Email Class
+class SendDescriptor():
+    """sends descriptor
     """
-    def __init__(self,servername,fromaddress,toaddress):
+    def __init__(self,servername):
         self.__servername = servername
-        self.__fromaddress = fromaddress
-        self.__toaddress = toaddress
-
 
     def sendDescriptorToServer(self,data):
         """ Sends email to server
         :return: object: sends descriptor to server
         """
         url = self.__servername + "/getDescriptor"
-        payload = {'metadata': data, 'emailId': self.__fromaddress, 'servername': self.__servername}
+        payload = {'metadata': data, 'servername': self.__servername}
         headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
         response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
         return response
 
-    def callEmailScript(self):
-        """ Sends email to given address """
-        print("In call email")
-        try:
-            mail_cmd = 'project/sendMailToUser.sh'
-            link = str(self.__servername) + "/insertPaper?emailId=" + self.__toaddress
-            print("link>>",link)
-            proc2 = subprocess.Popen([str(mail_cmd), self.__fromaddress,self.__toaddress, link], stdout=subprocess.PIPE, stderr=subprocess.PIPE,executable='/bin/bash')
-        except Exception as e:
-            print("Sending mail failed",e)
-            # content = {'Error': 'Email Id invalid'}
-            return False
-        return True
+class GoogleAuth():
+    """ Authorization for google.
+    """
+    def __init__(self,clientid = None,redirecturi = None,scope = None):
+        self.clientid = clientid
+        self.redirecturi = redirecturi
+        self.scope = scope
 
-
-
+    def getGoogleAuth(self,state=None,token=None):
+        if token:
+            return OAuth2Session(self.clientid, token=token)
+        if state:
+            return OAuth2Session(
+                self.clientid,
+                state=state,
+                redirect_uri=self.redirecturi)
+        oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope)
+        return oauth

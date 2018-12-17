@@ -15,7 +15,7 @@
                                 <tr>
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                     <td>{{ form.folderAbsolutePath(class_='form-control input-lg',title=form.folderAbsolutePath.description,**{'data-toggle': 'tooltip'}) }}</td>
-                                    <td><input type="button" class="btn btn-theme-colored btn-lg m-0" id ="Searchbtn" value="Search" style="font-weight: bold; height: 45px;margin:10px;"/></td>
+                                    <td><input type="button" class="btn btn-theme-colored btn-lg m-0" id ="Searchbtn" value="Search" style="font-weight: bold; height: 50px;margin:10px;"/></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -28,7 +28,7 @@
         <div class="col-md-8">
              <div class="card">
                 <div class="card-body">
-                    <h3 title="This step identifies whether services are running on the remote server" class="card-title"> Identify services </h3>
+                    <h3 data-toggle="tooltip" title="This step identifies whether services are running on the remote server" class="card-title"> Identify services </h3>
                     <div id = "menulist" style="width:600px;">
 					<form class="services-form" name="services-form">
 						<table style="display: inline-block;">
@@ -58,7 +58,7 @@
 							</tbody>
 						</table>
 						<div class="col-md-12">
-							<input type="button" class="btn btn-theme-colored btn-lg m-0" title="Continue to Step 6." id ="Save" value="Continue" onclick="saveProjectPath('POST');"/>
+							<input type="button" style="font-weight: bold;height: 50px;" class="btn btn-theme-colored btn-lg m-0" title="Continue to Step 6." id ="Save" value="Continue" onclick="saveProjectPath('POST');"/>
                         </div>
 					</form>
 				</div>
@@ -68,7 +68,6 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='./javascript/modules/project.js') }}"></script>
-<script src="{{ url_for('static', filename='./javascript/vendor/vis.min.js') }}"></script>
         <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
         ga('create', 'UA-126882431-1', 'auto');

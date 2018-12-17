@@ -24,6 +24,12 @@ class Info(DynamicEmbeddedDocument):
     doi = StringField()
     meta = {'strict': False}
 
+class ExtraFields(DynamicEmbeddedDocument):
+    """ Extra fields
+    """
+    extrakey = StringField()
+    extravalue = StringField()
+
 class Charts(DynamicEmbeddedDocument):
     """ Class mapping Charts section of paper to mongo database
     """
@@ -31,11 +37,10 @@ class Charts(DynamicEmbeddedDocument):
     id = StringField()
     imageFile = StringField()
     files = ListField()
-    kind = StringField()
     number = StringField()
     properties = ListField()
     saveas = StringField()
-    extraFields = DictField()
+    extraFields = ListField()
     meta = {'strict': False}
 
 class Tools(DynamicEmbeddedDocument):
@@ -52,7 +57,7 @@ class Tools(DynamicEmbeddedDocument):
     measurement = StringField()
     URLs = ListField()
     saveas = StringField()
-    extraFields = DictField()
+    extraFields = ListField()
     meta = {'strict': False}
 
 class Datasets(DynamicEmbeddedDocument):
@@ -63,7 +68,7 @@ class Datasets(DynamicEmbeddedDocument):
     readme = StringField()
     URLs = ListField()
     saveas = StringField()
-    extraFields = DictField()
+    extraFields = ListField()
     meta = {'strict': False}
 
 class Scripts(DynamicEmbeddedDocument):
@@ -74,7 +79,7 @@ class Scripts(DynamicEmbeddedDocument):
     readme = StringField()
     URLs = ListField()
     saveas = StringField()
-    extraFields = DictField()
+    extraFields = ListField()
     meta = {'strict': False}
 
 
@@ -147,7 +152,7 @@ class FilterQuerySet(QuerySet):
 
 class Paper(Document):
     version = LongField()
-    pis = ListField(EmbeddedDocumentField(Person))
+    PIs = ListField(EmbeddedDocumentField(Person))
     info = EmbeddedDocumentField(Info)
     charts = ListField(EmbeddedDocumentField(Charts))
     datasets = ListField(EmbeddedDocumentField(Datasets))
@@ -158,6 +163,7 @@ class Paper(Document):
     workflow = EmbeddedDocumentField(Workflow)
     documentation = EmbeddedDocumentField(Documentation)
     collections = ListField()
+    schema = StringField()
     tags = ListField()
     versions = ListField()
     meta = {'strict': False,
