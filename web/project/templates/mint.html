@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <!-- Header -->
+    <div class="card">
+        <div class="card-body">
+                        <div class="mintWrapper">
+                            <h3 data-toggle="tooltip" class="card-title" style="text-align: center;"> Mint DOI </h3>
+                            <p class="mb-30">To register a DOI for the curated paper, signup to figshare at <a href="https://figshare.com/account/applications" target="_blank">figshare/applications</a>.
+                                <br> Click Create Application and create an application with "Qresp" as <b>Application Name</b> & <b>Description</b>. The Callback URL is <label id="currentLocation"></label>
+                                <br> Once registered paste the consumer id here and click Connect.
+                            </p>
+
+                            <!-- Mint Form -->
+
+                            <form class="form-transparent">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="consumer_id">Consumer Id</label> <input
+                                                id="consumer_id" name="consumer_id"
+                                                class="form-control required" type="text"
+                                                placeholder="Enter Consumer Id">
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="input-group-btn">
+                                    <input type="button" id="btnConnect"
+                                           value="Connect"
+                                           class="btn btn-theme-colored btn-lg m-0"
+                                           style="font-weight: bold; height: 50px;">
+                                </span>
+                            </form>
+
+                            <!-- Contact Form Validation-->
+
+                        </div>
+                        <div class='textWrapper'>
+                            <div id='connectionText'>
+
+                            </div>
+
+                        </div>
+        </div>
+    </div>
+
+<script type="text/javascript" charset="utf-8">
+  $(function () {
+   function getParameterByName(name, url) {
+	if (!url) {
+		url = window.location.href;
+                $("#currentLocation").html(url);
+	}
+	name = name.replace(/[\[\]]/g, "\\$&");
+	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex
+			.exec(url);
+	if (!results)
+		return null;
+	if (!results[2])
+		return '';
+	return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    var token = getParameterByName('access_token');;
+    if (token) {
+     //var RESOURCE_ENDPOINT_FOR_ID = "https://api.figshare.com/v2/account/articles/reserve_doi";
+     var RESOURCE_ENDPOINT_FOR_ARTICLE = "https://api.figshare.com/v2/account/articles";
+
+     $(".mintWrapper").toggle();
+     $(".textWrapper").toggle();
+     var paperId = localStorage.getItem("paperId");
+     var numb =  paperId.match(/\d/g);
+     var articleId = Number(numb.join(""));
+     var title = localStorage.getItem("title");
+     var description = localStorage.getItem("description");
+     var tags = localStorage.getItem("tags");
+     var tagsarray = tags.split(',');
+     var article = {"id":articleId,"title":title,"description":description,"keywords":tagsarray,"categories":[1,10,11],"defined_type": "media"};
+      $.ajax({
+          type : "POST",
+          url: RESOURCE_ENDPOINT_FOR_ARTICLE,
+          data : JSON.stringify(article),
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', "token " + token);
+            xhr.setRequestHeader('Accept', "application/json");
+          },
+          success: function (response) {
+            if (response) {
+              uploadLink(response.location,token);
+            } else {
+              alert("An error occurred.");
+            }
+          },
+          error: function(response){
+              var container = $('#connectionText');
+              container.text("An error occurred.");
+          }
+      });
+    } else {
+        $(".textWrapper").toggle();
+    }
+
+
+    function uploadLink(url,token){
+        var link = localStorage.getItem("link");
+        var File = {"link":link};
+         $.ajax({
+             type : "POST",
+             url: url+"/files",
+             data : JSON.stringify(File),
+             beforeSend: function (xhr) {
+               xhr.setRequestHeader('Authorization', "token " + token);
+               xhr.setRequestHeader('Accept', "application/json");
+             }
+           , success: function (response) {
+               if (response) {
+                 reserveDOI(link,url,token);
+               } else {
+                 alert("An error occurred.");
+               }
+             },
+             error: function(response){
+              var container = $('#connectionText');
+              container.text("An error occurred.");
+          }
+        });
+    }
+    function reserveDOI(link,url,token){
+      $.ajax({
+          type : "POST",
+          url: url+"/reserve_doi",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', "token " + token);
+            xhr.setRequestHeader('Accept', "application/json");
+          },
+          success: function (response) {
+            if (response) {
+                publishDOI(link,url,token,response.doi);
+            } else {
+              alert("An error occurred.");
+            }
+          },
+          error: function(response){
+              var container = $('#connectionText');
+              container.text("An error occurred.");
+          }
+      });
+    }
+
+     function publishDOI(link,url,token,doi){
+      $.ajax({
+          type : "POST",
+          url: url+"/publish",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', "token " + token);
+            xhr.setRequestHeader('Accept', "application/json");
+          },
+          success: function (response) {
+            if (response) {
+                insertDOI(link, doi);
+            } else {
+              alert("An error occurred.");
+            }
+          },
+          error: function(response){
+              var container = $('#connectionText');
+              container.text("An error occurred.");
+          }
+      });
+    }
+
+   function insertDOI(link,doi){
+       $.ajax({
+            type : "POST",
+            url : "REST/papers/insertDOI",
+            dataType : "json",
+            data : JSON.stringify({
+                    paperId : paperId,
+                    doi : doi
+            })
+        }).done(function(response) {
+            if (response) {
+                var redirect = link;
+                window.location.replace(redirect);
+
+                return false;
+            } else {
+              alert("An error occurred.");
+            }
+        }).fail(
+                function(jqXHR, textStatus,
+                                errorThrown) {
+                        alert(jqXHR.responseText.message + ': ' + errorThrown);
+                        //window.location.href = "search.jsp";
+                }).always(function() {
+        //alert("Complete!");
+        });
+    }
+
+
+
+
+    $("#btnConnect").on('click',function() {
+        var CLIENT_ID = $('#consumer_id').val();
+        var AUTHORIZATION_ENDPOINT = "https://figshare.com/account/applications/authorize";
+        var authUrl = AUTHORIZATION_ENDPOINT + "?response_type=token&client_id=" + CLIENT_ID;
+        window.location.replace(authUrl);
+        return false;
+   });
+
+
+
+
+  });
+</script>
+    <script type="text/javascript">
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+        ga('create', 'UA-126882431-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'> </script>
+
+{% endblock %}
