@@ -1,5 +1,5 @@
 # Qresp
-Qresp software repository. [qresp.org](http://qresp.org) 
+[Qresp](http://qresp.org) software repository. 
 
 ## About
 **Qresp** "Curation and Exploration of Reproducible Scientific Papers" is a Python application that facilitates the organization, annotation and exploration of data presented in scientific papers.
