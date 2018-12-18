@@ -1,8 +1,5 @@
 from setuptools import setup,find_packages
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
 setup(
     name='qresp',
     version='1.0',
@@ -14,7 +11,6 @@ setup(
     author='Aditya Tanikanti, Marco Govoni',
     author_email='datadev@lists.uchicago.edu',
     description='Qresp "Curation and Exploration of Reproducible Scientific Papers" is a Python application that facilitates the organization, annotation and exploration of data presented in scientific papers. ',
-    long_description = long_description,
     python_requires='>=3.0',
     packages=find_packages(),
     install_requires=[
