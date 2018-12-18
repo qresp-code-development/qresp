@@ -5,10 +5,22 @@ from flask_session import Session
 from flask_wtf import CSRFProtect
 from flask_sitemap import Sitemap
 
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+REDIRECT_URI = os.environ.get("REDIRECT_URI")
+MAIL_ADDR = os.environ.get("MAIL_ADDR")
+MAIL_PWD = os.environ.get("MAIL_PWD")
 
 AUTH_URI = 'https://accounts.google.com/o/oauth2/auth'
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 USER_INFO = 'https://www.googleapis.com/userinfo/v2/me'
+
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = os.environ.get("MONGODB_PORT")
+MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME")
+MONGODB_PASSWORD = os.environ.get("MONGODB_PASSWORD")
+MONGODB_DB = os.environ.get("MONGODB_DB")
+
 
 app = Flask(__name__)
 app.secret_key = '\\\xfcS\x1e\x8f\xfb]6\x1e.\xa8\xb3\xe1x\xc8\x8e\xc1\xeb5^x\x81\xcc\xd5'
