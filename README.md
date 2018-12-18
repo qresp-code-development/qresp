@@ -1,27 +1,11 @@
-# QRESP
-Qresp Code
+# Qresp
+Qresp software repository. [qresp.org](http://qresp.org) 
 
 ## About
 **Qresp** "Curation and Exploration of Reproducible Scientific Papers" is a Python application that facilitates the organization, annotation and exploration of data presented in scientific papers.
 
-## Installation 
-To quickly install **Qresp**, execute : 
+## Documentation
+Qresp documentation is available at [qresp.org](http://qresp.org).
 
-     pip install qresp 
-     qresp
-
-Alternatively you can execute : 
-
-     pip install -e .
-	 
-### Docker
-To download using docker
-
-Download source code and change the environment variable docker-compose and docker-compose.override and add a user defined key to set environment variable so as to connect to a mongo database.
-	
-     docker-compose build
-     docker-compose up -d	
-
-Alternatively you can execute :
-
-     docker run qrespcontainer/qresp:latest
+## Development 
+The Qresp development is hosted on [GitHub](https://github.com/west-code-development/qresp), and licensed under the open-source GPLv3 license.
