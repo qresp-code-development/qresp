@@ -9,5 +9,5 @@
 
 ## Contributors
 
-Milson Munakami
-Jonathan Skone
+- Milson Munakami
+- Jonathan Skone
