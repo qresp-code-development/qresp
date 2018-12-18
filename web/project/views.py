@@ -169,7 +169,7 @@ class HeadForm(Form):
 
 class PublishForm(Form):
     server = SelectField('Qresp Server',choices=[], validators=[validators.DataRequired()],description='Select the Address of the Database. Qresp automatically inserts the metadata file in the database')
-    emailId = EmailField('Email Address', validators = [validators.DataRequired()],description='e.g. john.doe@company.com',render_kw={"placeholder": "Enter your email address"})
+    emailId = EmailField('Email Address', validators = [validators.DataRequired()],description='e.g. john.doe@gmail.com',render_kw={"placeholder": "Enter a Google based email address to verify your identity."})
 
 class PaperForm(Form):
     PIs = FieldList(FormField(NameForm))

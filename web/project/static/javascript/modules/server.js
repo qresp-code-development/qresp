@@ -5,8 +5,10 @@ $(document).ready(function () {
 	$("#serverid").addClass("is-active");
 	$("#btnServer").on("click",function () {
 		var isDUO = $('input[name=isDUOAuth]:checked').val();
+		console.log("isDUO",isDUO);
 		if("Yes" === isDUO){
-			$(".alert-success").addClass('fade in');
+			console.log("here");
+			$(".alert-success").toggleClass('fade');
 		}
     });
 });

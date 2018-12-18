@@ -5,9 +5,7 @@ from flask_session import Session
 from flask_wtf import CSRFProtect
 from flask_sitemap import Sitemap
 
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = os.environ.get("REDIRECT_URI")
+
 AUTH_URI = 'https://accounts.google.com/o/oauth2/auth'
 TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
 USER_INFO = 'https://www.googleapis.com/userinfo/v2/me'
@@ -24,8 +22,15 @@ app.config['REDIRECT_URI'] = REDIRECT_URI
 app.config['AUTH_URI'] = AUTH_URI
 app.config['TOKEN_URI'] = TOKEN_URI
 app.config['USER_INFO'] = USER_INFO
-app.config['SCOPE'] = ['profile','email']
+app.config['SCOPE'] = ['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/userinfo.email']
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+app.config['MAIL_ADDR'] = MAIL_ADDR
+app.config['MAIL_PWD'] = MAIL_PWD
+app.config['MONGODB_HOST'] = MONGODB_HOST
+app.config['MONGODB_PORT'] = MONGODB_PORT
+app.config['MONGODB_USERNAME'] = MONGODB_USERNAME
+app.config['MONGODB_PASSWORD'] = MONGODB_PASSWORD
+app.config['MONGODB_DB'] = MONGODB_DB
 
 Session(app)
 ext = Sitemap(app)

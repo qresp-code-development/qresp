@@ -12,7 +12,8 @@ services:
       - GOOGLE_CLIENT_ID=<insert google client id>
       - GOOGLE_CLIENT_SECRET=<insert secret key>
       - REDIRECT_URI=<insert redirect uri>
-
+      - MAIL_ADDR=<administrators mail address>
+      - MAIL_PWD=<administrators password>
     volumes:
       - ./web/:/usr/src/app/web
     command: flask run --host=0.0.0.0 --port 8080

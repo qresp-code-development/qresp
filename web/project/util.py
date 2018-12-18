@@ -12,6 +12,8 @@ from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, 
 
 
 
+
+
 class DirectoryTree:
     """Class Providing Constants for Directory Tree.
     """
@@ -46,17 +48,24 @@ class Servers():
             a = Draft4Validator(schema_coll_data)
             for error in sorted(a.iter_errors(coll_data), key=str):
                 print("errors, ",error)
+                message = ""
                 try:
-                    exp = str(error.absolute_path[2]) + " is missing in " + str(error.absolute_path[0]) + str(
+                    exp = str(error.absolute_path[2]) + " is missing in " + str(error.absolute_path[0]) + " " + str(
                         error.absolute_path[1])
                     exceptions.append(exp)
                 except IndexError:
                     try:
-                        exp = str(error.message) + " in " + str(error.absolute_path[0]) + " "+ str(error.absolute_path[1])
+                        message = error.message
+                        if "is not of type" or "is too short" in message:
+                            message = "Missing values"
+                        exp = str(message) + " in " + str(error.absolute_path[0]) + " "+ str(error.absolute_path[1])
                         exceptions.append(exp)
                     except IndexError:
                         try:
-                            exp = str(error.message) + " in " + str(error.absolute_path[0])
+                            message = error.message
+                            if "is not of type" or "is too short" in message:
+                                message = "Missing values"
+                            exp = str(message) + " in " + str(error.absolute_path[0])
                             exceptions.append(exp)
                         except IndexError:
                             exceptions.append(str(error.message))
@@ -394,10 +403,12 @@ class SendDescriptor():
 class GoogleAuth():
     """ Authorization for google.
     """
+
     def __init__(self,clientid = None,redirecturi = None,scope = None):
         self.clientid = clientid
         self.redirecturi = redirecturi
         self.scope = scope
+
 
     def getGoogleAuth(self,state=None,token=None):
         if token:

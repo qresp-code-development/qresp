@@ -1,13 +1,15 @@
 import os
-import traceback
 from datetime import timedelta, datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 import schedule
-from flask import render_template, request, flash, redirect, url_for, jsonify, session
+from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file
 from project import csrf
 from project import app
 from project import ext
-
+import smtplib
 
 from flask_cors import CORS
 
@@ -70,9 +72,7 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
-    dbAdmin = MongoDBConnection.getDB(hostname="", port=27017,
-                                      username="", password="",
-                                      dbname="", collection="", isssl="")
+    dbAdmin = MongoDBConnection.getDB()
     return render_template('index.html')
 
 @ext.register_generator
@@ -95,6 +95,18 @@ def index():
     yield 'paperdetails', {'paperid': '594c507f1bd40f5ebf185fde'}, {}
     yield 'paperdetails', {'paperid': '594c50671bd40f5e9b5c043b'}, {}
     yield 'paperdetails', {'paperid': '594c504a1bd40f5e7819a0aa'}, {}
+
+
+@app.route('/downloads/<file>')
+def downloadfile(file=None):
+    if file:
+        try:
+            path = 'downloads/'+file
+            return send_file(path, as_attachment=True)
+        except Exception as e:
+            print(e)
+            msg = {"Content":"Not Found"}
+            return jsonify(msg),400
 
 
 
@@ -587,6 +599,9 @@ def publish():
     serverslist = Servers()
     form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                            serverslist.getServersList()]
+    maintaineraddresses = [item for qrespserver in
+                           serverslist.getServersList() for item in qrespserver['qresp_maintainer_emails']]
+    session['maintaineraddresses'] = maintaineraddresses
     error = []
     if request.method == 'POST':
         projectName = session.get("ProjectName")
@@ -650,11 +665,30 @@ def authorized():
                         senddescriptor = SendDescriptor(server)
                         response = senddescriptor.sendDescriptorToServer(json.load(jsonData))
                         if response.status_code == 400:
-                            flash("Paper already exists")
-                            return render_template('publish.html', form=form)
+                           flash("Paper already exists")
+                           return render_template('publish.html', form=form)
                         else:
-                            paperdata = response.json()
-                            return redirect(server+"/paperdetails/"+paperdata["paperid"])
+                            try:
+                                paperdata = response.json()
+                                maintaineraddresses = session.get('maintaineraddresses')
+                                body =  'The user ' + str(session.get('insertedBy')['firstName']) + ' with email address ' + emailAddress + ' has inserted paper with paper id ' + str(paperdata["paperid"])
+                                fromx = app.config['MAIL_ADDR']
+                                to = maintaineraddresses
+                                msg = MIMEMultipart()
+                                msg['Subject'] = 'New paper inserted into Qresp ecosystem'
+                                msg['From'] = fromx
+                                msg['To'] = ", ".join(to)
+                                msg.attach(MIMEText(body,'plain'))
+                                mailserver = smtplib.SMTP('smtp.gmail.com', 587)
+                                mailserver.starttls()
+                                mailserver.login(app.config['MAIL_ADDR'], app.config['MAIL_PWD'])
+                                mailserver.sendmail(fromx, to, msg.as_string())
+                                mailserver.close()
+                                return redirect(server + "/paperdetails/" + paperdata["paperid"])
+                            except Exception as e:
+                                print(e)
+                                flash('Could not email your administrator')
+                                return render_template('publish.html', form=form)
                 except Exception as e:
                     print(e)
                     flash('No paper found')
@@ -686,10 +720,10 @@ def download():
     heads = session.get("heads")
     projectName = session.get("ProjectName","unknown")
     pubdate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    fileServerPath = session.get("fileServerPath")
-    notebookPath = session.get("notebookPath")
-    downloadPath = session.get("downloadPath")
-    projectName = session.get("ProjectName")
+    fileServerPath = session.get("fileServerPath","")
+    notebookPath = session.get("notebookPath","")
+    downloadPath = session.get("downloadPath","")
+    projectName = session.get("ProjectName","")
     if projectName:
         if projectName not in fileServerPath:
             fileServerPath = fileServerPath + "/" +projectName
@@ -792,7 +826,6 @@ def search():
                                allpaperslist = allpaperslist)
     except Exception as e:
         print(e)
-        print(traceback.format_exc())
         flash('Error in search. ' + str(e))
         return render_template('search.html',allpaperslist=[])
 
@@ -818,7 +851,6 @@ def searchWord():
         return jsonify(allpaperslist=allpaperslist)
     except Exception as e:
         print(e)
-        print(traceback.format_exc())
         flash('Error in search. ' + str(e))
 
 
