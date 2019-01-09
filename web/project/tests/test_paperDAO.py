@@ -49,15 +49,23 @@ class TestPaperDAO(TestCase):
         allpapers = dao.getAllPapers()
         self.assertTrue(list(allpapers))
 
-    # def test_getAllFilteredSearchObjects(self):
-    #     self.fail()
-    #
-    # def test_getAllSearchObjects(self):
-    #     self.fail()
-    #
-    # def test_insertIntoPapers(self):
-    #     self.fail()
-    #
+    def test_getAllFilteredSearchObjects(self):
+        """
+        Tests for all search Objects
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        self.assertTrue(list(allSearchObjects))
+
+    def test_getFilteredPaperObjects(self):
+        """
+        Tests for all search Objects with name
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects(authorsList=['Marco Govoni'])
+        print(allSearchObjects)
+        self.assertTrue(list(allSearchObjects))
+
     # def test_getPaperDetails(self):
     #     self.fail()
     #

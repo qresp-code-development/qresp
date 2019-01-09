@@ -45,12 +45,11 @@ app.config['SCOPE'] = ['https://www.googleapis.com/auth/userinfo.profile','https
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['MAIL_ADDR'] = MAIL_ADDR
 app.config['MAIL_PWD'] = MAIL_PWD
-app.config['MONGODB_HOST'] = MONGODB_HOST
-app.config['MONGODB_PORT'] = MONGODB_PORT
-app.config['MONGODB_USERNAME'] = MONGODB_USERNAME
-app.config['MONGODB_PASSWORD'] = MONGODB_PASSWORD
-app.config['MONGODB_DB'] = MONGODB_DB
-
+app.config['MONGODB_HOST'] = 'paperstack.uchicago.edu'
+app.config['MONGODB_PORT'] = 27017
+app.config['MONGODB_USERNAME'] = 'qresp_user_explorer'
+app.config['MONGODB_PASSWORD'] = 'qresp_pwd'
+app.config['MONGODB_DB'] = 'explorer'
 Session(app)
 ext = Sitemap(app)
 
