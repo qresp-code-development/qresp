@@ -7,7 +7,6 @@ from email.mime.multipart import MIMEMultipart
 import schedule
 from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file
 from project import csrf
-from project import app
 from project import ext
 import smtplib
 
@@ -16,7 +15,7 @@ from flask_cors import CORS
 from .paperdao import *
 from .util import *
 from .views import *
-
+from project import app
 qresp_config = {}
 ftp_dict = {}
 
@@ -50,15 +49,6 @@ schedule.every(23).hours.do(closeConnection)
 
 
 
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    """ Returns error code
-    """
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
-
-
 @app.before_request
 def make_session_permanent():
     """ makes session values last for a day
@@ -72,30 +62,7 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
-    dbAdmin = MongoDBConnection.getDB()
     return render_template('index.html')
-
-@ext.register_generator
-def index():
-    # Not needed if you set SITEMAP_INCLUDE_RULES_WITHOUT_PARAMS=True
-    yield 'index', {}
-    yield 'qrespexplorer', {}
-    yield 'paperdetails', {'paperid': '594186a91bd40fd4f2ce1aa0'}, {}
-    yield 'paperdetails', {'paperid': '5bb12835096ace7a9d8eb97d'}, {}
-    yield 'paperdetails', {'paperid': '5b3441242986382db00fab92'}, {}
-    yield 'paperdetails', {'paperid': '5b33a02629863800f82e297c'}, {}
-    yield 'paperdetails', {'paperid': '5b339eb029863800f82e297b'}, {}
-    yield 'paperdetails', {'paperid': '5b0ef8381f87c63760acb909'}, {}
-    yield 'paperdetails', {'paperid': '5a5e4e933a2c122ca8e9cd92'}, {}
-    yield 'paperdetails', {'paperid': '5ad8df0650cefd3974d05a83'}, {}
-    yield 'paperdetails', {'paperid': '5a5e437e3a2c122ca8e9cd75'}, {}
-    yield 'paperdetails', {'paperid': '5950fbfc1bd40f6cb67fb939'}, {}
-    yield 'paperdetails', {'paperid': '5992072a7590617df5a88a85'}, {}
-    yield 'paperdetails', {'paperid': '5983afce759061384c1aae48'}, {}
-    yield 'paperdetails', {'paperid': '594c507f1bd40f5ebf185fde'}, {}
-    yield 'paperdetails', {'paperid': '594c50671bd40f5e9b5c043b'}, {}
-    yield 'paperdetails', {'paperid': '594c504a1bd40f5e7819a0aa'}, {}
-
 
 @app.route('/downloads/<file>')
 def downloadfile(file=None):
@@ -108,14 +75,6 @@ def downloadfile(file=None):
             msg = {"Content":"Not Found"}
             return jsonify(msg),400
 
-
-
-@app.route('/qrespexplorer')
-def qrespexplorer():
-    """ Fetches the explorer homepage
-    """
-    serverslist = Servers()
-    return render_template('qrespexplorer.html', serverslist=serverslist.getServersList())
 
 @app.route('/qrespcurator')
 def qrespcurator():
@@ -759,6 +718,25 @@ def acknowledgement():
 
 ########################################EXPLORER#############################################################################
 
+@csrf.exempt
+@app.route('/qrespexplorer',methods=['GET','POST'])
+def qrespexplorer():
+    """ Fetches the explorer homepage
+    """
+    dao = PaperDAO()
+    dao.getDB()
+    form = QrespServerForm()
+    serverslist = Servers()
+    form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
+                           serverslist.getServersList()]
+    form.serverList.append('http://localhost')
+    if request.method == 'POST':
+        if request.form.get('serversList'):
+            session["selectedserver"] = request.form.get('serversList')
+        else:
+            session['selectedserver'] = form.serverList
+        return redirect(url_for('search'))
+    return render_template('qrespexplorer.html', form=form)
 
 @csrf.exempt
 @app.route('/verifyPasscode',methods=['POST'])
@@ -815,19 +793,21 @@ def search():
     """  This method helps in filtering paper content
     :return: template: search.html
     """
+    allpaperslist = []
     try:
-        dao = PaperDAO()
-        allpaperslist = dao.getAllFilteredSearchObjects("", "", "", "", "", "", "")
-        if not allpaperslist:
-            allpaperslist = []
-        return render_template('search.html',
-                               collectionlist=dao.getCollectionList(), authorslist=dao.getAuthorList(),
-                               publicationlist=dao.getPublicationList(), allPapersSize=len(dao.getAllSearchObjects()),
-                               allpaperslist = allpaperslist)
+        selectedserver = session.get("selectedserver")
+        fetchdata = FetchDataFromAPI(selectedserver)
+        allpaperslist = fetchdata.fetchOutput('/api/search')
+        collectionlist = fetchdata.fetchOutput('/api/collections')
+        authorslist = fetchdata.fetchOutput('/api/authors')
+        publicationlist = fetchdata.fetchOutput('/api/publications')
+        allPapersSize = len(allpaperslist)
     except Exception as e:
         print(e)
         flash('Error in search. ' + str(e))
-        return render_template('search.html',allpaperslist=[])
+        return render_template('search.html', allpaperslist=allpaperslist)
+    return render_template('search.html',allpaperslist=allpaperslist,collectionlist=collectionlist,authorslist=authorslist,
+                           publicationlist=publicationlist,allPapersSize=allPapersSize)
 
 
 # Fetches search word options after selecting server
@@ -846,8 +826,12 @@ def searchWord():
         collectionList = json.loads(request.args.get('collectionList'))
         authorsList = json.loads(request.args.get('authorsList'))
         publicationList = json.loads(request.args.get('publicationList'))
-        allpaperslist = dao.getAllFilteredSearchObjects(searchWord, paperTitle, doi, tags, collectionList, authorsList,
-                                                        publicationList)
+        selectedserver = session.get("selectedserver")
+        fetchdata = FetchDataFromAPI(selectedserver)
+        url = '/api/search' + "?searchWord=" + searchWord
+        # url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
+        #       "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
+        allpaperslist = fetchdata.fetchOutput(url)
         return jsonify(allpaperslist=allpaperslist)
     except Exception as e:
         print(e)
@@ -897,6 +881,9 @@ def chartworkflow():
 @csrf.exempt
 @app.route('/getDescriptor', methods=['POST','GET'])
 def getDescriptor():
+    """
+    Inserts and fetches the metadata into Papers collections
+    """
     try:
         data = request.get_json()
         paper = data.get("metadata")
@@ -927,7 +914,7 @@ def mint():
     """
     return render_template('mint.html')
 
-def main():
+def main(port):
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
     CORS(app)
-    app.run(port=80, debug=False)
+    app.run(port=port, debug=False)

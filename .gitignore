@@ -5,3 +5,5 @@ web/flask_session/
 flask_session/
 web/dist/
 web/project/__pycache__/
+web/build/
+web/qresp.egg-info/

@@ -307,6 +307,12 @@ class Search(object):
     def year(self, val):
         self.__year = val
 
+    def __hash__(self):
+        return hash(self.__title)
+
+    def __eq__(self, other):
+        return self.__title == other.__title
+
 
 class PaperDetails(object):
     def __init__(self):

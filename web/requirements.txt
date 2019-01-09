@@ -23,3 +23,7 @@ WTForms==2.2.1
 schedule
 flask-sitemap
 requests_oauthlib
+mongomock
+connexion
+coverage
+nose2

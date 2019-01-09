@@ -9,5 +9,5 @@ install:
   - cd web
   - python setup.py install
 # command to run tests
-#script:
-#  - pytest
+script:
+  - nose2

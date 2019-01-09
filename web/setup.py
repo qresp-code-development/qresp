@@ -35,7 +35,11 @@ setup(
         'schedule',
         'wtforms',
         'flask-sitemap',
-        'requests_oauthlib'
+        'requests_oauthlib',
+        'mongomock',
+        'connexion',
+        'coverage',
+        'nose2'
       ],
     include_package_data=True
 )

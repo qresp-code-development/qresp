@@ -40,8 +40,8 @@ class PaperDAO(MongoDBConnection):
         allPapers = [paper.to_json() for paper in Paper.objects()]
         return allPapers
 
-    def getAllFilteredSearchObjects(self, searchWord, paperTitle, doi, tags, collectionList, authorsList,
-                                    publicationList):
+    def getAllFilteredSearchObjects(self, searchWord=None, paperTitle=None, doi=None, tags=None, collectionList=[], authorsList=[],
+                                    publicationList=[]):
         """
         Produces papers after filtering with word
         :param searchWord:
@@ -58,13 +58,13 @@ class PaperDAO(MongoDBConnection):
             allFilteredSearchObjects = self.__filtersearchedPaper(filteredPaper)
         else:
             searchquery = Q()
-            if paperTitle.strip():
+            if paperTitle and paperTitle.strip():
                 searchTitleQuery = Q(reference__title__icontains=paperTitle)
                 searchquery = searchquery & searchTitleQuery
-            if doi.strip():
+            if doi and doi.strip():
                 searchdoiquery = Q(reference__DOI__icontains=doi)
                 searchquery = searchquery & searchdoiquery
-            if tags.strip():
+            if tags and tags.strip():
                 searchtagquery = Q(tags__icontains=tags)
                 searchquery = searchquery & searchtagquery
             if len(collectionList) > 0:

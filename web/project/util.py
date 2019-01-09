@@ -6,6 +6,7 @@ import paramiko  # Provides SSH functionality
 import requests
 from jsonschema import Draft4Validator
 from requests_oauthlib import OAuth2Session
+import itertools
 
 
 from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
@@ -399,6 +400,39 @@ class SendDescriptor():
         headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
         response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
         return response
+
+class FetchDataFromAPI():
+    """ Fetches data for search,paper details and chart details for explorer
+    """
+    def __init__(self,servernames):
+        if servernames and len(servernames)>0:
+            self.__servernames = servernames
+        else:
+            serverslist = Servers()
+            serverList = [qrespserver['qresp_server_url'] for qrespserver in
+                               serverslist.getServersList()]
+            serverList.append('http://localhost')
+            serverList.append('http://localhost')
+            self.__servernames = serverList
+
+    def fetchOutput(self,apiname):
+        """ Fetches output to server
+        :return: object: sends descriptor to server
+        """
+        outDict = {}
+        for snames in self.__servernames:
+            url = snames + apiname
+            print("url>",url)
+            headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
+            response = requests.get(url,headers=headers, verify=False)
+            if response.status_code == 200:
+                if "search" in apiname:
+                    outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
+                else:
+                    outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
+        output = list(outDict.values())
+        return output
+
 
 class GoogleAuth():
     """ Authorization for google.

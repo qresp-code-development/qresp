@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  description: This is the swagger file that goes with our server code
-  version: "1.0.0"
+  description: This is the swagger file that provides the API to fetch data from Qresp server
+  version: "1.0"
   title: Swagger REST Article
 consumes:
   - "application/json"
@@ -10,25 +10,127 @@ produces:
 
 basePath: "/api"
 
-## Paths supported by the server application
-#paths:
-#  /people:
-#    get:
-#      operationId: "people.read"
-#      tags:
-#        - "People"
-#      summary: "The people data structure supported by the server application"
-#      description: "Read the list of people"
-#      responses:
-#        200:
-#          description: "Successful read people list operation"
-#          schema:
-#            type: "array"
-#            items:
-#              properties:
-#                fname:
-#                  type: "string"
-#                lname:
-#                  type: "string"
-#                timestamp:
-#                  type: "string"
+# Paths supported by the server application
+paths:
+  /search:
+    get:
+      operationId: "project.api.search"
+      tags:
+        - "Papers"
+      summary: "Fetches all papers"
+      description: "Read the list of papers"
+      parameters:
+        - in: query
+          name: searchWord
+          type: string
+          required: false
+          description: Filter paper results based on search word
+        - in: query
+          name: paperTitle
+          type: string
+          required: false
+          description: Filter paper results based on paper title
+        - in: query
+          name: doi
+          type: string
+          required: false
+          description: Filter paper results based on paper doi
+        - in: query
+          name: tags
+          type: string
+          required: false
+          description: Filter paper results based on paper tags
+        - in: query
+          name: collectionList
+          type: array
+          required: false
+          description: Filter paper results based on collection
+        - in: query
+          name: authorsList
+          type: array
+          required: false
+          description: Filter paper results based on authors
+        - in: query
+          name: publicationList
+          required: false
+          type: array
+          description: Filter paper results based on publication
+      responses:
+        200:
+          description: "Successful read papers list operation"
+          schema:
+            type: "array"
+            items:
+              properties:
+                _Search__abstract:
+                  type: "string"
+                _Search__authors:
+                  type: "string"
+                _Search__collections:
+                  type: "array"
+                _Search__doi:
+                  type: "string"
+                _Search__downloadPath:
+                  type: "string"
+                _Search__fileServerPath:
+                  type: "string"
+                _Search__folderAbsolutePath:
+                  type: "string"
+                _Search__id":
+                  type: "string"
+                _Search__notebookFile:
+                  type: "string"
+                _Search__notebookPath:
+                  type: "string"
+                _Search__publication:
+                  type: "string"
+                _Search__serverPath:
+                  type: "string"
+                _Search__tags:
+                  type: "array"
+                _Search__title:
+                  type: "string"
+                _Search__year:
+                  type: "integer"
+  /collections:
+    get:
+      operationId: "project.api.collections"
+      tags:
+        - "Collections"
+      summary: "Fetches all collections"
+      description: "Read the list of collections"
+      responses:
+        200:
+          description: "Successful read collections list operation"
+          schema:
+            type: "array"
+            items:
+                type: "string"
+  /authors:
+    get:
+      operationId: "project.api.authors"
+      tags:
+        - "Authors"
+      summary: "Fetches all authors"
+      description: "Read the list of authors"
+      responses:
+        200:
+          description: "Successful read authors list operation"
+          schema:
+            type: "array"
+            items:
+                type: "string"
+  /publications:
+    get:
+      operationId: "project.api.publications"
+      tags:
+        - "Publications"
+      summary: "Fetches all publications"
+      description: "Read the list of publications"
+      responses:
+        200:
+          description: "Successful read publications list operation"
+          schema:
+            type: "array"
+            items:
+                type: "string"

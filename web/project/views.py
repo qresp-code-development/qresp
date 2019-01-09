@@ -48,6 +48,10 @@ class ConfigForm(Form):
     downloadPath = StringField('Download Path',description='The Globus service allows to download the paper content using gridFTP.')
     fileServerPath = StringField('File Server Path', description='If a HTTP service is running on the server, a URL may be associated to the paper content. This URL is only required by Qresp | Exploration to view images & download files using a web browser.')
 
+class QrespServerForm(Form):
+    serverList = FieldList(StringField(description='Select the Address of the Database. Qresp automatically inserts the metadata file in the database'))
+
+
 class NameForm(Form):
     firstName = StringField(validators=[validators.DataRequired()],description='e.g. John',render_kw={"placeholder": "Enter first name"})
     middleName = StringField(description='e.g. L.',render_kw={"placeholder": "Enter middle name"})
