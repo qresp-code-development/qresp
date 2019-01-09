@@ -12,6 +12,7 @@ import itertools
 from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
 
 
+LOCALHOST = None
 
 
 
@@ -406,14 +407,16 @@ class FetchDataFromAPI():
     """
     def __init__(self,servernames):
         if servernames and len(servernames)>0:
-            self.__servernames = servernames
+            serverList = servernames
         else:
             serverslist = Servers()
             serverList = [qrespserver['qresp_server_url'] for qrespserver in
                                serverslist.getServersList()]
-            serverList.append('http://localhost')
-            serverList.append('http://localhost')
-            self.__servernames = serverList
+        global LOCALHOST
+        print(LOCALHOST)
+        if LOCALHOST:
+            serverList.append(LOCALHOST)
+        self.__servernames = serverList
 
     def fetchOutput(self,apiname):
         """ Fetches output to server
@@ -454,3 +457,8 @@ class GoogleAuth():
                 redirect_uri=self.redirecturi)
         oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope)
         return oauth
+
+class SetLocalHost:
+    def __init__(self,localhost):
+        global LOCALHOST
+        LOCALHOST = localhost

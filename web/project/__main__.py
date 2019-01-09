@@ -3,9 +3,8 @@
 
 from flask import Flask
 import connexion
-#app = Flask(__name__)
 # Create the application instance
-connexionapp = connexion.App(__name__, specification_dir='./',template_folder='project/templates')
+connexionapp = connexion.App(__name__, specification_dir='./')
 
 # Read the swagger.yml file to configure the endpoints
 connexionapp.add_api('swagger.yml')

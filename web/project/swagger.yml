@@ -98,7 +98,7 @@ paths:
       tags:
         - "Collections"
       summary: "Fetches all collections"
-      description: "Read the list of collections"
+      description: "Fetches collections from all Papers"
       responses:
         200:
           description: "Successful read collections list operation"
@@ -112,7 +112,7 @@ paths:
       tags:
         - "Authors"
       summary: "Fetches all authors"
-      description: "Read the list of authors"
+      description: "Fetches authors from papers"
       responses:
         200:
           description: "Successful read authors list operation"
@@ -126,7 +126,7 @@ paths:
       tags:
         - "Publications"
       summary: "Fetches all publications"
-      description: "Read the list of publications"
+      description: "Fetches publications from all papers"
       responses:
         200:
           description: "Successful read publications list operation"

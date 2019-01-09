@@ -19,9 +19,6 @@ from project import app
 qresp_config = {}
 ftp_dict = {}
 
-
-
-
 class InvalidUsage(Exception):
     """ Invalid page
     """
@@ -62,6 +59,8 @@ def make_session_permanent():
 def index():
     """ Fetches the homepage
     """
+    #TO BE DELETED
+    SetLocalHost(str(request.host_url).strip("/"))
     return render_template('index.html')
 
 @app.route('/downloads/<file>')
@@ -729,7 +728,6 @@ def qrespexplorer():
     serverslist = Servers()
     form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
                            serverslist.getServersList()]
-    form.serverList.append('http://localhost')
     if request.method == 'POST':
         if request.form.get('serversList'):
             session["selectedserver"] = request.form.get('serversList')
@@ -764,11 +762,11 @@ def admin():
             dbAdmin = MongoDBConnection.getDB(hostname=form.hostname.data, port=int(form.port.data),
                                         username=form.username.data, password=form.password.data,
                                         dbname=form.dbname.data, collection=form.collection.data, isssl=form.isSSL.data)
-            paperCollectionlist = Paper.objects.get_unique_values('collections')
         except Exception as e:
             flash('Could not connect to server, \n ' + str(e))
             raise InvalidUsage('Could not connect to server, \n ' + str(e), status_code=410)
         flash('Connected')
+        SetLocalHost(str(request.host_url).strip("/"))
         return redirect(url_for('qrespexplorer'))
     return render_template('admin.html', form=form,verifyform =verifyform )
 

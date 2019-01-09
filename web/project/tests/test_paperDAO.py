@@ -22,7 +22,6 @@ class TestPaperDAO(TestCase):
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         with open(os.path.join(__location__, 'data.json')) as f:
             paperdata = json.load(f)
-        #paperdata = json.loads(paperdata)
         paper = Paper(**paperdata)
         paper.save()
 
