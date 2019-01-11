@@ -4,6 +4,11 @@ python:
   - "3.5"
   - "3.6"
 # command to install dependencies
+os:
+  - linux
+  - osx
+  - windows
+
 install:
   - cd web
   - pip install -r requirements.txt

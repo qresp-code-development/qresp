@@ -1,15 +1,13 @@
 import unittest
-from unittest import TestCase
 from project.paperdao import *
 import os
-import mongomock
 import json
 def warn(*args, **kwargs):
     pass
 import warnings
 warnings.warn = warn
 
-class TestPaperDAO(TestCase):
+class TestPaperDAO(unittest.TestCase):
     def setUp(self):
         """
         Sets up database to test
@@ -24,6 +22,14 @@ class TestPaperDAO(TestCase):
             paperdata = json.load(f)
         paper = Paper(**paperdata)
         paper.save()
+
+    def tearDown(self):
+        """
+        Sets up database to test
+        """
+        paper = Paper()
+        paper.drop_collection()
+
 
     def test_getCollectionList(self):
         """
@@ -63,7 +69,6 @@ class TestPaperDAO(TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(authorsList=['marco'])
-        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
 
     def test_getFilteredPaperObjectsForSearchWord(self):
@@ -72,7 +77,6 @@ class TestPaperDAO(TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(searchWord='photo')
-        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
 
     def test_getFilteredPaperObjectsForTitle(self):
@@ -90,7 +94,6 @@ class TestPaperDAO(TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(tags=['photo'])
-        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
 
     def test_getFilteredPaperObjectsForCollections(self):
@@ -99,7 +102,6 @@ class TestPaperDAO(TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(collectionList=['miccom'])
-        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
 
     def test_insertDOI(self):
@@ -109,6 +111,7 @@ class TestPaperDAO(TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects()
         paper = dao.insertDOI(allSearchObjects[0]['_Search__id'],'123')
+        print(dao.getAllPapers())
         self.assertEquals(1, paper)
 
 

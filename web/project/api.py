@@ -1,4 +1,7 @@
 from .paperdao import *
+
+#edit swagger.yml file for method changes
+
 def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=None,authorsList=None,publicationList=None):
     """
     This function responds to a request for /api/search
