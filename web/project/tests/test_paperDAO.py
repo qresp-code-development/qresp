@@ -57,14 +57,60 @@ class TestPaperDAO(TestCase):
         allSearchObjects = dao.getAllFilteredSearchObjects()
         self.assertTrue(list(allSearchObjects))
 
-    def test_getFilteredPaperObjects(self):
+    def test_getFilteredPaperObjectsForAuthors(self):
         """
         Tests for all search Objects with name
         """
         dao = PaperDAO()
-        allSearchObjects = dao.getAllFilteredSearchObjects(authorsList=['Marco Govoni'])
-        print(allSearchObjects)
+        allSearchObjects = dao.getAllFilteredSearchObjects(authorsList=['marco'])
+        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
+
+    def test_getFilteredPaperObjectsForSearchWord(self):
+        """
+        Tests for all search Objects with name
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects(searchWord='photo')
+        print(len(allSearchObjects))
+        self.assertTrue(list(allSearchObjects))
+
+    def test_getFilteredPaperObjectsForTitle(self):
+        """
+        Tests for all search Objects with name
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects(paperTitle='photo')
+        print(len(allSearchObjects))
+        self.assertTrue(list(allSearchObjects))
+
+    def test_getFilteredPaperObjectsForTags(self):
+        """
+        Tests for all search Objects with name
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects(tags=['photo'])
+        print(len(allSearchObjects))
+        self.assertTrue(list(allSearchObjects))
+
+    def test_getFilteredPaperObjectsForCollections(self):
+        """
+        Tests for all search Objects with name
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects(collectionList=['miccom'])
+        print(len(allSearchObjects))
+        self.assertTrue(list(allSearchObjects))
+
+    def test_insertDOI(self):
+        """
+        Tests for isertion of DOI
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        paper = dao.insertDOI(allSearchObjects[0]['_Search__id'],'123')
+        self.assertEquals(1, paper)
+
 
     # def test_getPaperDetails(self):
     #     self.fail()

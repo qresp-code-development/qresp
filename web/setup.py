@@ -36,7 +36,7 @@ setup(
         'flask-sitemap',
         'requests_oauthlib',
         'mongomock',
-        'connexion',
+        'connexion[swagger-ui]',
         'coverage',
         'nose2'
       ],

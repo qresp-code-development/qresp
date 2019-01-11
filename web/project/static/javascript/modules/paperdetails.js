@@ -2,7 +2,6 @@ var bindModal = function (info) {
     $('#myModalLabel').html(info[0]);
     $('#myModalLabel').css('position', 'absolute');
     $('#myModalBody').html(info[1]);
-
     $('#modalInfo').modal('show');
 };
 
@@ -116,15 +115,18 @@ $(function () {
 
 //Builds first half of page i.e. paper details
 function buildPaperInfo(paperDetails) {
+    //id
+    localStorage.setItem("paperId", paperDetails._PaperDetails__id);
+    //link
+    var currenturl = window.location.href;
+    localStorage.setItem("link",currenturl);
+
     //title
     $("#lblTitle").html(paperDetails._PaperDetails__title);
+    localStorage.setItem("title", paperDetails._PaperDetails__title);
 
     //authors
     var authors = "by " + paperDetails._PaperDetails__authors ;
-    // $.each(paperDetails._PaperDetails__authors, function (i, item) {
-    //     authors += item.firstName + " " + item.lastName + ", ";
-    // });
-    // authors = authors.replace(/,\s*$/, "");
     $("#lblAuthor").html(authors);
 
     //cite

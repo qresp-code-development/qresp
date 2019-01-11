@@ -42,19 +42,19 @@ paths:
           description: Filter paper results based on paper tags
         - in: query
           name: collectionList
-          type: array
+          type: string
           required: false
-          description: Filter paper results based on collection
+          description: Filter paper results based on collection. Seperate by comma for multiple values
         - in: query
           name: authorsList
-          type: array
+          type: string
           required: false
-          description: Filter paper results based on authors
+          description: Filter paper results based on authors. Seperate by comma for multiple values
         - in: query
           name: publicationList
           required: false
-          type: array
-          description: Filter paper results based on publication
+          type: string
+          description: Filter paper results based on publication. Seperate by comma for multiple values
       responses:
         200:
           description: "Successful read papers list operation"
@@ -129,8 +129,61 @@ paths:
       description: "Fetches publications from all papers"
       responses:
         200:
-          description: "Successful read publications list operation"
+          description: "Successful read paper publications operation"
           schema:
             type: "array"
             items:
                 type: "string"
+  /paper/{id}:
+    get:
+      operationId: "project.api.paper"
+      tags:
+        - "Paper details"
+      summary: "Fetches details of paper given id"
+      description: "Fetches paper details given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: "Successful read paper details "
+  /workflow/{id}:
+    get:
+      operationId: "project.api.workflow"
+      tags:
+        - "Workflow details"
+      summary: "Fetches workflow of paper given id"
+      description: "Fetches workflow of paper given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: "Successful read workflow details of paper"
+  /paper/{id}/chart/{cid}:
+    get:
+      operationId: "project.api.chart"
+      tags:
+        - "Chart details"
+      summary: "Fetches chart of paper given id of paper and chart"
+      description: "Fetches chart of paper given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: path
+          name: cid
+          type: string
+          required: true
+          description: Chart Id
+      responses:
+        200:
+          description: "Successful read workflow details of paper"

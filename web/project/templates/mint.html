@@ -169,32 +169,20 @@
     }
 
    function insertDOI(link,doi){
-       $.ajax({
-            type : "POST",
-            url : "REST/papers/insertDOI",
-            dataType : "json",
-            data : JSON.stringify({
-                    paperId : paperId,
-                    doi : doi
-            })
-        }).done(function(response) {
-            if (response) {
-                var redirect = link;
-                window.location.replace(redirect);
+        $.getJSON('/insertDOI', {
+               paperId : paperId,
+                doi : doi
+            }, function (data) {
+                if (data) {
+                    var redirect = link;
+                    window.location.replace(redirect);
 
-                return false;
-            } else {
-              alert("An error occurred.");
-            }
-        }).fail(
-                function(jqXHR, textStatus,
-                                errorThrown) {
-                        alert(jqXHR.responseText.message + ': ' + errorThrown);
-                        //window.location.href = "search.jsp";
-                }).always(function() {
-        //alert("Complete!");
-        });
-    }
+                    return false;
+                } else {
+                  alert("An error occurred.");
+                }
+            });
+   }
 
 
 

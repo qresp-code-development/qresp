@@ -170,7 +170,10 @@ class Dtree():
             if "qresp.ini" in file:
                 self.openFileToReadConfig("qresp.ini")
             dataFile.title = file
-            parent = self.__path.split("/")
+            if "/" in self.__path:
+                parent = self.__path.split("/")
+            else:
+                parent = self.__path
             parentName = parent[len(parent) - 1]
             dataFile.key = self.__path + "/" + file
             dataFile.id = file
@@ -406,6 +409,7 @@ class FetchDataFromAPI():
     """ Fetches data for search,paper details and chart details for explorer
     """
     def __init__(self,servernames):
+        serverList = []
         if servernames and len(servernames)>0:
             serverList = servernames
         else:
@@ -413,7 +417,6 @@ class FetchDataFromAPI():
             serverList = [qrespserver['qresp_server_url'] for qrespserver in
                                serverslist.getServersList()]
         global LOCALHOST
-        print(LOCALHOST)
         if LOCALHOST:
             serverList.append(LOCALHOST)
         self.__servernames = serverList
@@ -423,17 +426,22 @@ class FetchDataFromAPI():
         :return: object: sends descriptor to server
         """
         outDict = {}
+        output = None
+        self.__servernames = list(set(self.__servernames))
         for snames in self.__servernames:
             url = snames + apiname
             print("url>",url)
             headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
             response = requests.get(url,headers=headers, verify=False)
             if response.status_code == 200:
-                if "search" in apiname:
+                if "paper" or "workflow" in apiname:
+                    output = response.json()
+                elif "search" in apiname:
                     outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
+                    output = list(outDict.values())
                 else:
                     outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
-        output = list(outDict.values())
+                    output = list(outDict.values())
         return output
 
 

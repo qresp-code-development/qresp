@@ -89,7 +89,7 @@ class InfoForm(Form):
     PIs = FieldList(FormField(NameForm), label='Principal Investigator(s)', description='Enter PI(s)', min_entries=1, validators=[validators.DataRequired()])
     collections = StringField(label='PaperStack',validators = [validators.DataRequired("Please enter keywords")], description='Enter name(s) defining group of papers (e.g. according to source of fundings)',render_kw={"placeholder": "Enter collection to which project belongs"})
     tags = StringField(label='Keywords',validators = [validators.DataRequired("Please enter keywords")], description='Enter Keyword(s) (e.g: DFT, organic materials, charge transfer): they facilitate paper searches using Qresp | Explorer',render_kw={"placeholder": "Enter tags for the project"})
-    mainnotebookfile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
+    notebookFile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
     doi = StringField('DOI',description='DOI minted by Qresp',render_kw={'readonly': True})
 
 class ExtraForm(Form):

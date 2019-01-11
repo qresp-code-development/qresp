@@ -81,6 +81,13 @@ def qrespcurator():
     """
     return render_template('qrespcurator.html')
 
+@app.route('/startfromscratch')
+def startfromscratch():
+    """ clears session
+    """
+    session.clear()
+    return redirect(url_for('details'))
+
 @csrf.exempt
 @app.route('/uploadFile',methods=['POST','GET'])
 def uploadFile():
@@ -145,6 +152,7 @@ def uploadFile():
         infoform = InfoForm(**paperform.data)
         infoform.tags.data = ", ".join(paperform.tags.data)
         infoform.collections.data = ", ".join(paperform.collections.data)
+        infoform.notebookFile.data = paperform.info.notebookFile.data
         session["info"] = infoform.data
         session["PIs"] = [form.data for form in infoform.PIs.entries]
         session["tags"] = [form for form in paperform.tags.data]
@@ -217,15 +225,22 @@ def setproject():
             absPath = pathDetails['folderAbsolutePath']
             ftpclient = session.get("sftpclient")
             ftp = ftp_dict[ftpclient]
-            dtree = Dtree(ftp, absPath.rsplit("/", 1)[0], session)
+            if "/" in absPath:
+                dtree = Dtree(ftp, absPath.rsplit("/", 1)[0], session)
+            else:
+                dtree = Dtree(ftp, absPath, session)
             dtree.openFileToReadConfig("qresp.ini")
             services = dtree.fetchServices()
             isConfig = dtree.checkIsConfigFile()
             session["folderAbsolutePath"] = absPath
-            session["ProjectName"] = absPath.rsplit("/",1)[1]
+            if "/" in absPath:
+                session["ProjectName"] = absPath.rsplit("/",1)[1]
+            else:
+                session["ProjectName"] = absPath
             return jsonify(folderAbsolutePath=absPath,isConfigFile=isConfig,services=services)
     except Exception as e:
-        flash("Could not connect to server. Plase try again!" + str(e))
+        print(e)
+        flash("Could not connect to server. Plase try again! " + str(e))
         return jsonify(folderAbsolutePath=absPath, isConfigFile=isConfig, services=services)
 
 
@@ -301,7 +316,7 @@ def info():
         session["PIs"] = [form.data for form in infoform.PIs.entries]
         session["tags"] = infoform.tags.data.split(",")
         session["collections"] = infoform.collections.data.split(",")
-        session["notebookFile"] = infoform.mainnotebookfile.data
+        session["notebookFile"] = infoform.notebookFile.data
         msg = "Info Saved"
         return jsonify(data=msg)
     return jsonify(data=infoform.errors)
@@ -826,9 +841,8 @@ def searchWord():
         publicationList = json.loads(request.args.get('publicationList'))
         selectedserver = session.get("selectedserver")
         fetchdata = FetchDataFromAPI(selectedserver)
-        url = '/api/search' + "?searchWord=" + searchWord
-        # url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
-        #       "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
+        url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
+              "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)
         return jsonify(allpaperslist=allpaperslist)
     except Exception as e:
@@ -844,9 +858,12 @@ def paperdetails(paperid):
     :return: template: paperdetails.html
     """
     try:
-        dao = PaperDAO()
-        paperdetail = dao.getPaperDetails(paperid)
-        workflowdetail = dao.getWorkflowDetails(paperid)
+        selectedserver = session.get("selectedserver")
+        fetchdata = FetchDataFromAPI(selectedserver)
+        url = '/api/paper/'+paperid
+        paperdetail = fetchdata.fetchOutput(url)
+        url = '/api/workflow/'+paperid
+        workflowdetail = fetchdata.fetchOutput(url)
         return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
     except Exception as e:
         print(e)
@@ -870,7 +887,10 @@ def chartworkflow():
         paperid = str(paperid).strip()
         chartid = request.args.get('chartid', 0, type=str)
         chartid = str(chartid).strip()
-        chartworkflowdetail = dao.getWorkflowForChartDetails(paperid, chartid)
+        selectedserver = session.get("selectedserver")
+        fetchdata = FetchDataFromAPI(selectedserver)
+        url = '/api/paper/' + paperid + '/chart/' + chartid
+        chartworkflowdetail = fetchdata.fetchOutput(url)
         return jsonify(chartworkflowdetail=chartworkflowdetail)
     except Exception as e:
         print(e)
@@ -906,11 +926,30 @@ def getDescriptor():
         return jsonify(content),400
     return jsonify(content),200
 
-@app.route('/mint')
+@app.route('/mint', methods=['POST','GET'])
 def mint():
     """ Fetches the mint page
     """
     return render_template('mint.html')
+
+@app.route('/insertDOI', methods=['POST','GET'])
+def insertDOI():
+    """ Inserts DOI to database
+    """
+    try:
+        paperid = request.args.get('paperId', 0, type=str)
+        paperid = str(paperid).strip()
+        doi = request.args.get('doi', 0, type=str)
+        doi = str(doi).strip()
+        dao = PaperDAO()
+        if paperid and doi:
+            dao.insertDOI(paperid,doi)
+    except Exception as e:
+        print(e)
+        content = {'Failed': 'Could Not Insert'}
+        return jsonify(content), 500
+    content = {'Success': 'Inserted'}
+    return jsonify(content), 200
 
 def main(port):
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'

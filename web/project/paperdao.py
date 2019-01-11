@@ -53,29 +53,55 @@ class PaperDAO(MongoDBConnection):
             searchRegWord = re.compile(regSearch, re.IGNORECASE)
             filteredPaper = Paper.objects.filter(
                 Q(reference__title=searchRegWord) | Q(reference__publishedAbstract=searchRegWord) |
-                Q(tags=searchRegWord) | Q(collections=searchRegWord) | Q(reference__authors__firstName=searchWord) |
-                Q(reference__authors__lastName=searchWord))
+                Q(tags__in=[searchRegWord]) | Q(collections__in=[searchRegWord]) | Q(reference__authors__firstName__in=[searchRegWord]) |
+                Q(reference__authors__lastName__in=[searchRegWord]))
             allFilteredSearchObjects = self.__filtersearchedPaper(filteredPaper)
         else:
             searchquery = Q()
             if paperTitle and paperTitle.strip():
-                searchTitleQuery = Q(reference__title__icontains=paperTitle)
+                regSearch = '.*' + paperTitle + '.*'
+                searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                searchTitleQuery = Q(reference__title=searchRegWord)
                 searchquery = searchquery & searchTitleQuery
             if doi and doi.strip():
-                searchdoiquery = Q(reference__DOI__icontains=doi)
+                regSearch = '.*' + doi + '.*'
+                searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                searchdoiquery = Q(reference__DOI=searchRegWord)
                 searchquery = searchquery & searchdoiquery
-            if tags and tags.strip():
-                searchtagquery = Q(tags__icontains=tags)
+            if tags and len(tags)>0:
+                newtagList = []
+                for item in tags:
+                    regSearch = '.*' + item + '.*'
+                    searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                    newtagList.append(searchRegWord)
+                searchtagquery = Q(tags__in=newtagList)
                 searchquery = searchquery & searchtagquery
-            if len(collectionList) > 0:
-                searchcollectionquery = Q(collections__in=collectionList)
+            if collectionList and len(collectionList) > 0:
+                newcollectionList = []
+                for item in collectionList:
+                    regSearch = '.*' + item + '.*'
+                    searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                    newcollectionList.append(searchRegWord)
+                searchcollectionquery = Q(collections__in=newcollectionList)
                 searchquery = searchquery & searchcollectionquery
-            if len(authorsList) > 0:
-                lastnamelist = [name.split(" ")[1] for name in authorsList]
-                searchauthorquery = Q(reference__authors__lastName__in=lastnamelist)
-                searchquery = searchquery & searchauthorquery
-            if len(publicationList) > 0:
-                searchpubquery = Q(reference__journal__fullName__in=publicationList)
+            if authorsList and len(authorsList) > 0:
+                namelist = [name.split(" ") for name in authorsList]
+                newnamelist = []
+                for sublist in namelist:
+                    for item in sublist:
+                        regSearch = '.*' + item + '.*'
+                        searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                        newnamelist.append(searchRegWord)
+                searchlastauthorquery = Q(reference__authors__lastName__in=newnamelist)
+                searchfirstauthorquery = Q(reference__authors__firstName__in=newnamelist)
+                searchquery = searchquery & (searchlastauthorquery | searchfirstauthorquery)
+            if publicationList and len(publicationList) > 0:
+                newpubList = []
+                for item in publicationList:
+                    regSearch = '.*' + item + '.*'
+                    searchRegWord = re.compile(regSearch, re.IGNORECASE)
+                    newpubList.append(searchRegWord)
+                searchpubquery = Q(reference__journal__fullName__in=newpubList)
                 searchquery = searchquery & searchpubquery
             if searchquery:
                 filteredPaper = Paper.objects.filter(searchquery)
@@ -100,6 +126,10 @@ class PaperDAO(MongoDBConnection):
         paper.save()
         return str(paper.id)
 
+    def insertDOI(self,id,doi):
+        """ Inserts into collection"""
+        paper = Paper.objects(id=id).update(info__doi=doi)
+        return paper
 
 
     def __filtersearchedPaper(self, filteredPaper):
