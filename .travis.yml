@@ -7,7 +7,6 @@ python:
 os:
   - linux
   - osx
-  - windows
 
 install:
   - cd web
@@ -15,4 +14,7 @@ install:
   - python setup.py install
 # command to run tests
 script:
-  - nose2
+  - nose2 -v
+
+after_success:
+  - coveralls

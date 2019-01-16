@@ -111,7 +111,6 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects()
         paper = dao.insertDOI(allSearchObjects[0]['_Search__id'],'123')
-        print(dao.getAllPapers())
         self.assertEquals(1, paper)
 
 

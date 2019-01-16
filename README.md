@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/atanikan/Qresp.svg?branch=qresp-1.1)](https://travis-ci.com/atanikan/Qresp)
+[![Build Status](https://travis-ci.org/qresp-code-development/qresp.svg?branch=master)](https://travis-ci.org/qresp-code-development/qresp)
+[![Coverage Status](https://coveralls.io/repos/github/qresp-code-development/qresp/badge.svg?branch=master)](https://coveralls.io/github/qresp-code-development/qresp?branch=qresp-1.1)
 
 # Qresp
 [Qresp](http://qresp.org) software repository. 

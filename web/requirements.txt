@@ -28,3 +28,4 @@ mongomock
 connexion[swagger-ui]
 coverage
 nose2
+python-coveralls
