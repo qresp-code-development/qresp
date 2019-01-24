@@ -1,12 +1,4 @@
 language: python
-#python:
-#  - "3.4"
-#  - "3.5"
-#  - "3.6"
-# command to install dependencies
-#os:
-#  - linux
-#  - osx
 matrix:
     include:
         - os: linux
@@ -45,6 +37,7 @@ before_install: |
     pyenv-virtualenv venv
     source venv/bin/activate
     # A manual check that the correct version of Python is running.
+    pip install --upgrade setuptools
     python --version
   fi
 
