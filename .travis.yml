@@ -13,9 +13,6 @@ matrix:
         - os: osx
           env: PYTHON=3.4.4
           language: generic
-        - os: osx
-          language: generic
-          env: PYTHON=3.5.1
 
 before_install: |
   if [ "$TRAVIS_OS_NAME" == "osx" ]; then

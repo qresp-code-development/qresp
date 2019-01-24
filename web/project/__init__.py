@@ -22,8 +22,6 @@ MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.environ.get("MONGODB_PASSWORD")
 MONGODB_DB = os.environ.get("MONGODB_DB")
 
-
-#app = Flask(__name__)
 # Create the application instance
 connexionapp = connexion.App(__name__, specification_dir='./')
 
@@ -31,6 +29,7 @@ connexionapp = connexion.App(__name__, specification_dir='./')
 connexionapp.add_api('swagger.yml')
 app = connexionapp.app
 app.secret_key = '\\\xfcS\x1e\x8f\xfb]6\x1e.\xa8\xb3\xe1x\xc8\x8e\xc1\xeb5^x\x81\xcc\xd5'
+
 csrf = CSRFProtect(app)
 SESSION_TYPE = 'filesystem'
 app.config.from_object(__name__)
@@ -45,12 +44,14 @@ app.config['SCOPE'] = ['https://www.googleapis.com/auth/userinfo.profile','https
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['MAIL_ADDR'] = MAIL_ADDR
 app.config['MAIL_PWD'] = MAIL_PWD
-app.config['MONGODB_HOST'] = 'paperstack.uchicago.edu'
-app.config['MONGODB_PORT'] = 27017
-app.config['MONGODB_USERNAME'] = 'qresp_user_explorer'
-app.config['MONGODB_PASSWORD'] = 'qresp_pwd'
-app.config['MONGODB_DB'] = 'explorer'
+app.config['MONGODB_HOST'] = MONGODB_HOST
+app.config['MONGODB_PORT'] = MONGODB_PORT
+app.config['MONGODB_USERNAME'] = MONGODB_USERNAME
+app.config['MONGODB_PASSWORD'] = MONGODB_PASSWORD
+app.config['MONGODB_DB'] = MONGODB_DB
+
 Session(app)
 ext = Sitemap(app)
+
 
 from project import routes

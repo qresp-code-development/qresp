@@ -7,5 +7,5 @@ CORS(app)
 
 #app.run()
 if __name__ == "__main__":
-    connexionapp.run(port=80,debug=True)
+    connexionapp.run(host='0.0.0.0',port=80,debug=True)
 

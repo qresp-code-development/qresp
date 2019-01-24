@@ -1,5 +1,5 @@
 import unittest
-from project.paperdao import *
+from project.paperdao import PaperDAO,MongoDBConnection,Paper
 import os
 import json
 def warn(*args, **kwargs):
@@ -85,7 +85,6 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(paperTitle='photo')
-        print(len(allSearchObjects))
         self.assertTrue(list(allSearchObjects))
 
     def test_getFilteredPaperObjectsForTags(self):
@@ -106,7 +105,7 @@ class TestPaperDAO(unittest.TestCase):
 
     def test_insertDOI(self):
         """
-        Tests for isertion of DOI
+        Tests for insertion of DOI
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects()
@@ -114,14 +113,38 @@ class TestPaperDAO(unittest.TestCase):
         self.assertEquals(1, paper)
 
 
-    # def test_getPaperDetails(self):
-    #     self.fail()
-    #
-    # def test_getWorkflowDetails(self):
-    #     self.fail()
-    #
-    # def test_getWorkflowForChartDetails(self):
-    #     self.fail()
+    def test_getPaperDetails(self):
+        """
+        Tests Paper details given paper id
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        paperDetails = dao.getPaperDetails(allSearchObjects[0]['_Search__id'])
+        self.assertEquals(allSearchObjects[0]['_Search__id'], paperDetails['_PaperDetails__id'])
+
+
+    def test_getWorkflowDetails(self):
+        """
+        Tests workflow details given paper id
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        workflowdetails = dao.getWorkflowDetails(allSearchObjects[0]['_Search__id'])
+        self.assertEquals(workflowdetails['paperTitle'],allSearchObjects[0]['_Search__title'])
+
+
+
+    def test_getWorkflowForChartDetails(self):
+        """
+        Tests workflow details given chart id and paper id
+        :return:
+        """
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        paperDetails = dao.getPaperDetails(allSearchObjects[0]['_Search__id'])
+        chartid = paperDetails['_PaperDetails__charts'][0].id
+        workflowchartdetails = dao.getWorkflowForChartDetails(paperDetails['_PaperDetails__id'],chartid)
+        self.assertEquals(workflowchartdetails['paperTitle'],allSearchObjects[0]['_Search__title'])
 
 if __name__ == "__main__":
     unittest.main()

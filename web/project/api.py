@@ -84,7 +84,7 @@ def paper(id):
     except Exception as e:
         msg = "Exception in paper api " + str(e)
         print("Exception in paper api ", e)
-        return e, 500
+        return e, 400
     return paperdetail
 
 def workflow(id):
@@ -101,7 +101,7 @@ def workflow(id):
     except Exception as e:
         msg = "Exception in workflow api " + str(e)
         print("Exception in workflow api ", e)
-        return msg,500
+        return msg,400
     return workflowdetail
 
 def chart(id,cid):
@@ -118,5 +118,5 @@ def chart(id,cid):
     except Exception as e:
         msg = "Exception in chart api " + str(e)
         print("Exception in chart api ", e)
-        return msg,500
+        return msg,400
     return chartworkflowdetail

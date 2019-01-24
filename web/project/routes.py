@@ -12,7 +12,7 @@ import smtplib
 
 from flask_cors import CORS
 
-from .paperdao import *
+from .paperdao import PaperDAO,MongoDBConnection
 from .util import *
 from .views import *
 from project import app
@@ -60,7 +60,7 @@ def index():
     """ Fetches the homepage
     """
     #TO BE DELETED
-    SetLocalHost(str(request.host_url).strip("/"))
+    #SetLocalHost(str(request.host_url).strip("/"))
     return render_template('index.html')
 
 @app.route('/downloads/<file>')
@@ -158,11 +158,12 @@ def uploadFile():
         session["tags"] = [form for form in paperform.tags.data]
         session["collections"] = [form for form in paperform.collections.data]
         session["workflow"] = paperform.workflow.data
-        return jsonify(out="Processed text")
-    except:
-        return jsonify(error="Could not process json file")
+        return jsonify(out="Processed text"), 200
+    except Exception as e:
+        print(e)
+        return jsonify(error=str(e)), 400
 
-
+@csrf.exempt
 @app.route('/details', methods=['POST', 'GET'])
 def details():
     """ This method helps in storing the details of the person using the curator.
@@ -193,12 +194,12 @@ def server():
             return redirect(url_for('project'))
         except Exception as e:
             flash("Could not connect to server. Plase try again!"+str(e))
-            render_template('server.html', form=form)
-    return render_template('server.html', form=form)
+            render_template('server.html', form=form), 400
+    return render_template('server.html', form=form), 200
 
 
 @csrf.exempt
-@app.route('/project', methods=['POST', 'GET'])
+@app.route('/project', methods=['GET'])
 def project():
     """ This method helps in populating the project form.
     """
@@ -237,11 +238,11 @@ def setproject():
                 session["ProjectName"] = absPath.rsplit("/",1)[1]
             else:
                 session["ProjectName"] = absPath
-            return jsonify(folderAbsolutePath=absPath,isConfigFile=isConfig,services=services)
+            return jsonify(folderAbsolutePath=absPath,isConfigFile=isConfig,services=services), 200
     except Exception as e:
         print(e)
         flash("Could not connect to server. Plase try again! " + str(e))
-        return jsonify(folderAbsolutePath=absPath, isConfigFile=isConfig, services=services)
+        return jsonify(folderAbsolutePath=absPath, isConfigFile=isConfig, services=services), 401
 
 
 @csrf.exempt
@@ -252,19 +253,20 @@ def getTreeInfo():
     pathDetails = request.get_json()
     listObjects = []
     services = []
-    ftpclient = session.get("sftpclient")
-    ftp = ftp_dict[ftpclient]
-    if 'folderAbsolutePath' in pathDetails:
-        content_path = pathDetails['folderAbsolutePath']
-    else:
-        content_path = session.get("folderAbsolutePath")
     try:
+        ftpclient = session.get("sftpclient")
+        ftp = ftp_dict[ftpclient]
+        if 'folderAbsolutePath' in pathDetails:
+            content_path = pathDetails['folderAbsolutePath']
+        else:
+            content_path = session.get("folderAbsolutePath")
         dtree = Dtree(ftp,content_path,session)
         listObjects = dtree.fetchForTree()
         services = dtree.fetchServices()
     except Exception as e:
+        jsonify({'errors':str(e)}), 400
         print(e)
-    return jsonify({'listObjects': listObjects, 'services': services})
+    return jsonify({'listObjects': listObjects, 'services': services}), 200
 
 @app.route('/curate', methods=['POST', 'GET'])
 def curate():
@@ -318,8 +320,8 @@ def info():
         session["collections"] = infoform.collections.data.split(",")
         session["notebookFile"] = infoform.notebookFile.data
         msg = "Info Saved"
-        return jsonify(data=msg)
-    return jsonify(data=infoform.errors)
+        return jsonify(data=msg), 200
+    return jsonify(data=infoform.errors), 400
 
 @csrf.exempt
 @app.route('/charts', methods=['POST', 'GET'])
@@ -343,8 +345,8 @@ def charts():
                 chartList = [item for item in chartList if item['saveas'] not in chartform.saveas.data]
                 chartList.append(chartform.data)
                 session["charts"] = deepcopy(chartList)
-        return jsonify(chartList = chartList)
-    return jsonify(data=chartform.errors)
+        return jsonify(chartList = chartList), 200
+    return jsonify(data=chartform.errors), 200
 
 @csrf.exempt
 @app.route('/tools', methods=['POST', 'GET'])
@@ -368,8 +370,8 @@ def tools():
                 toolList = [item for item in toolList if item['saveas'] not in toolform.saveas.data]
                 toolList.append(toolform.data)
                 session["tools"] = deepcopy(toolList)
-        return jsonify(toolList = toolList)
-    return jsonify(errors=toolform.errors)
+        return jsonify(toolList = toolList), 200
+    return jsonify(errors=toolform.errors), 200
 
 @csrf.exempt
 @app.route('/datasets', methods=['POST', 'GET'])
@@ -393,8 +395,8 @@ def datasets():
                 datasetList = [item for item in datasetList if item['saveas'] not in datasetform.saveas.data]
                 datasetList.append(datasetform.data)
                 session["datasets"] = deepcopy(datasetList)
-        return jsonify(datasetList = datasetList)
-    return jsonify(data=datasetform.errors)
+        return jsonify(datasetList = datasetList), 200
+    return jsonify(data=datasetform.errors), 200
 
 @csrf.exempt
 @app.route('/scripts', methods=['POST', 'GET'])
@@ -418,8 +420,8 @@ def scripts():
                 scriptList = [item for item in scriptList if item['saveas'] not in scriptform.saveas.data]
                 scriptList.append(scriptform.data)
                 session["scripts"] = deepcopy(scriptList)
-        return jsonify(scriptList = scriptList)
-    return jsonify(data=scriptform.errors)
+        return jsonify(scriptList = scriptList), 200
+    return jsonify(data=scriptform.errors), 200
 
 @csrf.exempt
 @app.route('/reference', methods=['POST', 'GET'])
@@ -430,8 +432,8 @@ def reference():
     if request.method == 'POST' and referenceform.validate():
         session["reference"] = referenceform.data
         msg = "Reference Saved"
-        return jsonify(data=msg)
-    return jsonify(data=referenceform.errors)
+        return jsonify(data=msg), 200
+    return jsonify(data=referenceform.errors), 200
 
 @csrf.exempt
 @app.route('/fetchReferenceDOI', methods=['POST', 'GET'])
@@ -444,8 +446,8 @@ def fetchReferenceDOI():
         refdata = fetchDOI.fetchFromDOI()
     except Exception as e:
         print(e)
-        return jsonify(errors="Recheck your DOI")
-    return jsonify(fetchDOI=refdata.data)
+        return jsonify(errors="Recheck your DOI"), 400
+    return jsonify(fetchDOI=refdata.data), 200
 
 @csrf.exempt
 @app.route('/documentation', methods=['POST', 'GET'])
@@ -456,8 +458,8 @@ def documentation():
     if request.method == 'POST' and docform.validate():
         session["documentation"] = docform.data
         msg = "Documentation Saved"
-        return jsonify(data=msg)
-    return jsonify(data=docform.errors)
+        return jsonify(data=msg), 200
+    return jsonify(data=docform.errors), 200
 
 @csrf.exempt
 @app.route('/workflow', methods=['POST', 'GET'])
@@ -559,10 +561,9 @@ def workflow():
         session["workflow"] = workflowinfo.data
     except Exception as e:
         print(e)
-    return jsonify({'workflow': workflow.__dict__})
+    return jsonify({'workflow': workflow.__dict__}), 200
 
 
-# Fetches list of qresp servers for the explorer
 @csrf.exempt
 @app.route('/publish', methods=['POST', 'GET'])
 def publish():
@@ -720,7 +721,7 @@ def download():
     with open("papers/"+projectName+"/"+"data.json", "w") as outfile:
         json.dump(paperdata, outfile, default=lambda o: o.__dict__, separators=(',', ':'), sort_keys=True, indent=3)
     session["paper"] = paperdata
-    return jsonify(paper=paperdata)
+    return jsonify(paper=paperdata), 200
 
 
 @csrf.exempt
@@ -737,15 +738,13 @@ def acknowledgement():
 def qrespexplorer():
     """ Fetches the explorer homepage
     """
-    dao = PaperDAO()
-    dao.getDB()
     form = QrespServerForm()
     serverslist = Servers()
     form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
                            serverslist.getServersList()]
     if request.method == 'POST':
-        if request.form.get('serversList'):
-            session["selectedserver"] = request.form.get('serversList')
+        if request.form.getlist('serversList'):
+            session["selectedserver"] = request.form.getlist('serversList')
         else:
             session['selectedserver'] = form.serverList
         return redirect(url_for('search'))
@@ -760,8 +759,8 @@ def verifypasscode():
     confirmpasscode = app.config['passkey']
     if request.method == 'POST' and form.validate():
         if confirmpasscode == form.passcode.data:
-            return jsonify(msg="success")
-    return jsonify(msg="failed")
+            return jsonify(msg="success"),200
+    return jsonify(msg="failed"),401
 
 # Fetches list of qresp admin
 @csrf.exempt
@@ -807,14 +806,23 @@ def search():
     :return: template: search.html
     """
     allpaperslist = []
+    collectionlist = []
+    authorslist = []
+    publicationlist = []
+    allPapersSize = 0
     try:
         selectedserver = session.get("selectedserver")
         fetchdata = FetchDataFromAPI(selectedserver)
-        allpaperslist = fetchdata.fetchOutput('/api/search')
-        collectionlist = fetchdata.fetchOutput('/api/collections')
-        authorslist = fetchdata.fetchOutput('/api/authors')
-        publicationlist = fetchdata.fetchOutput('/api/publications')
-        allPapersSize = len(allpaperslist)
+        fetchallpaperslist = fetchdata.fetchOutput('/api/search')
+        fetchcollectionlist = fetchdata.fetchOutput('/api/collections')
+        fetchauthorslist = fetchdata.fetchOutput('/api/authors')
+        fetchpublicationlist = fetchdata.fetchOutput('/api/publications')
+        if fetchallpaperslist and len(fetchallpaperslist)>0:
+            allpaperslist = fetchallpaperslist
+            collectionlist = fetchcollectionlist
+            authorslist = fetchauthorslist
+            publicationlist = fetchpublicationlist
+            allPapersSize = len(allpaperslist)
     except Exception as e:
         print(e)
         flash('Error in search. ' + str(e))
@@ -830,6 +838,7 @@ def searchWord():
     """  filtering paper content
     :return: object: allpaperlist
     """
+    allpaperslist = []
     try:
         dao = PaperDAO()
         searchWord = request.args.get('searchWord', type=str)
@@ -844,10 +853,11 @@ def searchWord():
         url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
               "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)
-        return jsonify(allpaperslist=allpaperslist)
+        return jsonify(allpaperslist=allpaperslist), 200
     except Exception as e:
         print(e)
         flash('Error in search. ' + str(e))
+        return jsonify(allpaperslist=allpaperslist), 400
 
 
 # Fetches details of chart based on user click
@@ -857,6 +867,8 @@ def paperdetails(paperid):
     """  fetching papers details content
     :return: template: paperdetails.html
     """
+    paperdetail = []
+    workflowdetail = []
     try:
         selectedserver = session.get("selectedserver")
         fetchdata = FetchDataFromAPI(selectedserver)
@@ -868,8 +880,6 @@ def paperdetails(paperid):
     except Exception as e:
         print(e)
         flash('Error in paperdetails. ' + str(e))
-        paperdetail = []
-        workflowdetail = []
         return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
 
 
@@ -881,6 +891,7 @@ def chartworkflow():
     """  Fetching chart workflow content
     :return: object: chartworkflow
     """
+    chartworkflowdetail = []
     try:
         dao = PaperDAO()
         paperid = request.args.get('paperid', 0, type=str)
@@ -891,10 +902,11 @@ def chartworkflow():
         fetchdata = FetchDataFromAPI(selectedserver)
         url = '/api/paper/' + paperid + '/chart/' + chartid
         chartworkflowdetail = fetchdata.fetchOutput(url)
-        return jsonify(chartworkflowdetail=chartworkflowdetail)
+        return jsonify(chartworkflowdetail=chartworkflowdetail), 200
     except Exception as e:
         print(e)
-        flash('Error in paperdetails. ' + str(e))
+        flash('Error in chartdetails. ' + str(e))
+        return jsonify(chartworkflowdetail=chartworkflowdetail), 400
 
 @csrf.exempt
 @app.route('/getDescriptor', methods=['POST','GET'])
@@ -947,7 +959,7 @@ def insertDOI():
     except Exception as e:
         print(e)
         content = {'Failed': 'Could Not Insert'}
-        return jsonify(content), 500
+        return jsonify(content), 400
     content = {'Success': 'Inserted'}
     return jsonify(content), 200
 

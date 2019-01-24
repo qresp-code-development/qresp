@@ -409,7 +409,8 @@ class FetchDataFromAPI():
     """ Fetches data for search,paper details and chart details for explorer
     """
     def __init__(self,servernames):
-        serverList = []
+        if isinstance(servernames,str):
+            servernames = [servernames]
         if servernames and len(servernames)>0:
             serverList = servernames
         else:
@@ -430,7 +431,6 @@ class FetchDataFromAPI():
         self.__servernames = list(set(self.__servernames))
         for snames in self.__servernames:
             url = snames + apiname
-            print("url>",url)
             headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
             response = requests.get(url,headers=headers, verify=False)
             if response.status_code == 200:
