@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+  web:
+    restart: always
+    build: ./web
+    expose:
+      - 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web/:/usr/src/app/web
+    environment:
+      - KEY=<insert key>
+      - GOOGLE_CLIENT_ID=<insert google client id>
+      - GOOGLE_CLIENT_SECRET=<insert google client secret>
+      - REDIRECT_URI=<insert redirect uri>
+      - MAIL_ADDR=<administrators mail address>
+      - MAIL_PWD=<administrators password>
+    command: python run.py --host=0.0.0.0 --port 8080
+
+  nginx:
+    restart: always
+    build: ./nginx
+    ports:
+      - "8001:8001"
+    volumes:
+      - /www/static
+      - ./papercollection:/usr/src/files
+    volumes_from:
+      - web
+    depends_on:
+      - web
+
+  mongodb:
+    image: mongo:latest
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/usr/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/usr/data/db
+    ports:
+      - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
