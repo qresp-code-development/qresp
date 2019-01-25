@@ -127,13 +127,13 @@ function buildTable(allPapers) {
                     var downloads = "<li><a href='" + row["_Search__downloadPath"] + "' title='Download' target='_blank'><img src='static/images/download-icon.png' alt='download'></a></li>";
                     var notebookPath = row["_Search__notebookPath"];
                     var notebookFile = row["_Search__notebookFile"];
-                    if (notebookPath !== "") {
+                    if (notebookPath !==undefined  && notebookPath !== "") {
                         if (notebookPath.indexOf('notebooks') < 0) {
                             notebookPath = notebookPath.replace(/^(https?:\/\/)?(www\.)?/, '');
                             notebookPath = "http://nbviewer.jupyter.org/url/" + notebookPath;
                         }
                     }
-                    if (notebookFile !== undefined || notebookFile !== null || notebookFile !== "") {
+                    if (notebookFile !== undefined && notebookFile !== null && notebookFile !== "") {
                         notebookPath = notebookPath + "/" + notebookFile;
                     }
                     var notebooks = "<li><a href='" + notebookPath + "' title='Jupyter Notebook' target='_blank'> <img src='static/images/jupyter.png' alt='jupyter'></a></li>";

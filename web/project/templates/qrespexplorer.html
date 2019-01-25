@@ -5,11 +5,11 @@
      <div class="card">
         <div class="card-body">
             <h2 data-toggle="tooltip" class="card-title" style="text-align: center;"> Select Qresp node to search </h2>
-                    <form action="{{ url_for('search') }}" method="post" class="text-center">
-                        <select name="serversList" id="serversList" class="selectpicker show-tick form-control"
-                                data-width="auto" data-actions-box="true" multiple data-live-search="true">
-                            {% for server in serverslist %}
-                                <option value="{{ server.qresp_server_url }}">{{ server.qresp_server_url }}</option>
+                    <form method="post" class="text-center">
+                        <select name="serversList" id="serversList" multiple="multiple" class="selectpicker show-tick form-control"
+                                data-width="80%" data-actions-box="true" multiple data-live-search="true">
+                            {% for server in form.serverList %}
+                                <option value="{{ server }}">{{ server }}</option>
                             {% endfor %}
                         </select>
                         <input type="submit" id="btnSearch"

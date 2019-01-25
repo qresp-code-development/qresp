@@ -1,3 +1,4 @@
+setuptools
 Flask==1.0.2
 Flask-API==1.0
 Flask-Cors==3.0.6
@@ -23,3 +24,8 @@ WTForms==2.2.1
 schedule
 flask-sitemap
 requests_oauthlib
+mongomock
+connexion[swagger-ui]
+coverage
+nose2
+python-coveralls

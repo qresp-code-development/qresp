@@ -11,7 +11,7 @@ setup(
     author='Aditya Tanikanti, Marco Govoni',
     author_email='datadev@lists.uchicago.edu',
     description='Qresp "Curation and Exploration of Reproducible Scientific Papers" is a Python application that facilitates the organization, annotation and exploration of data presented in scientific papers. ',
-    python_requires='>=3.0',
+    python_requires='>=3.4',
     packages=find_packages(),
     install_requires=[
         'flask_api',
@@ -26,7 +26,6 @@ setup(
         'mongoengine',
         'cryptography',
         'jinja2',
-        'requests',
         'pyOpenSSL',
         'werkzeug',
         'itsdangerous',
@@ -35,7 +34,11 @@ setup(
         'schedule',
         'wtforms',
         'flask-sitemap',
-        'requests_oauthlib'
+        'requests_oauthlib',
+        'mongomock',
+        'connexion[swagger-ui]',
+        'coverage',
+        'nose2'
       ],
     include_package_data=True
 )

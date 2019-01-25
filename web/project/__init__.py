@@ -4,6 +4,7 @@ from flask import Flask
 from flask_session import Session
 from flask_wtf import CSRFProtect
 from flask_sitemap import Sitemap
+import connexion
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
@@ -21,9 +22,14 @@ MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.environ.get("MONGODB_PASSWORD")
 MONGODB_DB = os.environ.get("MONGODB_DB")
 
+# Create the application instance
+connexionapp = connexion.App(__name__, specification_dir='./')
 
-app = Flask(__name__)
+# Read the swagger.yml file to configure the endpoints
+connexionapp.add_api('swagger.yml')
+app = connexionapp.app
 app.secret_key = '\\\xfcS\x1e\x8f\xfb]6\x1e.\xa8\xb3\xe1x\xc8\x8e\xc1\xeb5^x\x81\xcc\xd5'
+
 csrf = CSRFProtect(app)
 SESSION_TYPE = 'filesystem'
 app.config.from_object(__name__)

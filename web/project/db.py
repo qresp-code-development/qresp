@@ -1,7 +1,7 @@
 from flask_mongoengine import MongoEngine
 from pymongo import errors
-
-from project import app
+from project import connexionapp
+app = connexionapp.app
 
 class MongoDBConnection():
     """Class representing connection to Mongo database

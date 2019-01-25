@@ -48,6 +48,10 @@ class ConfigForm(Form):
     downloadPath = StringField('Download Path',description='The Globus service allows to download the paper content using gridFTP.')
     fileServerPath = StringField('File Server Path', description='If a HTTP service is running on the server, a URL may be associated to the paper content. This URL is only required by Qresp | Exploration to view images & download files using a web browser.')
 
+class QrespServerForm(Form):
+    serverList = FieldList(StringField(description='Select the Address of the Database. Qresp automatically inserts the metadata file in the database'))
+
+
 class NameForm(Form):
     firstName = StringField(validators=[validators.DataRequired()],description='e.g. John',render_kw={"placeholder": "Enter first name"})
     middleName = StringField(description='e.g. L.',render_kw={"placeholder": "Enter middle name"})
@@ -85,7 +89,7 @@ class InfoForm(Form):
     PIs = FieldList(FormField(NameForm), label='Principal Investigator(s)', description='Enter PI(s)', min_entries=1, validators=[validators.DataRequired()])
     collections = StringField(label='PaperStack',validators = [validators.DataRequired("Please enter keywords")], description='Enter name(s) defining group of papers (e.g. according to source of fundings)',render_kw={"placeholder": "Enter collection to which project belongs"})
     tags = StringField(label='Keywords',validators = [validators.DataRequired("Please enter keywords")], description='Enter Keyword(s) (e.g: DFT, organic materials, charge transfer): they facilitate paper searches using Qresp | Explorer',render_kw={"placeholder": "Enter tags for the project"})
-    mainnotebookfile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
+    notebookFile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
     doi = StringField('DOI',description='DOI minted by Qresp',render_kw={'readonly': True})
 
 class ExtraForm(Form):

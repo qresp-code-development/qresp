@@ -121,7 +121,7 @@ $('input[type=text]').bind("keyup focusin", function () {
 });
 
 //copy from tree
-$('form[name="info"] #mainnotebookfile').bind("keyup focusin", function () {
+$('form[name="info"] #notebookFile').bind("keyup focusin", function () {
 	$('#tree').removeClass('disabledtree');
 	var values = []
 	$("#tree").fancytree("getTree").visit(function (node) {
@@ -131,7 +131,7 @@ $('form[name="info"] #mainnotebookfile').bind("keyup focusin", function () {
 				var path = keypath.substring(keypath.indexOf(projectName) + projectName.length + 1);
 				values.push(path);
 				var copiedcontent = values.slice();
-				$('form[name="info"] #mainnotebookfile').val(copiedcontent);
+				$('form[name="info"] #notebookFile').val(copiedcontent);
 			}
 		}
 	});
@@ -623,11 +623,21 @@ function fillValues(obj,type) {
             $("div[data-toggle=author-fieldset-toggle]").each(function() {
                 var $this = $(this);
                  if(value.firstName) {
-                    $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
-                    // $this.find("button[data-toggle=fieldset-remove-row-authors]").trigger('click');
-                     $('#authors-' + index + '-firstName').val(value.firstName);
-                    $('#authors-' + index + '-middleName').val(value.middleName);
-                    $('#authors-' + index + '-lastName').val(value.lastName);
+                     // $this.find("button[data-toggle=fieldset-remove-row-authors]").trigger('click');
+                     if($('#authors-' + index + '-firstName').length) {
+                         $('#authors-' + index + '-firstName').val(value.firstName);
+                         $('#authors-' + index + '-middleName').val(value.middleName);
+                         $('#authors-' + index + '-lastName').val(value.lastName);
+                     }else{
+                        $this.find("button[data-toggle=fieldset-add-row-author]").trigger('click');
+                         var oldrow = $this.find("#authorTable tr:last");
+                         var row = oldrow.clone(true, true);
+                         var elem_id = row.find(":input")[0].id;
+                         var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1'));
+                         $('#authors-' + elem_num + '-firstName').val(value.firstName);
+                         $('#authors-' + elem_num + '-middleName').val(value.middleName);
+                         $('#authors-' + elem_num + '-lastName').val(value.lastName);
+                     }
                 }
             });
         });

@@ -6,11 +6,13 @@ import paramiko  # Provides SSH functionality
 import requests
 from jsonschema import Draft4Validator
 from requests_oauthlib import OAuth2Session
+import itertools
 
 
 from .views import ReferenceForm, ChartForm, DatasetForm, ToolForm, ScriptForm, HeadForm
 
 
+LOCALHOST = None
 
 
 
@@ -168,7 +170,10 @@ class Dtree():
             if "qresp.ini" in file:
                 self.openFileToReadConfig("qresp.ini")
             dataFile.title = file
-            parent = self.__path.split("/")
+            if "/" in self.__path:
+                parent = self.__path.split("/")
+            else:
+                parent = self.__path
             parentName = parent[len(parent) - 1]
             dataFile.key = self.__path + "/" + file
             dataFile.id = file
@@ -400,6 +405,46 @@ class SendDescriptor():
         response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
         return response
 
+class FetchDataFromAPI():
+    """ Fetches data for search,paper details and chart details for explorer
+    """
+    def __init__(self,servernames):
+        if isinstance(servernames,str):
+            servernames = [servernames]
+        if servernames and len(servernames)>0:
+            serverList = servernames
+        else:
+            serverslist = Servers()
+            serverList = [qrespserver['qresp_server_url'] for qrespserver in
+                               serverslist.getServersList()]
+        global LOCALHOST
+        if LOCALHOST:
+            serverList.append(LOCALHOST)
+        self.__servernames = serverList
+
+    def fetchOutput(self,apiname):
+        """ Fetches output to server
+        :return: object: sends descriptor to server
+        """
+        outDict = {}
+        output = None
+        self.__servernames = list(set(self.__servernames))
+        for snames in self.__servernames:
+            url = snames + apiname
+            headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
+            response = requests.get(url,headers=headers, verify=False)
+            if response.status_code == 200:
+                if "paper" or "workflow" in apiname:
+                    output = response.json()
+                elif "search" in apiname:
+                    outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
+                    output = list(outDict.values())
+                else:
+                    outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
+                    output = list(outDict.values())
+        return output
+
+
 class GoogleAuth():
     """ Authorization for google.
     """
@@ -420,3 +465,8 @@ class GoogleAuth():
                 redirect_uri=self.redirecturi)
         oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope)
         return oauth
+
+class SetLocalHost:
+    def __init__(self,localhost):
+        global LOCALHOST
+        LOCALHOST = localhost

@@ -16,4 +16,4 @@ services:
       - MAIL_PWD=<administrators password>
     volumes:
       - ./web/:/usr/src/app/web
-    command: flask run --host=0.0.0.0 --port 8080
+    command: python run.py --host=0.0.0.0 --port 8080
