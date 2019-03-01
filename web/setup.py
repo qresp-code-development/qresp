@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='qresp',
-    version='1.0',
+    version='1.1',
     url='http://qresp.org/',
     entry_points = {
         'console_scripts': ['qresp=project.__main__:main'],
@@ -26,6 +26,7 @@ setup(
         'mongoengine',
         'cryptography',
         'jinja2',
+        'jsonschema==2.6.0'
         'pyOpenSSL',
         'werkzeug',
         'itsdangerous',
