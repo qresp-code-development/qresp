@@ -1,13 +1,14 @@
-# Project Leads 
+# Contributing to Qresp
 
-- Marco Govoni (Argonne National Laboratory and University of Chicago)
-- Giulia Galli (University of Chicago and Argonne National Laboratory)
+Fork the repository and clone.
 
-## Developers
+** Qresp ** needs atleast Python version 3.4 and pip
 
-- Aditya Tanikanti (University of Chicago)
+```bash
+$ git clone https://github.com/qresp-code-development/qresp.git
+$ cd qresp/web
+$ pip install -r requirements.txt
+```
 
-## Contributors
-
-- Milson Munakami
-- Jonathan Skone
+## Running Tests
+Run `nose2 -v` to run all tests.
