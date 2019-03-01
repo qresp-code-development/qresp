@@ -25,7 +25,7 @@ schedule
 flask-sitemap
 requests_oauthlib
 mongomock
-connexion[swagger-ui]
+connexion[swagger-ui]==2.0.0
 coverage
 nose2
 python-coveralls
