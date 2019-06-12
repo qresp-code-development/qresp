@@ -1,0 +1,5 @@
+- repo: git://github.com/pre-commit/pre-commit-hooks
+  sha: v2.2.3
+  hooks:
+  - id: check-yaml
+  - id: check-json
