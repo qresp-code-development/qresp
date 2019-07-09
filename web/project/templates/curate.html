@@ -24,7 +24,9 @@
                         <option value="Info">Info</option>
                         <option value="Charts">Charts</option>
                         <option value="Tools">Tools</option>
-                        <option value="Datasets">Datasets</option>
+                        {% if not use_hybrid3 %}
+                          <option value="Datasets">Datasets</option>
+                        {% endif %}
                         <option value="Scripts">Scripts</option>
                         <option value="Reference">Paper</option>
                         <option value="Documentation">Documentation</option>
@@ -79,7 +81,22 @@
                     </div>
                     {# Charts #}
                     <div id="Charts" class="dropdown-container" style="display: none;">
-                        <h3 class="card-title" data-toggle="tooltip" data-placement="left" title="This section collects information about the Charts of the paper"> Add Charts </h3>
+                      {% if use_hybrid3 %}
+                        <h3>
+                          <span class="input-group-btn">
+                          <input type="submit" value="Add charts"
+                                 class="btn btn-theme-colored btn-lg m-0"
+                                 style="font-weight: bold;"
+                                 onclick="window.location='{{ hybrid3_add_data_url }}';">
+                          </span>
+                        </h3>
+                      {% else %}
+                        <h3 class="card-title" data-toggle="tooltip" data-placement="left"
+                            title="This section collects information about the Charts of the paper">
+                          Add Charts
+                        </h3>
+                      {% endif %}
+
                         <form method="post" id="ChartListForm">
                             <table id="chartbuttons">
                             </table>
@@ -292,12 +309,16 @@
                         <form method="post" id="ReferenceForm" name="reference">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <table>
-                                <tbody>
-                                {{ render_field_curate(referenceform.kind) }}
+                              <tbody>
+                                {% if not use_hybrid3 %}
+                                  {{ render_field_curate(referenceform.kind) }}
+                                {% endif %}
                                  <div class="form-group row">
                                         <div class="col-sm-12">
-                                             <label class="col-form-label">{{ referenceform.DOI.label }}<span style="color: red;">*</span>
-                                                 <input type="button" class="btn btn-theme-colored" id="fillReference" title="Auto fills paper fields using DOI." value="fetch" onclick="javascript:fetchDOI($('#DOI').val());"/>
+                                          <label class="col-form-label">{{ referenceform.DOI.label }}<span style="color: red;">*</span>
+                                            {% if not use_hybrid3 %}
+                                              <input type="button" class="btn btn-theme-colored" id="fillReference" title="Auto fills paper fields using DOI." value="fetch" onclick="javascript:fetchDOI($('#DOI').val());"/>
+                                            {% endif %}
                                              </label>
                                         </div>
                                          <div class="col-sm-12">
@@ -307,7 +328,10 @@
                                 </tbody>
                             </table>
                                 <div data-toggle="author-fieldset-toggle" id="author-fieldset">
-                                <label class="col-form-label">{{ referenceform.authors.label }}</label> <span style="color: red;">*</span> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-author" data-target="#author-fieldset">+</button>
+                                  <label class="col-form-label">{{ referenceform.authors.label }}</label> <span style="color: red;">*</span>
+                                  {% if not use_hybrid3 %}
+                                    <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-author" data-target="#author-fieldset">+</button>
+                                  {% endif %}
 
                                 <table id="authorTable">
                                     {% for name in referenceform.authors %}
@@ -315,7 +339,9 @@
                                         <td style="padding-bottom: 1rem;">{{ name.firstName(class_='form-control',title=name.firstName.description,**{'data-toggle': 'tooltip'}) }}</td>
                                         <td style="padding-bottom: 1rem;">{{ name.middleName(class_='form-control',title=name.middleName.description,**{'data-toggle': 'tooltip'}) }}</td>
                                         <td style="padding-bottom: 1rem;">{{ name.lastName(class_='form-control',title=name.lastName.description,**{'data-toggle': 'tooltip'}) }}</td>
-                                        <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-authors" id="authors-{{loop.index0}}-remove">-</button></td>
+                                        {% if not use_hybrid3 %}
+                                          <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-authors" id="authors-{{loop.index0}}-remove">-</button></td>
+                                        {% endif %}
                                     </tr>
                                     {% endfor %}
                                 </table>

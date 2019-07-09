@@ -222,7 +222,7 @@
     "datasets": {
       "$id": "#/properties/datasets",
       "type": ["array"],
-      "minItems": 1,
+      "minItems": 0,
       "title": "The Datasets Schema",
       "items": {
         "$id": "#/properties/datasets/items",

@@ -303,9 +303,32 @@ def curate():
     if session.get("reference"):
         referenceForm = session.get("reference")
         referenceform = ReferenceForm(**referenceForm)
+    use_hybrid3 = 'use-hybrid3' in session
+    hybrid3_add_data_url = (f'{app.config["HYBRID3_URL"]}/materials/add-data?'
+                            f'return-url={app.config["HOST_URL"]}/hybrid3')
+    if use_hybrid3:
+        chartform.make_fields_readonly()
+    if session.get('hybrid3-reference'):
+        hybrid3_ref = session.get('hybrid3-reference')
+        authors = [{'firstName': a['first_name'], 'lastName': a['last_name']}
+                   for a in hybrid3_ref['authors']]
+        referenceform = ReferenceForm(
+            kind=hybrid3_ref['kind'],
+            DOI=hybrid3_ref['DOI'],
+            authors=authors,
+            title=hybrid3_ref['title'],
+            page=hybrid3_ref['page'],
+            publishedAbstract=hybrid3_ref['publishedAbstract'],
+            volume=hybrid3_ref['volume'],
+            year=hybrid3_ref['year'],
+            URLs=hybrid3_ref['URLs'])
+        referenceform.journal = JournalForm(fullName=hybrid3_ref['journal'])
+        referenceform.make_fields_readonly()
+        hybrid3_add_data_url = f'{hybrid3_add_data_url}&reference={hybrid3_ref["pk"]}'
     return render_template('curate.html',infoform=infoform,chartlistform=chartlist,chartform=chartform,
                            toollistform=toollist,toolform=toolform,datalistform=datasetlist,datasetform=datasetform,
-                           scriptlistform=scriptlist,scriptform=scriptform,referenceform=referenceform,projName=projectName,documentationform=documentationform)
+                           scriptlistform=scriptlist,scriptform=scriptform,referenceform=referenceform,projName=projectName,documentationform=documentationform,
+                           use_hybrid3=use_hybrid3, hybrid3_add_data_url=hybrid3_add_data_url)
 
 @csrf.exempt
 @app.route('/info', methods=['POST', 'GET'])
@@ -698,7 +721,7 @@ def download():
     notebookPath = session.get("notebookPath","")
     downloadPath = session.get("downloadPath","")
     projectName = session.get("ProjectName","")
-    if projectName:
+    if projectName and 'use-hybrid3' not in session:
         if projectName not in fileServerPath:
             fileServerPath = fileServerPath + "/" +projectName
         if projectName not in notebookPath:
@@ -962,6 +985,110 @@ def insertDOI():
         return jsonify(content), 400
     content = {'Success': 'Inserted'}
     return jsonify(content), 200
+
+@app.route('/use-hybrid3', methods=['GET'])
+def use_hybrid3():
+    """Switch on the global flag for exporting data to HybriD3."""
+    session['use-hybrid3'] = True
+    return redirect(url_for('curate'))
+
+
+@app.route('/hybrid3', methods=['GET'])
+def hybrid3():
+    """Fetch data from HybriD3 and prefill forms in Qresp."""
+    dataset = requests.get(f'{app.config["HYBRID3_URL"]}/materials/datasets/'
+                           f'{request.args.get("pk")}/info').json()
+    pk = dataset['pk']
+    session['fileServerPath'] = app.config['HYBRID3_URL']
+    session['downloadPath'] = 'materials'
+    if not session.get("ProjectName"):
+        session['ProjectName'] = f'materials_{pk}'
+    if dataset['caption']:
+        caption = dataset['caption']
+    else:
+        caption = f'dataset {pk}'
+    properties = [dataset['primary_property']]
+    if dataset['primary_unit']:
+        properties[-1] += f' ({dataset["primary_unit"]})'
+    if dataset['secondary_property']:
+        properties.append(dataset["secondary_property"])
+    if dataset['secondary_unit']:
+        properties[-1] += f' ({dataset["secondary_unit"]})'
+    chartList = deepcopy(session.get('charts', []))
+    chartList.append({
+        'id': '',
+        'caption': caption,
+        'number': str(len(chartList) + 1),
+        'files': f'media/qresp/dataset_{pk}/data.txt',
+        'imageFile': f'media/qresp/dataset_{pk}/figure.png',
+        'notebookFile': '',
+        'properties': properties,
+        'saveas': f'dataset_{pk}.png',
+        'extraFields': [
+            {
+                'extrakey': '',
+                'extravalue': ''
+            }
+        ]
+    })
+    session['charts'] = deepcopy(chartList)
+    reference = requests.get(
+        f'{app.config["HYBRID3_URL"]}/materials/references/'
+        f'{dataset["reference"]}').json()
+    session['hybrid3-reference'] = {
+        'pk': reference['pk'],
+        'kind': 'journal',
+        'DOI': reference['doi_isbn'],
+        'authors': reference['author_set'],
+        'title': reference['title'],
+        'journal': reference['journal'],
+        'page': reference['pages_start'],
+        'publishedAbstract': '',
+        'volume': reference['vol'],
+        'year': reference['year'],
+        'URLs': '',
+    }
+    return redirect(url_for('curate'))
+
+
+@app.route('/export/<paperid>', methods=['GET'])
+def export(paperid):
+    """Export some of the data to HybriD3.
+
+    Since HybriD3 is a structured database (MariaDB), the user will
+    have to fill in most fields on the HybriD3 data submission
+    webpage.
+
+    """
+    selectedserver = session.get('selectedserver')
+    fetchdata = FetchDataFromAPI(selectedserver)
+    paper_detail = fetchdata.fetchOutput(f'/api/paper/{paperid}')
+    n_charts = len(paper_detail['_PaperDetails__charts'])
+    if 'current_export_chart' not in session:
+        session['current_export_chart'] = 0
+    else:
+        session['current_export_chart'] += 1
+    if session.get('current_export_chart') == n_charts - 1:
+        return_url = f'{app.config["HOST_URL"]}/paperdetails/{paperid}'
+    else:
+        return_url = f'{app.config["HOST_URL"]}/export/{paperid}'
+    hybrid3_add_data_url = (
+        f'{app.config["HYBRID3_URL"]}/materials/add-data?'
+        f'return-url={return_url}&'
+        f'qresp-fetch-url={app.config["HOST_URL"]}/get-paper-details/{paperid}'
+        f'&qresp-chart-nr={session.get("current_export_chart")}')
+    if session.get('current_export_chart') == n_charts - 1:
+        session.pop('current_export_chart')
+    return redirect(hybrid3_add_data_url)
+
+
+@app.route('/get-paper-details/<paperid>', methods=['GET'])
+def get_paper_details(paperid):
+    selectedserver = session.get('selectedserver')
+    fetchdata = FetchDataFromAPI(selectedserver)
+    paper_detail = fetchdata.fetchOutput(f'/api/paper/{paperid}')
+    return jsonify(paper_detail)
+
 
 def main(port):
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
