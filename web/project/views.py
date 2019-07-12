@@ -65,11 +65,10 @@ class DetailsForm(Form):
     affiliation = StringField('Affiliation', description='e.g. Department of Chem, University of XYZ',render_kw={"placeholder": "Enter your university"})
 
 class ServerForm(Form):
-    serverName = StringField('Server Name', [validators.DataRequired("Please enter hostname of server")], description='Enter Hostname of remote server where paper content is organized and located e.g. midway.rcc.uchicago.edu',render_kw={"placeholder": "Enter hostname of server"})
-    username = StringField('Username', [validators.DataRequired("Please enter username of server")], description='Enter your username to establish a SSH connection to the remote server',render_kw={"placeholder": "Enter username to login"})
-    password = PasswordField('Password', [validators.DataRequired("Please enter password of server")], description='Enter your password associated to the username',render_kw={"placeholder": "Enter password to login"})
-    isDUOAuth = RadioField('Is 2FA DUO authorized?', choices=[('Yes', 'Yes'), ('No', 'No')], default='Yes',description='Is server 2FA DUO authorized?')
-
+    kind = RadioField('Kind', choices=[('HTTP', 'HTTP Connection'), ('Zenodo', 'Zenodo'), ('Other','Other')], default='HTTP',description='Select connection type')
+    hostUrl = SelectField('Host Url',choices=[], validators = [RequiredIf(kind='HTTP Connection')], description='Enter url of remote server where paper content is organized and located e.g. https://notebook.rcc.uchicago.edu/files/')
+    zenodoUrl = StringField('Zenodo', description='e.g. https://www.zenodo.org/record/3332726/preview/Colex_Europe_Suppl.zip',render_kw={"placeholder": "Enter zenodo preview url to parse data"})
+    other = StringField('Other', description='e.g. http://xyz.com/files',render_kw={"placeholder": "Enter url to parse data"})
 
 class ProjectForm(Form):
     downloadPath = HiddenField()

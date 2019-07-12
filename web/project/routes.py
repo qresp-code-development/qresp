@@ -2,7 +2,7 @@ import os
 from datetime import timedelta, datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+import uuid
 
 import schedule
 from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file
@@ -12,9 +12,9 @@ import smtplib
 
 from flask_cors import CORS
 
-from .paperdao import PaperDAO,MongoDBConnection
-from .util import *
-from .views import *
+from project.paperdao import PaperDAO,MongoDBConnection
+from project.util import *
+from project.views import *
 from project import app
 qresp_config = {}
 ftp_dict = {}
@@ -36,19 +36,9 @@ class InvalidUsage(Exception):
         rv['message'] = self.message
         return rv
 
-def closeConnection():
-    """closes ssh connection"""
-    for username in list(ftp_dict.keys()):
-        if username not in session:
-            del ftp_dict[username]
-
-schedule.every(23).hours.do(closeConnection)
-
-
-
 @app.before_request
 def make_session_permanent():
-    """ makes session values last for a day
+    """ makes session values last for a day, session data is stored in the server
     """
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=1)
@@ -57,14 +47,251 @@ def make_session_permanent():
 @app.route('/')
 @app.route('/index')
 def index():
-    """ Fetches the homepage
-    """
-    #TO BE DELETED
-    #SetLocalHost(str(request.host_url).strip("/"))
+    """ Fetches the homepage """
     return render_template('index.html')
+
+# Fetches list of qresp servers
+@app.route('/test')
+def test():
+    """ Fetches the homepage """
+    """ Previews the metadata for user """
+    if request.method == 'GET':
+        """ This method helps in storing the details of the person using the curator. """
+        detailsform = DetailsForm(**session.get("insertedBy",request.form))
+
+        serverform = ServerForm(request.form)
+        serverslist = Servers()
+        serverform.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
+                                serverslist.getHttpServersList()]
+
+        projectform = ProjectForm(request.form)
+        projectform.folderAbsolutePath.data = session.get("folderAbsolutePath","")
+        projectform.fileServerPath.data = session.get("fileServerPath","")
+
+        chartform = ChartForm(request.form)
+        chartlist = deepcopy(session.get("charts", []))
+
+        toolform = ToolForm(request.form)
+        toollist = deepcopy(session.get("tools", []))
+
+        datasetform = DatasetForm(request.form)
+        datasetlist = deepcopy(session.get("datasets", []))
+
+        scriptform = ScriptForm(request.form)
+        scriptlist = deepcopy(session.get("scripts", []))
+
+        return render_template('testpaperdetails.html', detailsform=detailsform, serverform=serverform,
+                               projectform=projectform, chartlistform=chartlist, chartform=chartform,
+                               toollistform=toollist, toolform=toolform, datalistform=datasetlist,
+                               datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform)
+
+@csrf.exempt
+@app.route('/testdetails', methods=['POST', 'GET'])
+def testdetails():
+    """ This method helps in storing the details of the person using the curator. """
+    form = DetailsForm(request.form)
+    if request.method == 'POST' and form.validate():
+        session["insertedBy"] = form.data
+        return jsonify(data=form.data), 200
+    elif session.get("insertedBy"):
+        detailsForm = session.get("insertedBy")
+        form = DetailsForm(**detailsForm)
+    return jsonify(data=form.errors), 400
+
+@csrf.exempt
+@app.route('/testserver', methods=['POST'])
+def testserver():
+    """ This method helps in storing the details of the person using the curator. """
+    form = ServerForm(request.form)
+    serverslist = Servers()
+    form.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
+                            serverslist.getHttpServersList()]
+    if request.method == 'POST' and form.validate():
+        try:
+            if "HTTP" in form.kind.data:
+                session["fileServerPath"] = form.hostUrl.data
+            elif "Zenodo" in form.kind.data:
+                session["fileServerPath"] = form.zenodoUrl.data
+            else:
+                session["fileServerPath"] = form.other.data
+            return jsonify(data=form.data), 200
+        except Exception as e:
+            print(e)
+            flash("Could not connect to server. Plase try again!"+str(e))
+            return jsonify(data=form.errors), 400
+    else:
+        flash(form.errors)
+    return jsonify(data=form.errors), 400
+
+@csrf.exempt
+@app.route('/testsetproject', methods=['POST', 'GET'])
+def testsetproject():
+    """ Sets server services available """
+    form = ProjectForm(request.form)
+    isConfig = "N"
+    services = []
+    folderAbsolutePath = None
+    if request.method == 'POST':
+        try:
+            folderAbsolutePath = form.folderAbsolutePath.data
+            dtree = Dtree(folderAbsolutePath, session)
+            session["ProjectName"] = folderAbsolutePath.rsplit("/", 2)[1]
+            dtree.openFileToReadConfigFromHttp("qresp.ini")
+            services = dtree.fetchServices()
+            isConfig = dtree.checkIsConfigFileFromHttp()
+            session["folderAbsolutePath"] = folderAbsolutePath
+            return jsonify(folderAbsolutePath=folderAbsolutePath,isConfigFile=isConfig,services=services), 200
+        except Exception as e:
+            print("Error",e)
+            flash("Could not connect to server. Plase try again! " + str(e))
+    else:
+        flash(form.errors)
+    return jsonify(folderAbsolutePath=folderAbsolutePath, isConfigFile=isConfig, services=services), 400
+
+@csrf.exempt
+@app.route('/testgetTreeInfo', methods=['POST', 'GET'])
+def testgetTreeInfo():
+    """ Renders the Tree containing Project Information which is 'SSH'ed with the remote directory """
+    pathDetails = request.get_json()
+    listObjects = []
+    services = []
+    try:
+        if 'treeUrl' in pathDetails:
+            content_path = pathDetails['treeUrl']
+        else:
+            content_path = session.get("folderAbsolutePath")
+        dtree = Dtree(content_path, session)
+        print(content_path)
+        if 'zenodo' in content_path:
+            listObjects = dtree.fetchForTreeFromZenodo()
+        else:
+            listObjects = dtree.fetchForTreeFromHttp()
+            services = dtree.fetchServices()
+    except Exception as e:
+        jsonify({'errors':str(e)}), 400
+        print(e)
+    return jsonify({'listObjects': listObjects, 'services': services}), 200
+
+@csrf.exempt
+@app.route('/testcharts', methods=['POST'])
+def testcharts():
+    """ Renders the charts section of the paper """
+    chartform = ChartForm(request.form)
+    if request.method == 'POST' and chartform.validate():
+        chartList = deepcopy(session.get("charts", []))
+        if len(chartList) <  1:
+            chartList.append(chartform.data)
+            session["charts"] = deepcopy(chartList)
+        else:
+            idList = [eachchart['saveas'] if eachchart['saveas'] else eachchart['id'] for eachchart in chartList]
+            id = chartform.id.data
+            saveas = chartform.saveas.data
+            if id not in idList and saveas not in idList:
+                chartList.append(chartform.data)
+                session["charts"] = deepcopy(chartList)
+            else:
+                chartList = [item for item in chartList if item['saveas'] not in chartform.saveas.data]
+                chartList.append(chartform.data)
+                session["charts"] = deepcopy(chartList)
+        return jsonify(chartList = chartList,folderAbsolutePath=session.get("folderAbsolutePath")), 200
+    return jsonify(data=chartform.errors), 400
+
+@csrf.exempt
+@app.route('/testworkflow', methods=['POST', 'GET'])
+def testworkflow():
+    """Renders the Workflow page """
+    GenerateIDs(session)
+    nodesList = []
+    workflowsave = request.json
+    workflow = WorkflowCreator()
+    for chart in session.get("charts",[]):
+        try:
+            img = '<img src="' + session.get("folderAbsolutePath")+chart["imageFile"] + '" width="250px;" height="250px;"/>'
+            caption = "<b> Image: </b>" + img
+        except Exception as e:
+            caption = ""
+        nodesList.append(chart["id"])
+        workflow.addChart(chart["id"], caption)
+    for tool in session.get("tools",[]):
+        pack = ""
+        try:
+            pack = "<b> Package Name: </b>" + tool["packageName"]
+        except:
+            try:
+                pack = "<b> Facility Name: </b>" + tool["facilityName"] + " <br/> <b>Measurement: </b>" + tool["measurement"]
+            except:
+                pack = ""
+        nodesList.append(tool["id"])
+        workflow.addTool(tool["id"], pack)
+    for dataset in session.get("datasets",[]):
+        readme = ""
+        try:
+            readme = "<b> ReadMe: </b>" + dataset["readme"]
+        except:
+            readme = ""
+        nodesList.append(dataset["id"])
+        workflow.addDataset(dataset["id"], readme)
+    for script in session.get("scripts",[]):
+        try:
+            readme = "<b> ReadMe: </b>" + script["readme"]
+        except:
+            readme = ""
+        if not script["saveas"]:
+            script["saveas"] = script["id"]
+        nodesList.append(script["id"])
+        workflow.addScript(script["id"], readme)
+    for head in session.get("heads",[]):
+        try:
+            readme = head["readme"]
+        except:
+            readme = ""
+        try:
+            nodesList.append(head["id"])
+            workflow.addHead(head["id"], readme, head["URLs"])
+        except:
+            nodesList.append(head["id"])
+            workflow.addHead(head["id"], readme)
+
+    for edge in session.get("edges",[]):
+        workflow.addEdge(edge)
+    try:
+        edgeList = []
+        for edge in workflowsave[0]:
+            workflow.addEdge(edge)
+            edgeList.append(edge)
+        session["edges"] = edgeList
+    except Exception as e:
+        print(e)
+    try:
+        heads = HeadForm(request.form)
+        headInfo = workflowsave[1]
+        headList = []
+        for head in headInfo:
+            hinfo = head.split("*")
+            nodesList.append(hinfo[0])
+            heads.id.data = hinfo[0]
+            try:
+                if hinfo[1]:
+                    heads.readme.data = str(hinfo[1])
+            except Exception as e:
+                print(e)
+            try:
+                if hinfo[2]:
+                    heads.URLs.data = str(hinfo[2]).strip()
+            except Exception as e:
+                print(e)
+            headList.append(heads.data)
+        session["heads"] = headList
+        nodesList = list(set(nodesList))
+        workflowinfo = WorkflowForm(edges = edgeList,nodes=nodesList)
+        session["workflow"] = workflowinfo.data
+    except Exception as e:
+        print(e)
+    return jsonify({'workflow': workflow.__dict__}), 200
 
 @app.route('/downloads/<file>')
 def downloadfile(file=None):
+    """ Download file from server """
     if file:
         try:
             path = 'downloads/'+file
@@ -77,22 +304,19 @@ def downloadfile(file=None):
 
 @app.route('/qrespcurator')
 def qrespcurator():
-    """ Fetches the curator homepage
-    """
+    """ Fetches the curator homepage """
     return render_template('qrespcurator.html')
 
 @app.route('/startfromscratch')
 def startfromscratch():
-    """ clears session
-    """
+    """ clears session and redirects to details page"""
     session.clear()
     return redirect(url_for('details'))
 
 @csrf.exempt
 @app.route('/uploadFile',methods=['POST','GET'])
 def uploadFile():
-    """ Renders and stores uploaded file text
-    """
+    """ Renders and stores uploaded file text into session """
     try:
         uploadJSON = json.loads(request.get_json())
         paperform = PaperForm(**uploadJSON)
@@ -166,8 +390,7 @@ def uploadFile():
 @csrf.exempt
 @app.route('/details', methods=['POST', 'GET'])
 def details():
-    """ This method helps in storing the details of the person using the curator.
-    """
+    """ This method helps in storing the details of the person using the curator. """
     form = DetailsForm(request.form)
     if request.method == 'POST' and form.validate():
         session["insertedBy"] = form.data
@@ -180,31 +403,31 @@ def details():
 @csrf.exempt
 @app.route('/server', methods=['POST', 'GET'])
 def server():
-    """ This method helps in connecting to the remote server for the data tree.
-    """
+    """ This method helps in connecting to the remote server for the data tree. """
     form = ServerForm(request.form)
+    url = None
+    allpaperslist = None
+    serverslist = Servers()
+    form.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
+                           serverslist.getHttpServersList()]
+    fetchdata = FetchDataFromAPI(servernames=None)
+    if session.get("insertedBy"):
+        url = '/api/search' + "?authorsList=" + session.get("insertedBy")['lastName']
+        allpaperslist = fetchdata.fetchOutput(url)
     if request.method == 'POST' and form.validate():
         try:
-            if ftp_dict.get(form.username.data):
-                ftp_dict.get(form.username.data).close()
-                del ftp_dict[form.username.data]
-            sftp = ConnectToServer(form.serverName.data,form.username.data,form.password.data,form.isDUOAuth.data,"1")
-            session["sftpclient"] = form.username.data
-            ftp_dict[form.username.data] = sftp.getSftp()
+            session["folderAbsolutePath"] = form.hostUrl.data
             return redirect(url_for('project'))
         except Exception as e:
             flash("Could not connect to server. Plase try again!"+str(e))
             render_template('server.html', form=form), 400
-    return render_template('server.html', form=form), 200
-
+    return render_template('server.html', form=form, allpaperslist=allpaperslist), 200
 
 @csrf.exempt
 @app.route('/project', methods=['GET'])
 def project():
-    """ This method helps in populating the project form.
-    """
+    """ This method helps in populating the project form. """
     form = ProjectForm(request.form)
-    # absPath = ""
     if request.method == 'GET':
         if session.get("folderAbsolutePath"):
             form.folderAbsolutePath.data = session.get("folderAbsolutePath")
@@ -215,8 +438,7 @@ def project():
 @csrf.exempt
 @app.route('/setproject', methods=['POST', 'GET'])
 def setproject():
-    """ Sets server services available
-    """
+    """ Sets server services available """
     absPath = ""
     isConfig = "N"
     services = []
@@ -224,44 +446,35 @@ def setproject():
         if request.method == 'POST':
             pathDetails = request.get_json()
             absPath = pathDetails['folderAbsolutePath']
-            ftpclient = session.get("sftpclient")
-            ftp = ftp_dict[ftpclient]
-            if "/" in absPath:
-                dtree = Dtree(ftp, absPath.rsplit("/", 1)[0], session)
-            else:
-                dtree = Dtree(ftp, absPath, session)
-            dtree.openFileToReadConfig("qresp.ini")
+            ftp = None
+            dtree = Dtree(absPath, session)
+            session["ProjectName"] = absPath.rsplit("/", 2)[1]
+            dtree.openFileToReadConfigFromHttp("qresp.ini")
             services = dtree.fetchServices()
-            isConfig = dtree.checkIsConfigFile()
+            isConfig = dtree.checkIsConfigFileFromHttp()
+            session["fileServerPath"] = absPath
             session["folderAbsolutePath"] = absPath
-            if "/" in absPath:
-                session["ProjectName"] = absPath.rsplit("/",1)[1]
-            else:
-                session["ProjectName"] = absPath
             return jsonify(folderAbsolutePath=absPath,isConfigFile=isConfig,services=services), 200
     except Exception as e:
-        print(e)
+        print("Error",e)
         flash("Could not connect to server. Plase try again! " + str(e))
         return jsonify(folderAbsolutePath=absPath, isConfigFile=isConfig, services=services), 401
-
 
 @csrf.exempt
 @app.route('/getTreeInfo', methods=['POST', 'GET'])
 def getTreeInfo():
-    """   Renders the Tree containing Project Information which is 'SSH'ed with the remote directory.
-    """
+    """   Renders the Tree containing Project Information which is 'SSH'ed with the remote directory """
     pathDetails = request.get_json()
     listObjects = []
     services = []
+    ftp = None
     try:
-        ftpclient = session.get("sftpclient")
-        ftp = ftp_dict[ftpclient]
         if 'folderAbsolutePath' in pathDetails:
             content_path = pathDetails['folderAbsolutePath']
         else:
             content_path = session.get("folderAbsolutePath")
-        dtree = Dtree(ftp,content_path,session)
-        listObjects = dtree.fetchForTree()
+        dtree = Dtree(content_path, session)
+        listObjects = dtree.fetchForTreeFromHttp()
         services = dtree.fetchServices()
     except Exception as e:
         jsonify({'errors':str(e)}), 400
@@ -295,11 +508,14 @@ def curate():
         datasetlist = deepcopy(session.get("datasets",[]))
     if session.get("scripts",[]):
         scriptlist = deepcopy(session.get("scripts",[]))
-    if session.get("folderAbsolutePath"):
-        if "/" in session.get("folderAbsolutePath"):
-            projectName = session.get("folderAbsolutePath").rsplit("/", 1)[1]
-        else:
-            projectName = session.get("folderAbsolutePath")
+    if session.get("ProjectName"):
+        projectName = session.get("ProjectName")
+    else:
+        if session.get("folderAbsolutePath"):
+            if "/" in session.get("folderAbsolutePath"):
+                projectName = session.get("folderAbsolutePath").rsplit("/", 1)[1]
+            else:
+                projectName = session.get("folderAbsolutePath")
     if session.get("reference"):
         referenceForm = session.get("reference")
         referenceform = ReferenceForm(**referenceForm)
@@ -697,7 +913,7 @@ def download():
     fileServerPath = session.get("fileServerPath","")
     notebookPath = session.get("notebookPath","")
     downloadPath = session.get("downloadPath","")
-    projectName = session.get("ProjectName","")
+    projectName = session.get("ProjectName",uuid.uuid4().hex)
     if projectName:
         if projectName not in fileServerPath:
             fileServerPath = fileServerPath + "/" +projectName
@@ -721,7 +937,20 @@ def download():
     with open("papers/"+projectName+"/"+"data.json", "w") as outfile:
         json.dump(paperdata, outfile, default=lambda o: o.__dict__, separators=(',', ':'), sort_keys=True, indent=3)
     session["paper"] = paperdata
-    return jsonify(paper=paperdata), 200
+    return jsonify(paper=paperdata, projectName=projectName), 200
+
+
+@csrf.exempt
+@app.route('/preview/<projectName>', methods=['POST', 'GET'])
+def preview(projectName):
+    """ Previews the metadata for user """
+    data = None
+    with open("papers/" + projectName + "/" + "data.json") as json_file:
+        data = json.load(json_file)
+    previewObj = ObjectsForPreview(data)
+    paperdetail = previewObj.getPaperDetails()
+    workflowdetail = previewObj.getWorkflowDetails()
+    return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
 
 
 @csrf.exempt
@@ -789,7 +1018,6 @@ def admin():
 @app.route('/config', methods=['POST', 'GET'])
 def config():
     """ This method helps in connecting to the mongo database.
-    :return:
     """
     form = ConfigForm(request.form)
     app.config['qresp_config']['fileServerPath'] = 'https://notebook.rcc.uchicago.edu/files'
@@ -798,7 +1026,6 @@ def config():
     return render_template('config.html', form=form,verifyform =verifyform)
 
 
-# Fetches search options after selecting server
 @csrf.exempt
 @app.route('/search', methods=['POST', 'GET'])
 def search():
@@ -831,7 +1058,6 @@ def search():
                            publicationlist=publicationlist,allPapersSize=allPapersSize)
 
 
-# Fetches search word options after selecting server
 @csrf.exempt
 @app.route('/searchWord', methods=['POST', 'GET'])
 def searchWord():

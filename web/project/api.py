@@ -7,7 +7,7 @@ def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=Non
     This function responds to a request for /api/search
     with the complete lists of papers
 
-    :return:        list of papers
+    :return list allpaperslist: A list of all papers
     """
     allpaperslist = []
     try:
@@ -30,7 +30,7 @@ def collections():
     This function responds to a request for /api/collections
     with the complete lists of c
 
-    :return:        list of collections
+    :return list allcollectionlist: A list of all collections
     """
     allcollectionlist = []
     try:
@@ -45,7 +45,7 @@ def authors():
     This function responds to a request for /api/authors
     with the complete lists of authors
 
-    :return:        list of authors
+    :return list allauthorlist: A list of all authors
     """
     allauthorlist = []
     try:
@@ -60,7 +60,7 @@ def publications():
     This function responds to a request for /api/publications
     with the complete lists of publications
 
-    :return:        list of publications
+    :return list allpublist: A list of all publications
     """
     allpublist = []
     try:
@@ -75,7 +75,7 @@ def paper(id):
     This function responds to a request for /api/paper/{id}
     with the details of paper given id
 
-    :return:        paper details object
+    :return object paperdetail: An object of paper with paper contents
     """
     paperdetail = None
     try:

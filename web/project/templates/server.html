@@ -3,19 +3,17 @@
 {% block page_content %}
 
     {% from "_formhelpers.html" import render_field %}
-    <div class="card">
-        <div class="card-body">
-            <h3 data-toggle="tooltip" title="This step defines the location of the remote server where the paper content is organized and  stored. The paper will be accessed by establishing an SSH connection using the credentials inserted below. Username and password will not be saved." class="card-title text-center"> Connect to the server where the paper content is located </h3>
-            <div class="alert alert-success fade" id="bsalert" style="margin-top:0.1rem;margin-bottom:0.1rem;">
-                        <strong>Please check your phone!</strong>
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            </div>
-            <form method="post" action="server">
+     <div class="row">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h3 data-toggle="tooltip" title="This step defines the location of the remote server where the paper content is organized and  stored. The paper will be accessed by establishing HTTP access." class="card-title text-center"> Select HTTP Connection  </h3>
+                    <form method="post" action="server" name="server">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        {{ render_field(form.serverName) }}
-                        {{ render_field(form.username) }}
-                        {{ render_field(form.password) }}
-                        {{ render_field(form.isDUOAuth) }}
+                        {{ form.kind(title=form.kind.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
+                        <div id="HTTP" class="serverClass">
+                            {{ render_field(form.hostUrl) }}
+                        </div>
                        <span class="input-group-btn">
                             <input type="submit" id="btnServer"
                                    value="Continue"
@@ -27,10 +25,69 @@
                                    style="font-weight: bold; height: 50px;" onclick="window.location='/project';">
                        </span>
                     </form>
+                </div>
+            </div>
         </div>
-    </div>
+         <div class="col-md-7">
+             <div class="card">
+                <div class="card-body">
+                    <h3 data-toggle="tooltip" class="card-title"> Your previously curated papers </h3>
+                    <form class="paper-form" name="paper-form">
+						<table style="display: inline-block;">
+							<tbody id="papers">
+                                <div id="divPapers">
+                                    <table id="tblPapers" class="display" cellspacing="0" width="100%">
+                                        <thead>
+                                        <tr>
+                                <th>Paper Id</th>
+                                <th>Title</th>
+                                <th>Tag(s)</th>
+                                <th>Collections(s)</th>
+                                <th>Author(s)</th>
+                                <th>Publication</th>
+                                <th>Abstract</th>
+                                <th>DOI</th>
+                                <th>Server Path</th>
+                                <th>Folder Absolute Path</th>
+                                <th>File Server Path</th>
+                                <th>Download Path</th>
+                                <th>Notebook Path</th>
+                                <th>Notebook File</th>
+                                <th>Year</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th>Paper Id</th>
+                                <th>Title</th>
+                                <th>Tag(s)</th>
+                                <th>Collections(s)</th>
+                                <th>Author(s)</th>
+                                <th>Publication</th>
+                                <th>Abstract</th>
+                                <th>DOI</th>
+                                <th>Server Path</th>
+                                <th>Folder Absolute Path</th>
+                                <th>File Server Path</th>
+                                <th>Download Path</th>
+                                <th>Notebook Path</th>
+                                <th>Notebook File</th>
+                                <th>Year</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+							</tbody>
+						</table>
+					</form>
+                </div>
+             </div>
+         </div>
+     </div>
     <script src="{{ url_for('static', filename='./javascript/modules/server.js') }}"></script>
-        <script type="text/javascript">
+    <script type="text/javascript">
+        var allPapersList = {{ allpaperslist | tojson }};
+        buildTable(allPapersList);
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
         ga('create', 'UA-126882431-1', 'auto');
         ga('send', 'pageview');

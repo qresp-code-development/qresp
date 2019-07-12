@@ -151,6 +151,8 @@ class FilterQuerySet(QuerySet):
         return unique_values
 
 class Paper(Document):
+    """ Class to filter query on mongo database
+    """
     version = LongField()
     PIs = ListField(EmbeddedDocumentField(Person))
     info = EmbeddedDocumentField(Info)
@@ -170,6 +172,7 @@ class Paper(Document):
             'queryset_class': FilterQuerySet}
 
 class Search(object):
+    """ Class collecting Search details"""
     def __init__(self):
         self.id = ""
         self.title = ""
@@ -315,6 +318,7 @@ class Search(object):
 
 
 class PaperDetails(object):
+    """ Class collecting details of Paper """
     def __init__(self):
         self.id = ""
         self.title = ""
@@ -533,7 +537,7 @@ class PaperDetails(object):
         self.__timeStamp = val
 
 class WorkflowInfo:
-    """Collects info for workflow
+    """Class collecting info for workflow
     """
     paperTitle = ""
     edges = []
@@ -541,7 +545,7 @@ class WorkflowInfo:
     workflowType = ""
 
 class WorkflowNodeInfo:
-    """Collects node info
+    """Class collecting node info
     """
     toolTip = ""
     details = []

@@ -5,6 +5,8 @@ from .models import *
 
 
 class PaperDAO(MongoDBConnection):
+    """ Class providing data access objects
+    """
     def __init__(self):
         self.hasvisited = []
         self.workflowinfo = WorkflowInfo()
@@ -12,40 +14,44 @@ class PaperDAO(MongoDBConnection):
         self.workflowinfo.edges = []
 
     def getCollectionList(self):
-        """fetches all collections from paper
-        :return paperCollectionlist: list
+        """ fetches all collections from paper
+        :return list: List of collections
         """
         paperCollectionlist = Paper.objects.get_unique_values('collections')
         return paperCollectionlist
 
     def getPublicationList(self):
-        """fetches all publications from paper
-            :return paperPublicationlist: list
+        """ fetches all publications from paper
+        :return list: List of publications
         """
         paperPublicationlist = Paper.objects.get_unique_values('reference.journal.fullName')
         return paperPublicationlist
 
     def getAuthorList(self):
-        """fetches all authors from paper
-            :return authorslist: list
+        """ fetches all authors from paper
+        :return list authorslist: List of all authors
         """
         authorslist = Paper.objects.get_unique_names('reference.authors')
         return authorslist
 
     def getAllPapers(self):
-        """
-        fetches all papers
-        :return:
+        """ fetches all papers
+        :return list allPapers: List of all papers
         """
         allPapers = [paper.to_json() for paper in Paper.objects()]
         return allPapers
 
     def getAllFilteredSearchObjects(self, searchWord=None, paperTitle=None, doi=None, tags=None, collectionList=[], authorsList=[],
                                     publicationList=[]):
-        """
-        Produces papers after filtering with word
-        :param searchWord:
-        :return: Filtered Paper
+        """ Fetches all filtered papers based on word / title / doi / tags / collections / authors / publications
+        :param string searchWord: word to fiter papers
+        :param string paperTitle: title of paper
+        :param string doi: DOI of paper
+        :param string tags: tag of paper
+        :param list collectionsList: list of collections
+        :param list authorsList: list of authors
+        :param list publicationList: list of publications
+        :return object allFilteredSearchObjects : Object of Paper with filtered search paper
         """
         allFilteredSearchObjects = []
         if searchWord:
@@ -133,9 +139,8 @@ class PaperDAO(MongoDBConnection):
 
 
     def __filtersearchedPaper(self, filteredPaper):
-        """
-        Produces search results after filter
-        :return: list: filtered search objects
+        """ Produces search results after filter
+        :return: list filteredSearchobjects: filtered search objects
         """
         filteredSearchobjects = []
         for paper in filteredPaper:
@@ -160,10 +165,9 @@ class PaperDAO(MongoDBConnection):
         return filteredSearchobjects
 
     def getPaperDetails(self, paperid):
-        """
-        Produces details of paper based on paper clicked
-        :param paperid:
-        :return: object: Details of paper
+        """ Produces details of paper based on paper clicked
+        :param string paperid: Id of paper
+        :return object paperDetails: Object with details of paper
         """
         paperDetailsObject = Paper.objects.filter(id=str(paperid))
         paperDetails = PaperDetails()
@@ -195,10 +199,9 @@ class PaperDAO(MongoDBConnection):
         return paperDetails.__dict__
 
     def getWorkflowDetails(self, paperid):
-        """
-        Build workflow details based on paper
-        :param paperid: Id of paper to construct workflow
-        :return: object: workflow details
+        """ Build workflow details based on paper
+        :param string paperid: Id of paper to construct workflow
+        :return object workflowinfo: Object of workflow with info details
         """
         try:
             paperDetailsObject = Paper.objects.filter(id=str(paperid))
@@ -214,10 +217,9 @@ class PaperDAO(MongoDBConnection):
 
 
     def getWorkflowForChartDetails(self, paperid, chartid):
-        """
-        Build workflow details based on paper
-        :param paperid: Id of paper to construct workflow
-        :return: object: workflow details
+        """ Build workflow details based on paper
+        :param string paperid: Id of paper to construct workflow
+        :return object workflow : Object of workflow with chart details
         """
         paperDetailsObject = Paper.objects.filter(id=str(paperid))
         paper = paperDetailsObject[0]
@@ -227,9 +229,7 @@ class PaperDAO(MongoDBConnection):
         return self.workflowinfo.__dict__
 
     def __addEdgeToWorkflowForChart(self, chartid, paper):
-        """
-        Adds nodes to build workflow for chart
-        :return:
+        """ Adds nodes to build workflow for chart
         """
         for edge in paper.workflow.edges:
             if chartid in edge[1]:
@@ -243,11 +243,9 @@ class PaperDAO(MongoDBConnection):
                 self.hasvisited.clear()
 
     def __addNodeToWorkflowForChart(self, paper, edge):
-        """
-        Adds other node details for the chart
-        :param paper:
-        :param edge:
-        :return:
+        """ Adds other node details for the chart
+        :param string paper: Object of paper
+        :param list edge: list of edges
         """
         if edge[0] not in self.workflowinfo.nodes:
             self.__insertWorkflowNodeDetails(edge[0], paper)
@@ -255,13 +253,7 @@ class PaperDAO(MongoDBConnection):
             self.__insertWorkflowNodeDetails(edge[1], paper)
 
     def __hasPath(self, destination, chartid, workflow):
-        """
-        Checks if path is found
-        :param destination:
-        :param chartid:
-        :param workflow:
-        :return:
-        """
+        """ Checks if path is found """
         for edge in workflow.edges:
             if destination in edge[0]:
                 if edge[1] not in self.hasvisited:
@@ -271,13 +263,7 @@ class PaperDAO(MongoDBConnection):
         return False
 
     def __insertWorkflowNodeDetails(self, node, paper):
-        """
-
-        :param node:
-        :param paper:
-        :param nodeInfo:
-        :return:
-        """
+        """ Inserts with workflow node details """
         try:
             if "h" in node:
                 for head in paper.heads:
@@ -383,6 +369,7 @@ class PaperDAO(MongoDBConnection):
             print(e)
 
     def __getLinks(self, urls, properties=None):
+        """ Adds links to workflow """
         links = ""
         if len(urls) > 0:
             if properties:
@@ -400,6 +387,7 @@ class PaperDAO(MongoDBConnection):
         return links
 
     def __getFiles(self, files, fileserverpath):
+        """Adds filelinks to workflow """
         filelinks = ""
         if len(files) > 0:
             for file in files:
@@ -413,6 +401,7 @@ class PaperDAO(MongoDBConnection):
         return filelinks
 
     def __getTooltipForTools(self, tool):
+        """ Adds tool tip to tools """
         details = ""
         if "experiment" in tool.kind:
             details = "<i>Experiment</i></p><p><b>Facility Name:</b> " + tool.facilityName + \
@@ -426,6 +415,7 @@ class PaperDAO(MongoDBConnection):
         return "<p><b>Tool " + tool.id + "</b>: " + details
 
     def __getTooltipForNode(self, node, workflowtype, fileServerPath=None):
+        """ Adds tooltip for node """
         tooltip = ""
         if "d" in workflowtype:
             tooltip = "<p><b>Dataset " + node.id + "</b>: <i>" + node.readme + "</i>"
@@ -437,6 +427,7 @@ class PaperDAO(MongoDBConnection):
         return tooltip
 
     def __getExtraFields(self, node):
+        """ Adds extra fields to node """
         extraFieldValues = ""
         for hashkey, value in node.extraFields.items():
             if hashkey:

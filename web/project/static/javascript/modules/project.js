@@ -52,7 +52,7 @@ function saveProjectPath(type){
                     });
                 }
 				if(data.isConfigFile === "N"){
-					var r = window.confirm("Are you sure you want to curate the paper at the location"+data.folderAbsolutePath);
+					var r = window.confirm("Are you sure you want to curate the paper at the location "+data.folderAbsolutePath);
 					if (r != true) {
 						return;
 					}

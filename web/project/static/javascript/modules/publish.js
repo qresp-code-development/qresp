@@ -25,6 +25,10 @@ $(function () {
                     dlAnchorElem.setAttribute("href", dataStr);
                     dlAnchorElem.setAttribute("download", "data.json");
                     dlAnchorElem.click();
+                    var previewAnchorElem = document.getElementById("previewLink");
+                    var projectName = data["projectName"];
+                    console.log("a",projectName);
+                    previewAnchorElem.setAttribute("href", "/preview/"+projectName);
                 }
             }
         });

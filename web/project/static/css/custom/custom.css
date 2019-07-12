@@ -524,3 +524,79 @@ table.dataTable tbody tr.even {
     pointer-events: none;
     opacity: 0.6;
 }
+
+.custom-card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.custom-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.custom-icon {
+    font-size:23px;
+    color: #800000;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+label {
+    font-size: 17px;
+}
+
+.modal {
+  overflow-y:auto;
+}
+
+
+#divLegends {
+    border: 1px solid lightgray;
+    width:20%;
+    float: right;
+    height: 700px;
+
+}
+
+#divWorkflow {
+    width: 80%;
+    float:left;
+    height: 700px;
+    border: 1px solid lightgray;
+}
+
+#operation {
+    font-size:28px;
+}
+#node-popUp {
+    display:none;
+    position:absolute;
+    top:100px;
+    left:170px;
+    z-index:299;
+    width:300px;
+    height:150px;
+    background-color: #f9f9f9;
+    border-style:solid;
+    border-width:3px;
+    border-color: #5394ed;
+    padding:10px;
+    text-align: center;
+}
+#edge-popUp {
+    display:none;
+    position:absolute;
+    top:350px;
+    left:170px;
+    z-index:299;
+    width:250px;
+    height:90px;
+    background-color: #f9f9f9;
+    border-style:solid;
+    border-width:3px;
+    border-color: #5394ed;
+    padding:10px;
+    text-align: center;
+}

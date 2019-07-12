@@ -669,21 +669,6 @@
                 }else{
 					window.location = '/publish';
 				}
-				// if (type == "POST") {
-				// 	$("#navbar>li.is-active").removeClass("is-active");
-				// 	$("#workflowid").addClass("is-complete");
-				// 	$("#publishid").addClass("is-active");
-				// 	$("#publishid a").removeClass("disabled");
-				// 	$("#publishid span").removeClass("disabled");
-				// } else {
-				// 	$("#navbar>li.is-active").removeClass("is-active");
-				// 	$("#curateid").addClass("is-complete");
-				// 	$("#workflowid a").removeClass("disabled");
-				// 	$("#workflowid").addClass("is-active");
-				// 	$("#workflowid span").removeClass("disabled");
-                //
-				// 	bindChartWorkflow(data.workflow);
-				// }
 			}
 		});
 	}
