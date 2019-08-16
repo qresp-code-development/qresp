@@ -765,13 +765,15 @@ def qrespexplorer():
     serverslist = Servers()
     form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
                            serverslist.getServersList()]
+    session['exporting'] = 'export' in request.args
     if request.method == 'POST':
         if request.form.getlist('serversList'):
             session["selectedserver"] = request.form.getlist('serversList')
         else:
             session['selectedserver'] = form.serverList
         return redirect(url_for('search'))
-    return render_template('qrespexplorer.html', form=form)
+    return render_template('qrespexplorer.html', form=form,
+                           exporting=session.get('exporting'))
 
 @csrf.exempt
 @app.route('/verifyPasscode',methods=['POST'])
@@ -849,9 +851,9 @@ def search():
     except Exception as e:
         print(e)
         flash('Error in search. ' + str(e))
-        return render_template('search.html', allpaperslist=allpaperslist)
+        return render_template('search.html', allpaperslist=allpaperslist, exporting=session.get('exporting'))
     return render_template('search.html',allpaperslist=allpaperslist,collectionlist=collectionlist,authorslist=authorslist,
-                           publicationlist=publicationlist,allPapersSize=allPapersSize)
+                           publicationlist=publicationlist,allPapersSize=allPapersSize, exporting=session.get('exporting'))
 
 
 # Fetches search word options after selecting server
@@ -899,11 +901,13 @@ def paperdetails(paperid):
         paperdetail = fetchdata.fetchOutput(url)
         url = '/api/workflow/'+paperid
         workflowdetail = fetchdata.fetchOutput(url)
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
+        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail,
+                               exporting=session.get('exporting'))
     except Exception as e:
         print(e)
         flash('Error in paperdetails. ' + str(e))
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
+        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail,
+                               exporting=session.get('exporting'))
 
 
 
@@ -1039,7 +1043,7 @@ def hybrid3():
         'pk': reference['pk'],
         'kind': 'journal',
         'DOI': reference['doi_isbn'],
-        'authors': reference['author_set'],
+        'authors': reference['authors'],
         'title': reference['title'],
         'journal': reference['journal'],
         'page': reference['pages_start'],
@@ -1051,8 +1055,8 @@ def hybrid3():
     return redirect(url_for('curate'))
 
 
-@app.route('/export/<paperid>', methods=['GET'])
-def export(paperid):
+@app.route('/export/<paperid>/<chart_nr>', methods=['GET'])
+def export(paperid, chart_nr):
     """Export some of the data to HybriD3.
 
     Since HybriD3 is a structured database (MariaDB), the user will
@@ -1063,22 +1067,12 @@ def export(paperid):
     selectedserver = session.get('selectedserver')
     fetchdata = FetchDataFromAPI(selectedserver)
     paper_detail = fetchdata.fetchOutput(f'/api/paper/{paperid}')
-    n_charts = len(paper_detail['_PaperDetails__charts'])
-    if 'current_export_chart' not in session:
-        session['current_export_chart'] = 0
-    else:
-        session['current_export_chart'] += 1
-    if session.get('current_export_chart') == n_charts - 1:
-        return_url = f'{app.config["HOST_URL"]}/paperdetails/{paperid}'
-    else:
-        return_url = f'{app.config["HOST_URL"]}/export/{paperid}'
+    return_url = f'{app.config["HOST_URL"]}/paperdetails/{paperid}'
     hybrid3_add_data_url = (
         f'{app.config["HYBRID3_URL"]}/materials/add-data?'
         f'return-url={return_url}&'
         f'qresp-fetch-url={app.config["HOST_URL"]}/get-paper-details/{paperid}'
-        f'&qresp-chart-nr={session.get("current_export_chart")}')
-    if session.get('current_export_chart') == n_charts - 1:
-        session.pop('current_export_chart')
+        f'&qresp-chart-nr={int(chart_nr)-1}')
     return redirect(hybrid3_add_data_url)
 
 

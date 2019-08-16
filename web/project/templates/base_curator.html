@@ -94,7 +94,7 @@
                 <li class="nav-item mx-0 mx-lg-1">
                     <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">Explorer</a>
                 </li>
-                <li class="nav-item mx-0 mx-lg-1 active">
+                <li class="nav-item mx-0 mx-lg-1 {% if not exporting %}active{% endif %}">
                     <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">Curator</a>
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
@@ -102,6 +102,9 @@
                 </li>
                 <li class="nav-item mx-0 mx-lg-1">
                     <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">Contact us</a>
+                </li>
+                <li class="nav-item mx-0 mx-lg-1 {% if exporting %}active{% endif %}">
+                  <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer?export">Export</a>
                 </li>
             </ul>
         </div>

@@ -54,9 +54,9 @@
                                 <table id="piTable">
                                     {% for name in infoform.PIs %}
                                     <tr data-toggle="fieldset-entry" id="entry">
-                                        <td style="padding-bottom: 1rem;">{{ name.firstName(class_='form-control',title=name.firstName.description,**{'data-toggle': 'tooltip'}) }}</td>
-                                        <td style="padding-bottom: 1rem;">{{ name.middleName(class_='form-control',title=name.middleName.description,**{'data-toggle': 'tooltip'}) }}</td>
-                                        <td style="padding-bottom: 1rem;">{{ name.lastName(class_='form-control',title=name.lastName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ name.firstName(class_='form-control',title=name.firstName.description,**{'data-toggle': 'tooltip', 'readonly': false}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ name.middleName(class_='form-control',title=name.middleName.description,**{'data-toggle': 'tooltip', 'readonly': false}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ name.lastName(class_='form-control',title=name.lastName.description,**{'data-toggle': 'tooltip', 'readonly': false}) }}</td>
                                         <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row" id="PIs-{{loop.index0}}-remove">-</button></td>
                                     </tr>
                                     {% endfor %}
@@ -82,14 +82,32 @@
                     {# Charts #}
                     <div id="Charts" class="dropdown-container" style="display: none;">
                       {% if use_hybrid3 %}
-                        <h3>
-                          <span class="input-group-btn">
-                          <input type="submit" value="Add charts"
-                                 class="btn btn-theme-colored btn-lg m-0"
-                                 style="font-weight: bold;"
-                                 onclick="window.location='{{ hybrid3_add_data_url }}';">
-                          </span>
-                        </h3>
+                        <div class="row">
+                          <div class="col-md-3">
+                            <input type="submit" value="Add new"
+                                   class="btn btn-theme-colored btn-lg"
+                                   style="font-weight: bold;"
+                                   onclick="window.location='{{ hybrid3_add_data_url }}';">
+                          </div>
+                          <div class="col-md-9">
+                            <div class="input-group" style="margin-left:-30px;">
+                              <div class="input-group-prepend">
+                                <label class="input-group-text" style="font-weight: bold;">
+                                  Import existing data set
+                                </label>
+                              </div>
+                              <input id="hybrid3-import-dataset-id"
+                                     type="number" min="1" style="width: 100px;">
+                              <div class="input-group-append">
+                                <button id="hybrid3-import-btn" type="button"
+                                        class="btn btn-theme-colored btn-lg"
+                                        style="font-weight: bold;">
+                                  Submit
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       {% else %}
                         <h3 class="card-title" data-toggle="tooltip" data-placement="left"
                             title="This section collects information about the Charts of the paper">
@@ -394,6 +412,17 @@
     </div>
 
     <script src="{{ url_for('static', filename='./javascript/modules/curate.js') }}"></script>
+
+    <script>
+     document
+       .getElementById('hybrid3-import-btn')
+       .addEventListener('click', function() {
+         const dataset_id =
+           document.getElementById('hybrid3-import-dataset-id').value;
+         window.location.href='/hybrid3?pk=' + dataset_id;
+       });
+    </script>
+
     <script type="text/javascript">
         var chartList = {{ chartlistform|tojson }};
         var toolList = {{ toollistform|tojson }};
