@@ -30,3 +30,4 @@ connexion[swagger-ui]==2.0.0
 coverage
 nose2
 python-coveralls
+python-decouple==3.1
