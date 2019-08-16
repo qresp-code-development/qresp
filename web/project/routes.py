@@ -1000,8 +1000,9 @@ def use_hybrid3():
 @app.route('/hybrid3', methods=['GET'])
 def hybrid3():
     """Fetch data from HybriD3 and prefill forms in Qresp."""
-    dataset = requests.get(f'{app.config["HYBRID3_URL"]}/materials/datasets/'
-                           f'{request.args.get("pk")}/info').json()
+    dataset = requests.get(
+        f'{app.config["HYBRID3_URL"]}/materials/datasets/'
+        f'{request.args.get("pk")}/info', verify=False).json()
     pk = dataset['pk']
     session['fileServerPath'] = app.config['HYBRID3_URL']
     session['downloadPath'] = 'materials'
@@ -1038,7 +1039,7 @@ def hybrid3():
     session['charts'] = deepcopy(chartList)
     reference = requests.get(
         f'{app.config["HYBRID3_URL"]}/materials/references/'
-        f'{dataset["reference"]}').json()
+        f'{dataset["reference"]}', verify=False).json()
     session['hybrid3-reference'] = {
         'pk': reference['pk'],
         'kind': 'journal',
