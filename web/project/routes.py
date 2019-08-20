@@ -1024,7 +1024,7 @@ def hybrid3():
         'id': '',
         'caption': caption,
         'number': str(len(chartList) + 1),
-        'files': f'media/qresp/dataset_{pk}/data.txt',
+        'files': f'materials/datasets/{pk}/files/',
         'imageFile': f'media/qresp/dataset_{pk}/figure.png',
         'notebookFile': '',
         'properties': properties,
