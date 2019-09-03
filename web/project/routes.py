@@ -1,26 +1,22 @@
+# system imports
 import os
+import uuid
+import smtplib
 from datetime import timedelta, datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import uuid
-
-import schedule
-from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file
-from project import csrf
-from project import ext
-import smtplib
-
+from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file, abort
 from flask_cors import CORS
-
+from project import csrf
 from project.paperdao import PaperDAO,MongoDBConnection
 from project.util import *
 from project.views import *
+from project import constants as CURATOR_FIELD
 from project import app
-qresp_config = {}
-ftp_dict = {}
 
 class InvalidUsage(Exception):
-    """ Invalid page
+    """
+    Invalid page
     """
     status_code = 400
 
@@ -38,7 +34,8 @@ class InvalidUsage(Exception):
 
 @app.before_request
 def make_session_permanent():
-    """ makes session values last for a day, session data is stored in the server
+    """
+    Makes session values last for a day, session data is stored in the server
     """
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=1)
@@ -47,623 +44,359 @@ def make_session_permanent():
 @app.route('/')
 @app.route('/index')
 def index():
-    """ Fetches the homepage """
+    """
+    Fetches the homepage
+    """
     return render_template('index.html')
 
-# Fetches list of qresp servers
-@app.route('/test')
-def test():
-    """ Fetches the homepage """
-    """ Previews the metadata for user """
-    if request.method == 'GET':
-        """ This method helps in storing the details of the person using the curator. """
-        detailsform = DetailsForm(**session.get("insertedBy",request.form))
 
-        serverform = ServerForm(request.form)
-        serverslist = Servers()
-        serverform.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
-                                serverslist.getHttpServersList()]
-
-        projectform = ProjectForm(request.form)
-        projectform.folderAbsolutePath.data = session.get("folderAbsolutePath","")
-        projectform.fileServerPath.data = session.get("fileServerPath","")
-
-        chartform = ChartForm(request.form)
-        chartlist = deepcopy(session.get("charts", []))
-
-        toolform = ToolForm(request.form)
-        toollist = deepcopy(session.get("tools", []))
-
-        datasetform = DatasetForm(request.form)
-        datasetlist = deepcopy(session.get("datasets", []))
-
-        scriptform = ScriptForm(request.form)
-        scriptlist = deepcopy(session.get("scripts", []))
-
-        return render_template('testpaperdetails.html', detailsform=detailsform, serverform=serverform,
-                               projectform=projectform, chartlistform=chartlist, chartform=chartform,
-                               toollistform=toollist, toolform=toolform, datalistform=datasetlist,
-                               datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform)
-
-@csrf.exempt
-@app.route('/testdetails', methods=['POST', 'GET'])
-def testdetails():
-    """ This method helps in storing the details of the person using the curator. """
-    form = DetailsForm(request.form)
-    if request.method == 'POST' and form.validate():
-        session["insertedBy"] = form.data
-        return jsonify(data=form.data), 200
-    elif session.get("insertedBy"):
-        detailsForm = session.get("insertedBy")
-        form = DetailsForm(**detailsForm)
-    return jsonify(data=form.errors), 400
-
-@csrf.exempt
-@app.route('/testserver', methods=['POST'])
-def testserver():
-    """ This method helps in storing the details of the person using the curator. """
-    form = ServerForm(request.form)
-    serverslist = Servers()
-    form.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
-                            serverslist.getHttpServersList()]
-    if request.method == 'POST' and form.validate():
-        try:
-            if "HTTP" in form.kind.data:
-                session["fileServerPath"] = form.hostUrl.data
-            elif "Zenodo" in form.kind.data:
-                session["fileServerPath"] = form.zenodoUrl.data
-            else:
-                session["fileServerPath"] = form.other.data
-            return jsonify(data=form.data), 200
-        except Exception as e:
-            print(e)
-            flash("Could not connect to server. Plase try again!"+str(e))
-            return jsonify(data=form.errors), 400
-    else:
-        flash(form.errors)
-    return jsonify(data=form.errors), 400
-
-@csrf.exempt
-@app.route('/testsetproject', methods=['POST', 'GET'])
-def testsetproject():
-    """ Sets server services available """
-    form = ProjectForm(request.form)
-    isConfig = "N"
-    services = []
-    folderAbsolutePath = None
-    if request.method == 'POST':
-        try:
-            folderAbsolutePath = form.folderAbsolutePath.data
-            dtree = Dtree(folderAbsolutePath, session)
-            session["ProjectName"] = folderAbsolutePath.rsplit("/", 2)[1]
-            dtree.openFileToReadConfigFromHttp("qresp.ini")
-            services = dtree.fetchServices()
-            isConfig = dtree.checkIsConfigFileFromHttp()
-            session["folderAbsolutePath"] = folderAbsolutePath
-            return jsonify(folderAbsolutePath=folderAbsolutePath,isConfigFile=isConfig,services=services), 200
-        except Exception as e:
-            print("Error",e)
-            flash("Could not connect to server. Plase try again! " + str(e))
-    else:
-        flash(form.errors)
-    return jsonify(folderAbsolutePath=folderAbsolutePath, isConfigFile=isConfig, services=services), 400
-
-@csrf.exempt
-@app.route('/testgetTreeInfo', methods=['POST', 'GET'])
-def testgetTreeInfo():
-    """ Renders the Tree containing Project Information which is 'SSH'ed with the remote directory """
-    pathDetails = request.get_json()
-    listObjects = []
-    services = []
-    try:
-        if 'treeUrl' in pathDetails:
-            content_path = pathDetails['treeUrl']
-        else:
-            content_path = session.get("folderAbsolutePath")
-        dtree = Dtree(content_path, session)
-        print(content_path)
-        if 'zenodo' in content_path:
-            listObjects = dtree.fetchForTreeFromZenodo()
-        else:
-            listObjects = dtree.fetchForTreeFromHttp()
-            services = dtree.fetchServices()
-    except Exception as e:
-        jsonify({'errors':str(e)}), 400
-        print(e)
-    return jsonify({'listObjects': listObjects, 'services': services}), 200
-
-@csrf.exempt
-@app.route('/testcharts', methods=['POST'])
-def testcharts():
-    """ Renders the charts section of the paper """
-    chartform = ChartForm(request.form)
-    if request.method == 'POST' and chartform.validate():
-        chartList = deepcopy(session.get("charts", []))
-        if len(chartList) <  1:
-            chartList.append(chartform.data)
-            session["charts"] = deepcopy(chartList)
-        else:
-            idList = [eachchart['saveas'] if eachchart['saveas'] else eachchart['id'] for eachchart in chartList]
-            id = chartform.id.data
-            saveas = chartform.saveas.data
-            if id not in idList and saveas not in idList:
-                chartList.append(chartform.data)
-                session["charts"] = deepcopy(chartList)
-            else:
-                chartList = [item for item in chartList if item['saveas'] not in chartform.saveas.data]
-                chartList.append(chartform.data)
-                session["charts"] = deepcopy(chartList)
-        return jsonify(chartList = chartList,folderAbsolutePath=session.get("folderAbsolutePath")), 200
-    return jsonify(data=chartform.errors), 400
-
-@csrf.exempt
-@app.route('/testworkflow', methods=['POST', 'GET'])
-def testworkflow():
-    """Renders the Workflow page """
-    GenerateIDs(session)
-    nodesList = []
-    workflowsave = request.json
-    workflow = WorkflowCreator()
-    for chart in session.get("charts",[]):
-        try:
-            img = '<img src="' + session.get("folderAbsolutePath")+chart["imageFile"] + '" width="250px;" height="250px;"/>'
-            caption = "<b> Image: </b>" + img
-        except Exception as e:
-            caption = ""
-        nodesList.append(chart["id"])
-        workflow.addChart(chart["id"], caption)
-    for tool in session.get("tools",[]):
-        pack = ""
-        try:
-            pack = "<b> Package Name: </b>" + tool["packageName"]
-        except:
-            try:
-                pack = "<b> Facility Name: </b>" + tool["facilityName"] + " <br/> <b>Measurement: </b>" + tool["measurement"]
-            except:
-                pack = ""
-        nodesList.append(tool["id"])
-        workflow.addTool(tool["id"], pack)
-    for dataset in session.get("datasets",[]):
-        readme = ""
-        try:
-            readme = "<b> ReadMe: </b>" + dataset["readme"]
-        except:
-            readme = ""
-        nodesList.append(dataset["id"])
-        workflow.addDataset(dataset["id"], readme)
-    for script in session.get("scripts",[]):
-        try:
-            readme = "<b> ReadMe: </b>" + script["readme"]
-        except:
-            readme = ""
-        if not script["saveas"]:
-            script["saveas"] = script["id"]
-        nodesList.append(script["id"])
-        workflow.addScript(script["id"], readme)
-    for head in session.get("heads",[]):
-        try:
-            readme = head["readme"]
-        except:
-            readme = ""
-        try:
-            nodesList.append(head["id"])
-            workflow.addHead(head["id"], readme, head["URLs"])
-        except:
-            nodesList.append(head["id"])
-            workflow.addHead(head["id"], readme)
-
-    for edge in session.get("edges",[]):
-        workflow.addEdge(edge)
-    try:
-        edgeList = []
-        for edge in workflowsave[0]:
-            workflow.addEdge(edge)
-            edgeList.append(edge)
-        session["edges"] = edgeList
-    except Exception as e:
-        print(e)
-    try:
-        heads = HeadForm(request.form)
-        headInfo = workflowsave[1]
-        headList = []
-        for head in headInfo:
-            hinfo = head.split("*")
-            nodesList.append(hinfo[0])
-            heads.id.data = hinfo[0]
-            try:
-                if hinfo[1]:
-                    heads.readme.data = str(hinfo[1])
-            except Exception as e:
-                print(e)
-            try:
-                if hinfo[2]:
-                    heads.URLs.data = str(hinfo[2]).strip()
-            except Exception as e:
-                print(e)
-            headList.append(heads.data)
-        session["heads"] = headList
-        nodesList = list(set(nodesList))
-        workflowinfo = WorkflowForm(edges = edgeList,nodes=nodesList)
-        session["workflow"] = workflowinfo.data
-    except Exception as e:
-        print(e)
-    return jsonify({'workflow': workflow.__dict__}), 200
-
-@app.route('/downloads/<file>')
-def downloadfile(file=None):
-    """ Download file from server """
-    if file:
-        try:
-            path = 'downloads/'+file
-            return send_file(path, as_attachment=True)
-        except Exception as e:
-            print(e)
-            msg = {"Content":"Not Found"}
-            return jsonify(msg),400
-
-
-@app.route('/qrespcurator')
-def qrespcurator():
-    """ Fetches the curator homepage """
-    return render_template('qrespcurator.html')
-
-@app.route('/startfromscratch')
-def startfromscratch():
-    """ clears session and redirects to details page"""
-    session.clear()
-    return redirect(url_for('details'))
 
 @csrf.exempt
 @app.route('/uploadFile',methods=['POST','GET'])
 def uploadFile():
-    """ Renders and stores uploaded file text into session """
+    """
+    Renders and stores uploaded file text into session
+    """
     try:
         uploadJSON = json.loads(request.get_json())
-        paperform = PaperForm(**uploadJSON)
-        session["paper"] = paperform.data
-        session["insertedBy"] = paperform.info.insertedBy.data
-        session["serverPath"] = paperform.info.serverPath.data
-        session["fileServerPath"] = paperform.info.fileServerPath.data
-        session["downloadPath"] = paperform.info.downloadPath.data
-        session["gitService"] = paperform.info.gitPath.data
-        session["notebookPath"] = paperform.info.notebookPath.data
-        session["notebookFile"] = paperform.info.notebookFile.data
-        session["doi"] = paperform.info.doi.data
-        session["folderAbsolutePath"] = paperform.info.folderAbsolutePath.data
-        session["isPublic"] = paperform.info.isPublic.data
-        if paperform.info.folderAbsolutePath.data:
-            projectName = paperform.info.folderAbsolutePath.data.rsplit("/",1)[1]
-            session["ProjectName"] = projectName
 
-        chartList = []
-        for eachchartdata in paperform.charts.entries:
-            eachchart = eachchartdata.data
-            if not eachchart.get("saveas"):
-                eachchart["saveas"] = eachchart.get("id")
-            chartList.append(eachchart)
-        session["charts"] = chartList
+        # Converts list items to string for curator
+        paperdata = ConvertField.convertToString(["files", "properties", "URLs", "patches"],
+                                               [CURATOR_FIELD.CHARTS, CURATOR_FIELD.TOOLS, CURATOR_FIELD.DATASETS,
+                                                CURATOR_FIELD.SCRIPTS, CURATOR_FIELD.HEADS],
+                                               uploadJSON)
+        paperform = PaperForm(**paperdata)
 
-        toolList = []
-        for eachtooldata in paperform.tools.entries:
-            eachtool = eachtooldata.data
-            if not eachtool.get("saveas"):
-                eachtool["saveas"] = eachtool.get("id")
-            toolList.append(eachtool)
-        session["tools"] = toolList
+        # Stores curator information into session
+        session[CURATOR_FIELD.DETAILS] = paperform.info.insertedBy.data
 
-        datasetList = []
-        for eachdatasetdata in paperform.datasets.entries:
-            eachdataset = eachdatasetdata.data
-            if not eachdataset.get("saveas"):
-                eachdataset["saveas"] = eachdataset.get("id")
-            datasetList.append(eachdataset)
-        session["datasets"] = datasetList
+        # Stores server information into session
+        projectform = ProjectForm(**paperform.info.data)
+        session[CURATOR_FIELD.PROJECT] = projectform.data
 
-        scriptList = []
-        for eachscriptdata in paperform.scripts.entries:
-            eachscript = eachscriptdata.data
-            if not eachscript.get("saveas"):
-                eachscript["saveas"] = eachscript.get("id")
-            scriptList.append(eachscript)
-        session["scripts"] = scriptList
-
+        # Stores reference information into session
         referenceform = ReferenceForm(**paperform.reference.data)
-        session["reference"] = referenceform.data
+        session[CURATOR_FIELD.REFERENCE] = referenceform.data
 
-        session["heads"] = [form.data for form in paperform.heads.entries]
-        session["edges"] = [form.data for form in paperform.workflow.edges.entries]
-        session["nodes"] = [form for form in paperform.workflow.nodes.data]
+        # Stores project information into session
         infoform = InfoForm(**paperform.data)
         infoform.tags.data = ", ".join(paperform.tags.data)
         infoform.collections.data = ", ".join(paperform.collections.data)
         infoform.notebookFile.data = paperform.info.notebookFile.data
-        session["info"] = infoform.data
-        session["PIs"] = [form.data for form in infoform.PIs.entries]
-        session["tags"] = [form for form in paperform.tags.data]
-        session["collections"] = [form for form in paperform.collections.data]
-        session["workflow"] = paperform.workflow.data
-        return jsonify(out="Processed text"), 200
+        session[CURATOR_FIELD.INFO] = infoform.data
+
+        # Stores charts, tools, datasets, scripts, and workflows into session
+        session[CURATOR_FIELD.CHARTS] = [form.data for form in paperform.charts.entries]
+        session[CURATOR_FIELD.TOOLS] = [form.data for form in paperform.tools.entries]
+        session[CURATOR_FIELD.DATASETS] = [form.data for form in paperform.datasets.entries]
+        session[CURATOR_FIELD.SCRIPTS] = [form.data for form in paperform.scripts.entries]
+        session[CURATOR_FIELD.HEADS] = [form.data for form in paperform.heads.entries]
+        session[CURATOR_FIELD.EDGES] = [form.data for form in paperform.workflow.edges.entries]
+        session[CURATOR_FIELD.WORKFLOW] = paperform.workflow.data
+
+        # Stores in documentation
+        session[CURATOR_FIELD.DOCUMENTATION] = paperform.documentation.data
+
+        return jsonify(success="success"), 200
     except Exception as e:
         print(e)
         return jsonify(error=str(e)), 400
 
+@app.route('/startfromscratch')
+def startfromscratch():
+    """
+    Clears session and reloads page
+    """
+    session.clear()
+    return redirect(url_for('qrespcurator'))
+
+@app.route('/qrespcurator', methods=['GET'])
+def qrespcurator():
+    """
+    Fetches the homepage of the curator
+    """
+    if request.method == 'GET':
+        # Renders the details section
+        detailsform = DetailsForm(**session.get(CURATOR_FIELD.DETAILS,request.form))
+
+        # Renders the servers section
+        serverform = ServerForm(**session.get(CURATOR_FIELD.SERVERS,request.form))
+        serverslist = Servers()
+        serverform.hostUrl.choices = [(qrespserver['http_server_url'].strip('/'), qrespserver['http_server_url'].strip('/')) for qrespserver in
+                                serverslist.getHttpServersList()]
+
+        # Renders the project section
+        projectform = ProjectForm(**session.get(CURATOR_FIELD.PROJECT,request.form))
+
+        # Renders the info section
+        infoform = InfoForm(**session.get(CURATOR_FIELD.INFO,request.form))
+
+        # Renders the reference section
+        referenceform = ReferenceForm(**session.get(CURATOR_FIELD.REFERENCE,request.form))
+
+        # Renders the charts section
+        chartform = ChartForm(request.form)
+        chartlist = deepcopy(session.get(CURATOR_FIELD.CHARTS, []))
+
+        # Renders the tools section
+        toolform = ToolForm(request.form)
+        toollist = deepcopy(session.get(CURATOR_FIELD.TOOLS, []))
+
+        # Renders the datasets section
+        datasetform = DatasetForm(request.form)
+        datasetlist = deepcopy(session.get(CURATOR_FIELD.DATASETS, []))
+
+        # Renders the scripts section
+        scriptform = ScriptForm(request.form)
+        scriptlist = deepcopy(session.get(CURATOR_FIELD.SCRIPTS, []))
+
+        # Renders documentation section
+        documentationform = DocumentationForm(**session.get(CURATOR_FIELD.DOCUMENTATION,request.form))
+
+        # Renders publish form
+        publishform = PublishForm(request.form)
+        serverslist = Servers()
+        publishform.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
+                               serverslist.getServersList()]
+
+        return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
+                               projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
+                               toollistform=toollist, toolform=toolform, datasetlistform=datasetlist,
+                               datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform,
+                               documentationform=documentationform, publishform=publishform)
+
 @csrf.exempt
-@app.route('/details', methods=['POST', 'GET'])
+@app.route('/details', methods=['POST'])
 def details():
-    """ This method helps in storing the details of the person using the curator. """
+    """
+    Stores the details of the curator.
+    """
     form = DetailsForm(request.form)
     if request.method == 'POST' and form.validate():
-        session["insertedBy"] = form.data
-        return redirect(url_for('server'))
-    elif session.get("insertedBy"):
-        detailsForm = session.get("insertedBy")
-        form = DetailsForm(**detailsForm)
-    return render_template('details.html', form=form)
+        session[CURATOR_FIELD.DETAILS] = form.data
+        return jsonify(data=form.data), 200
+    return jsonify(data=form.errors), 400
 
 @csrf.exempt
-@app.route('/server', methods=['POST', 'GET'])
+@app.route('/server', methods=['POST'])
 def server():
-    """ This method helps in connecting to the remote server for the data tree. """
+    """
+    Stores the server on which data lives
+    """
     form = ServerForm(request.form)
-    url = None
-    allpaperslist = None
-    serverslist = Servers()
-    form.hostUrl.choices = [(qrespserver['http_server_url'], qrespserver['http_server_url']) for qrespserver in
-                           serverslist.getHttpServersList()]
-    fetchdata = FetchDataFromAPI(servernames=None)
-    if session.get("insertedBy"):
-        url = '/api/search' + "?authorsList=" + session.get("insertedBy")['lastName']
-        allpaperslist = fetchdata.fetchOutput(url)
+    try:
+        serverslist = Servers()
+        form.hostUrl.choices = [(qrespserver['http_server_url'].strip('/'), qrespserver['http_server_url'].strip('/')) for qrespserver in
+                                serverslist.getHttpServersList()]
+    except Exception as e:
+        raise InvalidUsage('Could not fetch serverlist, \n ' + str(e), status_code=410)
     if request.method == 'POST' and form.validate():
-        try:
-            session["folderAbsolutePath"] = form.hostUrl.data
-            return redirect(url_for('project'))
-        except Exception as e:
-            flash("Could not connect to server. Plase try again!"+str(e))
-            render_template('server.html', form=form), 400
-    return render_template('server.html', form=form, allpaperslist=allpaperslist), 200
-
-@csrf.exempt
-@app.route('/project', methods=['GET'])
-def project():
-    """ This method helps in populating the project form. """
-    form = ProjectForm(request.form)
-    if request.method == 'GET':
-        if session.get("folderAbsolutePath"):
-            form.folderAbsolutePath.data = session.get("folderAbsolutePath")
-        else:
-            form.folderAbsolutePath.data = "."
-        return render_template('project.html', form=form)
+        session[CURATOR_FIELD.SERVERS] = form.data
+        return jsonify(data=form.data), 200
+    return jsonify(data=form.errors), 400
 
 @csrf.exempt
 @app.route('/setproject', methods=['POST', 'GET'])
 def setproject():
-    """ Sets server services available """
-    absPath = ""
-    isConfig = "N"
-    services = []
-    try:
-        if request.method == 'POST':
-            pathDetails = request.get_json()
-            absPath = pathDetails['folderAbsolutePath']
-            ftp = None
-            dtree = Dtree(absPath, session)
-            session["ProjectName"] = absPath.rsplit("/", 2)[1]
-            dtree.openFileToReadConfigFromHttp("qresp.ini")
-            services = dtree.fetchServices()
-            isConfig = dtree.checkIsConfigFileFromHttp()
-            session["fileServerPath"] = absPath
-            session["folderAbsolutePath"] = absPath
-            return jsonify(folderAbsolutePath=absPath,isConfigFile=isConfig,services=services), 200
-    except Exception as e:
-        print("Error",e)
-        flash("Could not connect to server. Plase try again! " + str(e))
-        return jsonify(folderAbsolutePath=absPath, isConfigFile=isConfig, services=services), 401
+    """
+    Stores information about the project
+    """
+    form = ProjectForm(request.form)
+    if request.method == 'POST':
+        session[CURATOR_FIELD.PROJECT] = form.data
+        return jsonify(data=form.data), 200
+    return jsonify(data=form.errors), 400
 
 @csrf.exempt
 @app.route('/getTreeInfo', methods=['POST', 'GET'])
 def getTreeInfo():
-    """   Renders the Tree containing Project Information which is 'SSH'ed with the remote directory """
+    """
+    Renders the Tree containing Project Information which is web scraped from the url
+    """
     pathDetails = request.get_json()
     listObjects = []
-    services = []
-    ftp = None
     try:
-        if 'folderAbsolutePath' in pathDetails:
-            content_path = pathDetails['folderAbsolutePath']
-        else:
-            content_path = session.get("folderAbsolutePath")
+        content_path = pathDetails.get("treeUrl",session.get("project",{}).get("fileServerPath",""))
         dtree = Dtree(content_path, session)
-        listObjects = dtree.fetchForTreeFromHttp()
-        services = dtree.fetchServices()
+        if 'zenodo' in content_path:
+            listObjects = dtree.fetchForTreeFromZenodo()
+        else:
+            listObjects = dtree.fetchForTreeFromHttp()
     except Exception as e:
-        jsonify({'errors':str(e)}), 400
-        print(e)
-    return jsonify({'listObjects': listObjects, 'services': services}), 200
+        jsonify(errors=str(e)), 400
+    return jsonify({'listObjects': listObjects}), 200
 
-@app.route('/curate', methods=['POST', 'GET'])
-def curate():
-    """ This method populates the curator form.
-    """
-    infoform = InfoForm(request.form)
-    chartform = ChartForm(request.form)
-    toolform = ToolForm(request.form)
-    datasetform = DatasetForm(request.form)
-    scriptform = ScriptForm(request.form)
-    referenceform = ReferenceForm(request.form)
-    documentationform = DocumentationForm(request.form)
-    chartlist = []
-    toollist = []
-    datasetlist = []
-    scriptlist = []
-    projectName = ""
-    if session.get("info"):
-        sessionInfoForm = session.get("info")
-        infoform = InfoForm(**sessionInfoForm)
-    if session.get("charts",[]):
-        chartlist = deepcopy(session.get("charts",[]))
-    if session.get("tools",[]):
-        toollist = deepcopy(session.get("tools",[]))
-    if session.get("datasets",[]):
-        datasetlist = deepcopy(session.get("datasets",[]))
-    if session.get("scripts",[]):
-        scriptlist = deepcopy(session.get("scripts",[]))
-    if session.get("ProjectName"):
-        projectName = session.get("ProjectName")
-    else:
-        if session.get("folderAbsolutePath"):
-            if "/" in session.get("folderAbsolutePath"):
-                projectName = session.get("folderAbsolutePath").rsplit("/", 1)[1]
-            else:
-                projectName = session.get("folderAbsolutePath")
-    if session.get("reference"):
-        referenceForm = session.get("reference")
-        referenceform = ReferenceForm(**referenceForm)
-    return render_template('curate.html',infoform=infoform,chartlistform=chartlist,chartform=chartform,
-                           toollistform=toollist,toolform=toolform,datalistform=datasetlist,datasetform=datasetform,
-                           scriptlistform=scriptlist,scriptform=scriptform,referenceform=referenceform,projName=projectName,documentationform=documentationform)
 
 @csrf.exempt
 @app.route('/info', methods=['POST', 'GET'])
 def info():
-    """ This method helps in connecting to the server.
+    """
+    Stores information about the project
     """
     infoform = InfoForm(request.form)
     if request.method == 'POST' and infoform.validate():
-        session["info"] = infoform.data
-        session["PIs"] = [form.data for form in infoform.PIs.entries]
-        session["tags"] = infoform.tags.data.split(",")
-        session["collections"] = infoform.collections.data.split(",")
-        session["notebookFile"] = infoform.notebookFile.data
-        msg = "Info Saved"
-        return jsonify(data=msg), 200
+        session[CURATOR_FIELD.INFO] = infoform.data
+        return jsonify(data=infoform.data), 200
     return jsonify(data=infoform.errors), 400
 
 @csrf.exempt
-@app.route('/charts', methods=['POST', 'GET'])
-def charts():
-    """ This method helps in connecting to the server.
-    """
-    chartform = ChartForm(request.form)
-    if request.method == 'POST' and chartform.validate():
-        chartList = deepcopy(session.get("charts", []))
-        if len(chartList) <  1:
-            chartList.append(chartform.data)
-            session["charts"] = deepcopy(chartList)
-        else:
-            idList = [eachchart['saveas'] if eachchart['saveas'] else eachchart['id'] for eachchart in chartList]
-            id = chartform.id.data
-            saveas = chartform.saveas.data
-            if id not in idList and saveas not in idList:
-                chartList.append(chartform.data)
-                session["charts"] = deepcopy(chartList)
-            else:
-                chartList = [item for item in chartList if item['saveas'] not in chartform.saveas.data]
-                chartList.append(chartform.data)
-                session["charts"] = deepcopy(chartList)
-        return jsonify(chartList = chartList), 200
-    return jsonify(data=chartform.errors), 200
-
-@csrf.exempt
-@app.route('/tools', methods=['POST', 'GET'])
-def tools():
-    """ This method helps in populating tools section in the curator.
-    """
-    toolform = ToolForm(request.form)
-    if request.method == 'POST' and toolform.validate():
-        toolList = deepcopy(session.get("tools", []))
-        if len(toolList) <  1:
-            toolList.append(toolform.data)
-            session["tools"] = deepcopy(toolList)
-        else:
-            idList = [eachtool['saveas'] if eachtool['saveas'] else eachtool['id'] for eachtool in toolList]
-            id = toolform.id.data
-            saveas = toolform.saveas.data
-            if id not in idList and saveas not in idList:
-                toolList.append(toolform.data)
-                session["tools"] = deepcopy(toolList)
-            else:
-                toolList = [item for item in toolList if item['saveas'] not in toolform.saveas.data]
-                toolList.append(toolform.data)
-                session["tools"] = deepcopy(toolList)
-        return jsonify(toolList = toolList), 200
-    return jsonify(errors=toolform.errors), 200
-
-@csrf.exempt
-@app.route('/datasets', methods=['POST', 'GET'])
-def datasets():
-    """ This method helps in populating datasets section in the curator.
-    """
-    datasetform = DatasetForm(request.form)
-    if request.method == 'POST' and datasetform.validate():
-        datasetList = deepcopy(session.get("datasets", []))
-        if len(datasetList) <  1:
-            datasetList.append(datasetform.data)
-            session["datasets"] = deepcopy(datasetList)
-        else:
-            idList = [eachdataset['saveas'] if eachdataset['saveas'] else eachdataset['id'] for eachdataset in datasetList]
-            id = datasetform.id.data
-            saveas = datasetform.saveas.data
-            if id not in idList and saveas not in idList:
-                datasetList.append(datasetform.data)
-                session["datasets"] = deepcopy(datasetList)
-            else:
-                datasetList = [item for item in datasetList if item['saveas'] not in datasetform.saveas.data]
-                datasetList.append(datasetform.data)
-                session["datasets"] = deepcopy(datasetList)
-        return jsonify(datasetList = datasetList), 200
-    return jsonify(data=datasetform.errors), 200
-
-@csrf.exempt
-@app.route('/scripts', methods=['POST', 'GET'])
-def scripts():
-    """ This method helps in populating scripts section in the curator.
-    """
-    scriptform = ScriptForm(request.form)
-    if request.method == 'POST' and scriptform.validate():
-        scriptList = deepcopy(session.get("scripts", []))
-        if len(scriptList) <  1:
-            scriptList.append(scriptform.data)
-            session["scripts"] = deepcopy(scriptList)
-        else:
-            idList = [eachscript['saveas'] if eachscript['saveas'] else eachscript['id'] for eachscript in scriptList]
-            id = scriptform.id.data
-            saveas = scriptform.saveas.data
-            if id not in idList and saveas not in idList:
-                scriptList.append(scriptform.data)
-                session["scripts"] = deepcopy(scriptList)
-            else:
-                scriptList = [item for item in scriptList if item['saveas'] not in scriptform.saveas.data]
-                scriptList.append(scriptform.data)
-                session["scripts"] = deepcopy(scriptList)
-        return jsonify(scriptList = scriptList), 200
-    return jsonify(data=scriptform.errors), 200
-
-@csrf.exempt
-@app.route('/reference', methods=['POST', 'GET'])
+@app.route('/reference', methods=['POST'])
 def reference():
-    """ This method helps in filling reference section for paper.
+    """
+    Stores all references/information about the paper related to the project
     """
     referenceform = ReferenceForm(request.form)
     if request.method == 'POST' and referenceform.validate():
-        session["reference"] = referenceform.data
-        msg = "Reference Saved"
-        return jsonify(data=msg), 200
-    return jsonify(data=referenceform.errors), 200
+        session[CURATOR_FIELD.REFERENCE] = referenceform.data
+        return jsonify(data=referenceform.data), 200
+    return jsonify(data=referenceform.errors), 400
 
 @csrf.exempt
 @app.route('/fetchReferenceDOI', methods=['POST', 'GET'])
 def fetchReferenceDOI():
-    """ This method fetched reference information via DOI.
+    """
+    Fetches reference information via DOI.
     """
     reqDOI = request.get_json()
     try:
         fetchDOI = FetchDOI(reqDOI["doi"])
         refdata = fetchDOI.fetchFromDOI()
+        referenceform = ReferenceForm(**refdata)
     except Exception as e:
         print(e)
-        return jsonify(errors="Recheck your DOI"), 400
-    return jsonify(fetchDOI=refdata.data), 200
+        return jsonify(errors="Recheck your DOI "+str(e)), 400
+    print(referenceform.data)
+    return jsonify(data=referenceform.data), 200
+
+@csrf.exempt
+@app.route('/charts', methods=['POST'])
+def charts():
+    """
+    Stores information about the charts found in the project
+    """
+    chartform = ChartForm(request.form)
+    if request.method == 'POST' and chartform.validate():
+        # Add or append to list
+        genid = GenerateId(CURATOR_FIELD.CHARTS)
+        chartList = deepcopy(session.get(CURATOR_FIELD.CHARTS, []))
+        chartList = [genid.addId(item) for item in chartList if item.get('id') not in chartform.id.data]
+        chartList.append(genid.addId(chartform.data))
+        session[CURATOR_FIELD.CHARTS] = deepcopy(chartList)
+        return jsonify(chartList = chartList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=chartform.errors), 400
+
+@csrf.exempt
+@app.route('/charts/delete', methods=['POST'])
+def chartsdelete():
+    """
+    Deletes information about a chart from the from the project
+    """
+    chartform = ChartForm(request.form)
+    if request.method == 'POST' and chartform.validate():
+        # Delete from list
+        genid = GenerateId(CURATOR_FIELD.CHARTS)
+        chartList = deepcopy(session.get(CURATOR_FIELD.CHARTS, []))
+        chartList = [genid.addId(item) for item in chartList if item.get('id') not in chartform.id.data]
+        session[CURATOR_FIELD.CHARTS] = deepcopy(chartList)
+        return jsonify(chartList = chartList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=chartform.errors), 400
+
+@csrf.exempt
+@app.route('/tools', methods=['POST'])
+def tools():
+    """
+    Stores information about the tools found in the project
+    """
+    toolform = ToolForm(request.form)
+    if request.method == 'POST' and toolform.validate():
+        # Add or append to list
+        genid = GenerateId(CURATOR_FIELD.TOOLS)
+        toolList = deepcopy(session.get(CURATOR_FIELD.TOOLS, []))
+        toolList = [genid.addId(item) for item in toolList if item.get('id') not in toolform.id.data]
+        toolList.append(genid.addId(toolform.data))
+        session[CURATOR_FIELD.TOOLS] = deepcopy(toolList)
+        print("TL", toolList)
+        return jsonify(toolList = toolList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=toolform.errors), 400
+
+@csrf.exempt
+@app.route('/tools/delete', methods=['POST'])
+def toolsdelete():
+    """
+    Deletes information about a tool from the from the project
+    """
+    toolform = ToolForm(request.form)
+    if request.method == 'POST' and toolform.validate():
+        # Add or append to list
+        genid = GenerateId(CURATOR_FIELD.TOOLS)
+        toolList = deepcopy(session.get(CURATOR_FIELD.TOOLS, []))
+        toolList = [genid.addId(item) for item in toolList if item.get('id') not in toolform.id.data]
+        session[CURATOR_FIELD.TOOLS] = deepcopy(toolList)
+        return jsonify(toolList=toolList, fileServerPath=session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")), 200
+    return jsonify(data=toolform.errors), 400
+
+@csrf.exempt
+@app.route('/datasets', methods=['POST'])
+def datasets():
+    """
+    Stores information about the datasets found in the project
+    """
+    datasetform = DatasetForm(request.form)
+    if request.method == 'POST' and datasetform.validate():
+        genid = GenerateId(CURATOR_FIELD.DATASETS)
+        datasetList = deepcopy(session.get(CURATOR_FIELD.DATASETS, []))
+        datasetList = [genid.addId(item) for item in datasetList if item.get('id') not in datasetform.id.data]
+        datasetList.append(genid.addId(datasetform.data))
+        session[CURATOR_FIELD.DATASETS] = deepcopy(datasetList)
+        return jsonify(datasetList = datasetList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=datasetform.errors), 400
+
+@csrf.exempt
+@app.route('/datasets/delete', methods=['POST'])
+def datasetsdelete():
+    """
+    Deletes information about a dataset from the from the project
+    """
+    datasetform = DatasetForm(request.form)
+    if request.method == 'POST' and datasetform.validate():
+        # Delete from list
+        genid = GenerateId(CURATOR_FIELD.DATASETS)
+        datasetList = deepcopy(session.get(CURATOR_FIELD.DATASETS, []))
+        datasetList = [genid.addId(item) for item in datasetList if item.get('id') not in datasetform.id.data]
+        session[CURATOR_FIELD.DATASETS] = deepcopy(datasetList)
+        return jsonify(datasetList = datasetList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=datasetform.errors), 400
+
+@csrf.exempt
+@app.route('/scripts', methods=['POST'])
+def scripts():
+    """
+    Stores information about the scripts found in the project
+    """
+    scriptform = ScriptForm(request.form)
+    if request.method == 'POST' and scriptform.validate():
+        genid = GenerateId(CURATOR_FIELD.SCRIPTS)
+        scriptList = deepcopy(session.get(CURATOR_FIELD.SCRIPTS, []))
+        scriptList = [genid.addId(item) for item in scriptList if item.get('id') not in scriptform.id.data]
+        scriptList.append(genid.addId(scriptform.data))
+        session[CURATOR_FIELD.SCRIPTS] = deepcopy(scriptList)
+        return jsonify(scriptList = scriptList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=scriptform.errors), 400
+
+@csrf.exempt
+@app.route('/scripts/delete', methods=['POST'])
+def scriptsdelete():
+    """
+    Deletes information about a script from the from the project
+    """
+    scriptform = ScriptForm(request.form)
+    if request.method == 'POST' and scriptform.validate():
+        genid = GenerateId(CURATOR_FIELD.SCRIPTS)
+        scriptList = deepcopy(session.get(CURATOR_FIELD.SCRIPTS, []))
+        scriptList = [genid.addId(item) for item in scriptList if item.get('id') not in scriptform.id.data]
+        session[CURATOR_FIELD.SCRIPTS] = deepcopy(scriptList)
+        return jsonify(scriptList = scriptList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
+    return jsonify(data=scriptform.errors), 400
 
 @csrf.exempt
 @app.route('/documentation', methods=['POST', 'GET'])
@@ -672,147 +405,188 @@ def documentation():
     """
     docform = DocumentationForm(request.form)
     if request.method == 'POST' and docform.validate():
-        session["documentation"] = docform.data
-        msg = "Documentation Saved"
-        return jsonify(data=msg), 200
-    return jsonify(data=docform.errors), 200
+        session[CURATOR_FIELD.DOCUMENTATION] = docform.data
+        return jsonify(data=docform.data), 200
+    return jsonify(data=docform.errors), 400
+
+
 
 @csrf.exempt
-@app.route('/workflow', methods=['POST', 'GET'])
-def workflow():
-    """Collects and Returns values needed for the Workflow section.
-	:return: Information of the various nodes and edges - Dictionary
-	"""
-    GenerateIDs(session)
-    if request.method == 'GET':
-        return render_template('workflow.html')
+@app.route('/addToWorkflow', methods=['POST', 'GET'])
+def addToWorkflow():
+    """
+    Adds nodes to workflow
+    """
     nodesList = []
-    workflowsave = request.json
-    workflow = WorkflowCreator()
-    for chart in session.get("charts",[]):
-        try:
-            fileServerPath = session.get("fileServerPath","")
-            projectName = session.get("ProjectName","")
-            if projectName not in fileServerPath:
-                img = '<img src="' + fileServerPath  + "/" + projectName+"/"+chart["imageFile"] + '" width="250px;" height="250px;"/>'
-            else:
-                img = '<img src="' + fileServerPath  +"/"+chart["imageFile"] + '" width="250px;" height="250px;"/>'
-            caption = "<b> Image: </b>" + img
-        except Exception as e:
-            caption = ""
-        nodesList.append(chart["id"])
-        workflow.addChart(chart["id"], caption)
-    for tool in session.get("tools",[]):
-        pack = ""
-        try:
-            pack = "<b> Package Name: </b>" + tool["packageName"]
-        except:
-            try:
-                pack = "<b> Facility Name: </b>" + tool["facilityName"] + " <br/> <b>Measurement: </b>" + tool["measurement"]
-            except:
-                pack = ""
-        nodesList.append(tool["id"])
-        workflow.addTool(tool["id"], pack)
-    for dataset in session.get("datasets",[]):
-        readme = ""
-        try:
-            readme = "<b> ReadMe: </b>" + dataset["readme"]
-        except:
-            readme = ""
-        nodesList.append(dataset["id"])
-        workflow.addDataset(dataset["id"], readme)
-    for script in session.get("scripts",[]):
-        try:
-            readme = "<b> ReadMe: </b>" + script["readme"]
-        except:
-            readme = ""
-        if not script["saveas"]:
-            script["saveas"] = script["id"]
-        nodesList.append(script["id"])
-        workflow.addScript(script["id"], readme)
-    for head in session.get("heads",[]):
-        try:
-            readme = head["readme"]
-        except:
-            readme = ""
-        try:
-            nodesList.append(head["id"])
-            workflow.addHead(head["id"], readme, head["URLs"])
-        except:
-            nodesList.append(head["id"])
-            workflow.addHead(head["id"], readme)
-
-    for edge in session.get("edges",[]):
+    edgeList = []
+    workflow = WorkflowCreator(session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath",""))
+    for chart in session.get(CURATOR_FIELD.CHARTS, []):
+        if chart.get("id"):
+            nodesList.append(chart.get("id"))
+            workflow.addChart(chart)
+    for tool in session.get(CURATOR_FIELD.TOOLS, []):
+        if tool.get("id"):
+            nodesList.append(tool.get("id"))
+            workflow.addTool(tool)
+    for dataset in session.get(CURATOR_FIELD.DATASETS, []):
+        if dataset.get("id"):
+            nodesList.append(dataset.get("id"))
+            workflow.addDataset(dataset)
+    for script in session.get(CURATOR_FIELD.SCRIPTS, []):
+        if script.get("id"):
+            nodesList.append(script.get("id"))
+            workflow.addScript(script)
+    for head in session.get(CURATOR_FIELD.HEADS, []):
+        if head.get("id"):
+            nodesList.append(head.get("id"))
+            workflow.addHead(head)
+    for edge in session.get(CURATOR_FIELD.EDGES, []):
         workflow.addEdge(edge)
-    try:
-        edgeList = []
-        for edge in workflowsave[0]:
-            workflow.addEdge(edge)
-            edgeList.append(edge)
-        session["edges"] = edgeList
-    except Exception as e:
-        print(e)
-    try:
-        heads = HeadForm(request.form)
-        headInfo = workflowsave[1]
-        headList = []
-        for head in headInfo:
-            hinfo = head.split("*")
-            nodesList.append(hinfo[0])
-            heads.id.data = hinfo[0]
-            try:
-                if hinfo[1]:
-                    heads.readme.data = str(hinfo[1])
-            except Exception as e:
-                print(e)
-            try:
-                if hinfo[2]:
-                    heads.URLs.data = str(hinfo[2]).strip()
-            except Exception as e:
-                print(e)
-            headList.append(heads.data)
-        session["heads"] = headList
-        nodesList = list(set(nodesList))
-        workflowinfo = WorkflowForm(edges = edgeList,nodes=nodesList)
-        session["workflow"] = workflowinfo.data
-    except Exception as e:
-        print(e)
-    return jsonify({'workflow': workflow.__dict__}), 200
+        edgeList.append(edge)
+    nodesList = list(set(nodesList))
+    workflowinfo = WorkflowForm(edges = edgeList,nodes=nodesList)
+    session[CURATOR_FIELD.WORKFLOW] = workflowinfo.data
+    print("workflow",workflow.__dict__)
+    return jsonify(data=workflow.__dict__), 200
 
+@csrf.exempt
+@app.route('/saveNodesAndEdges', methods=['POST', 'GET'])
+def saveNodesAndEdges():
+    """
+    Saves edges and head workflow
+    """
+    head_edge_data = request.get_json()
+    if len(head_edge_data) > 0:
+        if len(head_edge_data[0]) > 0: #check for edges
+            edgeList = []
+            for edge in head_edge_data[0]:
+                edgeList.append(edge)
+            session[CURATOR_FIELD.EDGES] = edgeList #save edge data
+        if len(head_edge_data[1]) > 0: # check for nodes
+            headsList = []
+            for head_data in head_edge_data[1]:
+                heads = HeadForm(**head_data)
+                headsList.append(heads.data)
+            session[CURATOR_FIELD.HEADS] = headsList
+    return jsonify(data="saved"), 200
+
+
+@csrf.exempt
+@app.route('/preview/<previewFolder>', methods=['GET'])
+def preview(previewFolder):
+    """
+    Previews the metadata for user
+    """
+    data = None
+    with open("papers/" + previewFolder + "/" + "data.json") as json_file:
+        data = json.load(json_file)
+    previewObj = ObjectsForPreview(PaperForm(**data))
+    paperdetail = previewObj.getPaperDetails()
+    workflowdetail = previewObj.getWorkflowDetails()
+    return render_template('testpaperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=True)
+
+
+@csrf.exempt
+@app.route('/download', methods=['POST', 'GET'])
+def download():
+    """
+    Downloads the created metadata
+    """
+    #fill paper form
+    PIs = session.get(CURATOR_FIELD.INFO,{}).get("PIs",[])
+    charts = session.get(CURATOR_FIELD.CHARTS,[])
+    collections = session.get(CURATOR_FIELD.INFO,{}).get("collections","")
+    datasets = session.get(CURATOR_FIELD.DATASETS,[])
+    reference = session.get(CURATOR_FIELD.REFERENCE,{})
+    scripts = session.get(CURATOR_FIELD.SCRIPTS,[])
+    tools = session.get(CURATOR_FIELD.TOOLS,[])
+    tags = session.get(CURATOR_FIELD.INFO,{}).get("tags","")
+    versions = session.get(CURATOR_FIELD.VERSIONS,[])
+    workflow = session.get(CURATOR_FIELD.WORKFLOW,{})
+    heads = session.get(CURATOR_FIELD.HEADS,[])
+    documentation = session.get(CURATOR_FIELD.DOCUMENTATION,{})
+
+    #fill other parts of project form
+    pubdate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    fileServerPath = session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")
+    notebookPath = session.get(CURATOR_FIELD.PROJECT,{}).get("notebookPath","")
+    downloadPath = session.get(CURATOR_FIELD.PROJECT,{}).get("downloadPath","")
+    gitPath = session.get(CURATOR_FIELD.PROJECT,{}).get("gitPath","")
+    insertedBy = session.get(CURATOR_FIELD.DETAILS,{})
+    notebookFile = session.get(CURATOR_FIELD.INFO,{}).get("notebookFile","")
+    doi = session.get(CURATOR_FIELD.INFO,{}).get("doi","")
+    tempName = uuid.uuid4().hex
+    try:
+        serverpathList = fileServerPath.rsplit("/", 2)
+        projectName = serverpathList[len(serverpathList)-1]
+        if not projectName:
+            projectName = tempName
+            previewFolder = tempName
+        else:
+            previewFolder = serverpathList[len(serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
+    except:
+        projectName = tempName
+        previewFolder = tempName
+    projectForm = ProjectForm(downloadPath = downloadPath, fileServerPath = fileServerPath, notebookPath = notebookPath,
+                              ProjectName = projectName, gitPath = gitPath, insertedBy = insertedBy,
+                              isPublic = True, timeStamp = pubdate,
+                              notebookFile = notebookFile, doi = doi)
+
+    paperform = PaperForm(PIs = PIs, charts = charts, collections=ConvertField.convertToList([],[],collections), datasets = datasets, info = projectForm.data,
+                          reference = reference, scripts = scripts, tools = tools,
+                          tags = ConvertField.convertToList([],[],tags),versions = versions, workflow=workflow, heads=heads,
+                          schema='http://paperstack.uchicago.edu/v1_1.json',version=2, documentation=documentation)
+    #make fields to list
+    paperdata = ConvertField.convertToList(["files","properties","URLs","patches"],
+                                   [CURATOR_FIELD.CHARTS,CURATOR_FIELD.TOOLS,CURATOR_FIELD.DATASETS,CURATOR_FIELD.SCRIPTS,CURATOR_FIELD.HEADS],
+                                    paperform.data)
+    if not os.path.exists("papers/"+previewFolder):
+        os.makedirs("papers/"+previewFolder)
+    with open("papers/"+previewFolder+"/"+"data.json", "w") as outfile:
+        json.dump(paperdata, outfile, default=lambda o: o.__dict__, separators=(',', ':'), sort_keys=True, indent=3)
+    return jsonify(paper=paperdata, previewFolder=previewFolder), 200
 
 @csrf.exempt
 @app.route('/publish', methods=['POST', 'GET'])
 def publish():
-    """ Published the created metadata
+    """
+    Published the created metadata
     """
     form = PublishForm(request.form)
     serverslist = Servers()
-    form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
+    try:
+        form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                            serverslist.getServersList()]
-    maintaineraddresses = [item for qrespserver in
-                           serverslist.getServersList() for item in qrespserver['qresp_maintainer_emails']]
-    session['maintaineraddresses'] = maintaineraddresses
-    error = []
-    if request.method == 'POST':
-        projectName = session.get("ProjectName")
+    except Exception as e:
+        raise InvalidUsage('Could not fetch serverlist, \n ' + str(e), status_code=410)
+    if request.method == 'POST' and form.validate():
+        fileServerPath = session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")
+        serverpathList = fileServerPath.rsplit("/", 2)
+        previewFolder = serverpathList[len(serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
+        error = []
         try:
-            with open("papers/"+projectName+"/data.json", "r") as jsonData:
+            with open("papers/"+previewFolder+"/data.json", "r") as jsonData:
                 error = serverslist.validateSchema(json.load(jsonData))
-            if len(error)>0:
-                flash(error)
-                return render_template('publish.html', form=form)
-            else:
-                session['publishserver'] = form.server.data
-                session['emailAddress'] = form.emailId.data
-                googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'], app.config['SCOPE'])
-                google = googleauth.getGoogleAuth()
-                auth_url, state = google.authorization_url(app.config['AUTH_URI'], access_type='offline')
-                session['oauth_state'] = state
-                return redirect(auth_url)
-        except Exception as e:
-            flash("Could not publish. No project found "+str(e))
-            return render_template('publish.html', form=form)
-    return render_template('publish.html', form=form)
+        except:
+            error.append("No server found. Place files in a publicly accessible server.")
+        if len(error)>0:
+            return jsonify(error=error), 200
+        else:
+            session['publishserver'] = form.server.data
+            session['emailAddress'] = form.emailId.data
+            for item in serverslist.getServersList():
+                if form.server.data in item['qresp_server_url']:
+                    session['maintaineraddresses'] = item['qresp_maintainer_emails']
+            googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'], app.config['SCOPE'])
+            google = googleauth.getGoogleAuth()
+            auth_url, state = google.authorization_url(app.config['AUTH_URI'], access_type='offline')
+            session['oauth_state'] = state
+            print(auth_url,", -> ",state)
+            print(form.server.data)
+            print(form.emailId.data)
+            return redirect(auth_url)
+        return jsonify(data=form.data),200
+    return jsonify(error=form.errors), 400
 
 
 @csrf.exempt
@@ -825,10 +599,10 @@ def authorized():
     if 'error' in request.args:
         if request.args.get('error') == 'access_denied':
             print('denied access.')
-        return render_template('publish.html', form=form)
+        return redirect(url_for('qrespcurator'))
     if 'code' not in request.args and 'state' not in request.args:
         print('denied access.')
-        return render_template('publish.html', form=form)
+        return redirect(url_for('qrespcurator'))
     googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'])
     google = googleauth.getGoogleAuth(state=session['oauth_state'])
     try:
@@ -850,13 +624,15 @@ def authorized():
             server = session.get("publishserver")
             if user_data['email'] in emailAddress:
                 try:
-                    projectName = session.get("ProjectName")
-                    with open("papers/" + projectName + "/data.json", "r") as jsonData:
+                    fileServerPath = session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")
+                    serverpathList = fileServerPath.rsplit("/", 2)
+                    previewFolder = serverpathList[len(serverpathList) - 2] + "_" + serverpathList[len(serverpathList) - 1]
+                    with open("papers/" + previewFolder + "/data.json", "r") as jsonData:
                         senddescriptor = SendDescriptor(server)
                         response = senddescriptor.sendDescriptorToServer(json.load(jsonData))
                         if response.status_code == 400:
                            flash("Paper already exists")
-                           return render_template('publish.html', form=form)
+                           return redirect(url_for('qrespcurator'))
                         else:
                             try:
                                 paperdata = response.json()
@@ -878,87 +654,57 @@ def authorized():
                             except Exception as e:
                                 print(e)
                                 flash('Could not email your administrator')
-                                return render_template('publish.html', form=form)
+                                return redirect(url_for('qrespcurator'))
                 except Exception as e:
                     print(e)
                     flash('No paper found')
-                    return render_template('publish.html', form=form)
-                return render_template('publish.html', form=form)
+                    return redirect(url_for('qrespcurator'))
             else:
                 flash('Unauthorized access. Could not verify your email address')
     except Exception as e:
         print(e)
         flash('Unauthorized access. Could not verify your email address')
-        return render_template('publish.html', form=form)
-    return render_template('publish.html', form=form)
+        return redirect(url_for('qrespcurator'))
+    return redirect(url_for('qrespcurator'))
 
-@csrf.exempt
-@app.route('/download', methods=['POST', 'GET'])
-def download():
-    """ Downloads the created metadata
+@app.route('/mint', methods=['POST','GET'])
+def mint():
+    """ Fetches the mint page
     """
-    PIs = session.get("PIs")
-    charts = session.get("charts")
-    collections = session.get("collections")
-    datasets = session.get("datasets")
-    reference = session.get("reference")
-    scripts = session.get("scripts")
-    tools = session.get("tools")
-    tags = session.get("tags")
-    versions = session.get("versions")
-    workflow = session.get("workflow")
-    heads = session.get("heads")
-    projectName = session.get("ProjectName","unknown")
-    pubdate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    fileServerPath = session.get("fileServerPath","")
-    notebookPath = session.get("notebookPath","")
-    downloadPath = session.get("downloadPath","")
-    projectName = session.get("ProjectName",uuid.uuid4().hex)
-    if projectName:
-        if projectName not in fileServerPath:
-            fileServerPath = fileServerPath + "/" +projectName
-        if projectName not in notebookPath:
-            notebookPath = notebookPath + "/" +projectName
-        if projectName not in downloadPath:
-            downloadPath = downloadPath + projectName
+    return render_template('mint.html')
 
-
-    projectForm = ProjectForm(downloadPath = downloadPath,fileServerPath = fileServerPath,notebookPath = notebookPath,
-                              folderAbsolutePath = session.get("folderAbsolutePath"),ProjectName = session.get("ProjectName"),gitPath = session.get("gitPath"),
-                              insertedBy = session.get("insertedBy"),isPublic = session.get("isPublic"),timeStamp = pubdate,
-                              serverPath = session.get("serverPath"),notebookFile = session.get("notebookFile"),doi = session.get("doi"))
-    paperform = PaperForm(PIs = PIs, charts = charts, collections=collections, datasets = datasets, info = projectForm.data,
-                          reference = reference, scripts =scripts, tools = tools,
-                          tags = tags,versions =versions, workflow=workflow,heads=heads,schema='http://paperstack.uchicago.edu/v1_0.json',version=1)
-    paperdict = ConvertToList(paperform.data)
-    paperdata = paperdict.fetchConvertedList()
-    if not os.path.exists("papers/"+projectName):
-        os.makedirs("papers/"+projectName)
-    with open("papers/"+projectName+"/"+"data.json", "w") as outfile:
-        json.dump(paperdata, outfile, default=lambda o: o.__dict__, separators=(',', ':'), sort_keys=True, indent=3)
-    session["paper"] = paperdata
-    return jsonify(paper=paperdata, projectName=projectName), 200
-
-
-@csrf.exempt
-@app.route('/preview/<projectName>', methods=['POST', 'GET'])
-def preview(projectName):
-    """ Previews the metadata for user """
-    data = None
-    with open("papers/" + projectName + "/" + "data.json") as json_file:
-        data = json.load(json_file)
-    previewObj = ObjectsForPreview(data)
-    paperdetail = previewObj.getPaperDetails()
-    workflowdetail = previewObj.getWorkflowDetails()
-    return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
-
-
-@csrf.exempt
-@app.route('/acknowledgement', methods=['POST', 'GET'])
-def acknowledgement():
-    """Final acknowledgement page
+@app.route('/insertDOI', methods=['POST','GET'])
+def insertDOI():
+    """ Inserts DOI to database
     """
-    return render_template('acknowledgement.html')
+    try:
+        paperid = request.args.get('paperId', 0, type=str)
+        paperid = str(paperid).strip()
+        doi = request.args.get('doi', 0, type=str)
+        doi = str(doi).strip()
+        dao = PaperDAO()
+        if paperid and doi:
+            dao.insertDOI(paperid,doi)
+    except Exception as e:
+        print(e)
+        content = {'Failed': 'Could Not Insert'}
+        return jsonify(content), 400
+    content = {'Success': 'Inserted'}
+    return jsonify(content), 200
+
+@app.route('/downloads/<file>')
+def downloadfile(file=None):
+    """ Download file from server """
+    if file:
+        try:
+            path = 'downloads/'+file
+            return send_file(path, as_attachment=True)
+        except Exception as e:
+            print(e)
+            msg = {"Content":"Not Found"}
+            return jsonify(msg),400
+
+
 
 ########################################EXPLORER#############################################################################
 
@@ -998,13 +744,13 @@ def admin():
     """ This method helps in connecting to the mongo database.
     """
     form = AdminForm(request.form)
-    form.port.data = "27017"
+    form.port.data = 27017
     verifyform = PassCodeForm(request.form)
     if request.method == 'POST' and form.validate():
         try:
             dbAdmin = MongoDBConnection.getDB(hostname=form.hostname.data, port=int(form.port.data),
                                         username=form.username.data, password=form.password.data,
-                                        dbname=form.dbname.data, collection=form.collection.data, isssl=form.isSSL.data)
+                                        dbname=form.dbname.data, isssl=form.isSSL.data)
         except Exception as e:
             flash('Could not connect to server, \n ' + str(e))
             raise InvalidUsage('Could not connect to server, \n ' + str(e), status_code=410)
@@ -1066,8 +812,7 @@ def searchWord():
     """
     allpaperslist = []
     try:
-        dao = PaperDAO()
-        searchWord = request.args.get('searchWord', type=str)
+        searchWord = ""
         paperTitle = request.args.get('paperTitle', type=str)
         doi = request.args.get('doi', type=str)
         tags = request.args.get('tags', type=str)
@@ -1163,31 +908,6 @@ def getDescriptor():
         content = {'Error':'Could not insert, Cannot get descriptor'}
         return jsonify(content),400
     return jsonify(content),200
-
-@app.route('/mint', methods=['POST','GET'])
-def mint():
-    """ Fetches the mint page
-    """
-    return render_template('mint.html')
-
-@app.route('/insertDOI', methods=['POST','GET'])
-def insertDOI():
-    """ Inserts DOI to database
-    """
-    try:
-        paperid = request.args.get('paperId', 0, type=str)
-        paperid = str(paperid).strip()
-        doi = request.args.get('doi', 0, type=str)
-        doi = str(doi).strip()
-        dao = PaperDAO()
-        if paperid and doi:
-            dao.insertDOI(paperid,doi)
-    except Exception as e:
-        print(e)
-        content = {'Failed': 'Could Not Insert'}
-        return jsonify(content), 400
-    content = {'Success': 'Inserted'}
-    return jsonify(content), 200
 
 def main(port):
     app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'

@@ -25,15 +25,6 @@ var chartcanvasNetwork = null;
 var chartlegendNetwork = null;
 
 $(function () {
-    $(document).on('click', '.button-icon', function () {
-        $(this).toggleClass("active");
-        $(this).next(".icons").toggleClass("open");
-    });
-
-    $('#tblcharts tbody').on('click', '.button-icon', function () {
-        $(this).toggleClass("active");
-        $(this).next(".icons-charts").toggleClass("open");
-    });
 
     $('#PaperSection').on('click','#btnMint',function(){
                 window.location.href = "/mint";
@@ -109,6 +100,10 @@ $(function () {
 //     //minHeight: 150
 // });
 
+    $(document).on('click', '.button-icon', function () {
+        $(this).toggleClass("active");
+        $(this).next(".icons-charts").toggleClass("open");
+    });
 
 });
 

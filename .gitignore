@@ -7,3 +7,4 @@ web/dist/
 web/project/__pycache__/
 web/build/
 web/qresp.egg-info/
+.cache/

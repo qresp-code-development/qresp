@@ -1,7 +1,8 @@
 import re
 import traceback
-from .db import *
-from .models import *
+from project.db import *
+from project.models import *
+from project.util import WorkflowInfo, WorkflowNodeInfo, Search, PaperDetails
 
 
 class PaperDAO(MongoDBConnection):

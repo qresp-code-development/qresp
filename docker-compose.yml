@@ -5,6 +5,8 @@ services:
     restart: always
     build: ./web
     environment:
+      - FLASK_APP=run.py
+      - FLASK_DEBUG=1
       - KEY=<insert key>
       - GOOGLE_CLIENT_ID=<insert google client id>
       - GOOGLE_CLIENT_SECRET=<insert google client secret>
@@ -15,7 +17,10 @@ services:
       - "8080"
     volumes:
       - /usr/src/app/web/project/static
+      - ./web/:/usr/src/app/web
     command: /usr/local/bin/gunicorn -w 2 -b :8080 project:app
+    #command: python run.py --host=0.0.0.0 --port 8080
+
     
   nginx:
     restart: always

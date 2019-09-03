@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_curator.html" %}
 
 {% block page_content %}
 
@@ -33,7 +33,6 @@
                     {{ render_field(form.username) }}
                     {{ render_field(form.password) }}
                     {{ render_field(form.dbname) }}
-                    {{ render_field(form.collection) }}
                     {{ render_field(form.isSSL) }}
                     <span class="input-group-btn">
                                 <input type="submit" id="btnExplorer"

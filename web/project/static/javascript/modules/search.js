@@ -19,10 +19,6 @@ $(function () {
 
 
    $('.filtersearch').click(function (e) {
-
-        var location_url = document.location.href;
-        var search_url = '/searchWord';
-        var searchWord = $("#searchWord").val();
         var paperTitle = $("#txtPaperTitle").val();
         var doi = $("#txtDOI").val();
         var tags = $("#txtTags").val();
@@ -31,7 +27,6 @@ $(function () {
         var publicationList = $('#publicationList').val();
 
         $.getJSON('/searchWord', {
-            searchWord: searchWord,
             paperTitle: paperTitle,
             doi: doi,
             tags: tags,
@@ -227,8 +222,12 @@ function buildTable(allPapers) {
             "caseInsensitive": true,
             "regex": false,
             "smart": true
+        },
+        "language": {
+            "lengthMenu": "Show _MENU_ records",
+            "info": "Showing _START_ to _END_ of _TOTAL_ records",
+            "infoFiltered": "(filtered from _MAX_ total records)"
         }
-
     });
 
 }

@@ -230,8 +230,9 @@ tr:focus .custom-icon-bar {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    background-color: #800000;
-    color: white;
+    background-color: #777777;
+    font-family: fontawesome;
+    color: #fff;
     text-align: center;
     font-size: 1.7em;
     position: relative;
@@ -250,12 +251,17 @@ tr:focus .custom-icon-bar {
 }
 
 .button-icon:after {
-    content: "+";
+    font-family: fontawesome;
+    content: "\f105";
+    background-color: #777777;
 }
 
+
 .button-icon.active {
-    -webkit-transform: rotate(45deg);
-    transform: rotate(45deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+     content: "\f104";
+    background-color: #777777;
 }
 
 .icons {
@@ -573,8 +579,8 @@ label {
 #node-popUp {
     display:none;
     position:absolute;
-    top:100px;
-    left:170px;
+    /*top:100px;*/
+    /*left:170px;*/
     z-index:299;
     width:300px;
     height:150px;
@@ -600,3 +606,16 @@ label {
     padding:10px;
     text-align: center;
 }
+
+.background {
+    filter: blur(2px);
+    position: absolute;
+    z-index: 0;
+    left: 0;
+    width: 100%;
+    /*background-position: 50%;*/
+}
+
+
+/*Delete */
+

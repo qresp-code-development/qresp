@@ -1,4 +1,4 @@
-# # -*- coding: utf-8 -*-
+    # # -*- coding: utf-8 -*-
 # For desktop version running from command line
 
 from flask import Flask
