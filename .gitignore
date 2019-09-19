@@ -9,4 +9,4 @@ web/build/
 web/qresp.egg-info/
 .cache/
 web/project/config.ini 
-
+web/project/tests/__pycache__/

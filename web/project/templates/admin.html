@@ -14,7 +14,6 @@
             <div id="passcodesection">
                 <h3 data-toggle="tooltip" title="Enter passcode set at runtime" class="text-center"> Enter Passcode </h3>
                 <form method="post" id="passcodeform" action="verifyPasscode">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     {{ render_field(verifyform.passcode) }}
                     <span class="input-group-btn">
                                 <input type="button" id="btnPasscode"
@@ -27,7 +26,6 @@
             <div id="mongoconnection" style="display: none;">
                 <h3 data-toggle="tooltip" title="Connect to a mongo database" class="text-center"> Connect to Mongo Database </h3>
                 <form method="post" action="admin">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     {{ render_field(form.hostname) }}
                     {{ render_field(form.port) }}
                     {{ render_field(form.username) }}

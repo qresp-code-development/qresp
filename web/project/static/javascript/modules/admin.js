@@ -1,11 +1,4 @@
 $(function () {
-    $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
-                }
-            }
-        })
     $("#btnPasscode").on('click',function(event) {
            $.ajax({
                type: "POST",
