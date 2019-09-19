@@ -186,7 +186,6 @@ def setproject():
     """
     form = ProjectForm(request.form)
     if request.method == 'POST':
-        print(form.data)
         session[CURATOR_FIELD.PROJECT] = form.data
         return jsonify(data=form.data), 200
     return jsonify(data=form.errors), 400
@@ -208,7 +207,6 @@ def getTreeInfo():
         else:
             listObjects = dtree.fetchForTreeFromHttp()
             services = dtree.openFileToReadConfigFromHttp("qresp.ini")
-            print("Services",services)
     except Exception as e:
         jsonify(errors=str(e)), 400
     return jsonify({'listObjects': listObjects,'services':services}), 200
@@ -566,7 +564,6 @@ def publish():
         previewFolder = serverpathList[len(serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
         error = []
         try:
-            print("previewFolder>>",previewFolder)
             with open("papers/"+previewFolder+"/data.json", "r") as jsonData:
                 error = serverslist.validateSchema(json.load(jsonData))
         except:
@@ -583,7 +580,6 @@ def publish():
             google = googleauth.getGoogleAuth()
             auth_url, state = google.authorization_url(Config.get_setting('GOOGLE_API','AUTH_URI'), access_type='offline')
             session['oauth_state'] = state
-            print("auth",auth_url)
         return jsonify(data=auth_url),200
     return jsonify(error=form.errors), 400
 
@@ -638,7 +634,6 @@ def authorized():
                             try:
                                 paperdata = response.json()
                                 maintaineraddresses = session.get('maintaineraddresses')
-                                print(type(jsondata),jsondata['info']['insertedBy']['firstName'])
                                 body =  'The user ' + str(jsondata['info']['insertedBy']['firstName']) + ' with email address ' + emailAddress + ' has inserted paper with paper id ' + str(paperdata["paperid"])
                                 fromx = Config.get_setting('GLOBAL','MAIL_ADDR')
                                 to = maintaineraddresses
@@ -654,9 +649,7 @@ def authorized():
                                 mailserver.close()
                                 return redirect(server + "/paperdetails/" + paperdata["paperid"])
                             except Exception as e:
-                                print(e)
                                 print(traceback.format_exc())
-                                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
                                 flash('Could not email your administrator'+str(e))
                                 flash('Published')
                                 return redirect(url_for('qrespcurator'))
@@ -829,7 +822,6 @@ def paperdetails(paperid):
     workflowdetail = []
     try:
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        print("here0",selected_servers)
         fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
         url = '/api/paper/'+paperid
         paperdetail = fetchdata.fetchOutput(url)

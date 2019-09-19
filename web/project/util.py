@@ -72,7 +72,6 @@ class Servers():
             schema_coll_data = json.loads(url.text)
             a = Draft4Validator(schema_coll_data)
             for error in sorted(a.iter_errors(coll_data), key=str):
-                print("errors, ",error)
                 message = ""
                 try:
                     exp = str(error.absolute_path[2]) + " is missing in " + str(error.absolute_path[0]) + " " + str(
@@ -150,7 +149,6 @@ class Dtree():
             file = xtag.text_content().strip()
             if ".zip" in file:
                 page = requests.get(self.__path+self.__previewUrlForZenodo+file, headers=self.__headers, verify=False)  # open iframe src url
-                print(self.__path+self.__previewUrlForZenodo+file)
                 tree = html.fromstring(page.content)
                 tag = '//ul[@id="' + attrid + '"]/li/span[1]'
                 for xtag in tree.xpath(tag):
