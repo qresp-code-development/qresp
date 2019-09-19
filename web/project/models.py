@@ -3,9 +3,9 @@ from mongoengine import *
 class Person(DynamicEmbeddedDocument):
     """ Class mapping creators,PIs,authors of paper to mongo database
     """
-    firstName = StringField(max_length=50)
+    firstName = StringField(max_length=50, required= True)
     middleName = StringField(max_length=50)
-    lastName = StringField(max_length=50)
+    lastName = StringField(max_length=50, required= True)
     emailId = StringField(max_length=100)
     affiliation =StringField(max_length=100)
 
@@ -34,13 +34,13 @@ class Charts(DynamicEmbeddedDocument):
     """ Class mapping Charts section of paper to mongo database
     """
     caption = StringField()
-    id = StringField()
-    imageFile = StringField()
+    id = StringField(required= True)
+    imageFile = StringField(required= True)
     files = ListField()
     number = StringField()
-    properties = ListField()
-    saveas = StringField()
+    properties = ListField(required= True)
     extraFields = ListField()
+    saveas = StringField()
     meta = {'strict': False}
 
 class Tools(DynamicEmbeddedDocument):
@@ -56,8 +56,8 @@ class Tools(DynamicEmbeddedDocument):
     facilityname = StringField()
     measurement = StringField()
     URLs = ListField()
-    saveas = StringField()
     extraFields = ListField()
+    saveas = StringField()
     meta = {'strict': False}
 
 class Datasets(DynamicEmbeddedDocument):
@@ -67,8 +67,8 @@ class Datasets(DynamicEmbeddedDocument):
     files = ListField()
     readme = StringField()
     URLs = ListField()
-    saveas = StringField()
     extraFields = ListField()
+    saveas = StringField()
     meta = {'strict': False}
 
 class Scripts(DynamicEmbeddedDocument):
@@ -78,11 +78,9 @@ class Scripts(DynamicEmbeddedDocument):
     files = ListField()
     readme = StringField()
     URLs = ListField()
-    saveas = StringField()
     extraFields = ListField()
+    saveas = StringField()
     meta = {'strict': False}
-
-
 
 class Journal(DynamicEmbeddedDocument):
     """ Class mapping Journal section of reference to mongo database
@@ -103,7 +101,11 @@ class Reference(DynamicEmbeddedDocument):
     title = StringField()
     volume = StringField()
     year = DecimalField()
-    meta = {'strict': False}
+    meta = {'strict': False,
+            'indexes':[
+                {'title','unique'},
+                'publishedAbstract'
+            ]}
 
 class Documentation(DynamicEmbeddedDocument):
     """ Class mapping Datasets section of paper to mongo database
@@ -164,9 +166,10 @@ class Paper(Document):
     heads = ListField(EmbeddedDocumentField(Heads))
     workflow = EmbeddedDocumentField(Workflow)
     documentation = EmbeddedDocumentField(Documentation)
-    collections = ListField()
-    schema = StringField()
-    tags = ListField()
+    collections = ListField(required= True)
+    schema = StringField(required= True)
+    tags = ListField(required= True)
     versions = ListField()
     meta = {'strict': False,
-            'queryset_class': FilterQuerySet}
+            'queryset_class': FilterQuerySet
+            }

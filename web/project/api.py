@@ -1,4 +1,4 @@
-from .paperdao import *
+from project.paperdao import *
 
 #edit swagger.yml file for method changes
 
@@ -22,8 +22,10 @@ def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=Non
                                                         tags=tags,collectionList=collectionList,
                                                         authorsList=authorsList,publicationList=publicationList)
     except Exception as e:
-        print("Exception in search", e)
-    return allpaperslist
+        msg = "Exception in search api " + str(e)
+        print(msg)
+        return msg, 400
+    return allpaperslist, 200
 
 def collections():
     """
@@ -37,8 +39,10 @@ def collections():
         dao = PaperDAO()
         allcollectionlist = dao.getCollectionList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allcollectionlist)
+        msg = "Exception in collections api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allcollectionlist), 200
 
 def authors():
     """
@@ -52,8 +56,10 @@ def authors():
         dao = PaperDAO()
         allauthorlist = dao.getAuthorList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allauthorlist)
+        msg = "Exception in authors api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allauthorlist), 200
 
 def publications():
     """
@@ -67,8 +73,10 @@ def publications():
         dao = PaperDAO()
         allpublist = dao.getPublicationList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allpublist)
+        msg = "Exception in publications api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allpublist), 200
 
 def paper(id):
     """
@@ -83,9 +91,9 @@ def paper(id):
         paperdetail = dao.getPaperDetails(id)
     except Exception as e:
         msg = "Exception in paper api " + str(e)
-        print("Exception in paper api ", e)
-        return e, 400
-    return paperdetail
+        print(msg)
+        return msg, 400
+    return paperdetail, 200
 
 def workflow(id):
     """
@@ -100,9 +108,9 @@ def workflow(id):
         workflowdetail = dao.getWorkflowDetails(id)
     except Exception as e:
         msg = "Exception in workflow api " + str(e)
-        print("Exception in workflow api ", e)
+        print(msg)
         return msg,400
-    return workflowdetail
+    return workflowdetail, 200
 
 def chart(id,cid):
     """
@@ -117,6 +125,6 @@ def chart(id,cid):
         chartworkflowdetail = dao.getWorkflowForChartDetails(id, cid)
     except Exception as e:
         msg = "Exception in chart api " + str(e)
-        print("Exception in chart api ", e)
+        print(msg)
         return msg,400
-    return chartworkflowdetail
+    return chartworkflowdetail, 200

@@ -45,8 +45,9 @@ $(function(){
                 buildCuratorTable(data.data);
             },
             error: function(xhr, status, error) {
-                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                var errorMessage = xhr.status + ': ' + xhr.statusText + ': '+xhr.responseText;
                 console.log(errorMessage);
+                console.log(status,error);
                 $("#warning").toggle();
                 $("#warning-message").html(errorMessage);
             }
@@ -66,6 +67,7 @@ $(function(){
                     callTreeData({'treeUrl':data.data['hostUrl']});
                 }else if(data.data['kind'].includes("Zenodo")){
                     callTreeData({'treeUrl':data.data['zenodoUrl']+'#tree_item0'});
+                    $("#fileServerPath").val(data.data['zenodoUrl'].replace(/\/$/, ""));
                 }else{
                     callTreeData({'treeUrl':data.data['other']});
                 }
@@ -290,9 +292,10 @@ $(function(){
             success: function (data) {
                 if(data.error){
                     console.log(data.error);
-                    bootbox.alert(data.error.join('\r\n'));
+                    var errorstring = '<ul><li>' + data.error.join("</li><li>"); + '</li></ul>';
+                    bootbox.alert(errorstring);
                 }else {
-                    bootbox.alert('published');
+                    window.location.href = data.data;
                     $('#publishModal').modal('hide');
                 }
             },
@@ -304,15 +307,6 @@ $(function(){
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
-    });
-
-    // Inject our CSRF token into our AJAX request.
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
-            }
-        }
     });
 
     $(document).on('click', '.button-icon', function () {
@@ -431,22 +425,6 @@ $(function(){
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
-
-    // link for downloading metadata
-    // $('#shareLink').on('click',function (e) {
-    //       $(this).next().toggleClass('open-menu');
-    //     //  $.ajax({
-    //     //     type: "GET",
-    //     //     url: "download",
-    //     //     success: function (data) {
-    //     //         $('#share-div').toggle();
-    //     //         var previewFolder = data["previewFolder"];
-    //     //         $('#share-elem').val(window.location.host+"/preview/"+previewFolder);
-    //     //         console.log("preview",previewFolder);
-    //     //     }
-    //     // });
-    //     // e.preventDefault(); // block the traditional submission of the form.
-    // });
 });
 
 /* Functions */
@@ -586,15 +564,18 @@ function callTreeData(searchdata){
         contentType: "application/json ; charset=utf-8",
         data: JSON.stringify(searchdata),
         success: function (data) {
-            if(typeof data.services !== 'undefined'){
-                data.services.forEach(function(element) {
-                    if (element){
-                        toggleOnOff(true,element);
-                    }
-                });
+            console.log("data>>",data,data.services);
+            if("services" in data) {
+                if ("notebookPath" in data.services) {
+                    $("#notebookPath").val(data.services['notebookPath']);
+                }
+                if ("downloadPath" in data.services) {
+                    $("#downloadPath").val(data.services['downloadPath']);
+                }
+                if ("gitPath" in data.services) {
+                    $("#gitPath").val(data.services['gitPath']);
+                }
             }
-
-
             $("#projtree").fancytree({
                 checkbox: false,
                 selectMode: 1,
@@ -805,15 +786,13 @@ function buildChartTables(chartDetails,path) {
 
                                 var notebookPath = $.trim(path);
                                 if (notebookPath != "") {
-                                    if (notebookPath.indexOf('notebooks') < 0) {
                                         notebookPath = notebookPath.replace(/^(https?:\/\/)?(www\.)?/, '');
                                         notebookPath = "http://nbviewer.jupyter.org/url/" + notebookPath;
-                                    }
                                 }
                                 var notebooks = ($
                                     .trim(row.notebookFile) == "") ? ""
                                     : "<li><a href='"
-                                    + path
+                                    + notebookPath
                                     + "/"
                                     + $.trim(row.notebookFile)
                                     + "' title='View the Jupyter Notebook' target='_blank' ><img src='/static/images/jupyter.png' alt='jupyter'></a></li>";
@@ -824,14 +803,6 @@ function buildChartTables(chartDetails,path) {
                                     + $
                                         .trim(path)
                                     + "' title='Download the data source for the chart from this Endpoint' target='_blank'><img src='/static/images/download-icon.png' alt='download'></a></li>";
-
-                                // var workflows = ($
-                                //     .trim(paperDetails._PaperDetails__id) == "") ? ""
-                                //     : "<li><a href='javascript:void'><img data-workflow='"
-                                //     + paperDetails._PaperDetails__id
-                                //     + ","
-                                //     + $.trim(row.id)
-                                //     + "' src='/static/images/workflow.png' data-toggle='modal' data-target='#chartWorkflowModalMode' class='workflowimg' alt='workflow'></a></li>";
 
                                 chartInfo += datatree + downloads + notebooks + "</ul></div>";
                                 return chartInfo;
@@ -1457,7 +1428,7 @@ function bindWorkflow(jsonData) {
 
     var options = {
         edges: {
-            color: 'black',
+            // color: 'black',
             arrows: {
                 middle: true
                 // 					{
@@ -1542,11 +1513,12 @@ function bindWorkflow(jsonData) {
                     },
                     font: {
                         multi: 'html',
-                        size: 20,
+                        size: 0,
                         bold: {
                             color: '#0077aa'
                         }
-                    }
+                    },
+                    cid: 1
                 }]);
 
 
@@ -1578,11 +1550,12 @@ function bindWorkflow(jsonData) {
                     },
                     font: {
                         multi: 'html',
-                        size: 20,
+                        size: 0,
                         bold: {
                             color: '#0077aa'
                         }
-                    }
+                    },
+                    cid: 1
                 }]);
             });
         } else if (key == "scripts") {
@@ -1613,11 +1586,12 @@ function bindWorkflow(jsonData) {
                     },
                     font: {
                         multi: 'html',
-                        size: 20,
+                        size: 0,
                         bold: {
                             color: '#0077aa'
                         }
-                    }
+                    },
+                    cid: 1
                 }]);
             });
         }
@@ -1649,11 +1623,12 @@ function bindWorkflow(jsonData) {
                     },
                     font: {
                         multi: 'html',
-                        size: 20,
+                        size: 0,
                         bold: {
                             color: '#0077aa'
                         }
-                    }
+                    },
+                    cid: 1
                 }]);
             });
         }
@@ -1668,6 +1643,11 @@ function bindWorkflow(jsonData) {
                 headNum = headNum + 1;
                 nodeId = nodeId + 1;
                 console.log("head>",headNum.toString(),"id>",val['id']);
+                var head = {};
+                head["id"] = "h"+ headNum.toString();
+                head["readme"] = val['readme'];
+                head["URLs"] = val['URLs'];
+                headInfo.push(head);
                 hid = hid + 1;
                 nodes.add([{
                     x: x,
@@ -1684,11 +1664,12 @@ function bindWorkflow(jsonData) {
                     },
                     font: {
                         multi: 'html',
-                        size: 20,
+                        size: 0,
                         bold: {
                             color: '#0077aa'
                         }
-                    }
+                    },
+                    cid: 1
                 }]);
             });
         }
@@ -1724,6 +1705,8 @@ function bindWorkflow(jsonData) {
         data.shape = ShapeSelection("h");
         data.title = document.getElementById('node-readme').value;
         data.size = 10;
+        data.font = {multi: 'html', size: 0, bold: {color: '#0077aa'}};
+        data.cid = 1;
         clearNodePopUp();
         callback(data);
     }
@@ -1824,7 +1807,7 @@ function bindWorkflow(jsonData) {
 
     var nodes1 = new vis.DataSet();
     var edges1 = new vis.DataSet();
-    var mynetwork = document.getElementById('divLegends');
+    var mynetwork = document.getElementById('divLegend');
     var x = -mynetwork.clientWidth / 2 + 50;
     var y = -mynetwork.clientHeight / 1.8 + 60;
     var step = 83;
@@ -2007,7 +1990,6 @@ function connectedNodes() {
 
 function saveNodesAndEdges(){
         var plist = [];
-        console.log("headInfo>",headInfo);
 		if (connections.length > 0) {
 			plist.push(connections);
 			plist.push(headInfo);
@@ -2024,16 +2006,6 @@ function saveNodesAndEdges(){
 			}
 		});
 }
-
-function addPhysics() {
-    var options = {
-        physics:{
-            stabilization: false
-        }
-    }
-    network.setOptions(options);
-}
-
 function unique(arr) {
     var u = {}, a = [];
     for (var i = 0, l = arr.length; i < l; ++i) {
@@ -2044,11 +2016,27 @@ function unique(arr) {
     }
     return a;
 }
-
-function copyToClipboard(element) {
-  var $temp = $("<input>");
-  $("body").append($temp);
-  $temp.val($(element).text()).select();
-  document.execCommand("copy");
-  $temp.remove();
+function addPhysics() {
+     if($("#Movement").is(':checked')) {
+         network.setOptions({physics:{stabilization:false}});
+     }else{
+         network.setOptions({physics:{stabilization:true}});
+     }
 }
+
+function showHideLabelForNodes(){
+    if($("#LabelsVisibility").is(':checked')){
+        nodes.forEach(function (node) {
+            nodes.update({id:node.id,font:{size: 20} });
+        });
+    } else {
+         nodes.forEach(function (node) {
+            nodes.update({id:node.id,font:{size: 0} });
+        });
+    }
+}
+
+
+
+
+

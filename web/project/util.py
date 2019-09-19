@@ -1,33 +1,35 @@
 import json
 import re
-import socket  # This method requires that we create our own socket
-from copy import deepcopy
-import paramiko  # Provides SSH functionality
 import requests
 from jsonschema import Draft4Validator
 from requests_oauthlib import OAuth2Session
 from lxml import html
 from urllib.request import urlopen
+from project.config import Config
 
 import ssl
-
 ssl._create_default_https_context = ssl._create_unverified_context
 
 LOCALHOST = None
 
 
-
-class DirectoryTree:
-    """ Class Providing Constants for Directory Tree.
+class InvalidUsage(Exception):
     """
-    title = ""
-    parent = ""
-    key = ""
-    id = ""
-    lazy = ""
-    folder = ""
-    source = ""
+    Invalid page
+    """
+    status_code = 400
 
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
 
 class Servers():
     """ Class providing information about servers for federated search.
@@ -35,13 +37,13 @@ class Servers():
     def __init__(self):
         self.__headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
-        self.__urlString = "https://paperstack.uchicago.edu/static/qresp_servers.json"
-        #self.__schemaString = "https://paperstack.uchicago.edu/static/v1_1.json"
-        self.__schemaString = "http://localhost/static/v1_1.json"
-        self.__httpUrlString = "https://paperstack.uchicago.edu/static/http_servers.json"
+        self.__urlString = Config.get_setting('GLOBAL','QRESP_SERVER_URL')
+        self.__schemaString = Config.get_setting('GLOBAL','SCHEMA_URL')
+        self.__httpUrlString = Config.get_setting('GLOBAL','HTTP_SERVER_URL')
 
     def getServersList(self):
-        """  Fetches list of servers
+        """
+        Fetches list of servers
         :return object data: Json object of data from server
         """
         url = requests.get(self.__urlString, headers=self.__headers, verify = False)
@@ -49,7 +51,8 @@ class Servers():
         return data
 
     def getHttpServersList(self):
-        """ Fetches list of http servers
+        """
+        Fetches list of http servers
         :return object data: Json object of http data
         """
         url = requests.get(self.__httpUrlString, headers=self.__headers, verify=False)
@@ -58,8 +61,8 @@ class Servers():
 
 
     def validateSchema(self,coll_data):
-        """ Validates schema
-
+        """
+        Validates schema
         :param string coll_data:
         :return list exceptions:
         """
@@ -96,20 +99,21 @@ class Servers():
         return exceptions
 
 class Dtree():
-    """ Class to build server tree
     """
-    def __init__(self,path,session):
-        self.__services = []
-        self.session = session
+    Class to build server tree
+    """
+    def __init__(self,path):
         self.__listObjects = []
         self.__path = path.strip()
         self.__paperObjects = []
+        self.__serviceObjects = {}
         self.__headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
         self.__previewUrlForZenodo = "/preview/"
 
     def fetchForTreeFromHttp(self):
-        """ Fetches project from http server to build tree for curation
+        """
+        Fetches project from http server to build tree for curation
         :return: list listObjects: returns tree objects with file and folder content
         """
         page = requests.get(self.__path, headers=self.__headers, verify=False)
@@ -121,9 +125,9 @@ class Dtree():
                 dataFile.title = file
                 parent = self.__path.split("/")
                 parentName = parent[len(parent) - 2]
-                dataFile.key = self.__path + "/" + file
+                dataFile.key = self.__path + "/" + file.strip("/")
                 dataFile.id = file
-                relPath = str(self.__path + "/" + file).split(parentName, 1)[1]
+                relPath = str(self.__path + "/" + file.strip("/")).split(parentName, 1)[1]
                 dataFile.parent = parentName + relPath
                 if '/' in file:
                     dataFile.folder = 'true'
@@ -132,8 +136,9 @@ class Dtree():
         return self.__listObjects
 
     def fetchForTreeFromZenodo(self):
-        """ Fetches project from zenodo to build tree for curation
-           :return: list listObjects: returns tree objects with file and folder content
+        """
+        Fetches project from zenodo to build tree for curation
+        :return: list listObjects: returns tree objects with file and folder content
         """
         page = requests.get(self.__path, headers=self.__headers, verify=False)  # open iframe src url
         tree = html.fromstring(page.content)
@@ -155,7 +160,6 @@ class Dtree():
                     dataFile.key = self.__path +"files/"+ file
                     dataFile.id = file
                     dataFile.parent = attrid
-                    print("Files",dataFile.__dict__)
                     self.__listObjects.append(dataFile.__dict__)
                 tag = '//ul[@id="' + attrid + '"]/li/a[1]'
                 for xtag in tree.xpath(tag):
@@ -168,54 +172,36 @@ class Dtree():
                     dataFile.parent = attrid
                     dataFile.folder = 'true'
                     dataFile.lazy = 'true'
-                    print("Folders>", dataFile.__dict__)
                     self.__listObjects.append(dataFile.__dict__)
         return self.__listObjects
 
     def openFileToReadConfigFromHttp(self, configFile):
+        """
+        Reads config file by scrping ini file
+        :param configFile: qresp.ini file
+        :return: objects with paths for notebook and download
+        """
         try:
-            r = urlopen(str(self.__path + configFile))
+            r = urlopen(str(self.__path +"/"+configFile))
             for line in r:
                 line = str(line)
                 if line and "=" in line:
                     linesplit = line.split("=", 1)
                     servicename = str(linesplit[0]).strip()
-                    servicepath = str(linesplit[1]).strip()
+                    servicepath = str(linesplit[1]).strip("\\n'").strip()
                     if "http_service_path" in servicename:
                         if servicepath:
-                            self.session["fileServerPath"] = servicepath
-                            self.session["notebookPath"] = servicepath
-                            self.__services.append("http_service_path")
+                            self.__serviceObjects["fileServerPath"] = servicepath
+                            self.__serviceObjects["notebookPath"] = servicepath
                     elif "globus_service_path" in servicename:
                         if servicepath:
-                            self.session["downloadPath"] = servicepath
-                            self.__services.append("globus_service_path")
+                            self.__serviceObjects["downloadPath"] = servicepath
                     elif "isgitservice" in servicename:
                         if servicepath:
-                            self.session["gitService"] = servicepath
-                            self.__services.append("git_service")
+                            self.__serviceObjects["gitPath"] = servicepath
         except Exception as e:
             print("Config file not found", e)
-
-    def checkIsConfigFileFromHttp(self):
-        ssh = ""
-        isConfigFile = "N"
-        try:
-            page = requests.get(self.__path, headers=self.__headers, verify=False)
-            tree = html.fromstring(page.content)
-            for xtag in tree.xpath('//li/a'):
-                file = xtag.text_content().strip()
-                if 'Parent Directory' not in file:
-                    if "qresp.ini" in file:
-                        isConfigFile = "Y"
-                        break
-        except Exception as e:
-            print("Could not find file",e)
-        return isConfigFile
-
-    def fetchServices(self):
-        return self.__services
-
+        return self.__serviceObjects
 
 class FetchDOI():
     """ Fetches information using DOI
@@ -363,6 +349,8 @@ class WorkflowCreator(object):
         head_tooltip = {}
         head_tooltip['id'] = head.get("id")
         head_tooltip['caption'] = caption
+        head_tooltip['readme'] = head.get("readme","")
+        head_tooltip['URLs'] = head.get("URLs","")
         self.desc["heads"].append(head_tooltip)
 
     def addEdge(self, edge):
@@ -409,16 +397,17 @@ class ConvertField():
         return data
 
 
-
 class SendDescriptor():
-    """sends descriptor
+    """
+    Sends descriptor
     """
     def __init__(self,servername):
         self.__servername = servername
 
     def sendDescriptorToServer(self,data):
-        """ Sends email to server
-        :return: object: sends descriptor to server
+        """
+        Sends email to server
+        :return: response: sends descriptor to server
         """
         url = self.__servername + "/getDescriptor"
         payload = {'metadata': data, 'servername': self.__servername}
@@ -427,226 +416,94 @@ class SendDescriptor():
         return response
 
 class FetchDataFromAPI():
-    """ Fetches data for search,paper details and chart details for explorer
     """
-    def __init__(self,servernames):
-        if isinstance(servernames,str):
-            servernames = [servernames]
-        if servernames and len(servernames)>0:
-            serverList = servernames
+    Fetches data for search,paper details and chart details for explorer
+    """
+    def __init__(self,servernames=None,localServer=None):
+        serverList = []
+        global LOCALHOST
+        if servernames and isinstance(servernames,str):
+            serverList = servernames.split(",")
         else:
             serverslist = Servers()
             serverList = [qrespserver['qresp_server_url'] for qrespserver in
                                serverslist.getServersList()]
-        global LOCALHOST
-        if LOCALHOST:
+        if localServer:
+            serverList.append(localServer)
+        elif LOCALHOST:
             serverList.append(LOCALHOST)
         self.__servernames = serverList
 
     def fetchOutput(self,apiname):
-        """ Fetches output to server
+        """
+        Fetches output to server
         :return: object: sends descriptor to server
         """
         outDict = {}
-        output = None
         self.__servernames = list(set(self.__servernames))
-        for snames in self.__servernames:
-            url = snames + apiname
-            headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
-            response = requests.get(url,headers=headers, verify=False)
-            if response.status_code == 200:
-                if "paper" or "workflow" in apiname:
-                    output = response.json()
-                elif "search" in apiname:
-                    outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
-                    output = list(outDict.values())
-                else:
-                    outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
-                    output = list(outDict.values())
-        return output
-
-
-class ObjectsForPreview():
-    """
-    Generates Paper details and Workflow details objects
-    """
-    def __init__(self,form=None):
-        self.data = form
-        self.workflowinfo = WorkflowInfo()
-        self.workflowinfo.nodes = {}
-        self.workflowinfo.edges = []
-
-    def getPaperDetails(self):
-        paperDetails = PaperDetails()
-        paper = self.data
-        paperDetails.id = "preview_qresp"
-        paperDetails.title = paper.reference.title.data
-        paperDetails.tags = [form.data for form in paper.tags.entries]
-        paperDetails.collections = [form.data for form in paper.collections.entries]
-        if len(paper.reference.authors) > 0:
-            if paper.reference.authors.entries[0].data.get("firstName"):
-                paperDetails.authors = [authors.data.get("firstName") + " " + authors.data.get("lastName") for authors in paper.reference.authors.entries]
-            paperDetails.authors = ", ".join(paperDetails.authors)
-        if len(paper.PIs.entries) > 0:
-            if paper.PIs.entries[0].data.get("firstName"):
-                paperDetails.PIs = [pi.data.get("firstName") + " " + pi.data.get("lastName") for pi in
-                                        paper.PIs.entries]
-            paperDetails.PIs = ", ".join(paperDetails.PIs)
-        if paper.reference.journal.fullName.data:
-            paperDetails.publication = paper.reference.journal.fullName.data + " " + paper.reference.volume.data + ", " + paper.reference.page.data
-        paperDetails.abstract = paper.reference.publishedAbstract.data
-        paperDetails.doi = paper.reference.DOI.data
-        paperDetails.fileServerPath = paper.info.fileServerPath.data
-        paperDetails.downloadPath = paper.info.downloadPath.data
-        paperDetails.notebookPath = paper.info.notebookPath.data
-        paperDetails.notebookFile = paper.info.notebookFile.data
-        paperDetails.year = paper.reference.year.data
-        paperDetails.charts = [form.data for form in paper.charts.entries]
-        paperDetails.datasets = [form.data for form in paper.datasets.entries]
-        paperDetails.scripts = [form.data for form in paper.scripts.entries]
-        paperDetails.tools = [form.data for form in paper.tools.entries]
-        paperDetails.workflows = paper.workflow.data
-        paperDetails.heads = [form.data for form in paper.heads]
-        paperDetails.cite = 'N/A'
-        paperDetails.timeStamp = paper.info.timeStamp.data
-        paperDetails.firstName = paper.info.insertedBy.firstName.data
-        paperDetails.middleName = paper.info.insertedBy.middleName.data
-        paperDetails.lastName = paper.info.insertedBy.lastName.data
-        paperDetails.emailId = paper.info.insertedBy.emailId.data
-        paperDetails.affiliation = paper.info.insertedBy.affiliation.data
-        paperDetails.documentation = paper.documentation.readme.data
-        return paperDetails.__dict__
-
-    def getWorkflowDetails(self):
-        paper = self.data
-        self.workflowinfo.paperTitle = paper.reference.title.data
-        self.workflowinfo.edges = [form.data for form in paper.workflow.edges]
-        nodes = [form.data for form in paper.workflow.nodes]
-        for node in nodes:
-            self.__insertWorkflowNodeDetails(node, paper)
-        if paper.reference.title.data:
-            self.workflowinfo.workflowType = "paper: " + paper.reference.title.data
-        return self.workflowinfo.__dict__
-
-    def __insertWorkflowNodeDetails(self, node, paper):
-        """
-
-        :param node:
-        :param paper:
-        :param nodeInfo:
-        :return:
-        """
         try:
-            if "h" in node:
-                for head in paper.heads.entries:
-                    head = dotdict(head.data)
-                    if node in str(head.id):
-                        workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = "<p><b>External " + head.id + "</b>: <i>" + head.readme + "</i></p>"
-                        details = []
-                        details.append("Head " + node)
-                        details.append("<p><i>" + head.readme + "</i></p>" + self.__getLinks(head.URLs))
-                        workflownodeinfo.details = details
-                        workflownodeinfo.hasNotebookFile = False
-                        if head.saveas:
-                            workflownodeinfo.nodelabel = head.saveas
-                        else:
-                            workflownodeinfo.nodelabel = node
-                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-            elif "t" in node:
-                for tool in paper.tools.entries:
-                    tool = dotdict(tool.data)
-                    if node in str(tool.id):
-                        workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self.__getTooltipForTools(tool)
-                        details = []
-                        details.append("Tool " + node)
-                        toollinks = self.__getLinks(tool.URLs)
-                        tooldetails = self.__getTooltipForTools(tool)
-                        toolfiles = self.__getFiles(tool.files, paper.info.fileServerPath.data)
-                        workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
-                        details.append(workflowtools)
-                        workflownodeinfo.details = details
-                        if tool.saveas:
-                            workflownodeinfo.nodelabel = tool.saveas
-                        else:
-                            workflownodeinfo.nodelabel = node
-                        workflownodeinfo.hasNotebookFile = False
-                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-
-            elif "d" in node:
-                for dataset in paper.datasets.entries:
-                    dataset = dotdict(dataset.data)
-                    if node in str(dataset.id):
-                        workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self.__getTooltipForNode(dataset, node)
-                        details = []
-                        extradatasetfields = ""
-                        details.append("Dataset " + node)
-                        datasetlinks = self.__getLinks(dataset.URLs)
-                        datasetdetails = self.__getTooltipForNode(dataset, node)
-                        datasetfiles = self.__getFiles(dataset.files, paper.info.fileServerPath.data)
-                        # extradatasetfields = self.__getExtraFields(dataset)
-                        workflowdatasets = datasetdetails + datasetlinks + datasetfiles + extradatasetfields
-                        details.append(workflowdatasets)
-                        workflownodeinfo.details = details
-                        if dataset.saveas:
-                            workflownodeinfo.nodelabel = dataset.saveas
-                        else:
-                            workflownodeinfo.nodelabel = node
-                        workflownodeinfo.hasNotebookFile = False
-                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-
-            elif "s" in node:
-                for script in paper.scripts.entries:
-                    script = dotdict(script.data)
-                    if node in str(script.id):
-                        workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self.__getTooltipForNode(script, node)
-                        details = []
-                        extrascriptfields = ""
-                        details.append("Script " + node)
-                        scriptlinks = self.__getLinks(script.URLs)
-                        scriptdetails = self.__getTooltipForNode(script, node)
-                        scriptfiles = self.__getFiles(script.files, paper.info.fileServerPath.data)
-                        workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
-                        details.append(workflowscripts)
-                        workflownodeinfo.details = details
-                        if script.saveas:
-                            workflownodeinfo.nodelabel = script.saveas
-                        else:
-                            workflownodeinfo.nodelabel = node
-                        workflownodeinfo.hasNotebookFile = False
-                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-
-            elif "c" in node:
-                for chart in paper.charts.entries:
-                    chart = dotdict(chart.data)
-                    print("c",chart.files)
-                    if node in str(chart.id):
-                        workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self.__getTooltipForNode(chart, node, paper.info.fileServerPath.data)
-                        details = []
-                        extrachartfields = ""
-                        details.append("Chart " + node)
-                        chartlinks = self.__getLinks(chart.properties, "charts")
-                        chartdetails = self.__getTooltipForNode(chart, node, paper.info.fileServerPath.data)
-                        chartfiles = self.__getFiles(chart.files, paper.info.fileServerPath.data)
-                        # extrachartfields = self.__getExtraFields(chart)
-                        workflowcharts = chartdetails + chartlinks + chartfiles + extrachartfields
-                        details.append(workflowcharts)
-                        workflownodeinfo.details = details
-                        if chart.saveas:
-                            workflownodeinfo.nodelabel = chart.saveas
-                        else:
-                            workflownodeinfo.nodelabel = node
-                        workflownodeinfo.hasNotebookFile = False
-                        self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-                        self.workflowinfo.workflowType = chart.number + " of " + paper.reference.title.data
+            for snames in self.__servernames:
+                url = snames + apiname
+                headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
+                response = requests.get(url,headers=headers, verify=False)
+                if response.status_code == 200 and response.content:
+                    if "paper" in apiname or "workflow" in apiname:
+                        outDict = response.json()
+                        return outDict
+                    elif "search" in apiname:
+                        outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
+                    else:
+                        outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
         except Exception as e:
             print(e)
+        return list(outDict.values())
 
-    def __getLinks(self, urls, properties=None):
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+class GoogleAuth():
+    """
+    Authorization for google.
+    """
+    def __init__(self,clientid = None,redirecturi = None,scope = None):
+        self.clientid = clientid
+        self.redirecturi = redirecturi
+        self.scope = scope
+
+
+    def getGoogleAuth(self,state=None,token=None):
+        if token:
+            return OAuth2Session(self.clientid, token=token)
+        if state:
+            return OAuth2Session(
+                self.clientid,
+                state=state,
+                redirect_uri=self.redirecturi)
+        oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope.split(","))
+        return oauth
+
+class SetLocalHost:
+    def __init__(self,localhost):
+        global LOCALHOST
+        LOCALHOST = localhost
+
+
+
+class WorkflowObject:
+    """
+    Class defining HTML workflow objects for Paper workflow
+    """
+    def _getLinks(self, urls, properties=None):
+        """
+        Builds links for url and properties
+        :param urls: url objects for each node
+        :param properties: properties for each node
+        :return: string objects with links
+        """
         links = ""
         if urls and len(urls) > 0:
             if properties:
@@ -663,7 +520,13 @@ class ObjectsForPreview():
                     links = "<p><b>URLs:</b>" + links + "</p>"
         return links
 
-    def __getFiles(self, files, fileserverpath):
+    def _getFiles(self, files, fileserverpath):
+        """
+        Builds links for files
+        :param files: files object
+        :param fileserverpath: path to files
+        :return: links for files
+        """
         filelinks = ""
         if files and len(files) > 0:
             for file in files:
@@ -676,7 +539,12 @@ class ObjectsForPreview():
             filelinks = "<p><b>Files: </b>" + filelinks + "</p>"
         return filelinks
 
-    def __getTooltipForTools(self, tool):
+    def _getTooltipForTools(self, tool):
+        """
+        Tool tip for node tools
+        :param tool: Tool object
+        :return: string object for tool node
+        """
         details = ""
         if "experiment" in tool.kind:
             details = "<i>Experiment</i></p><p><b>Facility Name:</b> " + tool.facilityName + \
@@ -689,7 +557,14 @@ class ObjectsForPreview():
                 details = details + "</p><p><b>Readme:</b> " + tool.readme + "</p>"
         return "<p><b>Tool " + tool.id + "</b>: " + details
 
-    def __getTooltipForNode(self, node, workflowtype, fileServerPath=None):
+    def _getTooltipForNode(self, node, workflowtype, fileServerPath=None):
+        """
+        Fetches tool tips for node
+        :param node: node of type head,dataset, chart,script,tools
+        :param workflowtype: workflow of type dataset, script or charts
+        :param fileServerPath: File Server path to files destination
+        :return: tooltip for each node
+        """
         tooltip = ""
         if "d" in workflowtype:
             tooltip = "<p><b>Dataset " + node.id + "</b>: <i>" + node.readme + "</i>"
@@ -700,46 +575,18 @@ class ObjectsForPreview():
                       + node.number + ": </b><i>" + node.caption + "</i></p>"
         return tooltip
 
-    def __getExtraFields(self, node):
+    def _getExtraFields(self, node):
+        """
+        Fetch extra fields values for each node
+        :param node: node of type head,chart,script,tools
+        :return: A string object with extra fields
+        """
         extraFieldValues = ""
         for hashkey, value in node.extraFields.items():
             if hashkey:
                 for extrafieldkey, extrafieldval in hashkey.items():
                     extraFieldValues = extraFieldValues + "<p><b>" + extrafieldkey + ": </b><br>" + ", " + extrafieldval + "</p>"
         return extraFieldValues
-
-class dotdict(dict):
-    """dot.notation access to dictionary attributes"""
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-class GoogleAuth():
-    """ Authorization for google.
-    """
-
-    def __init__(self,clientid = None,redirecturi = None,scope = None):
-        self.clientid = clientid
-        self.redirecturi = redirecturi
-        self.scope = scope
-
-
-    def getGoogleAuth(self,state=None,token=None):
-        if token:
-            return OAuth2Session(self.clientid, token=token)
-        if state:
-            return OAuth2Session(
-                self.clientid,
-                state=state,
-                redirect_uri=self.redirecturi)
-        oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope)
-        return oauth
-
-class SetLocalHost:
-    def __init__(self,localhost):
-        global LOCALHOST
-        LOCALHOST = localhost
-
 
 class Search(object):
     """ Class collecting Search details"""
@@ -941,3 +788,15 @@ class WorkflowNodeInfo:
     fileServerPath = ""
     nodelabel = ""
     hasNotebookFile = False
+
+class DirectoryTree:
+    """
+    Class Providing Constants for Directory Tree.
+    """
+    title = ""
+    parent = ""
+    key = ""
+    id = ""
+    lazy = ""
+    folder = ""
+    source = ""

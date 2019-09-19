@@ -1,17 +1,13 @@
-    # # -*- coding: utf-8 -*-
+# # -*- coding: utf-8 -*-
 # For desktop version running from command line
+import sys
+from project import app
 
-from flask import Flask
-import connexion
-# Create the application instance
-connexionapp = connexion.App(__name__, specification_dir='./')
+# Initialize variables
+port = 80
 
 # Read the swagger.yml file to configure the endpoints
-connexionapp.add_api('swagger.yml')
-app = connexionapp.app
-from .routes import main
-import sys
-port = 80
 if len(sys.argv)>1:
     port = sys.argv[1]
-main(port)
+
+app.run(port=port, debug=False)

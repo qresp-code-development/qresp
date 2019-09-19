@@ -2,35 +2,21 @@
 import os
 import uuid
 import smtplib
+import urllib.parse
+import traceback
+import sys
 from datetime import timedelta, datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file, abort
-from flask_cors import CORS
-from project import csrf
-from project.paperdao import PaperDAO,MongoDBConnection
+from project import app
+from project.paperdao import *
 from project.util import *
 from project.views import *
+from project.db import *
 from project import constants as CURATOR_FIELD
-from project import app
-
-class InvalidUsage(Exception):
-    """
-    Invalid page
-    """
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
+from project.config import Config
+from copy import deepcopy
 
 @app.before_request
 def make_session_permanent():
@@ -40,7 +26,6 @@ def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=1)
 
-# Fetches list of qresp servers
 @app.route('/')
 @app.route('/index')
 def index():
@@ -49,9 +34,6 @@ def index():
     """
     return render_template('index.html')
 
-
-
-@csrf.exempt
 @app.route('/uploadFile',methods=['POST','GET'])
 def uploadFile():
     """
@@ -102,6 +84,7 @@ def uploadFile():
         print(e)
         return jsonify(error=str(e)), 400
 
+#@csrf.exempt
 @app.route('/startfromscratch')
 def startfromscratch():
     """
@@ -110,6 +93,7 @@ def startfromscratch():
     session.clear()
     return redirect(url_for('qrespcurator'))
 
+#@csrf.exempt
 @app.route('/qrespcurator', methods=['GET'])
 def qrespcurator():
     """
@@ -118,7 +102,6 @@ def qrespcurator():
     if request.method == 'GET':
         # Renders the details section
         detailsform = DetailsForm(**session.get(CURATOR_FIELD.DETAILS,request.form))
-
         # Renders the servers section
         serverform = ServerForm(**session.get(CURATOR_FIELD.SERVERS,request.form))
         serverslist = Servers()
@@ -165,7 +148,7 @@ def qrespcurator():
                                datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform,
                                documentationform=documentationform, publishform=publishform)
 
-@csrf.exempt
+
 @app.route('/details', methods=['POST'])
 def details():
     """
@@ -177,7 +160,7 @@ def details():
         return jsonify(data=form.data), 200
     return jsonify(data=form.errors), 400
 
-@csrf.exempt
+#
 @app.route('/server', methods=['POST'])
 def server():
     """
@@ -195,19 +178,20 @@ def server():
         return jsonify(data=form.data), 200
     return jsonify(data=form.errors), 400
 
-@csrf.exempt
-@app.route('/setproject', methods=['POST', 'GET'])
+
+@app.route('/setproject', methods=['POST'])
 def setproject():
     """
     Stores information about the project
     """
     form = ProjectForm(request.form)
     if request.method == 'POST':
+        print(form.data)
         session[CURATOR_FIELD.PROJECT] = form.data
         return jsonify(data=form.data), 200
     return jsonify(data=form.errors), 400
 
-@csrf.exempt
+
 @app.route('/getTreeInfo', methods=['POST', 'GET'])
 def getTreeInfo():
     """
@@ -215,20 +199,23 @@ def getTreeInfo():
     """
     pathDetails = request.get_json()
     listObjects = []
+    services = []
     try:
         content_path = pathDetails.get("treeUrl",session.get("project",{}).get("fileServerPath",""))
-        dtree = Dtree(content_path, session)
+        dtree = Dtree(content_path)
         if 'zenodo' in content_path:
             listObjects = dtree.fetchForTreeFromZenodo()
         else:
             listObjects = dtree.fetchForTreeFromHttp()
+            services = dtree.openFileToReadConfigFromHttp("qresp.ini")
+            print("Services",services)
     except Exception as e:
         jsonify(errors=str(e)), 400
-    return jsonify({'listObjects': listObjects}), 200
+    return jsonify({'listObjects': listObjects,'services':services}), 200
 
 
-@csrf.exempt
-@app.route('/info', methods=['POST', 'GET'])
+
+@app.route('/info', methods=['POST'])
 def info():
     """
     Stores information about the project
@@ -239,7 +226,7 @@ def info():
         return jsonify(data=infoform.data), 200
     return jsonify(data=infoform.errors), 400
 
-@csrf.exempt
+
 @app.route('/reference', methods=['POST'])
 def reference():
     """
@@ -251,7 +238,7 @@ def reference():
         return jsonify(data=referenceform.data), 200
     return jsonify(data=referenceform.errors), 400
 
-@csrf.exempt
+
 @app.route('/fetchReferenceDOI', methods=['POST', 'GET'])
 def fetchReferenceDOI():
     """
@@ -265,10 +252,9 @@ def fetchReferenceDOI():
     except Exception as e:
         print(e)
         return jsonify(errors="Recheck your DOI "+str(e)), 400
-    print(referenceform.data)
     return jsonify(data=referenceform.data), 200
 
-@csrf.exempt
+
 @app.route('/charts', methods=['POST'])
 def charts():
     """
@@ -285,7 +271,7 @@ def charts():
         return jsonify(chartList = chartList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=chartform.errors), 400
 
-@csrf.exempt
+
 @app.route('/charts/delete', methods=['POST'])
 def chartsdelete():
     """
@@ -301,7 +287,7 @@ def chartsdelete():
         return jsonify(chartList = chartList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=chartform.errors), 400
 
-@csrf.exempt
+
 @app.route('/tools', methods=['POST'])
 def tools():
     """
@@ -315,11 +301,10 @@ def tools():
         toolList = [genid.addId(item) for item in toolList if item.get('id') not in toolform.id.data]
         toolList.append(genid.addId(toolform.data))
         session[CURATOR_FIELD.TOOLS] = deepcopy(toolList)
-        print("TL", toolList)
         return jsonify(toolList = toolList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=toolform.errors), 400
 
-@csrf.exempt
+
 @app.route('/tools/delete', methods=['POST'])
 def toolsdelete():
     """
@@ -335,7 +320,7 @@ def toolsdelete():
         return jsonify(toolList=toolList, fileServerPath=session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")), 200
     return jsonify(data=toolform.errors), 400
 
-@csrf.exempt
+
 @app.route('/datasets', methods=['POST'])
 def datasets():
     """
@@ -351,7 +336,7 @@ def datasets():
         return jsonify(datasetList = datasetList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=datasetform.errors), 400
 
-@csrf.exempt
+
 @app.route('/datasets/delete', methods=['POST'])
 def datasetsdelete():
     """
@@ -367,7 +352,7 @@ def datasetsdelete():
         return jsonify(datasetList = datasetList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=datasetform.errors), 400
 
-@csrf.exempt
+
 @app.route('/scripts', methods=['POST'])
 def scripts():
     """
@@ -383,7 +368,7 @@ def scripts():
         return jsonify(scriptList = scriptList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=scriptform.errors), 400
 
-@csrf.exempt
+
 @app.route('/scripts/delete', methods=['POST'])
 def scriptsdelete():
     """
@@ -398,8 +383,8 @@ def scriptsdelete():
         return jsonify(scriptList = scriptList,fileServerPath=session.get(CURATOR_FIELD.PROJECT,{}).get("fileServerPath","")), 200
     return jsonify(data=scriptform.errors), 400
 
-@csrf.exempt
-@app.route('/documentation', methods=['POST', 'GET'])
+
+@app.route('/documentation', methods=['POST'])
 def documentation():
     """ This method helps in adding documentation to the paper.
     """
@@ -411,7 +396,7 @@ def documentation():
 
 
 
-@csrf.exempt
+
 @app.route('/addToWorkflow', methods=['POST', 'GET'])
 def addToWorkflow():
     """
@@ -446,10 +431,9 @@ def addToWorkflow():
     nodesList = list(set(nodesList))
     workflowinfo = WorkflowForm(edges = edgeList,nodes=nodesList)
     session[CURATOR_FIELD.WORKFLOW] = workflowinfo.data
-    print("workflow",workflow.__dict__)
     return jsonify(data=workflow.__dict__), 200
 
-@csrf.exempt
+
 @app.route('/saveNodesAndEdges', methods=['POST', 'GET'])
 def saveNodesAndEdges():
     """
@@ -471,7 +455,7 @@ def saveNodesAndEdges():
     return jsonify(data="saved"), 200
 
 
-@csrf.exempt
+
 @app.route('/preview/<previewFolder>', methods=['GET'])
 def preview(previewFolder):
     """
@@ -483,10 +467,26 @@ def preview(previewFolder):
     previewObj = ObjectsForPreview(PaperForm(**data))
     paperdetail = previewObj.getPaperDetails()
     workflowdetail = previewObj.getWorkflowDetails()
-    return render_template('testpaperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=True)
+    return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=True)
 
 
-@csrf.exempt
+@app.route('/previewchartworkflow', methods=['GET'])
+def previewchartworkflow():
+    """
+    Previews the chart workflow metadata for user
+    """
+    # try:
+    paperid = request.args.get('paperid', 0, type=str).strip()
+    chartid = request.args.get('chartid', 0, type=str).strip()
+    data = None
+    chartworkflowdetail = []
+    with open("papers/" + paperid + "/" + "data.json") as json_file:
+        data = json.load(json_file)
+    previewObj = ObjectsForPreview(PaperForm(**data))
+    chartworkflowdetail = previewObj.getWorkflowForChartDetails(chartid)
+    return jsonify(chartworkflowdetail=chartworkflowdetail), 200
+
+
 @app.route('/download', methods=['POST', 'GET'])
 def download():
     """
@@ -546,7 +546,7 @@ def download():
         json.dump(paperdata, outfile, default=lambda o: o.__dict__, separators=(',', ':'), sort_keys=True, indent=3)
     return jsonify(paper=paperdata, previewFolder=previewFolder), 200
 
-@csrf.exempt
+
 @app.route('/publish', methods=['POST', 'GET'])
 def publish():
     """
@@ -558,6 +558,7 @@ def publish():
         form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                            serverslist.getServersList()]
     except Exception as e:
+        print(e)
         raise InvalidUsage('Could not fetch serverlist, \n ' + str(e), status_code=410)
     if request.method == 'POST' and form.validate():
         fileServerPath = session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")
@@ -565,6 +566,7 @@ def publish():
         previewFolder = serverpathList[len(serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
         error = []
         try:
+            print("previewFolder>>",previewFolder)
             with open("papers/"+previewFolder+"/data.json", "r") as jsonData:
                 error = serverslist.validateSchema(json.load(jsonData))
         except:
@@ -577,21 +579,21 @@ def publish():
             for item in serverslist.getServersList():
                 if form.server.data in item['qresp_server_url']:
                     session['maintaineraddresses'] = item['qresp_maintainer_emails']
-            googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'], app.config['SCOPE'])
+            googleauth = GoogleAuth(Config.get_setting('DEV','GOOGLE_CLIENT_ID'), Config.get_setting('DEV','REDIRECT_URI'), Config.get_setting('GOOGLE_API','SCOPE'))
             google = googleauth.getGoogleAuth()
-            auth_url, state = google.authorization_url(app.config['AUTH_URI'], access_type='offline')
+            auth_url, state = google.authorization_url(Config.get_setting('GOOGLE_API','AUTH_URI'), access_type='offline')
             session['oauth_state'] = state
-            print(auth_url,", -> ",state)
-            print(form.server.data)
-            print(form.emailId.data)
-            return redirect(auth_url)
-        return jsonify(data=form.data),200
+            print("auth",auth_url)
+        return jsonify(data=auth_url),200
     return jsonify(error=form.errors), 400
 
 
-@csrf.exempt
+
 @app.route('/oauth2callback')
 def authorized():
+    """
+    Callback for authorization
+    """
     form = PublishForm()
     serverslist = Servers()
     form.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
@@ -603,21 +605,19 @@ def authorized():
     if 'code' not in request.args and 'state' not in request.args:
         print('denied access.')
         return redirect(url_for('qrespcurator'))
-    googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'])
-    google = googleauth.getGoogleAuth(state=session['oauth_state'])
+    googleauth = GoogleAuth(Config.get_setting('DEV','GOOGLE_CLIENT_ID'), Config.get_setting('DEV','REDIRECT_URI'))
+    google = googleauth.getGoogleAuth(state=session.get('oauth_state'))
     try:
         token = google.fetch_token(
-            app.config['TOKEN_URI'],
-            client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+            Config.get_setting('GOOGLE_API', 'TOKEN_URI'),
+            client_secret=Config.get_setting('DEV','GOOGLE_CLIENT_SECRET'),
             authorization_response=request.url)
     except Exception as e:
         print(e)
-        flash(e)
-        return 'HTTPError occurred.'
+        return 'HTTP Error occurred.'
     try:
-        googleauth = GoogleAuth(app.config['GOOGLE_CLIENT_ID'], app.config['REDIRECT_URI'])
         google = googleauth.getGoogleAuth(token=token)
-        resp = google.get(app.config['USER_INFO'])
+        resp = google.get(Config.get_setting('GOOGLE_API','USER_INFO'))
         if resp.status_code == 200:
             user_data = resp.json()
             emailAddress = session.get('emailAddress')
@@ -629,7 +629,8 @@ def authorized():
                     previewFolder = serverpathList[len(serverpathList) - 2] + "_" + serverpathList[len(serverpathList) - 1]
                     with open("papers/" + previewFolder + "/data.json", "r") as jsonData:
                         senddescriptor = SendDescriptor(server)
-                        response = senddescriptor.sendDescriptorToServer(json.load(jsonData))
+                        jsondata = json.load(jsonData)
+                        response = senddescriptor.sendDescriptorToServer(jsondata)
                         if response.status_code == 400:
                            flash("Paper already exists")
                            return redirect(url_for('qrespcurator'))
@@ -637,8 +638,9 @@ def authorized():
                             try:
                                 paperdata = response.json()
                                 maintaineraddresses = session.get('maintaineraddresses')
-                                body =  'The user ' + str(session.get('insertedBy')['firstName']) + ' with email address ' + emailAddress + ' has inserted paper with paper id ' + str(paperdata["paperid"])
-                                fromx = app.config['MAIL_ADDR']
+                                print(type(jsondata),jsondata['info']['insertedBy']['firstName'])
+                                body =  'The user ' + str(jsondata['info']['insertedBy']['firstName']) + ' with email address ' + emailAddress + ' has inserted paper with paper id ' + str(paperdata["paperid"])
+                                fromx = Config.get_setting('GLOBAL','MAIL_ADDR')
                                 to = maintaineraddresses
                                 msg = MIMEMultipart()
                                 msg['Subject'] = 'New paper inserted into Qresp ecosystem'
@@ -647,13 +649,16 @@ def authorized():
                                 msg.attach(MIMEText(body,'plain'))
                                 mailserver = smtplib.SMTP('smtp.gmail.com', 587)
                                 mailserver.starttls()
-                                mailserver.login(app.config['MAIL_ADDR'], app.config['MAIL_PWD'])
+                                mailserver.login(Config.get_setting('GLOBAL','MAIL_ADDR'), Config.get_setting('SECRETS','MAIL_PWD'))
                                 mailserver.sendmail(fromx, to, msg.as_string())
                                 mailserver.close()
                                 return redirect(server + "/paperdetails/" + paperdata["paperid"])
                             except Exception as e:
                                 print(e)
-                                flash('Could not email your administrator')
+                                print(traceback.format_exc())
+                                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+                                flash('Could not email your administrator'+str(e))
+                                flash('Published')
                                 return redirect(url_for('qrespcurator'))
                 except Exception as e:
                     print(e)
@@ -661,21 +666,25 @@ def authorized():
                     return redirect(url_for('qrespcurator'))
             else:
                 flash('Unauthorized access. Could not verify your email address')
+                return redirect(url_for('qrespcurator'))
     except Exception as e:
         print(e)
         flash('Unauthorized access. Could not verify your email address')
         return redirect(url_for('qrespcurator'))
+    flash('Published')
     return redirect(url_for('qrespcurator'))
 
 @app.route('/mint', methods=['POST','GET'])
 def mint():
-    """ Fetches the mint page
+    """
+    Fetches the mint page
     """
     return render_template('mint.html')
 
 @app.route('/insertDOI', methods=['POST','GET'])
 def insertDOI():
-    """ Inserts DOI to database
+    """
+    Inserts DOI to database
     """
     try:
         paperid = request.args.get('paperId', 0, type=str)
@@ -708,40 +717,25 @@ def downloadfile(file=None):
 
 ########################################EXPLORER#############################################################################
 
-@csrf.exempt
-@app.route('/qrespexplorer',methods=['GET','POST'])
-def qrespexplorer():
-    """ Fetches the explorer homepage
-    """
-    form = QrespServerForm()
-    serverslist = Servers()
-    form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
-                           serverslist.getServersList()]
-    if request.method == 'POST':
-        if request.form.getlist('serversList'):
-            session["selectedserver"] = request.form.getlist('serversList')
-        else:
-            session['selectedserver'] = form.serverList
-        return redirect(url_for('search'))
-    return render_template('qrespexplorer.html', form=form)
 
-@csrf.exempt
 @app.route('/verifyPasscode',methods=['POST'])
 def verifypasscode():
-    """ This method verifies with input passcode of flask connection.
+    """
+    This method verifies with input passcode of flask connection.
     """
     form = PassCodeForm(request.form)
-    confirmpasscode = app.config['passkey']
+    confirmpasscode = Config.get_setting('DEV','QRESP_DB_SECRET_KEY')
     if request.method == 'POST' and form.validate():
         if confirmpasscode == form.passcode.data:
             return jsonify(msg="success"),200
-    return jsonify(msg="failed"),401
+    return jsonify(msg="failed"),400
 
 # Fetches list of qresp admin
-@csrf.exempt
+
 @app.route('/admin', methods=['POST', 'GET'])
 def admin():
-    """ This method helps in connecting to the mongo database.
+    """
+    This method helps in connecting to the mongo database.
     """
     form = AdminForm(request.form)
     form.port.data = 27017
@@ -750,7 +744,7 @@ def admin():
         try:
             dbAdmin = MongoDBConnection.getDB(hostname=form.hostname.data, port=int(form.port.data),
                                         username=form.username.data, password=form.password.data,
-                                        dbname=form.dbname.data, isssl=form.isSSL.data)
+                                        dbname=form.dbname.data)
         except Exception as e:
             flash('Could not connect to server, \n ' + str(e))
             raise InvalidUsage('Could not connect to server, \n ' + str(e), status_code=410)
@@ -759,43 +753,38 @@ def admin():
         return redirect(url_for('qrespexplorer'))
     return render_template('admin.html', form=form,verifyform =verifyform )
 
-# Fetches list of qresp admin
-@csrf.exempt
-@app.route('/config', methods=['POST', 'GET'])
-def config():
-    """ This method helps in connecting to the mongo database.
+
+@app.route('/qrespexplorer',methods=['GET','POST'])
+def qrespexplorer():
     """
-    form = ConfigForm(request.form)
-    app.config['qresp_config']['fileServerPath'] = 'https://notebook.rcc.uchicago.edu/files'
-    app.config['qresp_config']['downloadPath'] = 'https://www.globus.org/app/transfer?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path='
-    verifyform = PassCodeForm(request.form)
-    return render_template('config.html', form=form,verifyform =verifyform)
+    Fetches the explorer homepage
+    """
+    form = QrespServerForm()
+    serverslist = Servers()
+    form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
+                           serverslist.getServersList()]
+    if request.method == 'POST':
+        if request.form.getlist('serversList'):
+            selectedservers = request.form.getlist('serversList')
+        else:
+            selectedservers = form.serverList
+        return redirect(url_for('search',servers=','.join(selectedservers)))
+    return render_template('qrespexplorer.html', form=form)
 
 
-@csrf.exempt
-@app.route('/search', methods=['POST', 'GET'])
+@app.route('/search', methods=['GET'])
 def search():
-    """  This method helps in filtering paper content
-    :return: template: search.html
     """
-    allpaperslist = []
-    collectionlist = []
-    authorslist = []
-    publicationlist = []
-    allPapersSize = 0
+    This method helps in filtering paper content
+    """
     try:
-        selectedserver = session.get("selectedserver")
-        fetchdata = FetchDataFromAPI(selectedserver)
-        fetchallpaperslist = fetchdata.fetchOutput('/api/search')
-        fetchcollectionlist = fetchdata.fetchOutput('/api/collections')
-        fetchauthorslist = fetchdata.fetchOutput('/api/authors')
-        fetchpublicationlist = fetchdata.fetchOutput('/api/publications')
-        if fetchallpaperslist and len(fetchallpaperslist)>0:
-            allpaperslist = fetchallpaperslist
-            collectionlist = fetchcollectionlist
-            authorslist = fetchauthorslist
-            publicationlist = fetchpublicationlist
-            allPapersSize = len(allpaperslist)
+        selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
+        allpaperslist = fetchdata.fetchOutput('/api/search')
+        collectionlist = fetchdata.fetchOutput('/api/collections')
+        authorslist = fetchdata.fetchOutput('/api/authors')
+        publicationlist = fetchdata.fetchOutput('/api/publications')
+        allPapersSize = len(allpaperslist)
     except Exception as e:
         print(e)
         flash('Error in search. ' + str(e))
@@ -804,11 +793,11 @@ def search():
                            publicationlist=publicationlist,allPapersSize=allPapersSize)
 
 
-@csrf.exempt
-@app.route('/searchWord', methods=['POST', 'GET'])
+
+@app.route('/searchWord', methods=['GET'])
 def searchWord():
-    """  filtering paper content
-    :return: object: allpaperlist
+    """
+    Filtering paper content
     """
     allpaperslist = []
     try:
@@ -819,8 +808,8 @@ def searchWord():
         collectionList = json.loads(request.args.get('collectionList'))
         authorsList = json.loads(request.args.get('authorsList'))
         publicationList = json.loads(request.args.get('publicationList'))
-        selectedserver = session.get("selectedserver")
-        fetchdata = FetchDataFromAPI(selectedserver)
+        selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
         url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
               "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)
@@ -831,46 +820,44 @@ def searchWord():
         return jsonify(allpaperslist=allpaperslist), 400
 
 
-# Fetches details of chart based on user click
-@csrf.exempt
-@app.route('/paperdetails/<paperid>', methods=['POST', 'GET'])
+@app.route('/paperdetails/<paperid>', methods=['GET'])
 def paperdetails(paperid):
-    """  fetching papers details content
-    :return: template: paperdetails.html
+    """
+    Fetching papers details content
     """
     paperdetail = []
     workflowdetail = []
     try:
-        selectedserver = session.get("selectedserver")
-        fetchdata = FetchDataFromAPI(selectedserver)
+        selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
+        print("here0",selected_servers)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
         url = '/api/paper/'+paperid
         paperdetail = fetchdata.fetchOutput(url)
         url = '/api/workflow/'+paperid
         workflowdetail = fetchdata.fetchOutput(url)
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
+        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=False)
     except Exception as e:
         print(e)
         flash('Error in paperdetails. ' + str(e))
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail)
+        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=False)
 
 
 
 # Fetches workflow of chart based on user click
-@csrf.exempt
-@app.route('/chartworkflow', methods=['POST', 'GET'])
+
+@app.route('/chartworkflow', methods=['GET'])
 def chartworkflow():
-    """  Fetching chart workflow content
-    :return: object: chartworkflow
+    """
+    Fetching chart workflow content
     """
     chartworkflowdetail = []
     try:
-        dao = PaperDAO()
         paperid = request.args.get('paperid', 0, type=str)
         paperid = str(paperid).strip()
         chartid = request.args.get('chartid', 0, type=str)
         chartid = str(chartid).strip()
-        selectedserver = session.get("selectedserver")
-        fetchdata = FetchDataFromAPI(selectedserver)
+        selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
         url = '/api/paper/' + paperid + '/chart/' + chartid
         chartworkflowdetail = fetchdata.fetchOutput(url)
         return jsonify(chartworkflowdetail=chartworkflowdetail), 200
@@ -879,11 +866,11 @@ def chartworkflow():
         flash('Error in chartdetails. ' + str(e))
         return jsonify(chartworkflowdetail=chartworkflowdetail), 400
 
-@csrf.exempt
+
 @app.route('/getDescriptor', methods=['POST','GET'])
 def getDescriptor():
     """
-    Inserts and fetches the metadata into Papers collections
+    Inserts and fetches the metadata into papers collections
     """
     try:
         data = request.get_json()
@@ -908,8 +895,3 @@ def getDescriptor():
         content = {'Error':'Could not insert, Cannot get descriptor'}
         return jsonify(content),400
     return jsonify(content),200
-
-def main(port):
-    app.secret_key = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
-    CORS(app)
-    app.run(port=port, debug=False)

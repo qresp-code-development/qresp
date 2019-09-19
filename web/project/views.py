@@ -3,7 +3,6 @@ from wtforms import validators
 from wtforms.fields.html5 import EmailField,IntegerField
 from wtforms.validators import DataRequired, Optional
 
-
 class RequiredIf(DataRequired):
     """Validator which makes a field required if another field is set and has a truthy value.
 

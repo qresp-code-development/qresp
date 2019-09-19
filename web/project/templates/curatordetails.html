@@ -34,14 +34,9 @@
            </span>
         </div>
     </div>
-{#    <div class="row" id="share-div" style="display:none;">#}
-{#        <div class="col-md-12">#}
-{#            <div style="float:right;"><input id="share-elem" type="text" readonly/><i class='fa fa-clipboard ml-1' style='font-size:20px; color: #800000; cursor: pointer;' data-toggle="tooltip" title='Copy preview url to clipboard' onclick="javascript: copyToClipboard('#share-elem');"></i></div>#}
-{#            </div>#}
-{#    </div>#}
+
 
     <div id="accordion" class="mt-3">
-
         {# Who is curating sections  #}
         <div class="custom-card" id="editCurator">
             <div class="card-header">
@@ -56,7 +51,6 @@
             <div id="detailsOne" class="collapse show" aria-labelledby="detailsOne" data-parent="#accordion">
                 <div class="card-body">
                     <form method="post" id="detailsform">
-                        {{ detailsform.csrf_token }}
                         <div class="form-group row">
                             <label class="col-sm-12">Name<span style="color: red;">*</span>  </label>
                             <div class="col-sm-4">
@@ -115,7 +109,6 @@
             <div id="serverOne" class="collapse" aria-labelledby="serverOne" data-parent="#accordion">
                 <div class="card-body">
                     <form method="post" id="serverform" name="serverform">
-                        {{ serverform.csrf_token }}
                         {{ serverform.kind(title=serverform.kind.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
                         <div id="HTTP" class="serverClass">
                             {{ render_field(serverform.hostUrl) }}
@@ -165,7 +158,6 @@
             <div id="infoOne" class="collapse" aria-labelledby="infoOne" data-parent="#accordion">
                 <div class="card-body">
                     <form method="post" id="infoform" name="info">
-                        {{ infoform.csrf_token }}
                         <div data-toggle="fieldset" id="pi-fieldset">
                             <label class="col-form-label">{{ infoform.PIs.label }}</label><span style="color: red;">*</span><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row" data-target="#pi-fieldset">+</button>
                             <table id="piTable">
@@ -201,7 +193,7 @@
                 </h3>
             </div>
             <div class="card-body">
-                <div class="paper-col-info"><label style="float: left">Name: &nbsp;</label>
+                <div class="paper-col-info"><label style="float: left">Principal Investigators: &nbsp;</label>
                     <p style="float: left" id="lblInfoPIs"></p></div>
                 <div class="paper-col-info"><label style="float: left">Collections: &nbsp;</label>
                     <p style="float: left" id="lblInfoCollections"></p></div>
@@ -225,7 +217,6 @@
             <div id="referenceOne" class="collapse" aria-labelledby="referenceOne" data-parent="#accordion">
                 <div class="card-body">
                     <form method="post" id="referenceform" name="reference">
-                            {{ referenceform.csrf_token }}
                             <table>
                                 <tbody>
                                 {{ render_field_curate(referenceform.kind) }}
@@ -454,7 +445,6 @@
             <div id="documentationOne" class="collapse" aria-labelledby="documentationOne">
                 <div class="card-body">
                     <form method="post" id="documentationform" name="documentation">
-                        {{ documentationform.csrf_token }}
                         {{ render_field(documentationform.readme) }}
                         <span class="input-group-btn">
                             <input type="submit" id="btnDocumentationSave"
@@ -485,13 +475,15 @@
     <div class="custom-card" id="editWorkflow" style="display:none;">
         <div class="card-header">
             <h3 class="mb-0" data-toggle="tooltip" title="This step defines the workflow of the paper. A workflow represents how the content of the paper was created. Use the Edit Button in the canvas to add: Add External Node , or to Add Node Connection. The type of nodes are listed on the right. (Hover over the node for hints).">
-                Build your workflow
+                <a id="headingWorkflow" data-toggle="collapse" data-target="#workflowOne" aria-expanded="true" aria-controls="workflowOne">
+                    <i class="fa fa-angle-down"></i>
+                    Build your workflow
+                </a>
             </h3>
         </div>
-        <div id="workflowOne">
+        <div id="workflowOne" class="collapse show" aria-labelledby="workflowOne">
             <div class="card-body">
                 <form method="post" action="workflow">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div id="node-popUp">
                         <span id="node-operation">Add External</span> <br>
                         <input type="hidden" id="node-label"/>
@@ -512,18 +504,19 @@
                         <input type="button" value="cancel" id="edge-cancelButton" />
                     </div>
                     <div id="divWorkflow"></div>
-                    <div id="divLegends"></div>
+                    <div id="divLegend"></div>
                     <span class="input-group-btn">
-                        <input type="button"
-                               title="Adds a free flow to the nodes and edges. This may disperse the nodes zoom in or zoom out as per need."
-                               id="Movement" value="Rearrange" onclick="addPhysics();"
-                               class="btn btn-theme-colored btn-lg m-2"
-                               style="font-weight: bold; height: 50px;">
                         <input type="button" class="btn btn-theme-colored btn-lg m-2"
-                               title="Continue to Step 7."
+                               title="Save workflow"
                                id="Save"
                                value="Save" style="font-weight: bold; height: 50px;"
                                onclick="javascript:connectedNodes();">
+                        <input type="checkbox"
+                               title="Adds a free flow to the nodes and edges. This may disperse the nodes zoom in or zoom out as per need."
+                               id="Movement" onclick="addPhysics();"> <b style="font-size:17px;">Rearrange</b>
+                        <input type="checkbox"
+                               title="Show/Hide visibility of nodes."
+                               id="LabelsVisibility" onclick="showHideLabelForNodes();"> <b style="font-size:17px;">Show Labels </b>
                     </span>
                 </form>
             </div>
@@ -544,7 +537,6 @@
 
 
 
-
     {# Upload Buttons Sections  #}
     <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel"
          aria-hidden="true">
@@ -561,7 +553,7 @@
                         <div class="row">
                             <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
                                 <input type="file" id="my_file" class="pb-3" title="Select a file">
-                                <textarea id="myTextArea" cols=100 rows=25 placeholder="Upload/Paste Here A JSON File"></textarea>
+                                <textarea id="myTextArea" rows=25 placeholder="Upload/Paste Here A JSON File" style="min-width: 100%;"></textarea>
                                 <div class="pt-4">
                                     <span class="input-group-btn">
                                         <input type="button" id="btnParse"
@@ -594,6 +586,9 @@
                     <div class="card-body">
                         <form class="tree-form" name="projectform" id="projectform">
                             {{ render_field(projectform.fileServerPath) }}
+                            {{ projectform.notebookPath }}
+                            {{ projectform.downloadPath }}
+                            {{ projectform.gitPath }}
                             <label for="field0"><span>Server Data Tree <span class="tooltipster glyphicon glyphicon-question-sign" title="Enter the path locating the paper content. If you do not know the full path, the data tree below helps you locate the paper content, and when you click on a folder the path field is automatically updated. If your paper path is not under your home directory, type the root of the path tree and click the Search button."></span></span></label>
                             <div id="projtree" class="mt-3">
                             </div>
@@ -627,7 +622,6 @@
                         <form method="post" id="chartform" name="charts">
                             <table>
                                 <tbody>
-                                {{ chartform.csrf_token }}
                                 {{ chartform.id }}
                                 {{ render_field_curate(chartform.caption) }}
                                 {{ render_field_curate(chartform.number) }}
@@ -635,7 +629,6 @@
                                 {{ render_field_curate(chartform.imageFile) }}
                                 {{ render_field_curate(chartform.notebookFile) }}
                                 {{ render_field_curate(chartform.properties) }}
-{#                                {{ render_field_curate(chartform.saveas) }}#}
                                 </tbody>
                             </table>
                             <div data-toggle="fieldset-charts" id="extra-fieldset-charts">
@@ -686,7 +679,6 @@
                 <div class="modal-body">
                     <div class="card-body">
                         <form method="post" id="toolform" name="tools">
-                            {{ toolform.csrf_token }}
                             {{ toolform.id }}
                             {{ toolform.kind(title=toolform.kind.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
                             <div class="toolClass" id="software">
@@ -737,7 +729,6 @@
                                 </table>
                             </div>
                             {{ render_field_curate(toolform.URLs) }}
-{#                            {{ render_field_curate(toolform.saveas) }}#}
                              <div data-toggle="fieldset-tools" id="extra-fieldset-tools">
                                 <label class="col-form-label">{{ toolform.extraFields.label }}</label> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-tools" data-target="#extra-fieldset-tools">+</button>
                                 <table id="extraTableTools">
@@ -787,12 +778,10 @@
                         <form method="post" id="datasetform" name="datasets">
                             <table>
                                 <tbody>
-                                    {{ datasetform.csrf_token }}
                                     {{ datasetform.id }}
                                     {{ render_field_curate(datasetform.files) }}
                                     {{ render_field_curate(datasetform.readme) }}
                                     {{ render_field_curate(datasetform.URLs) }}
-{#                                    {{ render_field_curate(datasetform.saveas) }}#}
                                 </tbody>
                             </table>
                              <div data-toggle="fieldset-datasets" id="extra-fieldset-datasets">
@@ -844,12 +833,10 @@
                          <form method="post" id="scriptform" name="scripts">
                             <table>
                                 <tbody>
-                                {{ scriptform.csrf_token }}
                                 {{ scriptform.id }}
                                 {{ render_field_curate(scriptform.files) }}
                                 {{ render_field_curate(scriptform.readme) }}
                                 {{ render_field_curate(scriptform.URLs) }}
-{#                                {{ render_field_curate(scriptform.saveas) }}#}
                                 </tbody>
                             </table>
                             <div data-toggle="fieldset-scripts" id="extra-fieldset-scripts">
@@ -928,7 +915,6 @@
                 <div class="modal-body">
                     <div class="card-body">
                         <form method="post" name="publishform" id="publishform">
-                            {{ publishform.csrf_token }}
                         {{ render_field(publishform.server) }}
                         {{ render_field(publishform.emailId) }}
                         <span class="input-group-btn">
@@ -943,7 +929,6 @@
             </div>
         </div>
     </div>
-
     <script src="{{ url_for('static', filename='./javascript/modules/curatordetails.js') }}"></script>
     <script type="text/javascript">
         buildCuratorTable({{ detailsform.data|tojson }});

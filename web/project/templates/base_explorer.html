@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <meta name="description" content="Qresp"/>
+    <meta name="keywords"
+          content="Qresp, MICCOM, IME, MICCOM Qresp Explorer, scienctific papers, research, research papers, uchi, uchicago, research"/>
+    <meta name="author" content="Aditya">
+    <meta name="google-site-verification" content="FmcRvtY3_-Mepo65Nv9JxPsI07mWjamDs2muLIzmG1M"/>
+    <title>Home | Qresp Explorer</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='./images/favicon.ico') }}"
+          type="image/vnd.microsoft.icon"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/bootstrap.min.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/theme/bootstrap-select.css') }}">
+
+    <!-- Plugin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/magnific-popup.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/font-awesome.min.css') }}">
+
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/freelancer.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/style-main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/theme/template.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/custom/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/needsharebutton.min.css') }}">
+
+    <!--datatables themes-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/datatables/jquery.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/css-plugin-collections.css') }}">
+
+    <!--vis-->
+    <link href="https://unpkg.com/vis-network@latest/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="{{ url_for('static', filename='./javascript/vendor/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/umd/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/umd/tooltip.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='./javascript/theme/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/vendor/jqBootstrapValidation.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/vendor/jquery.easing.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/theme/bootstrap-select.min.js') }}"></script>
+
+    <!--datatables javascript -->
+    <script src="{{ url_for('static', filename='./javascript/datatables/jquery.dataTables.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='./javascript/vendor/jquery-plugin-collection.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/theme/custom.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/vendor/jquery.lazyload.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/vendor/needsharebutton.js') }}"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
+
+
+    <script type="text/javascript">
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+        ga('create', 'UA-126882431-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'> </script>
+     <style>
+        .nav-item::after{content:'';display:block;width:0px;height:2px;background:#ffffff;transition: 0.2s;}
+        .nav-item:hover::after{width:100%;}
+        .navbar-dark .navbar-nav .active > .nav-link, .navbar-dark .navbar-nav .nav-link.active, .navbar-dark .navbar-nav .nav-link.show, .navbar-dark .navbar-nav .show > .nav-link,.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover{color:#fec400;}
+        .nav-link{padding:15px 5px;transition:0.2s;}
+        .active{background:#c40306;}
+
+        .dropdown-item.active, .dropdown-item:active{color:#212529;}
+        .dropdown-item:focus, .dropdown-item:hover{background:#ffffff;}
+    </style>
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-secondary" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="/"><img
+                src="{{ url_for('static', filename='./images/Qresp-logo.png') }}" alt="Qresp"
+                style="width:130px;"></a>
+        <button class="navbar-toggler navbar-toggler-right bg-primary rounded" type="button"
+                data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive"
+                aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto" style="font-size: 18px;">
+                <li class="nav-item mx-0 mx-lg-1 active">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespexplorer">Explorer</a>
+                </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="/qrespcurator">Curator</a>
+                </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="http://qresp.org/" target="_blank">Documentation</a>
+                </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="mailto:datadev@lists.uchicago.edu?subject=Qresp">Contact us</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+{% block content %}
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+     <div class="container" style="padding-top:2rem;padding-bottom: 6rem;min-height: 75vh;">
+        {% block page_content %}{% endblock %}
+     </div>
+
+{% endblock %}
+
+<!-- Footer -->
+<footer class="footer text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <a href="http://miccom-center.org/" target="_blank"><img
+                        src="{{ url_for('static', filename='./images/MICCoM_logo_all_white.png') }}" alt="MICCOM"
+                        style="width:200px;"></a><span></span>
+            </div>
+            <div class="col-md-4">
+                <a href="https://www.anl.gov/" target="_blank"><img
+                        src="{{ url_for('static', filename='./images/Argonne_wireframe_white_transparent.png') }}"
+                        alt="ARGONNE" style="width: 170px;margin-top: 18px;"></a><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+            <div class="col-md-4">
+                <a href="https://www.uchicago.edu/" target="_blank"><img
+                        src="{{ url_for('static', filename='./images/logo.rgb.reversed-2.png') }}"
+                        style="width:170px;margin-top: 20px;"></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="copyright py-4 text-center text-white">
+    <div class="container">
+        <small>Copyright &copy;2018-2019 <a class="font-11" style="color:#fff" href="/">Qresp</a> All Rights Reserved</small>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+</body>
+
+
+</html>
