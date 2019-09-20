@@ -5,6 +5,7 @@ from project import app
 from project.views import *
 from project.util import ConvertField
 from project import constants as CURATOR_FIELD
+from project.config import Config
 import ast
 from flask import Flask, request, jsonify
 
@@ -21,10 +22,10 @@ class RouteTests(unittest.TestCase):
         self.client = app.test_client()
         self.ctx = self.app.test_request_context()
         self.ctx.push()
-
+        Config.initialize('project/config_mock.ini')
         self.pagenames = ['/','qrespcurator','startfromscratch','getTreeInfo','addToWorkflow','mint',
                           'preview/files_paper','previewchartworkflow?paperid=files_paper&chartid=c0',
-                          'qrespexplorer','search','searchWord?searchWord=&paperTitle=&tags=&doi=&collectionList=[]&authorsList=[]&publicationList=[]',
+                          'qrespexplorer','search?servers=https%3A%2F%2Fpaperstack.uchicago.edu','searchWord?searchWord=&paperTitle=&tags=&doi=&collectionList=[]&authorsList=[]&publicationList=[]',
                           'paperdetails/5941869f1bd40fd44db0024a','chartworkflow?paperid=5941869f1bd40fd44db0024a&chartid=c0',
                           'insertDOI?paperId=5941869f1bd40fd44db0024a&doi=25678','oauth2callback']
 
@@ -68,7 +69,9 @@ class RouteTests(unittest.TestCase):
 
     def test_getMethods(self):
         for pagename in self.pagenames:
+            print("get-> pagename", pagename)
             response = self.client.get(pagename, follow_redirects=True)
+            print("get->",pagename,response.status_code)
             self.assertEquals(response.status_code,200)
 
 

@@ -7,12 +7,12 @@ class Config:
     """Interact with configuration variables."""
 
     configParser = configparser.ConfigParser()
-    configFilePath = (os.path.join(os.getcwd(), 'project/config.ini'))
 
     @classmethod
-    def initialize(cls):
+    def initialize(cls,path='project/config.ini'):
         """Start config by reading config.ini."""
-        cls.configParser.read(cls.configFilePath)
+        configFilePath = (os.path.join(os.getcwd(),path))
+        cls.configParser.read(configFilePath)
 
     @classmethod
     def get_setting(cls, section, key):
