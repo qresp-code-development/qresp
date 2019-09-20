@@ -26,15 +26,6 @@ $(function () {
         $(this).next("#doiText").toggle();
     });
 
-
-    // window.onresize = function () {
-    //     try {
-    //         legendNetwork.fit();
-    //     }
-    //     catch (err){
-    //         console.log("Initial Workflow scale is not set. ",err);
-    //     }
-    // };
     var chartworkflowdetail = null;
 
     $('.workflowimg').each(function () {
@@ -56,21 +47,10 @@ $(function () {
                 chartworkflowdetail = data['chartworkflowdetail'];
                 $('#chartWorkflowModal').modal('show');
                 $('#chartWorkflowModalLabel').html('Workflow of ' + chartworkflowdetail.workflowType);
-                console.log("chart>",chartworkflowdetail);
                 bindWorkflow(chartworkflowdetail,true);
             });
         });
     });
-
-
-    // window.onresize = function () {
-    //     try {
-    //         chartlegendNetwork.fit();
-    //     }catch (err){
-    //         console.log("Initial Workflow scale is not set. ",err);
-    //     }
-    // };
-
 
     $(document).on('click', '.button-icon', function () {
         $(this).toggleClass("active");
@@ -387,7 +367,6 @@ function buildChartTables(chartDetails, paperDetails) {
 }
 
 function buildDatasetTables(datasetDetails, paperDetails) {
-    console.log(datasetDetails , datasetDetails.length);
     if(datasetDetails && datasetDetails.length>0) {
         var tableDatasets = $('#tbldatasets')
             .DataTable(

@@ -23,7 +23,6 @@ $(function(){
             },
             error: function (xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
-                console.log(errorMessage);
                 bootbox.alert("Unable to process JSON "+ str(errorMessage));
             }
         });
@@ -46,8 +45,6 @@ $(function(){
             },
             error: function(xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText + ': '+xhr.responseText;
-                console.log(errorMessage);
-                console.log(status,error);
                 $("#warning").toggle();
                 $("#warning-message").html(errorMessage);
             }
@@ -96,7 +93,6 @@ $(function(){
         //Add new entry
         $this.find("button[data-toggle=fieldset-add-row]").click(function() {
             var target = $($(this).data("target"));
-            //console.log("target>>",target.id,target,target.split("-"));
             var oldrow = target.find("table tr:last");
             var row = oldrow.clone(true, true);
             var elem_id = row.find(":input")[0].id;
@@ -144,7 +140,6 @@ $(function(){
             },
             error: function(xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
-                console.log(errorMessage);
                 $("#warning").toggle();
                 $("#warning-message").html(errorMessage);
             }
@@ -291,7 +286,6 @@ $(function(){
             data: $('#publishform').serialize(), // serializes the form's elements.
             success: function (data) {
                 if(data.error){
-                    console.log(data.error);
                     var errorstring = '<ul><li>' + data.error.join("</li><li>"); + '</li></ul>';
                     bootbox.alert(errorstring);
                 }else {
@@ -301,7 +295,6 @@ $(function(){
             },
             error: function(xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
-                console.log(errorMessage);
                 $("#warning").toggle();
                 $("#warning-message").html(errorMessage);
             }
@@ -394,7 +387,6 @@ $(function(){
             success: function (data) {
                 var previewAnchorElem = document.getElementById("previewData");
                 var previewFolder = data["previewFolder"];
-                console.log("preview",previewFolder);
                 previewAnchorElem.setAttribute("href", "/preview/"+previewFolder);
                 previewAnchorElem.setAttribute("target", "_blank");
                 previewAnchorElem.click();
@@ -409,7 +401,6 @@ $(function(){
             type: "GET",
             url: "download",
             success: function (data) {
-                console.log("download>>",data);
                 var blob = new Blob([JSON.stringify(data["paper"])],{type: "text/json;charset=utf-8;"});
 				if (navigator.msSaveBlob) { // IE 10+
 						navigator.msSaveBlob(blob, "data.json")
@@ -548,7 +539,7 @@ function fetchDOI(doi) {
                 dataType: "json",
                 success: function (data) {
                     if("errors" in data){
-                        console.log("recheck your DOI");
+                        bootbox.alert("recheck your DOI");
                     }else {
                         fillValues(data.data, "reference"); // display the returned data in the console.
                     }
@@ -564,7 +555,6 @@ function callTreeData(searchdata){
         contentType: "application/json ; charset=utf-8",
         data: JSON.stringify(searchdata),
         success: function (data) {
-            console.log("data>>",data,data.services);
             if("services" in data) {
                 if ("notebookPath" in data.services) {
                     $("#notebookPath").val(data.services['notebookPath']);
@@ -743,7 +733,6 @@ function buildChartTables(chartDetails,path) {
                             "sortable": false,
                             "searchable": true,
                             "render": function (data, type, row) {
-                                console.log("id>>",row.id);
                                 var chartInfo = "<div class='span2'><a rel='prettyPhoto' title='"
                                     + $.trim(row.number)
                                     + ": "
@@ -1642,7 +1631,6 @@ function bindWorkflow(jsonData) {
             $.each(value, function (index, val) {
                 headNum = headNum + 1;
                 nodeId = nodeId + 1;
-                console.log("head>",headNum.toString(),"id>",val['id']);
                 var head = {};
                 head["id"] = "h"+ headNum.toString();
                 head["readme"] = val['readme'];
@@ -1718,7 +1706,6 @@ function bindWorkflow(jsonData) {
 
 
     function removeNode(data, callback) {
-        console.log("data node>>",data.nodes[0],">>",data)
         var datais = data.nodes[0];
         nodes.remove(data);
         var result = [];
@@ -1954,9 +1941,6 @@ function bindWorkflow(jsonData) {
 
 function connectedNodes() {
     var uniqueconnectednodes = [];
-    console.log("ed",edgeId);
-    console.log("es",edges);
-    console.log("nodes",nodes);
     for (var i = 1; i <= edgeId; i++) {
         var saves = [];
         if(edges.get(i)){
@@ -2001,7 +1985,6 @@ function saveNodesAndEdges(){
 			contentType: "application/json ; charset=utf-8",
 			data: JSON.stringify(plist),
 			success: function (data) {
-				console.log("Saved",data.data);
 				addToWorkflow();
 			}
 		});

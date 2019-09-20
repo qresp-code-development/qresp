@@ -576,7 +576,7 @@ def publish():
             for item in serverslist.getServersList():
                 if form.server.data in item['qresp_server_url']:
                     session['maintaineraddresses'] = item['qresp_maintainer_emails']
-            googleauth = GoogleAuth(Config.get_setting('DEV','GOOGLE_CLIENT_ID'), Config.get_setting('DEV','REDIRECT_URI'), Config.get_setting('GOOGLE_API','SCOPE'))
+            googleauth = GoogleAuth(Config.get_setting('PROD','GOOGLE_CLIENT_ID'), Config.get_setting('PROD','REDIRECT_URI'), Config.get_setting('GOOGLE_API','SCOPE'))
             google = googleauth.getGoogleAuth()
             auth_url, state = google.authorization_url(Config.get_setting('GOOGLE_API','AUTH_URI'), access_type='offline')
             session['oauth_state'] = state
@@ -601,12 +601,12 @@ def authorized():
     if 'code' not in request.args and 'state' not in request.args:
         print('denied access.')
         return redirect(url_for('qrespcurator'))
-    googleauth = GoogleAuth(Config.get_setting('DEV','GOOGLE_CLIENT_ID'), Config.get_setting('DEV','REDIRECT_URI'))
+    googleauth = GoogleAuth(Config.get_setting('PROD','GOOGLE_CLIENT_ID'), Config.get_setting('PROD','REDIRECT_URI'))
     google = googleauth.getGoogleAuth(state=session.get('oauth_state'))
     try:
         token = google.fetch_token(
             Config.get_setting('GOOGLE_API', 'TOKEN_URI'),
-            client_secret=Config.get_setting('DEV','GOOGLE_CLIENT_SECRET'),
+            client_secret=Config.get_setting('PROD','GOOGLE_CLIENT_SECRET'),
             authorization_response=request.url)
     except Exception as e:
         print(e)
@@ -717,7 +717,7 @@ def verifypasscode():
     This method verifies with input passcode of flask connection.
     """
     form = PassCodeForm(request.form)
-    confirmpasscode = Config.get_setting('DEV','QRESP_DB_SECRET_KEY')
+    confirmpasscode = Config.get_setting('PROD','QRESP_DB_SECRET_KEY')
     if request.method == 'POST' and form.validate():
         if confirmpasscode == form.passcode.data:
             return jsonify(msg="success"),200
@@ -772,7 +772,7 @@ def search():
     """
     try:
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         allpaperslist = fetchdata.fetchOutput('/api/search')
         collectionlist = fetchdata.fetchOutput('/api/collections')
         authorslist = fetchdata.fetchOutput('/api/authors')
@@ -802,7 +802,7 @@ def searchWord():
         authorsList = json.loads(request.args.get('authorsList'))
         publicationList = json.loads(request.args.get('publicationList'))
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
               "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)
@@ -822,7 +822,7 @@ def paperdetails(paperid):
     workflowdetail = []
     try:
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/paper/'+paperid
         paperdetail = fetchdata.fetchOutput(url)
         url = '/api/workflow/'+paperid
@@ -849,7 +849,7 @@ def chartworkflow():
         chartid = request.args.get('chartid', 0, type=str)
         chartid = str(chartid).strip()
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/paper/' + paperid + '/chart/' + chartid
         chartworkflowdetail = fetchdata.fetchOutput(url)
         return jsonify(chartworkflowdetail=chartworkflowdetail), 200

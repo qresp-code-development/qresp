@@ -26,13 +26,13 @@ ext = Sitemap(app)
 CORS(app)
 
 #initialize db
-if Config.get_setting('DEV','MONGODB_HOST'):
+if Config.get_setting('PROD','MONGODB_HOST'):
     db = MongoEngine()
-    app.config['MONGODB_HOST'] = Config.get_setting('DEV','MONGODB_HOST')
-    app.config['MONGODB_PORT'] = int(Config.get_setting('DEV','MONGODB_PORT'))
-    app.config['MONGODB_USERNAME'] = Config.get_setting('DEV','MONGODB_USERNAME')
-    app.config['MONGODB_PASSWORD'] = Config.get_setting('DEV','MONGODB_PASSWORD')
-    app.config['MONGODB_DB'] = Config.get_setting('DEV','MONGODB_DB_NAME')
+    app.config['MONGODB_HOST'] = Config.get_setting('PROD','MONGODB_HOST')
+    app.config['MONGODB_PORT'] = int(Config.get_setting('PROD','MONGODB_PORT'))
+    app.config['MONGODB_USERNAME'] = Config.get_setting('PROD','MONGODB_USERNAME')
+    app.config['MONGODB_PASSWORD'] = Config.get_setting('PROD','MONGODB_PASSWORD')
+    app.config['MONGODB_DB'] = Config.get_setting('PROD','MONGODB_DB_NAME')
     db.init_app(app)
 
 from project import routes

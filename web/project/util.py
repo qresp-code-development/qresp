@@ -442,8 +442,8 @@ class FetchDataFromAPI():
         """
         outDict = {}
         self.__servernames = list(set(self.__servernames))
-        try:
-            for snames in self.__servernames:
+        for snames in self.__servernames:
+            try:
                 url = snames + apiname
                 headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
                 response = requests.get(url,headers=headers, verify=False)
@@ -455,8 +455,8 @@ class FetchDataFromAPI():
                         outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
                     else:
                         outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
-        except Exception as e:
-            print(e)
+            except Exception as e:
+                print(e)
         return list(outDict.values())
 
 

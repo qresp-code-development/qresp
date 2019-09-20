@@ -21,5 +21,5 @@ class Config:
             ret = cls.configParser.get(section, key)
         except:
             ret = None
-        return  ret
+        return ret
 
