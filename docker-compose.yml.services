@@ -5,28 +5,22 @@ services:
     restart: always
     build: ./web
     expose:
-      - 8080
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./web/:/usr/src/app/web
+      - "8080"
     environment:
-      - KEY=<insert key>
-      - GOOGLE_CLIENT_ID=<insert google client id>
-      - GOOGLE_CLIENT_SECRET=<insert google client secret>
-      - REDIRECT_URI=<insert redirect uri>
-      - MAIL_ADDR=<administrators mail address>
-      - MAIL_PWD=<administrators password>
-    command: python run.py --host=0.0.0.0 --port 8080
+      - PYTHONUNBUFFERED=TRUE
+    volumes:
+      - /usr/src/app/web/project/static
+      - ./web/:/usr/src/app/web
+      - ./papercollection:/home/flask/app/web/papers
+    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :8080 project:app
 
   nginx:
     restart: always
     build: ./nginx
     ports:
-      - "8001:8001"
+      - "443:443"
     volumes:
       - /www/static
-      - ./papercollection:/usr/src/files
     volumes_from:
       - web
     depends_on:

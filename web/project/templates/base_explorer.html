@@ -27,37 +27,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/style-main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/theme/template.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/custom/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/needsharebutton.min.css') }}">
 
     <!--datatables themes-->
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/datatables/jquery.dataTables.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/css-plugin-collections.css') }}">
 
     <!--vis-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='./css/vendor/vis.min.css') }}">
-
-    <style type="text/css">
-        #divWorkflow {
-            width: 800px;
-            height: 600px;
-        }
-
-        #divLegend {
-            width: 130px;
-            height: 600px;
-            border: 1px solid lightgray;
-        }
-
-        #divChartWorkflow {
-            width: 600px;
-            height: 600px;
-        }
-
-        #divChartLegend {
-            width: 100px;
-            height: 600px;
-            border: 1px solid lightgray;
-        }
-    </style>
+    <link href="https://unpkg.com/vis-network@latest/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/umd/popper.js') }}"></script>
@@ -74,13 +51,16 @@
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery-plugin-collection.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/theme/custom.js') }}"></script>
     <script src="{{ url_for('static', filename='./javascript/vendor/jquery.lazyload.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='./javascript/vendor/needsharebutton.js') }}"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@latest/dist/vis-network.min.js"></script>
+
+
     <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
         ga('create', 'UA-126882431-1', 'auto');
         ga('send', 'pageview');
     </script>
     <script async src='https://www.google-analytics.com/analytics.js'> </script>
-    <script src="{{ url_for('static', filename='./javascript/vendor/vis.min.js') }}"></script>
      <style>
         .nav-item::after{content:'';display:block;width:0px;height:2px;background:#ffffff;transition: 0.2s;}
         .nav-item:hover::after{width:100%;}
@@ -134,8 +114,7 @@
             </div>
         {% endfor %}
     </div>
-     <div class="container" style="padding-top:6rem;padding-bottom: 6rem;min-height: 75vh;">
-     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+     <div class="container" style="padding-top:2rem;padding-bottom: 6rem;min-height: 75vh;">
         {% block page_content %}{% endblock %}
      </div>
 
@@ -166,7 +145,7 @@
 
 <div class="copyright py-4 text-center text-white">
     <div class="container">
-        <small>Copyright &copy;2018 <a class="font-11" style="color:#fff" href="/">Qresp</a> All Rights Reserved</small>
+        <small>Copyright &copy;2018-2019 <a class="font-11" style="color:#fff" href="/">Qresp</a> All Rights Reserved</small>
     </div>
 </div>
 

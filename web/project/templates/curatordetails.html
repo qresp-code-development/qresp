@@ -1,0 +1,952 @@
+{% extends "base_curator.html" %}
+
+{% block page_content %}
+    {% from "_formhelpers.html" import render_field, render_field_curate %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-2">
+               <span class="input-group-btn" data-toggle="tooltip" title="Continue with existing JSON file.">
+                     <input type="button" id="btnCurator"
+                            name="general_search_button" value="Resume"
+                            class="btn btn-theme-colored btn-lg m-0"
+                            style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#uploadModal' >
+               </span>
+                </div>
+                <div class="col-md-4">
+                    <span class="input-group-btn" data-toggle="tooltip" title="Clear session data and start from scratch.">
+                       <form action="/startfromscratch">
+                         <input type="submit" id="btnStartFromScratch"
+                                value="Start from scratch"
+                                class="btn btn-theme-colored btn-lg m-0"
+                                style="font-weight: bold; height: 50px;" >
+                       </form>
+                   </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-3">
+           <span class="float-right">
+               <a id="previewLink" data-toggle="tooltip" title='Preview your curated paper' style="cursor: pointer;"><i class='fa fa-eye mr-3' style='font-size:23px; color: #800000;'></i></a>
+               <a id="downloadLink" data-toggle="tooltip" title='Download the metadata of your curated paper' style="cursor: pointer;"><i class='fa fa-download mr-3' style='font-size:23px; color: #800000;'></i></a>
+               <a id="downloadData" style="display: none;"></a>
+               <a id="previewData" style="display: none;"></a>
+           </span>
+        </div>
+    </div>
+
+
+    <div id="accordion" class="mt-3">
+        {# Who is curating sections  #}
+        <div class="custom-card" id="editCurator">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This step defines the identity of the person that is using Qresp | Curator to generate metadata.">
+                    <a id="headingDetails" data-toggle="collapse" data-target="#detailsOne" aria-expanded="true" aria-controls="detailsOne">
+                        <i class="fa fa-angle-down"></i>
+                        Who is curating the paper?
+                    </a>
+                </h3>
+            </div>
+
+            <div id="detailsOne" class="collapse show" aria-labelledby="detailsOne" data-parent="#accordion">
+                <div class="card-body">
+                    <form method="post" id="detailsform">
+                        <div class="form-group row">
+                            <label class="col-sm-12">Name<span style="color: red;">*</span>  </label>
+                            <div class="col-sm-4">
+                                {{ detailsform.firstName(class_='form-control',title=detailsform.firstName.description,**{'data-toggle': 'tooltip'}) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ detailsform.middleName(class_='form-control',title=detailsform.middleName.description,**{'data-toggle': 'tooltip'}) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ detailsform.lastName(class_='form-control',title=detailsform.lastName.description,**{'data-toggle': 'tooltip'}) }}
+                            </div>
+                        </div>
+                        {{ render_field(detailsform.emailId) }}
+                        {{ render_field(detailsform.affiliation) }}
+                        <span class="input-group-btn">
+                                        <input type="submit" id="btnDetails"
+                                               value="Save"
+                                               class="btn btn-theme-colored btn-lg m-0"
+                                               style="font-weight: bold; height: 50px;">
+                                    </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card" id="showCurator" style="display: none;">
+            <div class="card-header" id="headingDetails" title="The identity of the person who curated the paper.">
+                <h3 class="mb-0">
+                    Curator Information
+                    <a id="detailsLink" title='Edit the details of the curator'><i class='fa fa-edit custom-icon' title="Edit the curator"></i></a>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="paper-col-info"><label style="float: left">Name: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorName"></p></div>
+                <div class="paper-col-info"><label style="float: left">Email Address: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorEmail"></p></div>
+                <div class="paper-col-info"><label style="float: left">Affiliation: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorAffiliation"></p></div>
+            </div>
+        </div>
+
+
+        {# Where is the paper server location#}
+
+        <div class="custom-card" id="editServer">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This step defines the location of the remote server where the paper content is organized and  stored. The paper will be accessed by establishing HTTP access.">
+                    <a class="collapsed" id="headingServer" data-toggle="collapse" data-target="#serverOne" aria-expanded="false" aria-controls="serverOne">
+                        <i class="fa fa-angle-down"></i>
+                        Where is the paper?
+                    </a>
+                </h3>
+            </div>
+
+            <div id="serverOne" class="collapse" aria-labelledby="serverOne" data-parent="#accordion">
+                <div class="card-body">
+                    <form method="post" id="serverform" name="serverform">
+                        {{ serverform.kind(title=serverform.kind.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
+                        <div id="HTTP" class="serverClass">
+                            {{ render_field(serverform.hostUrl) }}
+                        </div>
+                        <div id="Zenodo" class="serverClass" style="display:none;">
+                            {{ render_field(serverform.zenodoUrl) }}
+                        </div>
+                        <div id="Other" class="serverClass" style="display:none;">
+                            {{ render_field(serverform.other) }}
+                        </div>
+                        <span class="input-group-btn">
+                            <input type="submit" id="btnSearch"
+                                    value="Search"
+                                    class="btn btn-theme-colored btn-lg m-0"
+                                    style="font-weight: bold; height: 50px;">
+                         </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card" id="showServer" style="display: none;">
+            <div class="card-header" id="headingServer" title="The location of the paper.">
+                <h3 class="mb-0">
+                    Server Information
+                    <a id="serverLink" title='Edit the details of the location'><i class='fa fa-edit custom-icon'></i></a>
+                </h3>
+            </div>
+            <div id="serverDetailsOne">
+                <div class="card-body">
+                    <div class="paper-col-info"><label style="float: left">File Server path: &nbsp;</label>
+                        <p style="float: left" id="lblProject"></p></div>
+                </div>
+            </div>
+        </div>
+
+        {# Where is paper information located #}
+        <div class="custom-card" id="editInfo">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects general information about your paper.">
+                    <a class="collapsed" id="headingInfo" data-toggle="collapse" data-target="#infoOne" aria-expanded="false" aria-controls="infoOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Info about your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="infoOne" class="collapse" aria-labelledby="infoOne" data-parent="#accordion">
+                <div class="card-body">
+                    <form method="post" id="infoform" name="info">
+                        <div data-toggle="fieldset" id="pi-fieldset">
+                            <label class="col-form-label">{{ infoform.PIs.label }}</label><span style="color: red;">*</span><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row" data-target="#pi-fieldset">+</button>
+                            <table id="piTable">
+                                {% for name in infoform.PIs %}
+                                <tr data-toggle="fieldset-entry" id="entry">
+                                    <td style="padding-bottom: 1rem; width:35%;">{{ name.firstName(class_='form-control',title=name.firstName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                    <td style="padding-bottom: 1rem; width:25%;">{{ name.middleName(class_='form-control',title=name.middleName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                    <td style="padding-bottom: 1rem; width:35%;">{{ name.lastName(class_='form-control',title=name.lastName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                    <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row" id="PIs-{{loop.index0}}-remove">-</button></td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                                {{ render_field(infoform.collections) }}
+                                {{ render_field(infoform.tags) }}
+                                {{ render_field(infoform.notebookFile) }}
+                        <span class="input-group-btn">
+                            <input type="submit" id="btnInfoSave"
+                                   value="Save"
+                                   class="btn btn-theme-colored btn-lg m-0"
+                                   style="font-weight: bold; height: 50px;"/>
+                        </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card" id="showInfo" style="display: none;">
+            <div class="card-header" id="headingInfo" title="The information about the paper.">
+                <h3 class="mb-0">
+                    Paper Information
+                    <a id="infoLink" title='Edit the info of the paper'><i class='fa fa-edit custom-icon'></i></a>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="paper-col-info"><label style="float: left">Principal Investigators: &nbsp;</label>
+                    <p style="float: left" id="lblInfoPIs"></p></div>
+                <div class="paper-col-info"><label style="float: left">Collections: &nbsp;</label>
+                    <p style="float: left" id="lblInfoCollections"></p></div>
+                <div class="paper-col-info"><label style="float: left">Tags: &nbsp;</label>
+                    <p style="float: left" id="lblInfoTags"></p></div>
+                <div class="paper-col-info"><label style="float: left">Main Notebook File: &nbsp;</label>
+                    <p style="float: left" id="lblInfoNotebookFile"></p></div>
+            </div>
+        </div>
+
+        {# Add references about the project #}
+        <div class="custom-card" id="editReference">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects information about the publication associated to the paper. The DOI number may aid in auto filling certain fields.">
+                    <a class="collapsed" id="headingReference" data-toggle="collapse" data-target="#referenceOne" aria-expanded="false" aria-controls="referenceOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Reference to your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="referenceOne" class="collapse" aria-labelledby="referenceOne" data-parent="#accordion">
+                <div class="card-body">
+                    <form method="post" id="referenceform" name="reference">
+                            <table>
+                                <tbody>
+                                {{ render_field_curate(referenceform.kind) }}
+                                 <div class="form-group row">
+                                        <div class="col-sm-12">
+                                             <label class="col-form-label">{{ referenceform.DOI.label }}<span style="color: red;">*</span>
+                                                 <input type="button" class="btn btn-theme-colored" id="fillReference" title="Auto fills paper fields using DOI." value="fetch" onclick="javascript:fetchDOI($('#DOI').val());"/>
+                                             </label>
+                                        </div>
+                                         <div class="col-sm-12">
+                                             {{ referenceform.DOI(class_='form-control',title=referenceform.DOI.description,**{'data-toggle': 'tooltip'}) }}
+                                        </div>
+                                 </div>
+                                </tbody>
+                            </table>
+                                <div data-toggle="fieldset" id="author-fieldset">
+                                <label class="col-form-label">{{ referenceform.authors.label }}</label> <span style="color: red;">*</span> <button type="button" class="btn btn-theme-colored" id="author-add-row-button" data-toggle="fieldset-add-row" data-target="#author-fieldset">+</button>
+                                <table id="authorTable">
+                                    {% for name in referenceform.authors %}
+                                    <tr data-toggle="fieldset-entry-authors" id="entry">
+                                        <td style="padding-bottom: 1rem;">{{ name.firstName(class_='form-control',title=name.firstName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ name.middleName(class_='form-control',title=name.middleName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ name.lastName(class_='form-control',title=name.lastName.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row" id="authors-{{loop.index0}}-remove">-</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                                {{ render_field(referenceform.title) }}
+                                {{ render_field(referenceform.journal.fullName) }}
+                                {{ render_field(referenceform.page) }}
+                                {{ render_field(referenceform.publishedAbstract) }}
+                                {{ render_field(referenceform.volume) }}
+                                {{ render_field(referenceform.year) }}
+                                {{ render_field(referenceform.URLs) }}
+                                <span class="input-group-btn">
+                                  <input type="submit" id="btnReferenceSave"
+                                               value="Save"
+                                               class="btn btn-theme-colored btn-lg m-0"
+                                               style="font-weight: bold; height: 50px;"/>
+                                </span>
+                        </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card" id="showReference" style="display: none;">
+            <div class="card-header" id="headingReference" title="The references for the paper.">
+                <h3 class="mb-0">
+                    Reference
+                    <a id="referenceLink" title='Edit the reference of the paper'><i class='fa fa-edit custom-icon'></i></a>
+                </h3>
+            </div>
+            <div class="card-body">
+                <p id="lblTitle"></p>
+                <p id="lblAuthor"></p>
+                <div class="paper-col-info"><label style="float: left">Published In: &nbsp;</label>
+                    <p style="float: left" id="lblPublishedIn"></p></div>
+                <div id="PaperSection"></div>
+                <label>Abstract: </label>
+                <div style="width: 100%;">
+                    <p id="lblPaperAbstract" style="text-align: justify;"></p>
+                </div>
+            </div>
+        </div>
+
+        {# Where is the chart located#}
+        <div class="custom-card" id="editChart">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects information about the Charts of the paper">
+                    <a id="headingChart" data-toggle="collapse" data-target="#chartOne" aria-expanded="true" aria-controls="chartOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Charts from your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="chartOne" class="collapse show" aria-labelledby="chartOne">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                           <span class="input-group-btn">
+                                 <input type="button" id="btnChart"
+                                        name="general_add_button" value="Add Chart"
+                                        class="btn btn-theme-colored btn-lg m-0" title="Add new chart"
+                                        style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#chartModal' onclick="$('#chartform')[0].reset(); $('#btnChartDelete').hide();">
+                           </span>
+                        </div>
+                    </div>
+                    <table id="tblcharts" class="display" cellspacing="0" width="100%" style="display:none">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Image File</th>
+                            <th></th>
+                            <th>Number</th>
+                            <th>Caption</th>
+                            <th>Properties</th>
+                            <th>Files</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Where is the tool located#}
+        <div class="custom-card" id="editTool">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects information about the Tools of the paper">
+                    <a id="headingTool" data-toggle="collapse" data-target="#toolOne" aria-expanded="true" aria-controls="toolOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Tools from your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="toolOne" class="collapse show" aria-labelledby="toolOne">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                           <span class="input-group-btn">
+                                 <input type="button" id="btnTool"
+                                        name="general_search_button" value="Add Tool"
+                                        class="btn btn-theme-colored btn-lg m-0" title="Add new tool"
+                                        style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#toolModal' onclick="$('#toolform')[0].reset(); $('#btnToolDelete').hide(); $('form[name=tools] input[name=kind][value=software]').prop('checked', true).change();">
+                           </span>
+                        </div>
+                    </div>
+                    <table id="tbltools" class="display" cellspacing="0" width="100%" style="display:none">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Kind</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        {# Where is the dataset located#}
+        <div class="custom-card" id="editDataset">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects information about the Datasets of the paper">
+                    <a id="headingDataset" data-toggle="collapse" data-target="#datasetOne" aria-expanded="true" aria-controls="datasetOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Datasets from your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="datasetOne" class="collapse show" aria-labelledby="datasetOne">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                           <span class="input-group-btn">
+                                 <input type="button" id="btnDataset"
+                                        name="general_search_button" value="Add Dataset"
+                                        class="btn btn-theme-colored btn-lg m-0" title="Add new dataset"
+                                        style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#datasetModal' onclick="$('#datasetform')[0].reset(); $('#btnDatasetDelete').hide();">
+                           </span>
+                        </div>
+                    </div>
+                    <table id="tbldatasets" class="display" cellspacing="0" width="100%" style="display:none">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th>Files</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Where is the scripts located#}
+        <div class="custom-card" id="editScript">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects information about the Scripts of the paper">
+                    <a id="headingScript" data-toggle="collapse" data-target="#scriptOne" aria-expanded="true" aria-controls="scriptOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add Scripts from your paper
+                    </a>
+                </h3>
+            </div>
+            <div id="scriptOne" class="collapse show" aria-labelledby="scriptOne">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                           <span class="input-group-btn">
+                                 <input type="button" id="btnScript"
+                                        name="general_search_button" value="Add Script"
+                                        class="btn btn-theme-colored btn-lg m-0" title="Add new script"
+                                        style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#scriptModal' onclick="$('#scriptform')[0].reset(); $('#btnScriptDelete').hide();">
+                           </span>
+                        </div>
+                    </div>
+                    <table id="tblscripts" class="display" cellspacing="0" width="100%" style="display:none">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th>Files</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Add documentation is paper information located #}
+        <div class="custom-card" id="editDocumentation">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section collects additional documentation about your paper.">
+                    <a class="collapsed" id="headingDocumentation" data-toggle="collapse" data-target="#documentationOne" aria-expanded="false" aria-controls="documentationOne">
+                        <i class="fa fa-angle-down"></i>
+                        Add additional documentation
+                    </a>
+                </h3>
+            </div>
+            <div id="documentationOne" class="collapse" aria-labelledby="documentationOne">
+                <div class="card-body">
+                    <form method="post" id="documentationform" name="documentation">
+                        {{ render_field(documentationform.readme) }}
+                        <span class="input-group-btn">
+                            <input type="submit" id="btnDocumentationSave"
+                                   value="Save"
+                                   class="btn btn-theme-colored btn-lg m-0"
+                                   style="font-weight: bold; height: 50px;"/>
+                        </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="custom-card" id="showDocumentation" style="display: none;">
+            <div class="card-header" id="headingDocumentation" title="The documentation about the paper.">
+                <h3 class="mb-0">
+                    Documentation
+                    <a id="documentationLink" title='Edit the documentation of the paper'><i class='fa fa-edit custom-icon'></i></a>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="paper-col-info"><label style="float: left">Readme: &nbsp;</label>
+                    <p style="float: left" id="lblReadme"></p></div>
+            </div>
+        </div>
+
+    </div>
+
+    {# Where is workflow#}
+    <div class="custom-card" id="editWorkflow" style="display:none;">
+        <div class="card-header">
+            <h3 class="mb-0" data-toggle="tooltip" title="This step defines the workflow of the paper. A workflow represents how the content of the paper was created. Use the Edit Button in the canvas to add: Add External Node , or to Add Node Connection. The type of nodes are listed on the right. (Hover over the node for hints).">
+                <a id="headingWorkflow" data-toggle="collapse" data-target="#workflowOne" aria-expanded="true" aria-controls="workflowOne">
+                    <i class="fa fa-angle-down"></i>
+                    Build your workflow
+                </a>
+            </h3>
+        </div>
+        <div id="workflowOne" class="collapse show" aria-labelledby="workflowOne">
+            <div class="card-body">
+                <form method="post" action="workflow">
+                    <div id="node-popUp">
+                        <span id="node-operation">Add External</span> <br>
+                        <input type="hidden" id="node-label"/>
+                        <table style="margin:auto;">
+                            <tr>
+                                <td>Description</td><td><input id="node-readme" class="tooltipster" title="Enter a  description about the external resources used in the project." value="" /></td>
+                            </tr>
+                            <tr>
+                                <td>URL</td><td><input id="node-url" class="tooltipster" title="Enter a url pointing to the external resource." value="" /></td>
+                            </tr>
+                        </table>
+                        <input type="button" value="Save External" class="tooltipster" title="Saves the External resource information." id="node-saveButton" />
+                        <input type="button" value="cancel" id="node-cancelButton" />
+                    </div>
+                    <div id="edge-popUp">
+                        <span id="edge-operation">edge</span> <br>
+                        <input type="button" value="save" id="edge-saveButton" />
+                        <input type="button" value="cancel" id="edge-cancelButton" />
+                    </div>
+                    <div id="divWorkflow"></div>
+                    <div id="divLegend"></div>
+                    <span class="input-group-btn">
+                        <input type="button" class="btn btn-theme-colored btn-lg m-2"
+                               title="Save workflow"
+                               id="Save"
+                               value="Save" style="font-weight: bold; height: 50px;"
+                               onclick="javascript:connectedNodes();">
+                        <input type="checkbox"
+                               title="Adds a free flow to the nodes and edges. This may disperse the nodes zoom in or zoom out as per need."
+                               id="Movement" onclick="addPhysics();"> <b style="font-size:17px;">Rearrange</b>
+                        <input type="checkbox"
+                               title="Show/Hide visibility of nodes."
+                               id="LabelsVisibility" onclick="showHideLabelForNodes();"> <b style="font-size:17px;">Show Labels </b>
+                    </span>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Publish button #}
+    <div class="row">
+        <div class="col-md-8">
+           <span class="input-group-btn" data-toggle="tooltip" title="Publish the metadata.">
+               <input type="button" id="btnPublishModal"
+                                   value="Publish"
+                                   class="btn btn-theme-colored btn-lg m-0 mt-3"
+                                   style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#publishModal' onclick="$('#downloadLink').trigger('click');">
+           </span>
+        </div>
+    </div>
+
+
+
+    {# Upload Buttons Sections  #}
+    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload/Paste JSON File</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid pt-80 pb-10">
+                        <div class="row">
+                            <div class="col-md-12 col-lg-12 p-20 pl-md-0 md-text-center">
+                                <input type="file" id="my_file" class="pb-3" title="Select a file">
+                                <textarea id="myTextArea" rows=25 placeholder="Upload/Paste Here A JSON File" style="min-width: 100%;"></textarea>
+                                <div class="pt-4">
+                                    <span class="input-group-btn">
+                                        <input type="button" id="btnParse"
+                                               name="btnParse"
+                                               class="btn btn-theme-colored btn-lg m-0" title="Parses the JSON file and auto fills paper fields"
+                                               value="Fetch"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {# Tree Modal For Server #}
+    <div class="modal fade" id="treeServerModal" tabindex="-1" role="dialog" aria-labelledby="treeServerModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="treeServerModalLabel" data-toggle="tooltip" title="The paper content is a widget that allows the user to navigate the content of the paper and enter file names during the tagging operation.">Paper Content</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form class="tree-form" name="projectform" id="projectform">
+                            {{ render_field(projectform.fileServerPath) }}
+                            {{ projectform.notebookPath }}
+                            {{ projectform.downloadPath }}
+                            {{ projectform.gitPath }}
+                            <label for="field0"><span>Server Data Tree <span class="tooltipster glyphicon glyphicon-question-sign" title="Enter the path locating the paper content. If you do not know the full path, the data tree below helps you locate the paper content, and when you click on a folder the path field is automatically updated. If your paper path is not under your home directory, type the root of the path tree and click the Search button."></span></span></label>
+                            <div id="projtree" class="mt-3">
+                            </div>
+                            <span class="input-group-btn">
+                                <input type="submit" id="btnProject"
+                                       value="Save"
+                                       class="btn btn-theme-colored btn-lg m-0"
+                                       style="font-weight: bold; height: 50px;">
+                            </span>
+                        </form>
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {# Chart Modal #}
+    <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">Add new chart</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form method="post" id="chartform" name="charts">
+                            <table>
+                                <tbody>
+                                {{ chartform.id }}
+                                {{ render_field_curate(chartform.caption) }}
+                                {{ render_field_curate(chartform.number) }}
+                                {{ render_field_curate(chartform.files) }}
+                                {{ render_field_curate(chartform.imageFile) }}
+                                {{ render_field_curate(chartform.notebookFile) }}
+                                {{ render_field_curate(chartform.properties) }}
+                                </tbody>
+                            </table>
+                            <div data-toggle="fieldset-charts" id="extra-fieldset-charts">
+                                <label class="col-form-label">{{ chartform.extraFields.label }}</label> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-charts" data-target="#extra-fieldset-charts">+</button>
+                                <table id="extraTableCharts">
+                                    {% for extra in chartform.extraFields %}
+                                        <tr data-toggle="fieldset-entry-charts" id="entry-charts">
+                                            <td style="padding-bottom: 1rem;">{{ extra.extrakey(class_='form-control',title=extra.extrakey.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                            <td style="padding-bottom: 1rem;">{{ extra.extravalue(class_='form-control',title=extra.extravalue.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                            <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-charts" id="extraChartFields-{{loop.index0}}-remove">-</button></td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                            <div style="padding-bottom: 1rem;">
+                                <input type="submit" id="btnChartSave"
+                                       value="Save"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;"/>
+                                <input type="button" id="btnChartReset"
+                                       value="Reset"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;" onclick="$('#chartform')[0].reset();"/>
+                                <input type="submit" id="btnChartDelete"
+                                       value="Delete"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px; display:none;"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {# Tool Modal #}
+    <div class="modal fade" id="toolModal" tabindex="-1" role="dialog" aria-labelledby="toolModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="toolModalLabel">Add new tool</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form method="post" id="toolform" name="tools">
+                            {{ toolform.id }}
+                            {{ toolform.kind(title=toolform.kind.description,**{'data-toggle': 'tooltip','data-placement':'left'}) }}
+                            <div class="toolClass" id="software">
+                                <table>
+                                    <tbody>
+                                    <div class="form-group row">
+                                        <div class="col-sm-12">
+                                             <label class="col-form-label">{{ toolform.packageName.label }}<span style="color: red;">*</span> </label>
+                                        </div>
+                                         <div class="col-sm-12">
+                                             {{ toolform.packageName(class_='form-control',title=toolform.packageName.description,**{'data-toggle': 'tooltip'}) }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-sm-12">
+                                             <label class="col-form-label">{{ toolform.version.label }}<span style="color: red;">*</span> </label>
+                                        </div>
+                                         <div class="col-sm-12">
+                                             {{ toolform.version(class_='form-control',title=toolform.version.description,**{'data-toggle': 'tooltip'}) }}
+                                        </div>
+                                    </div>
+                                    {{ render_field_curate(toolform.programName) }}
+                                    {{ render_field_curate(toolform.patches) }}
+                                    {{ render_field_curate(toolform.description) }}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="toolClass" id="experiment" style="display: none;">
+                                <table>
+                                    <tbody>
+                                        <div class="form-group row">
+                                            <div class="col-sm-12">
+                                                 <label class="col-form-label">{{ toolform.facilityName.label }}<span style="color: red;">*</span> </label>
+                                            </div>
+                                             <div class="col-sm-12">
+                                                 {{ toolform.facilityName(class_='form-control',title=toolform.facilityName.description,**{'data-toggle': 'tooltip'}) }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-12">
+                                                 <label class="col-form-label">{{ toolform.measurement.label }}<span style="color: red;">*</span> </label>
+                                            </div>
+                                             <div class="col-sm-12">
+                                                 {{ toolform.measurement(class_='form-control',title=toolform.measurement.description,**{'data-toggle': 'tooltip'}) }}
+                                            </div>
+                                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{ render_field_curate(toolform.URLs) }}
+                             <div data-toggle="fieldset-tools" id="extra-fieldset-tools">
+                                <label class="col-form-label">{{ toolform.extraFields.label }}</label> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-tools" data-target="#extra-fieldset-tools">+</button>
+                                <table id="extraTableTools">
+                                    {% for extra in toolform.extraFields %}
+                                    <tr data-toggle="fieldset-entry-tools" id="entry-tools">
+                                        <td style="padding-bottom: 1rem;">{{ extra.extrakey(class_='form-control',title=extra.extrakey.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ extra.extravalue(class_='form-control',title=extra.extravalue.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-tools" id="extraToolFields-{{loop.index0}}-remove">-</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                             <div style="padding-bottom: 1rem;">
+                              <input type="submit" id="btnToolSave"
+                                       value="Save"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;"/>
+                                <input type="button" id="btnToolReset"
+                                       value="Reset"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;" onclick="$('#toolform')[0].reset();"/>
+                                <input type="submit" id="btnToolDelete"
+                                       value="Delete"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px; display:none;"/>
+                             </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Dataset Modal #}
+    <div class="modal fade" id="datasetModal" tabindex="-1" role="dialog" aria-labelledby="datasetModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="datasetModalLabel">Add new dataset</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form method="post" id="datasetform" name="datasets">
+                            <table>
+                                <tbody>
+                                    {{ datasetform.id }}
+                                    {{ render_field_curate(datasetform.files) }}
+                                    {{ render_field_curate(datasetform.readme) }}
+                                    {{ render_field_curate(datasetform.URLs) }}
+                                </tbody>
+                            </table>
+                             <div data-toggle="fieldset-datasets" id="extra-fieldset-datasets">
+                                <label class="col-form-label">{{ datasetform.extraFields.label }}</label> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-datasets" data-target="#extra-fieldset-datasets">+</button>
+                                <table id="extraTableDatasets">
+                                    {% for extra in datasetform.extraFields %}
+                                    <tr data-toggle="fieldset-entry-datasets" id="entry-datasets">
+                                        <td style="padding-bottom: 1rem;">{{ extra.extrakey(class_='form-control',title=extra.extrakey.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ extra.extravalue(class_='form-control',title=extra.extravalue.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-datasets" id="extraDatasetFields-{{loop.index0}}-remove">-</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                             <div style="padding-bottom: 1rem;">
+                                 <input type="submit" id="btnDatasetSave"
+                                       value="Save"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;"/>
+                                <input type="button" id="btnDatasetReset"
+                                       value="Reset"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;" onclick="$('#datasetform')[0].reset();"/>
+                                <input type="submit" id="btnDatasetDelete"
+                                       value="Delete"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px; display:none;"/>
+                             </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Script Modal #}
+    <div class="modal fade" id="scriptModal" tabindex="-1" role="dialog" aria-labelledby="scriptModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scriptModalLabel">Add new script</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                         <form method="post" id="scriptform" name="scripts">
+                            <table>
+                                <tbody>
+                                {{ scriptform.id }}
+                                {{ render_field_curate(scriptform.files) }}
+                                {{ render_field_curate(scriptform.readme) }}
+                                {{ render_field_curate(scriptform.URLs) }}
+                                </tbody>
+                            </table>
+                            <div data-toggle="fieldset-scripts" id="extra-fieldset-scripts">
+                                <label class="col-form-label">{{ scriptform.extraFields.label }}</label> <button type="button" class="btn btn-theme-colored" data-toggle="fieldset-add-row-scripts" data-target="#extra-fieldset-scripts">+</button>
+                                <table id="extraTableScripts">
+                                    {% for extra in scriptform.extraFields %}
+                                    <tr data-toggle="fieldset-entry-scripts" id="entry-scripts">
+                                        <td style="padding-bottom: 1rem;">{{ extra.extrakey(class_='form-control',title=extra.extrakey.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;">{{ extra.extravalue(class_='form-control',title=extra.extravalue.description,**{'data-toggle': 'tooltip'}) }}</td>
+                                        <td style="padding-bottom: 1rem;"><button type="button" class="btn btn-theme-colored" data-toggle="fieldset-remove-row-scripts" id="extraScriptFields-{{loop.index0}}-remove">-</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                             <div style="padding-bottom: 1rem;">
+                                 <input type="submit" id="btnScriptSave"
+                                       value="Save"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;"/>
+                                <input type="button" id="btnScriptReset"
+                                       value="Reset"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px;" onclick="$('#scriptform')[0].reset();"/>
+                                <input type="submit" id="btnScriptDelete"
+                                       value="Delete"
+                                       class="btn btn-theme-colored btn-lg m-1"
+                                       style="font-weight: bold; height: 50px; display:none;"/>
+                             </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Tree Modal For Curator #}
+    <div class="modal fade" id="treeModal" tabindex="-1" role="dialog" aria-labelledby="treeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="treeModalLabel" data-toggle="tooltip" title="The paper content is a widget that allows the user to navigate the content of the paper and enter file names during the tagging operation.">Paper Content</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form class="tree-modal-form" name="tree-modal-form">
+                            <div id="tree-modal">
+                            </div>
+                            <input type="hidden" name="formname" id="formname" value=""/>
+                            <input type="hidden" name="fieldname" id="fieldname" value=""/>
+                            <input type="button" id="btnCopy"
+                                   value="Copy"
+                                   class="btn btn-theme-colored btn-lg m-1"
+                                   style="font-weight: bold; height: 50px;"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Publish Modal #}
+    <div class="modal fade" id="publishModal" tabindex="-1" role="dialog" aria-labelledby="publishModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publishModalLabel">Save & move metadata file to a database of your choice</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form method="post" name="publishform" id="publishform">
+                        {{ render_field(publishform.server) }}
+                        {{ render_field(publishform.emailId) }}
+                        <span class="input-group-btn">
+                            <input type="submit" id="btnPublish"
+                                   value="Publish"
+                                   class="btn btn-theme-colored btn-lg m-0"
+                                   style="font-weight: bold; height: 50px;">
+                        </span>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='./javascript/modules/curatordetails.js') }}"></script>
+    <script type="text/javascript">
+        buildCuratorTable({{ detailsform.data|tojson }});
+        buildServerTable({{ projectform.data|tojson }});
+        buildInfoTable({{ infoform.data|tojson }});
+        buildReferenceTable({{ referenceform.data|tojson }});
+        buildChartTables({{ chartlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
+        buildToolTables({{ toollistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
+        buildDatasetTables({{ datasetlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
+        buildScriptTables({{ scriptlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
+        buildDocumentationTable({{ documentationform.data|tojson }});
+        addToWorkflow();
+    </script>
+    <script type="text/javascript">
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+        ga('create', 'UA-126882431-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'> </script>
+
+{% endblock %}

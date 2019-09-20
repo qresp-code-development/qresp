@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+v1.2.0 (2019/09/20)
+-------------------
+- Updated Curator UI
+- Added Preview Functionality
+- Added Share Functionality
+- Changed configuration scheme
+- Moved qresp schema to v1.1 from v1.0
+- Added more sections into Qresp explorer
+- Removed ssh connection and added Zenodo & HTTP connection
+- New unit tests
+
+
 v1.1.0 (2019/01/25)
 -------------------
 - Fixed bugs related to port number

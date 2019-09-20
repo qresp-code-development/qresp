@@ -4,19 +4,16 @@ services:
   web:
     restart: always
     build: ./web
-    environment:
-      - KEY=<insert key>
-      - GOOGLE_CLIENT_ID=<insert google client id>
-      - GOOGLE_CLIENT_SECRET=<insert google client secret>
-      - REDIRECT_URI=<insert redirect uri>
-      - MAIL_ADDR=<administrators mail address>
-      - MAIL_PWD=<administrators password>
     expose:
       - "8080"
+    environment:
+      - PYTHONUNBUFFERED=TRUE
     volumes:
       - /usr/src/app/web/project/static
-    command: /usr/local/bin/gunicorn -w 2 -b :8080 project:app
-    
+      - ./web/:/usr/src/app/web
+      - ./papercollection:/home/flask/app/web/papers
+    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :8080 project:app
+
   nginx:
     restart: always
     build: ./nginx

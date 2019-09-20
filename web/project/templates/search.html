@@ -1,25 +1,10 @@
-{% extends "base.html" %}
+{% extends "base_explorer.html" %}
 
 {% block page_content %}
     <div class="container text-center">
             <div class="col-md-12 col-lg-12 p-20 md-text-center">
-                <h2 class="pt-0 text-center">Found {{ allPapersSize }} papers </h2>
-                <h2 class="pt-0 text-center"> Refine your search  </h2>
+                <h2 class="pt-0 text-center">Search  {{ allPapersSize }} records for... </h2>
                 <div class="row">
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            <input type="text" id="searchWord" data-height="45px"
-                                   class="form-control input-lg"
-                                   placeholder="Enter your search here..." title="Search here" name="search" value=""
-                                   style="height: 45px;">
-                            <span class="input-group-btn">
-                                                <input type="button" id="btnSearch"
-                                                       name="general_search_button" value="Search"
-                                                       class="btn btn-theme-colored btn-lg m-0 filtersearch"
-                                                       style="font-weight: bold; height: 45px;">
-                                        </span>
-                        </div>
-                    </div>
                     <div id="conn_options" class="text-center col-md-8 col-md-offset-2">
                         <a href="javascript:void(0);" id="more-less-options-button"
                            style="color: #357ebd;float:left;margin-top: 5px;"> Advanced Search >> </a>
@@ -95,7 +80,7 @@
                     <thead>
                     <tr>
                         <th>Paper Id</th>
-                        <th>Title</th>
+                        <th>Record</th>
                         <th>Tag(s)</th>
                         <th>Collections(s)</th>
                         <th>Author(s)</th>
@@ -114,7 +99,7 @@
                     <tfoot>
                     <tr>
                         <th>Paper Id</th>
-                        <th>Title</th>
+                        <th>Record</th>
                         <th>Tag(s)</th>
                         <th>Collections(s)</th>
                         <th>Author(s)</th>

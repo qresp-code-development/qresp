@@ -3,6 +3,7 @@ from pymongo import errors
 from project import connexionapp
 app = connexionapp.app
 
+
 class MongoDBConnection():
     """Class representing connection to Mongo database
 
@@ -26,11 +27,11 @@ class MongoDBConnection():
             app.config['MONGODB_USERNAME'] = kwargs.get("username")
             app.config['MONGODB_PASSWORD'] = kwargs.get("password")
             app.config['MONGODB_DB'] = kwargs.get("dbname")
-        try:
-            cls.__db = None
-            cls.__db = MongoEngine()
-            cls.__db.init_app(app)
-        except errors.ConnectionFailure as e:
-            print(e)
-            raise ConnectionError("Could not connect to server: %s" % e)
+            try:
+                cls.__db = None
+                cls.__db = MongoEngine()
+                cls.__db.init_app(app)
+            except errors.ConnectionFailure as e:
+                print(e)
+                raise ConnectionError("Could not connect to server: %s" % e)
         return cls.__db

@@ -1,8 +1,7 @@
-from wtforms import Form, StringField, PasswordField, RadioField, IntegerField, HiddenField, FieldList, FormField, BooleanField, DateTimeField, TextAreaField, SelectField
+from wtforms import Form, StringField, PasswordField, RadioField, HiddenField, FieldList, FormField, BooleanField, DateTimeField, TextAreaField, SelectField
 from wtforms import validators
-from wtforms.fields.html5 import EmailField
+from wtforms.fields.html5 import EmailField,IntegerField
 from wtforms.validators import DataRequired, Optional
-
 
 class RequiredIf(DataRequired):
     """Validator which makes a field required if another field is set and has a truthy value.
@@ -65,23 +64,20 @@ class DetailsForm(Form):
     affiliation = StringField('Affiliation', description='e.g. Department of Chem, University of XYZ',render_kw={"placeholder": "Enter your university"})
 
 class ServerForm(Form):
-    serverName = StringField('Server Name', [validators.DataRequired("Please enter hostname of server")], description='Enter Hostname of remote server where paper content is organized and located e.g. midway.rcc.uchicago.edu',render_kw={"placeholder": "Enter hostname of server"})
-    username = StringField('Username', [validators.DataRequired("Please enter username of server")], description='Enter your username to establish a SSH connection to the remote server',render_kw={"placeholder": "Enter username to login"})
-    password = PasswordField('Password', [validators.DataRequired("Please enter password of server")], description='Enter your password associated to the username',render_kw={"placeholder": "Enter password to login"})
-    isDUOAuth = RadioField('Is 2FA DUO authorized?', choices=[('Yes', 'Yes'), ('No', 'No')], default='Yes',description='Is server 2FA DUO authorized?')
-
+    kind = RadioField('Kind', choices=[('HTTP', 'HTTP Connection'), ('Zenodo', 'Zenodo'), ('Other','Other')], default='HTTP',description='Select connection type')
+    hostUrl = SelectField('Host Url',choices=[], validators = [RequiredIf(kind='HTTP Connection')], description='Select url of remote server where paper content is organized and located e.g. https://notebook.rcc.uchicago.edu/files/')
+    zenodoUrl = StringField('Zenodo', description='e.g. https://www.zenodo.org/record/1234567',render_kw={"placeholder": "Enter zenodo preview url to parse data"})
+    other = StringField('Other', description='e.g. http://xyz.com/files',render_kw={"placeholder": "Enter url to parse data"})
 
 class ProjectForm(Form):
     downloadPath = HiddenField()
-    fileServerPath = HiddenField()
+    fileServerPath = StringField('File Server Path', [validators.DataRequired()], description='e.g. https://notebook.rcc.uchicago.edu/files/jacs6b',render_kw={"placeholder": "The absolute path to the paper"})
     notebookPath = HiddenField()
-    folderAbsolutePath = StringField('Folder Absolute Path', [validators.DataRequired()], description='e.g. /home/public',render_kw={"placeholder": "Enter relative path to the data"})
     ProjectName = HiddenField()
     gitPath = HiddenField()
     insertedBy = FormField(DetailsForm)
     isPublic = BooleanField(default=True)
     timeStamp = DateTimeField()
-    serverPath = HiddenField()
     notebookFile = HiddenField()
     doi = HiddenField()
 
@@ -89,7 +85,7 @@ class InfoForm(Form):
     PIs = FieldList(FormField(NameForm), label='Principal Investigator(s)', description='Enter PI(s)', min_entries=1, validators=[validators.DataRequired()])
     collections = StringField(label='PaperStack',validators = [validators.DataRequired("Please enter keywords")], description='Enter name(s) defining group of papers (e.g. according to source of fundings)',render_kw={"placeholder": "Enter collection to which project belongs"})
     tags = StringField(label='Keywords',validators = [validators.DataRequired("Please enter keywords")], description='Enter Keyword(s) (e.g: DFT, organic materials, charge transfer): they facilitate paper searches using Qresp | Explorer',render_kw={"placeholder": "Enter tags for the project"})
-    notebookFile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
+    notebookFile = StringField('Main Notebook File', description='Enter name of a notebook file, this file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the Paper Content icon (on the top) to fill this field',render_kw={"placeholder": "Enter main notebook filename"})
     doi = StringField('DOI',description='DOI minted by Qresp',render_kw={'readonly': True})
 
 class ExtraForm(Form):
@@ -97,45 +93,41 @@ class ExtraForm(Form):
     extravalue = StringField(description='Enter custom value', render_kw={"placeholder": "Enter Field Value"})
 
 class ChartForm(Form):
-    id = HiddenField('Id')
+    id = StringField('Id',render_kw={"style":"display:none;"})
     caption = StringField('Caption',[validators.DataRequired("Please enter caption")], description='Enter chart caption',render_kw={"placeholder": "Enter chart caption"})
     number = StringField('Number',[validators.DataRequired("Please enter number")], description='Enter chart number',render_kw={"placeholder": "Enter chart number"})
-    files = StringField(label='Files', description='Enter file name(s) containing the data displayed in the chart (e.g. a file in CSV format). Use the Paper Content widget (on the left) to fill this field',render_kw={"placeholder": "Enter file names used to construct Chart"})
-    imageFile = StringField('Image File', [validators.DataRequired("Please enter image file")], description='Enter the file name containing a snapshot of the chart. Use the Paper Content widget (on the left) to fill this field. Allowed formats are: jpg, jpeg, gif, png',render_kw={"placeholder": "Enter Image file name"})
-    notebookFile = StringField('Notebook File', description='Enter the name of the notebook file used to generate the chart. Use the Paper Content widget (on the left) to fill this field. Allowed format is ipynb',render_kw={"placeholder": "Enter Notebook file"})
+    files = StringField(label='Files', description='Enter file name(s) containing the data displayed in the chart (e.g. a file in CSV format). Use the Paper Content icon (on the top) to fill this field',render_kw={"placeholder": "Enter file names used to construct Chart"})
+    imageFile = StringField('Image File', [validators.DataRequired("Please enter image file")], description='Enter the file name containing a snapshot of the chart. Use the Paper Content icon (on the top) to fill this field. Allowed formats are: jpg, jpeg, gif, png',render_kw={"placeholder": "Enter Image file name"})
+    notebookFile = StringField('Notebook File', description='Enter the name of the notebook file used to generate the chart. Use the Paper Content icon (on the top) to fill this field. Allowed format is ipynb',render_kw={"placeholder": "Enter Notebook file"})
     properties = StringField(label='Keywords',validators= [validators.DataRequired("Please enter properties")], description='Enter keyword(s) for the content displayed in the chart. e.g. potential energy surface, band gap',render_kw={"placeholder": "Enter Keywords"})
-    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the chart', render_kw={"placeholder": "Save Chart as"})
+    # saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the chart', render_kw={"placeholder": "Save Chart as"})
     extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraChartFields')
 
-
 class ToolForm(Form):
-    id = HiddenField('Id')
+    id = StringField('Id',render_kw={"style":"display:none;"})
     kind = RadioField('Kind', choices=[('software', 'Software'), ('experiment', 'Experiment')], default='software',description='Select Software or Experiment')
     packageName = StringField('Package Name', validators = [RequiredIf(kind='Software')], description='Enter name of the package (e.g. WEST)',render_kw={"placeholder": "Enter Package name for software tools"})
-    URLs = StringField(label='URLs', description='Enter link(s) to package official website (e.g. www.west-code.org)',render_kw={"placeholder": "Enter Urls for software tools"})
+    URLs = StringField(label='URLs', description='Enter link(s) to package official website (e.g. www.west-code.org) or facility (e.g. www.aps.anl.gov)',render_kw={"placeholder": "Enter Urls for software tools"})
     version = StringField('Version',  validators = [RequiredIf(kind='Software')], description='Enter version number (e.g. 3.0.0) of the package',render_kw={"placeholder": "Enter version for software tools"})
     programName = StringField('Executable Name', description='Enter name of the executable (e.g. wstat.x) of the package',render_kw={"placeholder": "Enter Program name for software tools"})
-    patches = StringField(label='Patches', description='Enter file name(s) containing the patches of publicly available or versioned software, customized by the user to generate some of the datasets. Use the Paper Content widget (on the left) to fill this field. (e.g. Tools/modified_wstat.txt)',render_kw={"placeholder": "Enter files for software tool"})
+    patches = StringField(label='Patches', description='Enter file name(s) containing the patches of publicly available or versioned software, customized by the user to generate some of the datasets. Use the Paper Content icon (on the top) to fill this field. (e.g. Tools/modified_wstat.txt)',render_kw={"placeholder": "Enter files for software tool"})
     description = StringField('Description', description='Enter a summary of the modifications, if any, made to the executable', render_kw={"placeholder": "Enter Description for script added to the Software Tool"})
     facilityName = StringField('Facility Name',  validators = [RequiredIf(kind='Experiment')], description='Enter name of the facility where the experiment was conducted (e.g. Argonne Advanced Photon Source)', render_kw={"placeholder": "Enter Facility name for experiment tools"})
     measurement = StringField('Measurement',  validators = [RequiredIf(kind='Experiment')], description='Enter type of measurement (e.g. soft X-ray Photoemission)', render_kw={"placeholder": "Enter measurement for experiment tools"})
-    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the tool', render_kw={"placeholder": "Save tool as"})
     extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraToolFields')
 
 class DatasetForm(Form):
-    id = HiddenField('Id')
-    files = StringField(label='Files', validators = [validators.DataRequired()], description='Enter file name(s) to identify the dataset. Use the Paper Content widget (on the left) to fill this field (e.g. Data/dataset.dat). If you list a folder name, all documents of the folder belong to the dataset',render_kw={"placeholder": "Enter files for dataset"})
+    id = StringField('Id',render_kw={"style":"display:none;"})
+    files = StringField(label='Files', validators = [validators.DataRequired()], description='Enter file name(s) to identify the dataset. Use the Paper Content icon (on the top) to fill this field (e.g. Data/dataset.dat). If you list a folder name, all documents of the folder belong to the dataset',render_kw={"placeholder": "Enter files for dataset"})
     readme = StringField('Description', [validators.DataRequired()], description='Enter a summary about the content of the dataset',render_kw={"placeholder": "Enter descriptions For dataset"})
     URLs = StringField(label='URLs', description='Enter link(s) to the URL of the dataset, if available',render_kw={"placeholder": "Enter Urls for dataset"})
-    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the dataset', render_kw={"placeholder": "Save dataset as"})
     extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraDatasetFields')
 
 class ScriptForm(Form):
-    id = HiddenField('Id')
-    files = StringField(label='Files', validators = [validators.DataRequired()], description='Enter file names to identify the script. Use the Paper Content widget (on the left) to fill this field (e.g. Script/scriptA.py). If you list a folder name, all documents of the folder belong to the script',render_kw={"placeholder": "Enter files for script"})
+    id = StringField('Id',render_kw={"style":"display:none;"})
+    files = StringField(label='Files', validators = [validators.DataRequired()], description='Enter file names to identify the script. Use the Paper Content icon (on the top) to fill this field (e.g. Script/scriptA.py). If you list a folder name, all documents of the folder belong to the script',render_kw={"placeholder": "Enter files for script"})
     readme = StringField('Description', [validators.DataRequired()], description='Enter a summary about the content of the script',render_kw={"placeholder": "Enter description for script"})
     URLs = StringField(label='URLs', description='Enter link(s) to the URL of the script, if available',render_kw={"placeholder": "Enter Urls for script"})
-    saveas = StringField('Save As', [validators.DataRequired()], description='Enter a name to identify the script', render_kw={"placeholder": "Save script as"})
     extraFields = FieldList(FormField(ExtraForm), label='Extra Fields', description='Enter a label name and add a value to it',min_entries=1,id='extraScriptFields')
 
 class JournalForm(Form):
@@ -145,19 +137,19 @@ class JournalForm(Form):
 
 class ReferenceForm(Form):
     kind = RadioField('Kind', choices=[('preprint', 'Preprint'), ('journal', 'Journal'), ('dissertation','Dissertation')], default='journal',description='Select Preprint, Journal or Dissertation')
-    DOI = StringField('DOI', [validators.DataRequired()], description='Enter DOI of paper', render_kw={"placeholder": "Enter DOI of paper"})
+    DOI = StringField('DOI', [validators.DataRequired()], description='Enter DOI of paper (e.g. 10.1021/jacs.6b00225) if published', render_kw={"placeholder": "Enter DOI of paper"})
     authors = FieldList(FormField(NameForm),label='Authors', validators = [validators.DataRequired()], description='Enter authors of paper', render_kw={"placeholder": "Enter authors"},min_entries=1)
     title = StringField('Title', [validators.DataRequired()], description='Enter title of paper', render_kw={"placeholder": "Enter title"})
     journal = FormField(JournalForm)
     page = StringField('Page', [validators.DataRequired()], description='Enter page number of journal', render_kw={"placeholder": "Enter page number"})
-    publishedAbstract = StringField('Abstract', [validators.DataRequired()], description='Enter abstract', render_kw={"placeholder": "Enter abstract"})
+    publishedAbstract = TextAreaField('Abstract', [validators.DataRequired()], description='Enter abstract', render_kw={"placeholder": "Enter abstract"})
     volume = StringField('Volume', [validators.DataRequired()], description='Enter volume of journal', render_kw={"placeholder": "Enter volume number"})
     year = IntegerField('Year', [validators.DataRequired()], description='Enter year', render_kw={"placeholder": "Enter year"})
     URLs = StringField(label='URLs', description='Enter link(s) of the paper',render_kw={"placeholder": "Enter paper Urls"})
     school = StringField('School', description='Enter name of school where dissertation was presented', render_kw={"placeholder": "Enter name of school"})
 
 class DocumentationForm(Form):
-    readme = TextAreaField('Readme',description='Enter documentation about paper', render_kw={"placeholder": "Enter documentation of paper"})
+    readme = TextAreaField('Readme',description='Enter additional documentation about paper', render_kw={"placeholder": "Enter additional documentation for paper","rows": 10, "cols": 11})
 
 class WorkflowForm(Form):
     edges = FieldList(FieldList(StringField()))
@@ -186,48 +178,14 @@ class PaperForm(Form):
     tools = FieldList(FormField(ToolForm))
     tags = FieldList(StringField())
     versions = FieldList(FormField(VersionsForm))
+    documentation = FormField(DocumentationForm)
     workflow = FormField(WorkflowForm)
     heads = FieldList(FormField(HeadForm))
     schema = StringField()
     version = IntegerField()
 
-class WorkflowCreator(object):
-    """Class to create stand alone final workflow for the metadata(JSON) format.
-    """
 
-    def __init__(self):
-        self.desc = {}
-        self.desc["charts"] = []
-        self.desc["datasets"] = []
-        self.desc["scripts"] = []
-        self.desc["tools"] = []
-        self.desc["heads"] = []
-        self.desc["edges"] = []
-        self.desc["nodes"] = []
 
-    def addChart(self, chartsaveas, id):
-        self.desc["charts"].append(str(chartsaveas) + "*" + str(id))
-
-    def addDataset(self, datasetsaveas, id):
-        self.desc["datasets"].append(str(datasetsaveas) + "*" + str(id))
-
-    def addScript(self, scriptsaveas, id):
-        self.desc["scripts"].append(str(scriptsaveas) + "*" + str(id))
-
-    def addTool(self, toolssaveas, id):
-        self.desc["tools"].append(str(toolssaveas) + "*" + str(id))
-
-    def addHead(self, head, id, url=None):
-        if url is not None:
-            self.desc["heads"].append(str(head) + "*" + str(id) + "*" + url)
-        else:
-            self.desc["heads"].append(str(head) + "*" + str(id))
-
-    def addEdge(self, edge):
-        self.desc["edges"].append(edge)
-
-    def addNode(self, node):
-        self.desc["nodes"].append(node)
 
 
 
