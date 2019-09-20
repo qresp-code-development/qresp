@@ -47,7 +47,7 @@
       "isPublic":true,
       "notebookFile":"toc.ipynb",
       "notebookPath":"",
-      "timeStamp":"2019-09-19 19:12:46"
+      "timeStamp":"2019-09-19 21:00:59"
    },
    "reference":{
       "DOI":"10.1021/jacs.6b00225",
@@ -191,10 +191,10 @@
          ]
       ],
       "nodes":[
-         "s1",
+         "h0",
          "s0",
-         "t0",
-         "h0"
+         "s1",
+         "t0"
       ]
    }
 }
