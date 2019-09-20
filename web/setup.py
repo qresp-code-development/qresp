@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='qresp',
-    version='1.2',
+    version='1.2.0',
     url='http://qresp.org/',
     entry_points = {
         'console_scripts': ['qresp=project.__main__:main'],
