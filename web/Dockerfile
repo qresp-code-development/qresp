@@ -54,6 +54,7 @@ RUN set -ex \
                 tk-dev \
                 xz-dev \
                 zlib-dev \
+                libxslt-dev \
 # add build deps before removing fetch deps in case there's overlap
         && apk del .fetch-deps \
         \
@@ -120,8 +121,8 @@ RUN set -ex; \
                 \) -exec rm -rf '{}' +; \
         rm -f get-pip.py
 
-RUN apk add --no-cache curl python pkgconfig python-dev openssl-dev libffi-dev musl-dev make gcc
-
+RUN apk add --no-cache curl python pkgconfig python-dev openssl-dev libffi-dev musl-dev make gcc libxslt-dev
+RUN pip install lxml
 
 # Create the working directory (and set it as the working directory)
 RUN mkdir -p /home/flask/app/web

@@ -1,9 +1,13 @@
 venv/
 .idea/
-web/papers/
+#web/papers/*
+#!web/papers/files_paper/data.json
 web/flask_session/
 flask_session/
 web/dist/
 web/project/__pycache__/
 web/build/
 web/qresp.egg-info/
+.cache/
+web/project/config_test.ini 
+web/project/tests/__pycache__/

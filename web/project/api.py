@@ -1,4 +1,4 @@
-from .paperdao import *
+from project.paperdao import *
 
 #edit swagger.yml file for method changes
 
@@ -7,7 +7,7 @@ def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=Non
     This function responds to a request for /api/search
     with the complete lists of papers
 
-    :return:        list of papers
+    :return list allpaperslist: A list of all papers
     """
     allpaperslist = []
     try:
@@ -22,60 +22,68 @@ def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=Non
                                                         tags=tags,collectionList=collectionList,
                                                         authorsList=authorsList,publicationList=publicationList)
     except Exception as e:
-        print("Exception in search", e)
-    return allpaperslist
+        msg = "Exception in search api " + str(e)
+        print(msg)
+        return msg, 400
+    return allpaperslist, 200
 
 def collections():
     """
     This function responds to a request for /api/collections
     with the complete lists of c
 
-    :return:        list of collections
+    :return list allcollectionlist: A list of all collections
     """
     allcollectionlist = []
     try:
         dao = PaperDAO()
         allcollectionlist = dao.getCollectionList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allcollectionlist)
+        msg = "Exception in collections api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allcollectionlist), 200
 
 def authors():
     """
     This function responds to a request for /api/authors
     with the complete lists of authors
 
-    :return:        list of authors
+    :return list allauthorlist: A list of all authors
     """
     allauthorlist = []
     try:
         dao = PaperDAO()
         allauthorlist = dao.getAuthorList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allauthorlist)
+        msg = "Exception in authors api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allauthorlist), 200
 
 def publications():
     """
     This function responds to a request for /api/publications
     with the complete lists of publications
 
-    :return:        list of publications
+    :return list allpublist: A list of all publications
     """
     allpublist = []
     try:
         dao = PaperDAO()
         allpublist = dao.getPublicationList()
     except Exception as e:
-        print("Exception in ", e)
-    return list(allpublist)
+        msg = "Exception in publications api " + str(e)
+        print(msg)
+        return msg, 400
+    return list(allpublist), 200
 
 def paper(id):
     """
     This function responds to a request for /api/paper/{id}
     with the details of paper given id
 
-    :return:        paper details object
+    :return object paperdetail: An object of paper with paper contents
     """
     paperdetail = None
     try:
@@ -83,9 +91,9 @@ def paper(id):
         paperdetail = dao.getPaperDetails(id)
     except Exception as e:
         msg = "Exception in paper api " + str(e)
-        print("Exception in paper api ", e)
-        return e, 400
-    return paperdetail
+        print(msg)
+        return msg, 400
+    return paperdetail, 200
 
 def workflow(id):
     """
@@ -100,9 +108,9 @@ def workflow(id):
         workflowdetail = dao.getWorkflowDetails(id)
     except Exception as e:
         msg = "Exception in workflow api " + str(e)
-        print("Exception in workflow api ", e)
+        print(msg)
         return msg,400
-    return workflowdetail
+    return workflowdetail, 200
 
 def chart(id,cid):
     """
@@ -117,6 +125,6 @@ def chart(id,cid):
         chartworkflowdetail = dao.getWorkflowForChartDetails(id, cid)
     except Exception as e:
         msg = "Exception in chart api " + str(e)
-        print("Exception in chart api ", e)
+        print(msg)
         return msg,400
-    return chartworkflowdetail
+    return chartworkflowdetail, 200

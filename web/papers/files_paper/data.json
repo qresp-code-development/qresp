@@ -1,19 +1,19 @@
 {
    "PIs":[
       {
-         "firstName":"Giulia",
-         "lastName":"Galli",
+         "firstName":"John",
+         "lastName":"Doe",
          "middleName":""
       },
       {
-         "firstName":"Marco",
-         "lastName":"Govoni",
-         "middleName":"L"
+         "firstName":"Jane",
+         "lastName":"Gill",
+         "middleName":""
       }
    ],
    "charts":[
       {
-         "caption":"chart 1",
+         "caption":"c0",
          "extraFields":[
             {
                "extrakey":"",
@@ -21,16 +21,15 @@
             }
          ],
          "files":[
-            "charts/figure1/figure1.csv",
-            "charts/figure1/figure1.ipynb",
-            "charts/figure1/figure1.jpg"
+            "/charts/figure1/figure1.csv",
+            "/charts/figure1/figure1.ipynb",
+            "/charts/figure1/figure1.jpg"
          ],
          "id":"c0",
-         "imageFile":"charts/figure1/figure1.jpg",
-         "notebookFile":"charts/figure1/figure1.ipynb",
-         "number":"1",
+         "imageFile":"/charts/figure1/figure1.jpg",
+         "notebookFile":"/charts/figure1/figure1.ipynb",
+         "number":"0",
          "properties":[
-            "potential energy",
             "band gap"
          ]
       }
@@ -50,15 +49,15 @@
             }
          ],
          "files":[
-            "datasets/datasetA.dat",
-            "datasets/datasetB.dat"
+            "/datasets/datasetA.dat",
+            "/datasets/datasetB.dat"
          ],
          "id":"d0",
-         "readme":"DAT files"
+         "readme":"These are datasets"
       }
    ],
    "documentation":{
-      "readme":null
+      "readme":"This is additional content"
    },
    "heads":[
       {
@@ -66,26 +65,26 @@
             ""
          ],
          "id":"h0",
-         "readme":"Start of process"
+         "readme":"External setup info"
       }
    ],
    "info":{
       "ProjectName":"paper",
       "doi":null,
-      "downloadPath":"",
+      "downloadPath":"https://app.globus.org/file-manager?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path=",
       "fileServerPath":"https://notebook.rcc.uchicago.edu/files/paper",
-      "gitPath":"",
+      "gitPath":"Y",
       "insertedBy":{
-         "affiliation":"Department of Chem",
+         "affiliation":"Dept of Chem, UC",
          "emailId":"john.doe@company.com",
          "firstName":"John",
          "lastName":"Doe",
-         "middleName":""
+         "middleName":"H."
       },
       "isPublic":true,
-      "notebookFile":"toc.ipynb",
-      "notebookPath":"",
-      "timeStamp":"2019-09-09 11:51:19"
+      "notebookFile":"/toc.ipynb",
+      "notebookPath":"https://notebook.rcc.uchicago.edu/files",
+      "timeStamp":"2019-09-20 12:32:56"
    },
    "reference":{
       "DOI":"10.1021/jacs.6b00225",
@@ -100,26 +99,6 @@
             "firstName":"Marco",
             "lastName":"Govoni",
             "middleName":""
-         },
-         {
-            "firstName":"Robert",
-            "lastName":"Seidel",
-            "middleName":""
-         },
-         {
-            "firstName":"Jonathan",
-            "lastName":"Skone",
-            "middleName":"H."
-         },
-         {
-            "firstName":"Bernd",
-            "lastName":"Winter",
-            "middleName":""
-         },
-         {
-            "firstName":"Giulia",
-            "lastName":"Galli",
-            "middleName":""
          }
       ],
       "journal":{
@@ -128,7 +107,7 @@
       },
       "kind":"journal",
       "page":"6912-6915",
-      "publishedAbstract":"We present a combined computational and experimental study of the photoelectron spectrum of a simple aqueous solution of NaCl. Measurements were conducted on microjets, and first-principles calculations were performed using hybrid functionals and many-body perturbation theory at the G0W0 level, starting with wave functions computed in ab initio molecular dynamics simulations. We show excellent agreement between theory and experiments for the positions of both the solute and solvent excitation energies on an absolute energy scale and for peak intensities. The best comparison was obtained using wave functions obtained with dielectric-dependent self-consistent and range-separated hybrid functionals. Our computational protocol opens the way to accurate, predictive calculations of the electronic properties of electrolytes, of interest to a variety of energy problems.",
+      "publishedAbstract":"This is abstract",
       "school":"",
       "title":"Photoelectron Spectra of Aqueous Solutions from First Principles",
       "volume":"138",
@@ -147,11 +126,11 @@
             }
          ],
          "files":[
-            "scripts/fileA.py",
-            "scripts/fileB.py"
+            "/scripts/fileA.py",
+            "/scripts/fileB.py"
          ],
          "id":"s0",
-         "readme":"Python scripts"
+         "readme":"These are scripts"
       }
    ],
    "tags":[
@@ -163,7 +142,7 @@
          "URLs":[
             ""
          ],
-         "description":"Modified west code",
+         "description":"This is a software",
          "extraFields":[
             {
                "extrakey":"",
@@ -176,14 +155,14 @@
          "measurement":"",
          "packageName":"West",
          "patches":[
-            "tools/modded_qbox.diff"
+            "/tools/modded_qbox.diff"
          ],
          "programName":"wstat.x",
          "version":"3.0.0"
       },
       {
          "URLs":[
-            "aps.anl.gov"
+            ""
          ],
          "description":"",
          "extraFields":[
@@ -195,7 +174,7 @@
          "facilityName":"APS",
          "id":"t1",
          "kind":"experiment",
-         "measurement":"X-ray",
+         "measurement":"X-ray emission",
          "packageName":"",
          "patches":[
             ""
@@ -221,25 +200,25 @@
             "s0"
          ],
          [
+            "t1",
+            "s0"
+         ],
+         [
             "s0",
             "d0"
          ],
          [
             "d0",
             "c0"
-         ],
-         [
-            "t1",
-            "s0"
          ]
       ],
       "nodes":[
-         "c0",
-         "t1",
          "t0",
-         "s0",
+         "c0",
          "d0",
-         "h0"
+         "t1",
+         "h0",
+         "s0"
       ]
    }
 }

@@ -7131,12 +7131,12 @@ blockquote p {
 .panel-group .panel-title a.active::after {
     color: #fff;
     background: #e3e3e3 !important;
-    content: "\f068";
+    content: "\f106";
 }
 
 .panel-group .panel-title a::after {
     color: #777777;
-    content: "\f067";
+    content: "\f107";
     font-family: fontawesome;
     font-size: 14px;
     left: 0;

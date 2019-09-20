@@ -2,7 +2,10 @@
     <div class="form-group row">
      {% if field.flags.required %}
          <label class="col-sm-12 col-form-label">{{ field.label }}<span style="color: red;">*</span> </label>
-    {% else %}
+     {% elif field.label.text == "Main Notebook File" %}
+         <label class="col-form-label" style="padding-left: 15px;position: relative;min-height: 1px;">{{ field.label }}</label>
+         <img src='/static/images/folder-tree.png' style="height: 25px; margin-left: 1px; cursor: pointer;" class="folder-tree" id="{{ field.name }}-tree" name="{{ field.name }}-tree" alt='folder-tree'>
+     {% else %}
          <label class="col-sm-12 col-form-label">{{ field.label }}</label>
     {% endif %}
     <div class="col-sm-12">
@@ -31,6 +34,9 @@
                 {% else %}
                     <label class="col-form-label">{{ field.label }}</label>
                 {% endif %}
+                {% if field.label.text in ["Files","Image File","Notebook File","Patches"] %}
+                    <img src='/static/images/folder-tree.png' style="height: 25px; margin-left: 1px; cursor: pointer;" class="folder-tree" id="{{ field.name }}-tree" name="{{ field.name }}-tree" alt='folder-tree'>
+                {% endif %}
     </div>
     <div class="col-sm-12">
                 {% if field.type != "RadioField" %}
@@ -46,7 +52,7 @@
                 </ul>
             {% endif %}
 
-            </div>
+    </div>
     </div>
 
 {% endmacro %}

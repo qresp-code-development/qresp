@@ -1,15 +1,27 @@
-{% extends "base.html" %}
+{% extends "base_explorer.html" %}
 
 {% block page_content %}
         <div class="row">
+            <div class="col-md-6">
+                <h7><div id="unpublished" style="display:none;color:red;">* This is unpublished content </div></h7>
+            </div>
+            <div class="col-md-6">
+                <span class="float-right">
+                    <a id="shareLink" class="need-share-button-default" data-share-icon-style="box" data-share-share-button-class="custom-button" data-share-networks="Mailto,Twitter,Facebook"><span class="custom-button"><i class='fa fa-share-alt mr-3' style='font-size:23px; color: #800000;'></i></span></a>
+                </span>
+            </div>
+        </div>
+        <div class="row" id="showProjectInfo">
             <div class="col-md-12">
-                <h3 class="pt-0"><p id="lblTitle" style="font-size: 22px;"></p></h3>
+                <h3 class="pt-0"><div id="lblTitle"></div></h3>
                 <p id="lblAuthor"></p>
                 <p id="lblTags"></p>
                 <div class="paper-col-info"><label style="float: left">Collection(s): &nbsp;</label>
                     <p style="float: left" id="lblCollection"></p></div>
                 <div class="paper-col-info"><label style="float: left">Published In: &nbsp;</label>
                     <p style="float: left" id="lblPublishedIn"></p></div>
+                <div class="paper-col-info"><label style="float: left">Principal Investigators: &nbsp;</label>
+                    <p style="float: left" id="lblInfoPIs"></p></div>
                 <div id="PaperSection"></div>
                 <label>Abstract: </label>
                 <div style="width: 100%;">
@@ -17,182 +29,269 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div id="chartToggle" class="panel-group toggle pb-0 mb-10">
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <div class="panel-title">
-                                <a data-toggle="collapse" href="#charts" id="chartscollap" class="active"
-                                   aria-expanded="true">
-                                    <span class="open-sub"></span><strong>View Charts</strong>
-                                </a>
-                            </div>
-                        </div>
-                        <div id="charts" class="panel-collapse in collapse show" aria-expanded="true">
-                            <div class="panel-body">
-                                <div id="divCharts" class="wow fadeInDown" style="margin-top: 10px;">
-                                    <table id="tblcharts" class="display" cellspacing="0" width="100%">
-                                        <thead>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Image File</th>
-                                            <th></th>
-                                            <th>Number</th>
-                                            <th>Caption</th>
-                                            <th>Properties</th>
-                                            <th>Files</th>
-                                        </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
 
-                    </div>
+        <div class="custom-card" id="showChart">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section shows information about the Charts of the paper">
+                    <a id="headingChart" data-toggle="collapse" data-target="#chartOne" aria-expanded="true" aria-controls="chartOne">
+                        <i class="fa fa-angle-down"></i>
+                        Charts
+                    </a>
+                </h3>
+            </div>
+            <div id="chartOne" class="collapse show" aria-labelledby="chartOne">
+                <div class="card-body">
+                    <table id="tblcharts" class="display" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Image File</th>
+                            <th></th>
+                            <th>Number</th>
+                            <th>Caption</th>
+                            <th>Properties</th>
+                            <th>Files</th>
+                        </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div id="datasetToggle" class="panel-group toggle pb-0 mb-10">
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <div class="panel-title">
-                                <a data-toggle="collapse" href="#datasets" id="datasetscollap" class="active"
-                                   aria-expanded="true">
-                                    <span class="open-sub"></span><strong>View Datasets</strong>
-                                </a>
-                            </div>
-                        </div>
-                        <div id="datasets" class="panel-collapse in collapse show" aria-expanded="true">
-                            <div class="panel-body">
-                                <div id="divDatasets" class="wow fadeInDown" style="margin-top: 10px;">
-                                    <table id="tbldatasets" class="display" cellspacing="0" width="100%">
-                                        <thead>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Description</th>
-                                            <th>Files</th>
-                                        </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
 
-                    </div>
+        {# Where is the dataset located#}
+        <div class="custom-card" id="showDataset">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section displays information about the Datasets of the paper">
+                    <a id="headingDataset" data-toggle="collapse" data-target="#datasetOne" aria-expanded="true" aria-controls="datasetOne">
+                        <i class="fa fa-angle-down"></i>
+                        Datasets
+                    </a>
+                </h3>
+            </div>
+            <div id="datasetOne" class="collapse show" aria-labelledby="datasetOne">
+                <div class="card-body">
+                    <table id="tbldatasets" class="display" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th>Files</th>
+                        </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div id="workflowToggle" class="panel-group toggle pb-0 mb-10">
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <div class="panel-title">
-                                <a data-toggle="collapse" href="#workflow" id="workflowcollap" class="active"
-                                   aria-expanded="true">
-                                    <span class="open-sub"></span><strong>View Workflow</strong>
-                                </a>
-                            </div>
-                        </div>
-                        <div id="workflow" class="panel-collapse in collapse show" aria-expanded="true">
-                            <div class="panel-body">
-                                <div class="container-fluid pt-80 pb-10">
-                                    <div class="row">
-                                        <div class="col-md-2 p-0">
-                                            <div id="divLegend" class="wow fadeInDown"></div>
-                                        </div>
-                                        <div class="col-md-10 p-0">
-                                            <div id="divWorkflow" class="wow fadeInDown"></div>
-                                        </div>
 
-                                        <div class="col-md-12">
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="modalInfo" tabindex="-1"
-                                                 role="dialog" aria-labelledby="myModalLabel">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <button type="button" class="close" data-dismiss="modal"
-                                                                    aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                            <h4 class="modal-title" id="myModalLabel"></h4>
-                                                        </div>
-                                                        <div class="modal-body" id="myModalBody"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
 
+        {# Show tool located#}
+        <div class="custom-card" id="showTool">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section shows information about the Tools of the paper">
+                    <a id="headingTool" data-toggle="collapse" data-target="#toolOne" aria-expanded="true" aria-controls="toolOne">
+                        <i class="fa fa-angle-down"></i>
+                        Tools
+                    </a>
+                </h3>
+            </div>
+            <div id="toolOne" class="collapse show" aria-labelledby="toolOne">
+                <div class="card-body">
+                    <table id="tbltools" class="display" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Kind</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Show script located#}
+        <div class="custom-card" id="showScript">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section shows information about the Scripts of the paper">
+                    <a id="headingScript" data-toggle="collapse" data-target="#scriptOne" aria-expanded="true" aria-controls="scriptOne">
+                        <i class="fa fa-angle-down"></i>
+                        Scripts
+                    </a>
+                </h3>
+            </div>
+            <div id="scriptOne" class="collapse show" aria-labelledby="scriptOne">
+                <div class="card-body">
+                    <table id="tblscripts" class="display" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th>Files</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Show workflow located#}
+        <div class="custom-card" id="showWorkflow">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="This section shows information about the workflow of the paper">
+                    <a id="headingWorkflow" data-toggle="collapse" data-target="#workflowOne" aria-expanded="true" aria-controls="workflowOne">
+                        <i class="fa fa-angle-down"></i>
+                        Workflow
+                    </a>
+                </h3>
+            </div>
+            <div id="workflowOne" class="collapse show" aria-labelledby="workflowOne">
+                <div class="card-body">
+                    <div class="row">
+                        <div id="divWorkflow"></div>
+                        <div id="divLegend"></div>
+                        <div class="col-md-12">
+                            <div class="modal fade" id="workflowModal" tabindex="-1" role="dialog" aria-labelledby="workflowModalLabel"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="workflowModalLabel" data-toggle="tooltip" title="Content of the node"></h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
                                         </div>
+                                        <div class="modal-body">
+                                            <div class="card-body" id="workflowModalBody">
 
+                                           </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
+
+     <div class="custom-card" id="showDocumentation">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="Additional documentation for the paper.">
+                    <a id="headingDocumentation" data-toggle="collapse" data-target="#documentationOne" aria-expanded="true" aria-controls="documentationOne">
+                        <i class="fa fa-angle-down"></i>
+                        Documentation
+                    </a>
+                </h3>
+            </div>
+
+            <div id="documentationOne" class="collapse show" aria-labelledby="documentationOne">
+                <div class="card-body">
+                     <div class="paper-col-info"><label style="float: left">Readme: &nbsp;</label>
+                    <p style="float: left" id="lblReadme"></p></div>
+                </div>
+            </div>
+        </div>
+
+         <div class="custom-card" id="showCurator">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="The identity of the person who curated the paper.">
+                    <a id="headingDetails" data-toggle="collapse" data-target="#detailsOne" aria-expanded="true" aria-controls="detailsOne">
+                        <i class="fa fa-angle-down"></i>
+                        Curator Information
+                    </a>
+                </h3>
+            </div>
+
+            <div id="detailsOne" class="collapse show" aria-labelledby="detailsOne">
+                <div class="card-body">
+                     <div class="paper-col-info"><label style="float: left">Name: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorName"></p></div>
+                <div class="paper-col-info"><label style="float: left">Email Address: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorEmail"></p></div>
+                <div class="paper-col-info"><label style="float: left">Affiliation: &nbsp;</label>
+                    <p style="float: left" id="lblCuratorAffiliation"></p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card" id="showServer">
+            <div class="card-header">
+                <h3 class="mb-0" data-toggle="tooltip" title="Shows location of Paper.">
+                    <a id="headingDetails" data-toggle="collapse" data-target="#serverOne" aria-expanded="true" aria-controls="serverOne">
+                        <i class="fa fa-angle-down"></i>
+                            File Server Information
+                    </a>
+                </h3>
+            </div>
+
+            <div id="serverOne" class="collapse show" aria-labelledby="serverOne">
+                <div class="card-body">
+                   <div class="paper-col-info"><label style="float: left">File Server path: &nbsp;</label>
+                        <p style="float: left" id="lblProject"></p></div>
+                </div>
+            </div>
+        </div>
         <!-- Modal -->
-        <div class="modal fade" id="chartWorkflowModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+
+        <div class="modal fade" id="chartWorkflowModal" tabindex="-1" role="dialog" aria-labelledby="chartWorkflowModalLabel"
              aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="chartWorkflowModalLabel"></h5>
+                        <h5 class="modal-title" id="chartWorkflowModalLabel" data-toggle="tooltip" title="Content of the node"></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="container-fluid pt-80 pb-10">
-                            <div class="row">
-                                <div class="col-md-2 p-0">
-                                    <div id="divChartLegend" class="wow fadeInDown"></div>
-                                </div>
-                                <div class="col-md-10 p-0">
-                                    <div id="divChartWorkflow" class="wow fadeInDown"></div>
-                                </div>
-
+                        <div class="card-body" id="chartWorkflowModalBody">
+                             <div class="row">
+                                <div id="divChartWorkflow"></div>
                                 <div class="col-md-12">
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="modalInfo" tabindex="-1"
-                                         role="dialog" aria-labelledby="myModalLabel">
-                                        <div class="modal-dialog" role="document">
+                                    <div class="modal fade" id="workflowModal" tabindex="-1" role="dialog" aria-labelledby="workflowModalLabel"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
+                                                    <h5 class="modal-title" id="workflowModalLabel" data-toggle="tooltip" title="Content of the node"></h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
-                                                    <h4 class="modal-title" id="myModalLabel"></h4>
                                                 </div>
-                                                <div class="modal-body" id="myModalBody"></div>
+                                                <div class="modal-body">
+                                                    <div class="card-body" id="workflowModalBody">
+
+                                                   </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
-                        </div>
+                       </div>
                     </div>
                 </div>
             </div>
         </div>
 
     <script src="{{ url_for('static', filename='./javascript/modules/paperdetails.js') }}"></script>
-
     <script type="text/javascript">
         var paperdetails = {{ paperdetail|tojson }};
         var workflowdetails = {{ workflowdetail|tojson }};
+        var isPreviewSection = {{  preview|tojson }};
         buildPaperInfo(paperdetails);
+        buildChartTables(paperdetails.charts, paperdetails);
+        buildDatasetTables(paperdetails.datasets, paperdetails);
+        buildScriptTables(paperdetails.scripts, paperdetails);
+        buildToolTables(paperdetails.tools);
         bindWorkflow(workflowdetails, false);
-        createGoogleDatasetsScript(paperdetails);
+        if(isPreviewSection) {
+            $("#unpublished").show();
+        }else{
+            createGoogleDatasetsScript(paperdetails);
+            $("#unpublished").hide();
+        }
+        new needShareDropdown(document.getElementById('shareLink'),options={url:window.location.href});
     </script>
         <script type="text/javascript">
         window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;

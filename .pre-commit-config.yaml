@@ -1,0 +1,14 @@
+- repo: git://github.com/pre-commit/pre-commit-hooks
+  rev: v2.2.3
+  hooks:
+  - id: check-yaml
+  - id: check-json
+  - id: check-xml
+  - id: check-ast
+  - id: check-merge-conflict
+  - id: flake8
+  - id: no-commit-to-branch
+    args: [--branch, master, --branch, develop]
+  - id: check-added-large-files
+    args: [--maxkb=200]
+  - id: trailing-whitespace
