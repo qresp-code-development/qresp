@@ -1,6 +1,7 @@
 venv/
 .idea/
-web/papers/
+#web/papers/*
+#!web/papers/files_paper/data.json
 web/flask_session/
 flask_session/
 web/dist/

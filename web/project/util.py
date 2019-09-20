@@ -342,8 +342,11 @@ class WorkflowCreator(object):
         self.desc["tools"].append(tool_tooltip)
 
     def addHead(self, head):
+        caption = None
         if head.get("readme") or head.get("URLs"):
             caption = "<b> Description: </b>" + head.get("readme", "") + "<br/> <b> URLs: </b>" + head.get("URLs", "")
+        else:
+            caption = ""
         head_tooltip = {}
         head_tooltip['id'] = head.get("id")
         head_tooltip['caption'] = caption
