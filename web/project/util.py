@@ -6,6 +6,8 @@ from requests_oauthlib import OAuth2Session
 from lxml import html
 from urllib.request import urlopen
 from project.config import Config
+from TexSoup import TexSoup
+import spacy
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -801,3 +803,73 @@ class DirectoryTree:
     lazy = ""
     folder = ""
     source = ""
+
+import sys
+import re
+
+class LatexParser:
+
+    """
+    Latex Parser to Autofill Fields
+    """
+
+    def __init__(self, tex_file, language_model=None):
+        """
+        Latex Parser Initializer
+        :param tex_file: Text from Latex input file to be parsed
+        :param language_model: Spacy Language Model for Named Entity Recognition
+        """
+        self.soup = TexSoup(str(tex_file))
+       
+        if language_model is None:
+            self.language_model = spacy.load("en_core_web_md", disable=[
+                "tagger", "parser", "tokenizer", "textcat"])
+        else:
+            self.language_model = language_model
+        
+        self.parsedData = {}
+    
+    def formatNames(self, author_list):
+        """
+        Formats a list of names into first, middle and last names  
+        :return: <List<Dict>>, each dictionary of type {firstname:..., middlename:..., lastname:...}  
+        """
+        authors = []
+
+        for name in author_list:
+            firstname, middlename, lastname = "","",""
+            names = name.strip().split(' ', 3)
+            if len(names) == 3:
+                firstname, middlename, lastname = names[0], names[1], names[2]
+            elif len(names) == 2:
+                firstname, lastname = names[0], names[1]
+            else:
+                firstname = names[0]
+            authors.append({"firstname":firstname, "middlename":middlename, "lastname":lastname})
+
+        return authors
+
+    def getAuthors(self):
+        """
+        Get all authors from the Latex Parser  
+        :return: List of Authors <List<String>>  
+        """
+        author_gen = self.soup.find_all('author')
+        input_text = []
+        
+        for author in author_gen:
+            clean_author = ''.join(e for e in str(author.string) if (e.isalpha() or e == " "))
+            input_text.append(clean_author)
+
+        processed_text = self.language_model(','.join(input_text))
+
+        authors = [entity.text for entity in processed_text.ents if entity.label_ == 'PERSON']
+        return authors
+
+    def getTitle(self):
+        """
+        Get Title of the Paper  
+        :return: Title of the paper <String>  
+        """
+        return (self.soup.title.args[0].value)
+
