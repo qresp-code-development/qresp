@@ -858,7 +858,7 @@ class LatexParser:
         input_text = []
         
         for author in author_gen:
-            clean_author = ''.join(e for e in str(author.string) if (e.isalpha() or e == " "))
+            clean_author = ''.join(e if (e.isalpha() or e == " ") else " " for e in str(author.string))
             input_text.append(clean_author)
 
         processed_text = self.language_model(','.join(input_text))
@@ -871,5 +871,12 @@ class LatexParser:
         Get Title of the Paper  
         :return: Title of the paper <String>  
         """
-        return (self.soup.title.args[0].value)
+        return self.soup.title.args[0].value
+    
+    def getAbstract(self):
+        """
+        Get Abstract of the Paper  
+        :return: Abstract of the paper <String>  
+        """
+        return self.soup.abstract.args[0].value
 
