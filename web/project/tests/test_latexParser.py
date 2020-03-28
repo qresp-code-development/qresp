@@ -46,7 +46,7 @@ class TestLatexParser:
             test_results[str(i+1)] = parser.formatNames(parser.getAuthors())
 
         assert test_results == results['authors']
-    
+
     def test_get_title(self, language_model, inputData, results):
         test_results = {}
         for i in range(3):
@@ -55,7 +55,7 @@ class TestLatexParser:
             test_results[str(i+1)] = parser.getTitle()
 
         assert test_results == results['titles']
-    
+
     def test_get_abstract(self, language_model, inputData, results):
         test_results = {}
         for i in range(3):
@@ -64,3 +64,13 @@ class TestLatexParser:
             test_results[str(i+1)] = parser.getAbstract()
 
         assert test_results == results['abstracts']
+    
+    def test_get_figures(self, language_model, inputData, results):
+        test_results = {}
+        for i in range(3):
+            parser = LatexParser(
+                inputData[str(i+1)], language_model=language_model)
+            
+            test_results[str(i+1)] = parser.getFigures()
+
+        assert test_results == results['figures']

@@ -925,4 +925,20 @@ class LatexParser:
         abstract = " ".join("".join(line.text).replace("\n", " ").strip()
                             for line in abstract).strip()
         abstract = re.sub(' +', ' ', abstract)
+
         return abstract
+
+    def getFigures(self):
+        """
+        Get All Figure Details of the paper  
+        :return: List<Dict>
+        """
+        count = 1
+        fgrs = self.soup.find_all('figure')
+        figures = []
+        for fig in fgrs:
+            figures.append({"number": count, "caption": fig.caption})
+            count += 1
+        
+        return figures
+
