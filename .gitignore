@@ -13,4 +13,5 @@ web/qresp.egg-info/
 web/project/config_test.ini 
 web/project/tests/__pycache__/
 web/project/tests/TexSamples/
+.pytest_cache
 
