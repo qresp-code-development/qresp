@@ -937,8 +937,12 @@ class LatexParser:
         fgrs = self.soup.find_all('figure')
         figures = []
         for fig in fgrs:
-            figures.append({"number": count, "caption": fig.caption})
+            caption = " ".join("".join(line.text).replace("\n", "").strip()
+                            for line in fig.caption.all).strip()
+            caption = re.sub(' +', ' ', caption)
+            caption = re.sub(' \. ', '. ', caption)
+            caption = re.sub(' , ', ', ', caption)
+            figures.append({"number": count, "caption": caption})
             count += 1
-        
-        return figures
 
+        return figures
