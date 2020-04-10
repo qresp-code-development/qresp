@@ -5,23 +5,32 @@
     <div class="row">
         <div class="col-md-8">
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                <span class="input-group-btn" data-toggle="tooltip" title="Continue with existing JSON file.">
                      <input type="button" id="btnCurator"
                             name="general_search_button" value="Resume"
-                            class="btn btn-theme-colored btn-lg m-0"
+                            class="btn btn-theme-colored btn-lg btn-block"
                             style="font-weight: bold; height: 50px;" data-toggle='modal' data-target='#uploadModal' >
                </span>
                 </div>
-                <div class="col-md-4">
+                
+                <div class="col-md-4 p-0">
                     <span class="input-group-btn" data-toggle="tooltip" title="Clear session data and start from scratch.">
                        <form action="/startfromscratch">
                          <input type="submit" id="btnStartFromScratch"
                                 value="Start from scratch"
-                                class="btn btn-theme-colored btn-lg m-0"
+                                class="btn btn-theme-colored btn-lg btn-block"
                                 style="font-weight: bold; height: 50px;" >
                        </form>
                    </span>
+                </div>
+
+                <div class="col-md-4">
+                    <span class="input-group-btn" data-toggle="tooltip" title="Parse info. from Latex">
+                        <label for="latex-file" name="latexparser" class="btn btn-theme-colored btn-lg btn-block"
+                        style="font-weight: bold; height: 50px;"><i class="fa fa-cloud-upload"></i> Upload Latex File</label>
+                        <input type="file" id="latex-file" accept=".tex" style="display: none;">
+                    </span>
                 </div>
             </div>
         </div>

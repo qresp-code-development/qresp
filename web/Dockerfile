@@ -1,5 +1,7 @@
 FROM alpine:3.4
+
 MAINTAINER Aditya Tanikanti <aditya.tanikanti@gmail.com>
+MAINTAINER Sushant Bansal <sushantbansal2@gmail.com>
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -33,7 +35,7 @@ RUN set -ex \
         && rm python.tar.xz \
         \
         && apk add --no-cache --virtual .build-deps  \
-                bzip2-dev \
+                bzip2-dev \     
                 coreutils \
                 dpkg-dev dpkg \
                 expat-dev \

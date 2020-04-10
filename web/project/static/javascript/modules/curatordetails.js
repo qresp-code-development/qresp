@@ -28,7 +28,27 @@ $(function(){
         });
     });
 
-
+    // Parse Latex Files
+    $("#latex-file").change(function(){
+        latexFile = this.files[0];
+        formData = new FormData();
+        formData.append("file",latexFile);
+        $.ajax({
+            type:"POST",
+            url:"/parseLatex",
+            data: formData,
+            contentType: "application/json",
+            success: function(data){
+                if ("error" in data) {
+                    bootbox.alert("Unable to process JSON "+ str(data.error));
+                }
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                bootbox.alert("Unable to process JSON "+ str(errorMessage));
+            }
+        });
+    });
 
     // closes alerts
     $("[data-hide]").on("click", function(){
