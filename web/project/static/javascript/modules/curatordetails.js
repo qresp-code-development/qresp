@@ -31,16 +31,22 @@ $(function(){
     // Parse Latex Files
     $("#latex-file").change(function(){
         latexFile = this.files[0];
-        formData = new FormData();
-        formData.append("file",latexFile);
+        fdata = new FormData();
+        
+        fdata.append("file",latexFile);
+
         $.ajax({
-            type:"POST",
             url:"/parseLatex",
-            data: formData,
-            contentType: "application/json",
+            type:"POST",
+            data: fdata,
+            processData:false,
+            contentType: false,
+            cache: false,
             success: function(data){
                 if ("error" in data) {
                     bootbox.alert("Unable to process JSON "+ str(data.error));
+                } else {
+                    window.location.href = "qrespcurator";
                 }
             },
             error: function (xhr, status, error) {
@@ -843,6 +849,7 @@ function buildChartTables(chartDetails,path) {
                         {
                             "data": "files",
                             "render": function (data, type, row) {
+                                console.log(data);
                                 var data = data.split(",");
                                 var filesLink = "<div class='span2'>";
                                 $
