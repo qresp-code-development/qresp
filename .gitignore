@@ -7,6 +7,8 @@ web/flask_session/
 flask_session/
 web/dist/
 web/project/__pycache__/
+web/__pycache__/
+web/run_flask.sh
 web/build/
 web/qresp.egg-info/
 .cache/
