@@ -47,6 +47,7 @@ def uploadFile():
                                                [CURATOR_FIELD.CHARTS, CURATOR_FIELD.TOOLS, CURATOR_FIELD.DATASETS,
                                                 CURATOR_FIELD.SCRIPTS, CURATOR_FIELD.HEADS],
                                                uploadJSON)
+       
         paperform = PaperForm(**paperdata)
 
         # Stores curator information into session
@@ -706,7 +707,27 @@ def downloadfile(file=None):
             msg = {"Content":"Not Found"}
             return jsonify(msg),400
 
+@app.route('/parseLatex', methods=['POST'])
+def parseLatex():
+    print("Parsing Latex ...")
+    if request.files['file'] is not None:
+        try:
+            parser = LatexParser(request.files['file'].read().decode('utf-8'))
+        except Exception as e:
+            return jsonify({"msg":str(e)}), 400          
+    else:
+        return jsonify({"msg":"No File Uploaded"}), 400 
+    
+    authors = parser.formatNames(parser.getAuthors())
+    abstract = parser.getAbstract()
+    title = parser.getTitle()
+    figures = parser.getFigures()
 
+    session[CURATOR_FIELD.REFERENCE] = {
+        'authors':authors, "publishedAbstract":abstract,"title":title}
+    session[CURATOR_FIELD.CHARTS] = figures
+
+    return jsonify(success="success"),200   
 
 ########################################EXPLORER#############################################################################
 
