@@ -862,7 +862,7 @@ class LatexParser:
         self.soup = TexSoup(str(tex_file))
 
         if language_model is None:
-            self.language_model = spacy.load("en_core_web_md", disable=[
+            self.language_model = spacy.load("en_core_web_sm", disable=[
                 "tagger", "parser", "tokenizer", "textcat"])
         else:
             self.language_model = language_model
@@ -886,7 +886,7 @@ class LatexParser:
             else:
                 firstname = names[0]
             authors.append(
-                {"firstname": firstname, "middlename": middlename, "lastname": lastname})
+                {"firstName": firstname, "middleName": middlename, "lastName": lastname})
 
         return authors
 
@@ -940,9 +940,37 @@ class LatexParser:
             caption = " ".join("".join(line.text).replace("\n", "").strip()
                             for line in fig.caption.all).strip()
             caption = re.sub(' +', ' ', caption)
-            caption = re.sub(' \. ', '. ', caption)
+            caption = re.sub(r' \. ', '. ', caption)
             caption = re.sub(' , ', ', ', caption)
-            figures.append({"number": count, "caption": caption})
+
+            processed_caption = self.language_model(caption)
+
+            figures.append({
+                "id":"c{}".format(count-1),
+                "number": str(count), 
+                "caption": caption,
+                "imageFile":fig.includegraphics.args[1].value,
+                "properties":",".join(entity.text for entity in processed_caption.ents),
+                "files":""})
             count += 1
 
         return figures
+    
+    def getTables(self):
+        """
+        Get All Table Details of the paper  
+        :return: List<Dict>
+        """
+        count = 1
+        tbls = self.soup.find_all('tabular')
+        tables = []
+        for tbl in tbls:
+            caption = " ".join("".join(line.text).replace("\n", "").strip()
+                            for line in tbl.parent.caption.all).strip()
+            caption = re.sub(' +', ' ', caption)
+            caption = re.sub(r' \. ', '. ', caption)
+            caption = re.sub(' , ', ', ', caption)
+            tables.append({"number": count, "caption": caption})
+            count += 1
+
+        return tables
