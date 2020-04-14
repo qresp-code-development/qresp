@@ -1,5 +1,13 @@
 $(function(){
 
+    $(document)
+    .ajaxStart(function () {
+        $('#loadingAni').show();
+    })
+    .ajaxComplete(function () {
+        $('#loadingAni').hide();
+    });
+
     // parses uploaded data
     $('input[type=file]').change(function (event) {
         $('#customfileupload').html($(this).val().replace("C:\\fakepath\\", ""));
@@ -46,7 +54,7 @@ $(function(){
                 if ("error" in data) {
                     bootbox.alert("Unable to process JSON "+ str(data.error));
                 } else {
-                    window.location.href = "qrespcurator";
+                    fillValues(data.data.refData, "reference")
                 }
             },
             error: function (xhr, status, error) {
@@ -849,7 +857,6 @@ function buildChartTables(chartDetails,path) {
                         {
                             "data": "files",
                             "render": function (data, type, row) {
-                                console.log(data);
                                 var data = data.split(",");
                                 var filesLink = "<div class='span2'>";
                                 $
@@ -1239,6 +1246,10 @@ function fillValues(obj,type) {
         $('form[name="reference"] #DOI').val(obj.DOI);
         $('form[name="reference"] #title').val(obj.title);
         $('form[name="reference"] #journal-fullName').val(obj.journal.fullName);
+
+        // Clear Names Before Filling New Names
+        $('#authorTable').find("tr:gt(0)").remove();
+
         $.each(obj.authors, function( index, value ) {
             $("#author-fieldset").each(function() {
                 var $this = $(this);
@@ -1267,7 +1278,10 @@ function fillValues(obj,type) {
         $('form[name="reference"] #school').val(obj.school);
         $('form[name="reference"] #year').val(obj.year);
         $('form[name="reference"] #volume').val(obj.volume);
-        $('form[name="reference"] #publishedAbstract').val(obj.publishedAbstract);
+
+        if($('form[name="reference"] #publishedAbstract').val() === ""){
+            $('form[name="reference"] #publishedAbstract').val(obj.publishedAbstract);
+        }
         $('form[name="reference"] #page').val(obj.page);
 
     }

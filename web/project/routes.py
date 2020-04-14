@@ -247,11 +247,13 @@ def fetchReferenceDOI():
     try:
         fetchDOI = FetchDOI(reqDOI["doi"])
         refdata = fetchDOI.fetchFromDOI()
-        referenceform = ReferenceForm(**refdata)
+        referenceform = ReferenceForm(**refdata).data
+        
     except Exception as e:
         print(e)
         return jsonify(errors="Recheck your DOI "+str(e)), 400
-    return jsonify(data=referenceform.data), 200
+
+    return jsonify(data=referenceform), 200
 
 
 @app.route('/charts', methods=['POST'])
@@ -718,18 +720,44 @@ def parseLatex():
     else:
         return jsonify({"msg":"No File Uploaded"}), 400 
     
-    authors = parser.formatNames(parser.getAuthors())
-    abstract = parser.getAbstract()
-    title = parser.getTitle()
-    figures = parser.getFigures()
+    try:
+        authors = parser.formatNames(parser.getAuthors())
+        abstract = parser.getAbstract()
+        title = parser.getTitle()
+        figures = parser.getFigures()
 
-    session[CURATOR_FIELD.REFERENCE] = {
-        'authors':authors, "publishedAbstract":abstract,"title":title}
-    session[CURATOR_FIELD.CHARTS] = figures
+        refValues = session.get(CURATOR_FIELD.REFERENCE, None)
+        
+        if refValues is not None:
+            if refValues.get('authors', None) is None or len(refValues.get('authors')) == 0:
+                refValues['authors'] = authors
+            if refValues.get('publishedAbstract', None) is None or len(refValues.get('publishedAbstract')) == 0:
+                refValues['publishedAbstract'] = abstract
+            if refValues.get('title', None) is None or len(refValues.get('title')) == 0:
+                refValues['title'] = title    
+        else:
+            refValues = {
+                'authors':authors,
+                'title':title
+            }
+        
+        refData = ReferenceForm(**refValues).data
+        refData['publishedAbstract'] = abstract
+        
+        session[CURATOR_FIELD.CHARTS] = figures
 
-    return jsonify(success="success"),200   
+        return jsonify(data={"refData":refData}),200
 
+    except Exception as e:
+        print("Error : ", str(e), e)
+        return jsonify({"statusText":str(e)}), 400          
+
+
+
+
+#############################################################################################################################
 ########################################EXPLORER#############################################################################
+#############################################################################################################################
 
 
 @app.route('/verifyPasscode',methods=['POST'])

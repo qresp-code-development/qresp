@@ -933,8 +933,9 @@ class LatexParser:
         Get All Figure Details of the paper  
         :return: List<Dict>
         """
-        count = 1
-        fgrs = self.soup.find_all('figure')
+        figure_count = 0
+        table_count = 0
+        fgrs = self.soup.find_all(['figure','table','table*'])
         figures = []
         for fig in fgrs:
             caption = " ".join("".join(line.text).replace("\n", "").strip()
@@ -945,14 +946,28 @@ class LatexParser:
 
             processed_caption = self.language_model(caption)
 
+            if fig.name == 'table' or fig.name == "table*":
+                id = "t{}".format(table_count)
+                table_count += 1
+                num = table_count
+            else:
+                id = "c{}".format(figure_count)
+                figure_count += 1
+                num = figure_count
+
+            if fig.includegraphics is not None:
+                imageFile = fig.includegraphics.args[1].value
+            else:
+                imageFile = ''
+
             figures.append({
-                "id":"c{}".format(count-1),
-                "number": str(count), 
+                "id":id,
+                "number": num, 
                 "caption": caption,
-                "imageFile":fig.includegraphics.args[1].value,
+                "imageFile": imageFile,
                 "properties":",".join(entity.text for entity in processed_caption.ents),
                 "files":""})
-            count += 1
+            
 
         return figures
     
