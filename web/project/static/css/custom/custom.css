@@ -620,5 +620,22 @@ label {
     /*background-position: 50%;*/
 }
 
+.loading-overlay{
+    display: none;
+    z-index: 5;
+    position: fixed;
+    top:0vh;
+    left:0vh;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: .75;
+}
 
+.loader-animation{
+    margin:auto;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+}
 
