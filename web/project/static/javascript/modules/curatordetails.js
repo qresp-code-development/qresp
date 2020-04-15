@@ -5,6 +5,7 @@ $(function(){
         $('#loadingAni').show();
     })
     .ajaxComplete(function () {
+        console.log("Finished")
         $('#loadingAni').hide();
     });
 
@@ -55,11 +56,13 @@ $(function(){
                     bootbox.alert("Unable to process JSON "+ str(data.error));
                 } else {
                     fillValues(data.data.refData, "reference")
+                    buildChartTables(data.data.chartData, "");
+                    // fillValues(data.data.chartData, "charts")
                 }
             },
             error: function (xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
-                bootbox.alert("Unable to process JSON "+ str(errorMessage));
+                bootbox.alert("Unable to Parse Latex Error "+ (errorMessage));
             }
         });
     });

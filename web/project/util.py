@@ -938,8 +938,17 @@ class LatexParser:
         fgrs = self.soup.find_all(['figure','table','table*'])
         figures = []
         for fig in fgrs:
-            caption = " ".join("".join(line.text).replace("\n", "").strip()
+
+            if fig.caption is None:
+                continue
+
+            try:
+                caption = " ".join("".join(line.text).replace("\n", "").strip()
                             for line in fig.caption.all).strip()
+            except AssertionError as e:
+                print(e, file=sys.stderr)
+                continue
+
             caption = re.sub(' +', ' ', caption)
             caption = re.sub(r' \. ', '. ', caption)
             caption = re.sub(' , ', ', ', caption)
@@ -967,7 +976,6 @@ class LatexParser:
                 "imageFile": imageFile,
                 "properties":",".join(entity.text for entity in processed_caption.ents),
                 "files":""})
-            
 
         return figures
     

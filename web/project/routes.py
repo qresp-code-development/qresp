@@ -723,6 +723,7 @@ def parseLatex():
     try:
         authors = parser.formatNames(parser.getAuthors())
         abstract = parser.getAbstract()
+        print("GOT ABSTRACT")
         title = parser.getTitle()
         figures = parser.getFigures()
 
@@ -743,13 +744,11 @@ def parseLatex():
         
         refData = ReferenceForm(**refValues).data
         refData['publishedAbstract'] = abstract
-        
-        session[CURATOR_FIELD.CHARTS] = figures
-
-        return jsonify(data={"refData":refData}),200
+        chartData = [ChartForm(**f).data for f in figures]
+        return jsonify(data={"refData":refData,"chartData":chartData}),200
 
     except Exception as e:
-        print("Error : ", str(e), e)
+        print("Error : ", str(e))
         return jsonify({"statusText":str(e)}), 400          
 
 
