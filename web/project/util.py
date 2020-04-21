@@ -914,19 +914,26 @@ class LatexParser:
         Get Title of the Paper  
         :return: Title of the paper <String>  
         """
-        return self.soup.title.args[0].value
+        try:
+            return self.soup.title.args[0].value
+        except AssertionError as e:
+            print(e,file=sys.stderr)
+            return ""
 
     def getAbstract(self):
         """
         Get Abstract of the Paper  
         :return: Abstract of the paper <String>  
         """
-        abstract = self.soup.abstract.all
-        abstract = " ".join("".join(line.text).replace("\n", " ").strip()
-                            for line in abstract).strip()
-        abstract = re.sub(' +', ' ', abstract)
-
-        return abstract
+        try:
+            abstract = self.soup.abstract.all
+            abstract = " ".join("".join(line.text).replace("\n", " ").strip()
+                                for line in abstract).strip()
+            abstract = re.sub(' +', ' ', abstract)
+            return abstract
+        except AttributeError as e:
+            print(e, file=sys.stderr)
+            return ""
 
     def getFigures(self):
         """
@@ -978,22 +985,3 @@ class LatexParser:
                 "files":""})
 
         return figures
-    
-    def getTables(self):
-        """
-        Get All Table Details of the paper  
-        :return: List<Dict>
-        """
-        count = 1
-        tbls = self.soup.find_all('tabular')
-        tables = []
-        for tbl in tbls:
-            caption = " ".join("".join(line.text).replace("\n", "").strip()
-                            for line in tbl.parent.caption.all).strip()
-            caption = re.sub(' +', ' ', caption)
-            caption = re.sub(r' \. ', '. ', caption)
-            caption = re.sub(' , ', ', ', caption)
-            tables.append({"number": count, "caption": caption})
-            count += 1
-
-        return tables

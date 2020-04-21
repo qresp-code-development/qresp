@@ -64,13 +64,14 @@ class TestLatexParser:
             test_results[str(i+1)] = parser.getAbstract()
 
         assert test_results == results['abstracts']
-    
+
     def test_get_figures(self, language_model, inputData, results):
         test_results = {}
         for i in range(3):
             parser = LatexParser(
                 inputData[str(i+1)], language_model=language_model)
-            
+
             test_results[str(i+1)] = parser.getFigures()
 
         assert test_results == results['figures']
+    
