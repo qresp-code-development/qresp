@@ -121,23 +121,28 @@ class Dtree():
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
         self.__previewUrlForZenodo = "/preview/"
 
-    def fetchForTreeFromHttp(self):
+    def fetchForTreeFromHttp(self, url=None):
         """
         Fetches project from http server to build tree for curation
         :return: list listObjects: returns tree objects with file and folder content
         """
-        page = requests.get(self.__path, headers=self.__headers, verify=False)
+        if url is not None:
+            path = url
+        else:
+            path = self.__path
+
+        page = requests.get(path, headers=self.__headers, verify=False)
         tree = html.fromstring(page.content)
         for xtag in tree.xpath('//li/a'):
             file = xtag.text_content().strip()
             if 'Parent Directory' not in file:
                 dataFile = DirectoryTree()
                 dataFile.title = file
-                parent = self.__path.split("/")
+                parent = path.split("/")
                 parentName = parent[len(parent) - 2]
-                dataFile.key = self.__path + "/" + file.strip("/")
+                dataFile.key = path + "/" + file.strip("/")
                 dataFile.id = file
-                relPath = str(self.__path + "/" + file.strip("/")
+                relPath = str(path + "/" + file.strip("/")
                               ).split(parentName, 1)[1]
                 dataFile.parent = parentName + relPath
                 if '/' in file:
@@ -214,6 +219,42 @@ class Dtree():
         except Exception as e:
             print("Config file not found", e)
         return self.__serviceObjects
+
+    def fetchImageFiles(self):
+        """
+        Get Images in the Directory with URls
+        """
+        def getFiles(pathDict, files=files, figuresOnly=figuresOnly):
+            """
+            Filter to keep only Files 
+            """
+            if "folder" in pathDict and files:
+                return False
+            if pathDict["title"].startswith('.'):
+                return False
+            if "data" in pathDict["title"]:
+                return False
+
+            if figuresOnly and any(w in pathDict["key"] for w in ["figure", "image", "chart", "table"]):
+                return True
+            else:
+                return False
+
+            return True
+
+        currDir = self.fetchForTreeFromHttp()
+        fileList = {d['title']: d['key'] for d in currDir if getFiles(d)}
+        stack = set([folder["key"]
+                     for folder in currDir if getFiles(folder)])
+
+        while len(stack) > 0:
+            currDir = self.fetchForTreeFromHttp(stack.pop())
+            fileList.update({d['title']: d['key']
+                             for d in currDir if getFiles(d)})
+            stack.update([folder["key"]
+                          for folder in currDir if getFiles(folder, files=False)])
+
+        return (fileList)
 
 
 class FetchDOI():

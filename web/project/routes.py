@@ -212,7 +212,10 @@ def getTreeInfo():
         jsonify(errors=str(e)), 400
     return jsonify({'listObjects': listObjects,'services':services}), 200
 
-
+@app.route('/getDirS',methods=["GET"])
+def testingDirectoryStr():
+    obj = Dtree(session.get("project",{}).get("fileServerPath",""))
+    return jsonify(obj.fetchImageFiles())
 
 @app.route('/info', methods=['POST'])
 def info():
