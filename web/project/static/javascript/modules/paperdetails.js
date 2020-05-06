@@ -96,7 +96,7 @@ function buildPaperInfo(paperDetails) {
     localStorage.setItem("title", paperDetails.title)
     localStorage.setItem("description", paperDetails.abstract)
     localStorage.setItem("tags", paperDetails.tags.join(','))
-    localStorage.setItem("link", window.location.host + window.location.pathname)
+    localStorage.setItem("link", window.location.protocol + "//" + window.location.host + window.location.pathname)
 
     if (paperDetails && paperDetails.title && paperDetails.authors) {
         //title
