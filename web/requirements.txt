@@ -1,4 +1,4 @@
-Werkzeug=0.16.0
+Werkzeug==0.16.0
 setuptools
 jsonschema
 Flask
