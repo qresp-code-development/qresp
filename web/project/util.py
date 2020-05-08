@@ -220,7 +220,7 @@ class Dtree():
             print("Config file not found", e)
         return self.__serviceObjects
 
-    def fetchImageFiles(self):
+    def fetchImageFiles(self, files, figuresOnly):
         """
         Get Images in the Directory with URls
         """
