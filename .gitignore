@@ -12,6 +12,7 @@ web/qresp.egg-info/
 web/project/config_test.ini 
 web/project/tests/__pycache__/
 
+
 # VsCode
 .vscode/
 
@@ -22,3 +23,11 @@ __pycache__
 run_flask.sh
 
 
+=======
+# Python
+__pycache__
+
+# Dev Envs
+.vscode/
+run_flask.sh
+TexSamples/
