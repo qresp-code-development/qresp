@@ -1,5 +1,5 @@
 setuptools
-jsonschema
+jsonschema==2.6.0
 Flask
 Flask-API
 Flask-Cors
@@ -10,7 +10,7 @@ Flask-Session
 Flask-WTF
 itsdangerous
 Jinja2
-mongoengine
+mongoengine==0.19.0
 paramiko
 pre-commit
 py3dns
@@ -21,7 +21,7 @@ swagger-spec-validator
 swaggerpy
 urllib3
 validate-email
-Werkzeug
+Werkzeug==0.16.0
 WTForms
 schedule
 flask-sitemap
