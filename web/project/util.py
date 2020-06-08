@@ -7,6 +7,11 @@ from lxml import html
 from urllib.request import urlopen
 from project.config import Config
 
+import frontmatter
+from os import listdir, path
+import string
+
+
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -801,3 +806,36 @@ class DirectoryTree:
     lazy = ""
     folder = ""
     source = ""
+
+class Licenses:
+    """
+    License Manage License Files
+    """
+    def __init__(self):
+        super().__init__()
+        self.path = path.dirname(path.realpath(__file__))+"/licenses/"
+        self.count = None
+        self.licenses = []
+
+    def getAll(self):
+        """
+        Return all License Names Available in List
+        """
+        licenses = [license for license in listdir(self.path)]
+        self.count = len(licenses)
+        for i in range(len(licenses)):
+            l = frontmatter.load(self.path+licenses[i])
+            self.licenses.append((licenses[i],l['title']))
+
+        return self.licenses
+
+    def getLicense(self, license, **kwargs):
+        """
+        Get License Text
+        Completed with the required Fields
+        """
+        l = frontmatter.load(self.path+license)
+        return l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
+
+
+

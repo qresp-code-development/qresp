@@ -168,7 +168,7 @@ class PublishForm(Form):
     emailId = EmailField('Email Address', validators = [validators.DataRequired()],description='e.g. john.doe@gmail.com',render_kw={"placeholder": "Enter a Google based email address to verify your identity."})
 
 class LicenseForm(Form):
-    license = SelectField('License', validators=[validators.DataRequired()], description="Choose a License for the meta-data")
+    license = SelectField('License', choices=[], validators=[validators.DataRequired()], description="Choose a License for the meta-data")
 
 class PaperForm(Form):
     PIs = FieldList(FormField(NameForm))

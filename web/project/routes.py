@@ -80,6 +80,7 @@ def uploadFile():
         # Stores in documentation
         session[CURATOR_FIELD.DOCUMENTATION] = paperform.documentation.data
 
+
         return jsonify(success="success"), 200
     except Exception as e:
         print(e)
@@ -143,11 +144,16 @@ def qrespcurator():
         publishform.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                                serverslist.getServersList()]
 
+        licenseform = LicenseForm(request.form)
+        licenses = Licenses().getAll()
+        licenseform.license.choices = licenses
+
         return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
                                projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
                                toollistform=toollist, toolform=toolform, datasetlistform=datasetlist,
                                datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform,
-                               documentationform=documentationform, publishform=publishform)
+                               documentationform=documentationform, publishform=publishform,
+                               licenseform=licenseform)
 
 
 @app.route('/details', methods=['POST'])
