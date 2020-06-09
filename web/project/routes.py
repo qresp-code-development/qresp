@@ -144,9 +144,10 @@ def qrespcurator():
         publishform.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                                serverslist.getServersList()]
 
-        licenseform = LicenseForm(request.form)
-        licenses = Licenses().getAll()
-        licenseform.license.choices = licenses
+        
+        licenseform = LicenseForm(**session.get(CURATOR_FIELD.LICENSE,request.form))
+        # Populate License Choices List
+        licenseform.license.choices = Licenses().getAll()
 
         return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
                                projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
@@ -399,6 +400,17 @@ def documentation():
         return jsonify(data=docform.data), 200
     return jsonify(data=docform.errors), 400
 
+
+@app.route('/license', methods=["POST"])
+def licensing():
+    """
+    Add the project data usage License
+    """
+    licenseForm = LicenseForm(request.form)
+    
+    print(session.get(CURATOR_FIELD.REFERENCE))
+    print(session.get(CURATOR_FIELD.DETAILS))
+    return "SUCCESS",200
 
 
 

@@ -810,6 +810,10 @@ class DirectoryTree:
 class Licenses:
     """
     License Manage License Files
+    All licenses are stored in the licenses directory
+    The file 'LIST' in the directory contains a comma seperated list of all 
+    license titles and file names. Like: file_name, License Title ...
+    Each License file contains formatted fields wherever applicable. 
     """
     def __init__(self):
         super().__init__()
@@ -821,11 +825,14 @@ class Licenses:
         """
         Return all License Names Available in List
         """
-        licenses = [license for license in listdir(self.path)]
+        with open(self.path+"LIST","r") as f:
+            licenses = f.readlines()
+
         self.count = len(licenses)
-        for i in range(len(licenses)):
-            l = frontmatter.load(self.path+licenses[i])
-            self.licenses.append((licenses[i],l['title']))
+        
+        for license in licenses:
+            value, label = license.split(",")
+            self.licenses.append((value, label))
 
         return self.licenses
 
@@ -834,6 +841,13 @@ class Licenses:
         Get License Text
         Completed with the required Fields
         """
+        fname = kwargs.get("fullname","")
+        year = kwargs.get("year","")
+        email = kwargs.get("email","")
+        title = kwargs.get("title","")
+        project = kwargs.get("project","")
+        org = kwargs.get("organization","")
+
         l = frontmatter.load(self.path+license)
         return l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
 

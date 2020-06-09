@@ -266,6 +266,19 @@ $(function(){
     });
 
     // documentation form
+    $('#licenseform').submit(function (e) {
+        $.ajax({
+            type: "POST",
+            url: "license",
+            data: $('#licenseform').serialize(), // serializes the form's elements.
+            success: function (data) {
+                alert(data)
+                // buildDocumentationTable(data.data);
+            }
+        });
+        e.preventDefault(); // block the traditional submission of the form.
+    });
+
     $('#documentationform').submit(function (e) {
         $.ajax({
             type: "POST",
@@ -277,6 +290,8 @@ $(function(){
         });
         e.preventDefault(); // block the traditional submission of the form.
     });
+
+
 
     // publish form
     $('#publishform').submit(function (e) {

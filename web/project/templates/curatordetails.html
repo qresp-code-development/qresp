@@ -841,7 +841,18 @@
     </div>
     <div id="license" class="collapse" aria-labelledby="license">
       <div class="card-body">
-        {{render_field(licenseform.license)}}          
+        <form method="post" id="licenseform" name="license">
+          {{render_field(licenseform.license)}}  
+          <span class="input-group-btn">
+            <input
+              type="submit"
+              id="btnLicenseSave"
+              value="Save"
+              class="btn btn-theme-colored btn-lg m-0"
+              style="font-weight: bold; height: 50px;"
+            />
+          </span>        
+        </form>
       </div>
     </div>
   </div>
