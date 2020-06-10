@@ -272,8 +272,10 @@ $(function(){
             url: "license",
             data: $('#licenseform').serialize(), // serializes the form's elements.
             success: function (data) {
-                alert(data)
-                // buildDocumentationTable(data.data);
+                buildLicenseTable(data)
+                },
+            error:function(data){
+                bootbox.alert("Unable to display license data, please contact the administrator "+ str(data.error));
             }
         });
         e.preventDefault(); // block the traditional submission of the form.
@@ -350,6 +352,12 @@ $(function(){
         $('#showDocumentation').hide();
         $('#editDocumentation').show();
         $('#documentationOne').collapse('show');
+    });
+
+    $('#licenseLink').on('click',function () {
+        $('#showLicense').hide();
+        $('#editLicense').show();
+        $('#license').collapse('show');
     });
 
     $('#referenceLink').on('click',function () {
@@ -545,6 +553,17 @@ function buildDocumentationTable(data){
         $("#lblReadme").html(data.readme);
     }
 }
+
+function buildLicenseTable(data){
+    if(data && data.codeLicense && data.mediaLicense){
+        $('#editLicense').hide();
+        $('#showLicense').show();
+        $("#codeLicenseText").html(data.codeLicense);
+        $("#mediaLicenseText").html(data.mediaLicense);
+    }
+}
+
+
 function fetchDOI(doi) {
         $.ajax({
                 type: "POST",

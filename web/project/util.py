@@ -849,7 +849,10 @@ class Licenses:
         org = kwargs.get("organization","")
 
         l = frontmatter.load(self.path+license)
-        return l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
+        licenseText =  l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
 
+        licenseText = licenseText.replace('\n','<br>')
+
+        return licenseText
 
 

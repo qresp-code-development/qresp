@@ -842,7 +842,8 @@
     <div id="license" class="collapse" aria-labelledby="license">
       <div class="card-body">
         <form method="post" id="licenseform" name="license">
-          {{render_field(licenseform.license)}}  
+          {{render_field(licenseform.mediaLicense)}}  
+          {{render_field(licenseform.codeLicense)}}  
           <span class="input-group-btn">
             <input
               type="submit"
@@ -856,6 +857,31 @@
       </div>
     </div>
   </div>
+  <div class="custom-card" id="showLicense" style="display: none;">
+    <div
+      class="card-header"
+      id="showHeadingLicense"
+      title="Usage License"
+    >
+      <h3 class="mb-0">
+        License
+        <a id="licenseLink" title="Edit the License attached to the paper"
+          ><i class="fa fa-edit custom-icon"></i
+        ></a>
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="paper-col-info">
+        <label style="float: left;">Code License: &nbsp;</label>
+        <p style="height: 250px;overflow-y: scroll;" id="codeLicenseText"></p>
+        <br>
+        <label style="float: left;">Media License: &nbsp;</label>
+        <p style="height: 250px;overflow-y: scroll;" id="mediaLicenseText"></p>
+      </div>
+    </div>
+  </div>
+
+
 </div>
 
 {# Where is workflow#}
