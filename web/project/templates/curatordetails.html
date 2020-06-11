@@ -1702,7 +1702,7 @@
   buildDatasetTables({{ datasetlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildScriptTables({{ scriptlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildDocumentationTable({{ documentationform.data|tojson }});
-  buildLicenseTable(fetchLicenseText({{ licenseform.data|tojson }}));
+  fetchLicenseText({{ licenseform.data|tojson }});
   addToWorkflow();
 </script>
 <script type="text/javascript">
