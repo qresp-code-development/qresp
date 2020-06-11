@@ -267,18 +267,8 @@ $(function(){
 
     // documentation form
     $('#licenseform').submit(function (e) {
-        $.ajax({
-            type: "POST",
-            url: "license",
-            data: $('#licenseform').serialize(), // serializes the form's elements.
-            success: function (data) {
-                buildLicenseTable(data)
-                },
-            error:function(data){
-                bootbox.alert("Unable to display license data, please contact the administrator "+ str(data.error));
-            }
-        });
         e.preventDefault(); // block the traditional submission of the form.
+        fetchLicenseText($('#licenseform').serialize())
     });
 
     $('#documentationform').submit(function (e) {
@@ -561,6 +551,20 @@ function buildLicenseTable(data){
         $("#codeLicenseText").html(data.codeLicense);
         $("#mediaLicenseText").html(data.mediaLicense);
     }
+}
+
+function fetchLicenseText(formData){
+    $.ajax({
+        type: "POST",
+        url: "license",
+        data: formData, // serializes the form's elements.
+        success: function (data) {
+            buildLicenseTable(data)
+            },
+        error:function(data){
+            bootbox.alert("Unable to display license data, please contact the administrator "+ str(data.error));
+        }
+    });
 }
 
 

@@ -842,8 +842,8 @@
     <div id="license" class="collapse" aria-labelledby="license">
       <div class="card-body">
         <form method="post" id="licenseform" name="license">
-          {{render_field(licenseform.mediaLicense)}}  
-          {{render_field(licenseform.codeLicense)}}  
+          {{render_field(licenseform.codeLicense)}}
+          {{render_field(licenseform.mediaLicense)}}
           <span class="input-group-btn">
             <input
               type="submit"
@@ -852,17 +852,13 @@
               class="btn btn-theme-colored btn-lg m-0"
               style="font-weight: bold; height: 50px;"
             />
-          </span>        
+          </span>
         </form>
       </div>
     </div>
   </div>
   <div class="custom-card" id="showLicense" style="display: none;">
-    <div
-      class="card-header"
-      id="showHeadingLicense"
-      title="Usage License"
-    >
+    <div class="card-header" id="showHeadingLicense" title="Usage License">
       <h3 class="mb-0">
         License
         <a id="licenseLink" title="Edit the License attached to the paper"
@@ -873,15 +869,13 @@
     <div class="card-body">
       <div class="paper-col-info">
         <label style="float: left;">Code License: &nbsp;</label>
-        <p style="height: 250px;overflow-y: scroll;" id="codeLicenseText"></p>
-        <br>
+        <p style="height: 250px; overflow-y: scroll;padding-right: 8px;" id="codeLicenseText"></p>
+        <br />
         <label style="float: left;">Media License: &nbsp;</label>
-        <p style="height: 250px;overflow-y: scroll;" id="mediaLicenseText"></p>
+        <p style="height: 250px; overflow-y: scroll;padding-right: 8px;" id="mediaLicenseText"></p>
       </div>
     </div>
   </div>
-
-
 </div>
 
 {# Where is workflow#}
@@ -1708,6 +1702,7 @@
   buildDatasetTables({{ datasetlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildScriptTables({{ scriptlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildDocumentationTable({{ documentationform.data|tojson }});
+  buildLicenseTable(fetchLicenseText({{ licenseform.data|tojson }}));
   addToWorkflow();
 </script>
 <script type="text/javascript">
