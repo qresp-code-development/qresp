@@ -147,8 +147,9 @@ def qrespcurator():
         
         licenseform = LicenseForm(**session.get(CURATOR_FIELD.LICENSE,request.form))
         # Populate License Choices List
-        licenseform.mediaLicense.choices = Licenses().getAll()        
-        licenseform.codeLicense.choices = Licenses().getAll()
+        lcs = Licenses()
+        licenseform.mediaLicense.choices = lcs.getMediaLicenses()
+        licenseform.codeLicense.choices = lcs.getCodeLicenses()
 
         return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
                                projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
@@ -410,8 +411,8 @@ def licensing():
     licenses = Licenses()
 
     licenseForm = LicenseForm(request.form)
-    licenseForm.mediaLicense.choices = Licenses().getAll()        
-    licenseForm.codeLicense.choices = Licenses().getAll()
+    licenseForm.mediaLicense.choices = licenses.getMediaLicenses()        
+    licenseForm.codeLicense.choices = licenses.getCodeLicenses()
     
     if request.method == "POST" and licenseForm.validate():
         session[CURATOR_FIELD.LICENSE] = licenseForm.data
@@ -419,8 +420,6 @@ def licensing():
         mediaL = licenses.getLicense(licenseForm.data['mediaLicense'])
         return jsonify({'codeLicense':codeL, 'mediaLicense':mediaL}), 200
     
-    # print(session.get(CURATOR_FIELD.REFERENCE))
-    # print(session.get(CURATOR_FIELD.DETAILS))
     return licenseForm.errors, 400
 
 

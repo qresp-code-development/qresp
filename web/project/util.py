@@ -818,23 +818,34 @@ class Licenses:
     def __init__(self):
         super().__init__()
         self.path = path.dirname(path.realpath(__file__))+"/licenses/"
-        self.count = None
-        self.licenses = []
+        self.codeLicenses = []
+        self.mediaLicenses = []
 
-    def getAll(self):
+    def getCodeLicenses(self):
         """
         Return all License Names Available in List
         """
-        with open(self.path+"LIST","r") as f:
+        with open(self.path+"CODELIST","r") as f:
             licenses = f.readlines()
 
-        self.count = len(licenses)
-        
         for license in licenses:
             value, label = license.split(",")
-            self.licenses.append((value, label))
+            self.codeLicenses.append((value, label))
 
-        return self.licenses
+        return self.codeLicenses
+    
+    def getMediaLicenses(self):
+        """
+        Return all License Names Available in List
+        """
+        with open(self.path+"MEDIALIST","r") as f:
+            licenses = f.readlines()
+
+        for license in licenses:
+            value, label = license.split(",")
+            self.mediaLicenses.append((value, label))
+
+        return self.mediaLicenses
 
     def getLicense(self, license, **kwargs):
         """
