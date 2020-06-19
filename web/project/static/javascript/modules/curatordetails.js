@@ -268,7 +268,7 @@ $(function () {
     // documentation form
     $('#licenseform').submit(function (e) {
         e.preventDefault(); // block the traditional submission of the form.
-        fetchLicenseText($('#licenseform').serialize())
+        buildLicenseTable($('#licenseform').serialize())
     });
 
     $('#documentationform').submit(function (e) {
@@ -545,22 +545,30 @@ function buildDocumentationTable(data) {
 }
 
 function buildLicenseTable(data) {
-    if (data && data.codeLicense && data.mediaLicense) {
-        $('#editLicense').hide();
-        $('#showLicense').show();
-        $("#codeLicenseText").html(data.codeLicense);
-        $("#mediaLicenseText").html(data.mediaLicense);
-    }
-}
-
-function fetchLicenseText(formData) {
-    if (formData.codeLicense !== "None" && formData.mediaLicense !== "None") {
+    if (data && data.mediaLicense !== "None") {
+        /* Fetch data corresponding to the license value*/
         $.ajax({
             type: "POST",
             url: "license",
-            data: formData, // serializes the form's elements.
+            data: data,
             success: function (data) {
-                buildLicenseTable(data)
+                $('#editLicense').hide();
+                $('#showLicense').show();
+
+                // Set Link and Title of the License chosen
+                $("#mediaLicenseLink").attr('href', data.link);
+                $("#mediaLicenseText").html(data.title);
+
+                // Link infographics to Licenses 
+                $("#mediaLicenseImages").attr('href', data.link);
+
+                // Add infographics to page
+                infographics = ""
+                data.infographics.forEach(image => {
+                    imageName = image.substring(0, 2).toUpperCase()
+                    infographics += '<img src=/static/./images/' + image + ' style="margin:4px;" alt=' + imageName + ' title=' + imageName + ' />'
+                });
+                $('#mediaLicenseImages').html(infographics)
             },
             error: function (data) {
                 bootbox.alert("Unable to display license data, please contact the administrator " + (data.error));

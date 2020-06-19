@@ -7,7 +7,6 @@ from lxml import html
 from urllib.request import urlopen
 from project.config import Config
 
-import frontmatter
 from os import listdir, path
 import string
 
@@ -819,51 +818,54 @@ class Licenses:
         super().__init__()
         self.path = path.dirname(path.realpath(__file__))+"/licenses/"
         self.codeLicenses = []
-        self.mediaLicenses = []
+        self.mediaLicenses = None
+    
+    # For Future Use -> START
+    # def getCodeLicenses(self):
+    #     """
+    #     Return all License Names Available in List
+    #     """
+    #     with open(self.path+"CODELIST","r") as f:
+    #         licenses = f.readlines()
 
-    def getCodeLicenses(self):
-        """
-        Return all License Names Available in List
-        """
-        with open(self.path+"CODELIST","r") as f:
-            licenses = f.readlines()
+    #     for license in licenses:
+    #         value, label = license.split(",")
+    #         self.codeLicenses.append((value, label))
 
-        for license in licenses:
-            value, label = license.split(",")
-            self.codeLicenses.append((value, label))
-
-        return self.codeLicenses
+    #     return self.codeLicenses
+    # For Future Use -> END
     
     def getMediaLicenses(self):
         """
         Return all License Names Available in List
         """
-        with open(self.path+"MEDIALIST","r") as f:
-            licenses = f.readlines()
+        with open(self.path+"CC_Licenses.json","r") as f:
+            self.mediaLicenses = json.load(f)
 
-        for license in licenses:
-            value, label = license.split(",")
-            self.mediaLicenses.append((value, label))
+        licenses = []
 
-        return self.mediaLicenses
+        for license in self.mediaLicenses.keys():
+            licenses.append((license, self.mediaLicenses[license]['title']))
+
+        return licenses
 
     def getLicense(self, license, **kwargs):
         """
         Get License Text
         Completed with the required Fields
         """
-        fname = kwargs.get("fullname","")
-        year = kwargs.get("year","")
-        email = kwargs.get("email","")
-        title = kwargs.get("title","")
-        project = kwargs.get("project","")
-        org = kwargs.get("organization","")
+        # For Future Use -> START
+        # fname = kwargs.get("fullname","")
+        # year = kwargs.get("year","")
+        # email = kwargs.get("email","")
+        # title = kwargs.get("title","")
+        # project = kwargs.get("project","")
+        # org = kwargs.get("organization","")
+        # l = frontmatter.load(self.path+license)
+        # licenseText =  l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
+        # licenseText = licenseText.replace('\n','<br>')
+        # For Future Use -> END
 
-        l = frontmatter.load(self.path+license)
-        licenseText =  l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
-
-        licenseText = licenseText.replace('\n','<br>')
-
-        return licenseText
+        return self.mediaLicenses[license]
 
 

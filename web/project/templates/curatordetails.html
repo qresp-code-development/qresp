@@ -842,7 +842,6 @@
     <div id="license" class="collapse" aria-labelledby="license">
       <div class="card-body">
         <form method="post" id="licenseform" name="license">
-          {{render_field(licenseform.codeLicense)}}
           {{render_field(licenseform.mediaLicense)}}
           <span class="input-group-btn">
             <input
@@ -852,6 +851,14 @@
               class="btn btn-theme-colored btn-lg m-0"
               style="font-weight: bold; height: 50px;"
             />
+            <a
+              href="https://creativecommons.org/choose/"
+              class="btn btn-theme-colored btn-lg m-0"
+              style="font-weight: bold; height: 50px;"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Help Me Choose</a
+            >
           </span>
         </form>
       </div>
@@ -867,12 +874,30 @@
       </h3>
     </div>
     <div class="card-body">
-      <div class="paper-col-info">
-        <label style="float: left;">Code License: &nbsp;</label>
-        <p style="max-height: 250px; overflow-y: auto;padding-right: 8px;" id="codeLicenseText"></p>
-        <br />
-        <label style="float: left;">Media and <br>Data License: &nbsp;</label>
-        <p style="max-height: 250px; overflow-y: auto;padding-right: 8px;" id="mediaLicenseText"></p>
+      <div class="row">
+        <div class="col-7">
+          <p>
+            This work presented here is licensed under a
+            <a
+              href=""
+              target="_blank"
+              rel="noopener noreferrer"
+              id="mediaLicenseLink"
+            >
+              <span id="mediaLicenseText"></span>
+            </a>
+          </p>
+        </div>
+        <div class="col-5">
+          <a
+            href=""
+            target="_blank"
+            rel="noopener noreferrer"
+            id="mediaLicenseImages"
+            style="display: flex; justify-content: center;"
+          >
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -1702,7 +1727,7 @@
   buildDatasetTables({{ datasetlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildScriptTables({{ scriptlistform|tojson }},{{ projectform.data.fileServerPath|tojson }});
   buildDocumentationTable({{ documentationform.data|tojson }});
-  fetchLicenseText({{ licenseform.data|tojson }});
+  buildLicenseTable({{ licenseform.data|tojson }});
   addToWorkflow();
 </script>
 <script type="text/javascript">

@@ -80,6 +80,8 @@ def uploadFile():
         # Stores in documentation
         session[CURATOR_FIELD.DOCUMENTATION] = paperform.documentation.data
 
+        # Stores the License
+        session[CURATOR_FIELD.LICENSE] = paperform.license.data
 
         return jsonify(success="success"), 200
     except Exception as e:
@@ -147,10 +149,8 @@ def qrespcurator():
         
         licenseform = LicenseForm(**session.get(CURATOR_FIELD.LICENSE,request.form))
         # Populate License Choices List
-        lcs = Licenses()
-        licenseform.mediaLicense.choices = lcs.getMediaLicenses()
-        licenseform.codeLicense.choices = lcs.getCodeLicenses()
-
+        licenseform.mediaLicense.choices = Licenses().getMediaLicenses()
+        
         return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
                                projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
                                toollistform=toollist, toolform=toolform, datasetlistform=datasetlist,
@@ -409,16 +409,13 @@ def licensing():
     Add the project data usage License
     """
     licenses = Licenses()
-
     licenseForm = LicenseForm(request.form)
     licenseForm.mediaLicense.choices = licenses.getMediaLicenses()        
-    licenseForm.codeLicense.choices = licenses.getCodeLicenses()
     
     if request.method == "POST" and licenseForm.validate():
         session[CURATOR_FIELD.LICENSE] = licenseForm.data
-        codeL = licenses.getLicense(licenseForm.data['codeLicense'])
         mediaL = licenses.getLicense(licenseForm.data['mediaLicense'])
-        return jsonify({'codeLicense':codeL, 'mediaLicense':mediaL}), 200
+        return jsonify(mediaL), 200
     
     return licenseForm.errors, 400
 
