@@ -20,7 +20,7 @@ app = connexionapp.app
 app.secret_key = Config.get_setting('SECRETS','FLASK_SECRET_KEY')
 SESSION_TYPE = 'filesystem'
 app.config.from_object(__name__)
-app.config['env'] = 'DEV'
+app.config['env'] = 'PROD'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 Session(app)
 ext = Sitemap(app)
