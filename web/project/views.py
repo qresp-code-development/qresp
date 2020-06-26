@@ -266,7 +266,7 @@ class PublishForm(Form):
 
 class LicenseForm(Form):
     mediaLicense = SelectField('Type', choices=[], validators=[validators.DataRequired(
-        "Please select a license for media and data")], description="Choose a License for the media/data", coerce=str)
+        "Please select a license for media and data")], description="Choose a License for the media/data", coerce=str,default="")
 
 
 class PaperForm(Form):

@@ -545,7 +545,7 @@ function buildDocumentationTable(data) {
 }
 
 function buildLicenseTable(data) {
-    if (data && data.mediaLicense !== "None") {
+    if (data && data.mediaLicense != '') {
         /* Fetch data corresponding to the license value*/
         $.ajax({
             type: "POST",
