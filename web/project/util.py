@@ -1,7 +1,7 @@
 import json
 import re
 import requests
-from jsonschema import Draft4Validator
+from jsonschema import Draft7Validator
 from requests_oauthlib import OAuth2Session
 from lxml import html
 from urllib.request import urlopen
@@ -74,7 +74,7 @@ class Servers():
         try:
             url = requests.get(self.__schemaString, headers=self.__headers, verify = False)
             schema_coll_data = json.loads(url.text)
-            a = Draft4Validator(schema_coll_data)
+            a = Draft7Validator(schema_coll_data)
             for error in sorted(a.iter_errors(coll_data), key=str):
                 message = ""
                 try:
