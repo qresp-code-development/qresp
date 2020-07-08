@@ -1,16 +1,17 @@
 import Header from "../components/Header/header"
 import Footer from "../components/Footer/footer"
-import { Fragment } from "react"
-
+import { Box } from "@material-ui/core"
 
 function Layout({ children }) {
 
     return (
-        <Fragment>
+        <Box display="flex" flexDirection="column" flexGrow={1}>
             <Header />
-            {children}
+            <Box display="flex" flexGrow={1}>
+                {children}
+            </Box>
             <Footer />
-        </Fragment>
+        </Box>
     )
 }
 
