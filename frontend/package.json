@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@material-ui/core": "^5.0.0-alpha.2",
+    "@material-ui/lab": "^4.0.0-alpha.56",
+    "axios": "^0.19.2",
     "next": "9.4.4",
     "react": "16.13.1",
     "react-dom": "16.13.1"
