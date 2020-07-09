@@ -1,11 +1,11 @@
-import Layout from "../components/layout";
+import { Fragment } from "react";
 import Link from "next/link";
 import StyledButton from "../components/button";
 import { Box, Typography, Container } from "@material-ui/core";
 
 export default () => {
   return (
-    <Layout>
+    <Fragment>
       <Box
         display="flex"
         flexGrow={1}
@@ -37,6 +37,6 @@ export default () => {
           color: #9a0000;
         }
       `}</style>
-    </Layout>
+    </Fragment>
   );
 };

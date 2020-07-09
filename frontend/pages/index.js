@@ -1,12 +1,20 @@
-import Layout from "../components/layout";
+import { Fragment } from "react";
 import StyledButton from "../components/button";
 import SEO from "../components/seo";
 import { Box, Typography, Container } from "@material-ui/core";
 
 export default function Home() {
+  const qrespDescription =
+    "Qresp facilitates scientific data reproducibility by making available all data & procedures presented in scientific papers, together with metadata to render them searchable and discoverable";
+  const qrespAuthor = "Giulia Galli, Macro Govoni";
+
   return (
-    <Layout>
-      {/* <SEO title="Qresp" description="" author=""></SEO> */}
+    <Fragment>
+      <SEO
+        title="Qresp"
+        description={qrespDescription}
+        author={qrespAuthor}
+      ></SEO>
       <Box display="flex" flexDirection="column" flexGrow={1}>
         <Box className="full-width">
           <img
@@ -62,6 +70,6 @@ export default function Home() {
           }
         `}
       </style>
-    </Layout>
+    </Fragment>
   );
 }
