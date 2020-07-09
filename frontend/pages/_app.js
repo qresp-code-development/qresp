@@ -3,6 +3,7 @@ import { useEffect, Fragment } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from "@material-ui/core/styles";
 
+import Layout from "../components/layout";
 import "../styles/global.css";
 import Theme from "../theme/theme";
 
@@ -19,7 +20,9 @@ export default function App({ Component, pageProps }) {
     <Fragment>
       <ThemeProvider theme={Theme}>
         <CssBaseline />
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </ThemeProvider>
     </Fragment>
   );
