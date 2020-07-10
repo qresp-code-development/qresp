@@ -113,6 +113,12 @@ class Documentation(DynamicEmbeddedDocument):
     readme = StringField()
     meta = {'strict': False}
 
+class License(DynamicEmbeddedDocument):
+    """ Class mapping License section of paper to mongo database
+    """
+    license = StringField()
+    meta = {'strict': False}
+
 class Heads(DynamicEmbeddedDocument):
     """ Class mapping Heads section of paper to mongo database
     """
@@ -166,6 +172,7 @@ class Paper(Document):
     heads = ListField(EmbeddedDocumentField(Heads))
     workflow = EmbeddedDocumentField(Workflow)
     documentation = EmbeddedDocumentField(Documentation)
+    license = EmbeddedDocumentField(License)
     collections = ListField(required= True)
     schema = StringField(required= True)
     tags = ListField(required= True)

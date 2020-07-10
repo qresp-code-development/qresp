@@ -208,6 +208,7 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         paperDetails.emailId = getattr(paper.info.insertedBy,'emailId','')
         paperDetails.affiliation = getattr(paper.info.insertedBy,'affiliation','')
         paperDetails.documentation = getattr(paper.documentation,'readme','')
+        paperDetails.license = getattr(paper,"license",'')
         return paperDetails.__dict__
 
     def getWorkflowDetails(self, paperid):
@@ -433,6 +434,7 @@ class ObjectsForPreview(WorkflowObject):
         paperDetails.affiliation = paper.info.insertedBy.affiliation.data
         paperDetails.documentation = paper.documentation.readme.data
         paperDetails.ProjectName = paper.info.ProjectName.data
+        paperDetails.license = getattr(paper,"license",'')
         return paperDetails.__dict__
 
     def getWorkflowDetails(self):
