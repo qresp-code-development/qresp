@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import StyledButton from "../components/button";
+import { InternalStyledButton } from "../components/button";
 import SEO from "../components/seo";
 import { Box, Typography, Container } from "@material-ui/core";
 
@@ -46,8 +46,8 @@ export default function Home() {
               justifyContent="center"
               p={1}
             >
-              <StyledButton text="Explorer" url="/explorer" />
-              <StyledButton text="Curator" url="/curator" />
+              <InternalStyledButton text="Explorer" url="/explorer" />
+              <InternalStyledButton text="Curator" url="/curator" />
             </Box>
           </Container>
         </Box>

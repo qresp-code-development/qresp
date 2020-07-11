@@ -1,5 +1,5 @@
 import { AppBar, Toolbar, Box, Container, Button } from "@material-ui/core";
-import StyledButton from "../button";
+import { InternalStyledButton, ExternalStyledButton } from "../button";
 import Link from "next/link";
 
 const Header = () => {
@@ -25,17 +25,15 @@ const Header = () => {
                 </Button>
               </Link>
             </Box>
-            <Box display="flex">
-              <StyledButton text="Explorer" url="/explorer" />
-              <StyledButton text="Curator" url="/curator" />
-              <StyledButton
-                text="Documentation"
-                url="https://qresp.org"
-                external={true}
-              />
-              <StyledButton text="Contact" url="/contact" />
-              <StyledButton text="LogIn" url="/login" />
-            </Box>
+            <InternalStyledButton text="Explorer" url="/explorer" />
+            <InternalStyledButton text="Curator" url="/curator" />
+            <ExternalStyledButton
+              text="Documentation"
+              url="https://qresp.org"
+              external={true}
+            />
+            <InternalStyledButton text="Contact" url="/contact" />
+            <InternalStyledButton text="LogIn" url="/login" />
           </Box>
         </Container>
       </Toolbar>

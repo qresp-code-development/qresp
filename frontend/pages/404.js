@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import StyledButton from "../components/button";
+import { InternalStyledButton } from "../components/button";
 import { Box, Typography, Container } from "@material-ui/core";
 
 export default () => {
@@ -27,8 +27,8 @@ export default () => {
             us!
           </Typography>
           <Box display="flex" flexDirection="row" m={4} justifyContent="center">
-            <StyledButton text="Go to Explorer" url="/explorer"></StyledButton>
-            <StyledButton text="Go to Curator" url="/curator"></StyledButton>
+            <InternalStyledButton text="Go to Explorer" url="/explorer" />
+            <InternalStyledButton text="Go to Curator" url="/curator" />
           </Box>
         </Container>
       </Box>

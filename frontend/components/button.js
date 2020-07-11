@@ -1,12 +1,13 @@
 import PropTypes from "prop-types";
 import Link from "next/link";
-import { Box, Button } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
-const NavButton = withStyles({
+const StyledButton = withStyles({
   root: {
     backgroundColor: "#800000",
-    fontSize: "16px",
+    fontSize: "18px",
+    margin: "8px",
     color: "#FFF",
     "&:hover": {
       backgroundColor: "#9a0000",
@@ -14,41 +15,56 @@ const NavButton = withStyles({
   },
 })(Button);
 
-const StyledButton = (props) => {
-  const { text, url, external } = props;
+const SmallStyledButton = withStyles({
+  root: {
+    backgroundColor: "#800000",
+    fontSize: "12px",
+    margin: "4px",
+    color: "#FFF",
+    "&:hover": {
+      backgroundColor: "#9a0000",
+    },
+  },
+})(Button);
+
+const ExternalStyledButton = (props) => {
+  const { text, url } = props;
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" m={1}>
-      {external ? (
-        <NavButton
-          variant="text"
-          color="inherit"
-          size="large"
-          href={url}
-          target="_black"
-          rel="noopener"
-        >
-          {text}
-        </NavButton>
-      ) : (
-        <Link href={url}>
-          <NavButton variant="text" color="inherit" size="large">
-            {text}
-          </NavButton>
-        </Link>
-      )}
-    </Box>
+    <StyledButton
+      variant="text"
+      color="inherit"
+      size="large"
+      href={url}
+      target="_blank"
+      rel="noopener"
+    >
+      {text}
+    </StyledButton>
   );
 };
 
-StyledButton.defaultProps = {
-  external: false,
+const InternalStyledButton = (props) => {
+  const { text, url } = props;
+
+  return (
+    <Link href={url}>
+      <StyledButton variant="text" color="inherit" size="large">
+        {text}
+      </StyledButton>
+    </Link>
+  );
 };
 
-StyledButton.propTypes = {
+ExternalStyledButton.propTypes = {
   text: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
-  external: PropTypes.bool,
 };
 
+InternalStyledButton.propTypes = {
+  text: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
+};
+
+export { InternalStyledButton, ExternalStyledButton, SmallStyledButton };
 export default StyledButton;
