@@ -6,7 +6,6 @@ const SEO = (props) => {
   return (
     <Head>
       <title>{title}</title>
-      <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       <meta property="description" content={description} />
       <meta property="og:title" content="My page title" key="title" />
       <meta property="og:description" content={description} key="description" />
