@@ -887,3 +887,27 @@ def getDescriptor():
         content = {'Error':'Could not insert, Cannot get descriptor'}
         return jsonify(content),400
     return jsonify(content),200
+
+
+
+
+#################################### NEW ENDPOINTS ########################################### 
+
+ 
+# # Return the list of nodes 
+# @app.route('/qrespexplorer',methods=['GET','POST'])
+# def qrespexplorer():
+#     """
+#     Fetches the explorer homepage
+#     """
+#     form = QrespServerForm()
+#     serverslist = Servers()
+#     form.serverList = [qrespserver['qresp_server_url'] for qrespserver in
+#                            serverslist.getServersList()]
+#     if request.method == 'POST':
+#         if request.form.getlist('serversList'):
+#             selectedservers = request.form.getlist('serversList')
+#         else:
+#             selectedservers = form.serverList
+#         return redirect(url_for('search',servers=','.join(selectedservers)))
+#     return render_template('qrespexplorer.html', form=form)
