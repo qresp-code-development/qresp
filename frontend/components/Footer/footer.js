@@ -17,6 +17,7 @@ const Footer = () => {
         flexDirection="row"
         alignItems="center"
         justifyContent="space-evenly"
+        flexWrap="wrap"
         style={style.upper}
         p={4}
       >
@@ -54,6 +55,13 @@ const Footer = () => {
           Copyright ©2018-2020 All Rights Reserved
         </Typography>
       </Box>
+      <style jsx>
+        {`
+          a {
+            margin: 16px;
+          }
+        `}
+      </style>
     </Box>
   );
 };
