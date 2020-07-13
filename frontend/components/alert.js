@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 
 import { SmallStyledButton } from "./button";
 
@@ -12,6 +12,8 @@ import {
 
 import { withStyles } from "@material-ui/core/styles";
 
+import AlertContext from "../Context/Alert/alertContext";
+
 const ContentText = withStyles({
   root: {
     display: "flex",
@@ -22,18 +24,20 @@ const ContentText = withStyles({
 })(DialogContentText);
 
 const AlertDialog = (props) => {
-  const [open, setOpen] = useState(true);
+  // const [open, setOpen] = useState(true);
+
+  const { open, title, msg, buttons, unsetAlert } = useContext(AlertContext);
 
   const handleClose = () => {
-    setOpen(false);
+    // setOpen(false);
+    unsetAlert();
   };
 
-  const { title, msg, buttons } = props;
+  // const { title, msg, buttons } = props;
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
