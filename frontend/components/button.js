@@ -10,8 +10,14 @@ const StyledButton = withStyles({
     margin: "8px",
     color: "#FFF",
     "&:hover": {
-      backgroundColor: "#9a0000",
+      backgroundColor: "#B30000",
+      borderColor: "#800000",
     },
+  },
+  disabled: {
+    backgroundColor: "#bdc3c7",
+    borderColor: "#800000",
+    textDecoration: "line-through",
   },
 })(Button);
 
