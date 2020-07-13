@@ -1,11 +1,13 @@
-import { useEffect, Fragment } from "react";
+import { useEffect } from "react";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from "@material-ui/core/styles";
 
+import Theme from "../theme/theme";
 import Layout from "../components/layout";
 import "../styles/global.css";
-import Theme from "../theme/theme";
+
+import AlertState from "../Context/Alert/AlertState";
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
@@ -17,13 +19,13 @@ export default function App({ Component, pageProps }) {
   }, []);
 
   return (
-    <Fragment>
-      <ThemeProvider theme={Theme}>
-        <CssBaseline />
+    <ThemeProvider theme={Theme}>
+      <CssBaseline />
+      <AlertState>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </ThemeProvider>
-    </Fragment>
+      </AlertState>
+    </ThemeProvider>
   );
 }
