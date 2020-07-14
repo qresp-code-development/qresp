@@ -16,20 +16,20 @@ export default function Home() {
         author={qrespAuthor}
       ></SEO>
       <Box display="flex" flexDirection="column" flexGrow={1}>
-        <Box className="full-width">
+        <div
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            maxHeight: "48vh",
+          }}
+        >
           <img
             src="/images/qresp-poster.png"
-            height="478px"
             width="100%"
             className="blur"
           ></img>
-          <img
-            src="/images/qresp-poster.png"
-            height="478px"
-            width="60%"
-            className="poster"
-          ></img>
-        </Box>
+          <img src="/images/qresp-poster.png" className="poster"></img>
+        </div>
         <Box display="flex" m={3} alignItems="center" justifyContent="center">
           <Container>
             <Typography variant="h5" align="center" gutterBottom>
@@ -54,19 +54,19 @@ export default function Home() {
       </Box>
       <style jsx>
         {`
-          .full-width {
-            width: 100%;
-          }
           .poster {
-            object-fit: cover;
-            object-position: left top;
+            object-fit: scale-down;
             position: absolute;
             left: 50%;
             transform: translate(-50%);
+            min-height: 48vmin;
+            max-width: 125vmin;
           }
 
           .blur {
-            filter: blur(25px);
+            overflow: hidden;
+            height: 48vmin;
+            filter: blur(10px);
           }
         `}
       </style>
