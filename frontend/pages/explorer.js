@@ -1,5 +1,5 @@
 import { Fragment, useState, useContext, useEffect } from "react";
-import Router from "next/router";
+import { useRouter } from "next/router";
 
 import StyledButton, { SmallStyledButton } from "../components/button";
 import SEO from "../components/seo";
@@ -22,11 +22,15 @@ const explorer = ({ servers, error }) => {
 
   // Get the list of selected servers, on change in list
   const handleChange = (event, values) => {
-    setSelectedServers(values.join(","));
+    setSelectedServers(
+      values.map((option) => option.qresp_server_url).join(",")
+    );
   };
 
+  const router = useRouter();
+
   const refresh = () => {
-    Router.reload();
+    router.reload();
   };
 
   const searchSelected = () => {
@@ -40,12 +44,19 @@ const explorer = ({ servers, error }) => {
       setAlert(title, msg, buttons);
       return;
     }
-    alert("Nice", selectedServers);
+    router.push({
+      pathname: "/search",
+      query: { servers: selectedServers },
+    });
   };
 
   const searchAll = () => {
     unsetAlert();
-    alert("Searching on All Servers", servers);
+    const params = servers.map((option) => option.qresp_server_url).join(",");
+    router.push({
+      pathname: "/search",
+      query: { servers: params },
+    });
   };
 
   const errortitle = "Oops!";
@@ -79,7 +90,7 @@ const explorer = ({ servers, error }) => {
       />
       <Container>
         <div>
-          <Box display="flex" alignItems="center" justifyContent="center" m={4}>
+          <Box display="flex" alignItems="center" justifyContent="center" m={2}>
             <Typography variant="h3">
               <Box fontWeight="bold">Select Qresp node to search</Box>
             </Typography>
@@ -125,7 +136,7 @@ const explorer = ({ servers, error }) => {
             border-style: solid;
             border-radius: 5px;
             border-color: rgba(0, 0, 0, 0.125);
-            margin: 40px;
+            margin: 40px 4px;
             padding: 40px;
           }
         `}
