@@ -6,8 +6,9 @@ import {
   Container,
   Button,
   Hidden,
-  SwipeableDrawer,
+  Drawer,
 } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 
 import { Menu } from "@material-ui/icons";
 
@@ -35,9 +36,14 @@ const Header = () => {
     setDrawer(!drawer);
   };
 
+  const StyledDrawer = withStyles({
+    paper: {
+      backgroundColor: "#800000",
+    },
+  })(Drawer);
+
   const links = (
     <Fragment>
-      {" "}
       <InternalStyledButton text="Explorer" url="/explorer" />
       <InternalStyledButton text="Curator" url="/curator" />
       <ExternalStyledButton
@@ -59,9 +65,9 @@ const Header = () => {
             flexDirection="row"
             flexGrow={1}
             alignItems="center"
-            m={2}
+            m={1}
           >
-            <Box display="flex" alignItems="center" flexGrow={1} m={1}>
+            <Box display="flex" alignItems="center" flexGrow={1}>
               <Link href="/">
                 <Button>
                   <img
@@ -83,14 +89,11 @@ const Header = () => {
           </Box>
         </Container>
       </Toolbar>
-      <SwipeableDrawer
-        anchor="top"
-        open={drawer}
-        onClose={toggleDrawer}
-        onOpen={toggleDrawer}
-      >
-        A
-      </SwipeableDrawer>
+      <StyledDrawer anchor="top" open={drawer} onClose={toggleDrawer}>
+        <Box display="flex" flexDirection="column" onClick={toggleDrawer}>
+          {links}
+        </Box>
+      </StyledDrawer>
     </AppBar>
   );
 };
