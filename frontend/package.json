@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^5.0.0-alpha.2",
+    "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "axios": "^0.19.2",
     "next": "9.4.4",
