@@ -17,6 +17,8 @@ const StyledPagination = withStyles({
 })(Pagination);
 
 const StyledTablePagination = withStyles({
+  toolbar: { paddingLeft: 16 },
+  root: { marginTop: "8px", marginBottom: "8px" },
   spacer: { flex: "none" },
 })(TablePagination);
 
@@ -104,6 +106,7 @@ const EnhancedTablePagination = (props) => {
   const { count, page, rowsPerPage, onChangePage, onChangeRowsPerPage } = props;
   return (
     <StyledTablePagination
+      component="div"
       rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
       count={count}
       rowsPerPage={rowsPerPage}
@@ -118,7 +121,6 @@ const EnhancedTablePagination = (props) => {
       labelDisplayedRows={({ from, to, count, page }) => {
         return `Showing ${from} to ${to} from ${count} records`;
       }}
-      fullWidth
     />
   );
 };
