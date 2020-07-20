@@ -26,10 +26,16 @@ const search = ({ data, error }) => {
     unsetAlert();
   };
 
-  const { allPapersSize = null, allpaperslist = null } = data || {};
+  const {
+    allPapersSize = null,
+    allpaperslist = null,
+    authorslist = null,
+    collectionlist = null,
+    publicationlist = null,
+  } = data || {};
 
   useEffect(() => {
-    if (error != "None") {
+    if (error || (data && data.error)) {
       setAlert(
         "Search Error !",
         "There was error trying to search on the selected nodes. Please try again ! If problems persist please contact the administrator.",
@@ -57,7 +63,7 @@ const search = ({ data, error }) => {
           </Box>
           <AdvancedSearch />
           <Divider />
-          <RecordTable />
+          <RecordTable rows={allpaperslist} />
         </Box>
       </Container>
     </Fragment>
@@ -68,12 +74,14 @@ export async function getServerSideProps(ctx) {
   const { query } = ctx;
   var error = false;
   var data = null;
+
   try {
-    const response = await apiEndpoint.get("/api/search", {
+    const response = await apiEndpoint.get("/backend/search", {
       params: query,
     });
     data = response.data;
   } catch (e) {
+    console.error(e);
     error = true;
   }
 
