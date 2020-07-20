@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import PropTypes from "prop-types";
 
 import {
   Table,
@@ -13,6 +14,8 @@ import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
 import EnhancedTableFooter from "./TableFooter";
 
+import Summary from "../Paper/Summary";
+
 const StyledTableCell = withStyles({
   root: {
     padding: "8px",
@@ -26,44 +29,13 @@ const StyledLastTableCell = withStyles({
   },
 })(TableCell);
 
-function createData(name, year) {
-  return { name, year };
-}
+const RecordTable = (props) => {
+  const { rows } = props;
 
-const rows = [
-  createData("Cupcake", 305),
-  createData("Donut", 452),
-  createData("Eclair", 262),
-  createData("Frozen yoghurt", 159),
-  createData("Gingerbread", 356),
-  createData("Honeycomb", 408),
-  createData("Ice cream sandwich", 237),
-  createData("Jelly Bean", 375),
-  createData("KitKat", 518),
-  createData("Lollipop", 392),
-  createData("Marshmallow", 318),
-  createData("Nougat", 360),
-  createData("Oreo", 437),
-  createData("A", 305),
-  createData("B", 452),
-  createData("C", 262),
-  createData("D", 159),
-  createData("E", 356),
-  createData("F", 408),
-  createData("G", 237),
-  createData("H", 375),
-  createData("I", 518),
-  createData("J", 392),
-  createData("K", 318),
-  createData("L", 360),
-  createData("M", 437),
-];
-
-const RecordTable = () => {
   // Table Headers
   const TableHeaders = [
-    { label: "Record", isNumeric: false, value: "name" },
-    { label: "Year", isNumeric: true, value: "year" },
+    { label: "Record", isNumeric: false, value: "_Search__title" },
+    { label: "Year", isNumeric: true, value: "_Search__year" },
   ];
 
   // Pagination Controls
@@ -146,20 +118,24 @@ const RecordTable = () => {
             {sortedData.map((row, index) => {
               if (index == sortedData.length - 1) {
                 return (
-                  <TableRow key={row.name}>
+                  <TableRow key={row._Search__title}>
                     <StyledLastTableCell scope="row">
-                      {row.name}
+                      {row._Search__title}
                     </StyledLastTableCell>
                     <StyledLastTableCell align="right">
-                      {row.year}
+                      {row._Search__year}
                     </StyledLastTableCell>
                   </TableRow>
                 );
               }
               return (
-                <TableRow key={row.name}>
-                  <StyledTableCell scope="row">{row.name}</StyledTableCell>
-                  <StyledTableCell align="right">{row.year}</StyledTableCell>
+                <TableRow key={row._Search__id}>
+                  <StyledTableCell scope="row">
+                    {row._Search__title}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {row._Search__year}
+                  </StyledTableCell>
                 </TableRow>
               );
             })}
@@ -180,6 +156,10 @@ const RecordTable = () => {
       />
     </Fragment>
   );
+};
+
+RecordTable.propTypes = {
+  rows: PropTypes.array.isRequired,
 };
 
 export default RecordTable;
