@@ -30,7 +30,7 @@ const StyledLastTableCell = withStyles({
 })(TableCell);
 
 const RecordTable = (props) => {
-  const { rows } = props;
+  const { rows, servers } = props;
 
   // Table Headers
   const TableHeaders = [
@@ -120,7 +120,7 @@ const RecordTable = (props) => {
                 return (
                   <TableRow key={row._Search__title}>
                     <StyledLastTableCell scope="row">
-                      {row._Search__title}
+                      <Summary rowdata={row} servers={servers} />
                     </StyledLastTableCell>
                     <StyledLastTableCell align="right">
                       {row._Search__year}
@@ -131,7 +131,7 @@ const RecordTable = (props) => {
               return (
                 <TableRow key={row._Search__id}>
                   <StyledTableCell scope="row">
-                    {row._Search__title}
+                    <Summary rowdata={row} servers={servers} />
                   </StyledTableCell>
                   <StyledTableCell align="right">
                     {row._Search__year}
@@ -160,6 +160,7 @@ const RecordTable = (props) => {
 
 RecordTable.propTypes = {
   rows: PropTypes.array.isRequired,
+  servers: PropTypes.string.isRequired,
 };
 
 export default RecordTable;

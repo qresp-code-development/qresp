@@ -13,7 +13,7 @@ import AdvancedSearch from "../components/Search/AdvancedSearch";
 import apiEndpoint from "../Context/axios";
 import AlertContext from "../Context/Alert/alertContext";
 
-const search = ({ data, error }) => {
+const search = ({ data, error, servers }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const searchDescription =
@@ -63,7 +63,7 @@ const search = ({ data, error }) => {
           </Box>
           <AdvancedSearch />
           <Divider />
-          <RecordTable rows={allpaperslist} />
+          <RecordTable rows={allpaperslist} servers={servers} />
         </Box>
       </Container>
     </Fragment>
@@ -71,7 +71,9 @@ const search = ({ data, error }) => {
 };
 
 export async function getServerSideProps(ctx) {
+  // Query contains the args from the url
   const { query } = ctx;
+  console.log(query);
   var error = false;
   var data = null;
 
@@ -86,7 +88,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { data, error },
+    props: { data, error, servers: query.servers },
   };
 }
 
