@@ -433,7 +433,7 @@ class FetchDataFromAPI():
             serverList.append(localServer)
         elif LOCALHOST:
             serverList.append(LOCALHOST)
-        self.__servernames = serverList
+        self.__servernames = set(serverList)
 
     def fetchOutput(self,apiname):
         """
