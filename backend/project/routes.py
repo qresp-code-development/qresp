@@ -823,19 +823,15 @@ def search():
     This method helps in filtering paper content
     """
 
-    print("SEARCHING")
-
     try:
         selected_servers = urllib.parse.unquote(
             request.args.get('servers', type=str, default=''))
         fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip(
-            "/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
+            "/") if Config.get_setting('DEV', 'MONGODB_HOST') else None)
         allpaperslist = fetchdata.fetchOutput('/api/search')
     except Exception as e:
         app.logger.error(e)
         return jsonify({"error":e}), 500
-
-    print("HERE")
 
     try:
         collectionlist = fetchdata.fetchOutput('/api/collections')
@@ -847,7 +843,6 @@ def search():
         return jsonify({"allpaperslist":allpaperslist, "error":str(e)}), 500
         # return render_template('search.html', allpaperslist=allpaperslist)
 
-    print("HERE")
     return jsonify({"allpaperslist": allpaperslist, "collectionlist": collectionlist, "authorslist": authorslist,
                     "publicationlist": publicationlist, "allPapersSize": allPapersSize, "error":None}), 200
 
