@@ -1,7 +1,10 @@
 import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
+import { CSSTransition } from "react-transition-group";
 
 import Link from "next/link";
+
+import styles from "./Summary.module.css";
 
 import {
   Typography,
@@ -13,7 +16,10 @@ import {
   IconButton,
 } from "@material-ui/core";
 
-import { ExpandMoreRounded, ExpandLessRounded } from "@material-ui/icons";
+import {
+  KeyboardArrowRightRounded,
+  KeyboardArrowLeftRounded,
+} from "@material-ui/icons";
 
 const StyledPaper = withStyles({
   root: {
@@ -27,6 +33,13 @@ const StyledChip = withStyles({
     color: "rgba(0,0,0,0.60)",
   },
 })(Chip);
+
+const StyledButton = withStyles({
+  root: {
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+})(IconButton);
 
 const Summary = ({ rowdata, servers }) => {
   const {
@@ -47,9 +60,9 @@ const Summary = ({ rowdata, servers }) => {
     _Search__year,
   } = rowdata;
 
-  const [checked, setChecked] = React.useState(true);
+  const [checked, setChecked] = useState(false);
 
-  const handleChange = () => {
+  const handleChange = async () => {
     setChecked((prev) => !prev);
   };
 
@@ -61,7 +74,7 @@ const Summary = ({ rowdata, servers }) => {
     <Fragment>
       <StyledPaper elevation={0}>
         <Grid container justify="flex-start" alignItems="center">
-          <Grid item xs={11} container>
+          <Grid item xs={12} container>
             <Grid item xs={12}>
               <Link
                 href="/paperdetails/[id]"
@@ -98,66 +111,102 @@ const Summary = ({ rowdata, servers }) => {
                 </Typography>
               </a>
             </Grid>
-            <Grid xs={12}>
+            <Grid item xs={12}>
               {_Search__tags.map((tag) => (
                 <StyledChip label={tag} key={tag} size="small" />
               ))}
             </Grid>
-            <Grid item xs={12}>
-              <div className="accordion" hidden={checked}>
-                <StyledPaper elevation={0}>
-                  <Grid container justify="space-evenly">
-                    <Grid item>
-                      <Link
-                        href="/paperdetails/[id]"
-                        as={{
-                          pathname: "/paperdetails/" + _Search__id,
-                          query: { servers: servers },
-                        }}
+
+            <Grid item xs={12} container direction="row">
+              <Grid item xs={2}>
+                <StyledButton onClick={handleChange}>
+                  {checked ? (
+                    <KeyboardArrowLeftRounded />
+                  ) : (
+                    <KeyboardArrowRightRounded />
+                  )}
+                </StyledButton>
+              </Grid>
+              <CSSTransition
+                in={checked}
+                timeout={300}
+                classNames={{
+                  enter: styles.enter,
+                  enterActive: styles.enterActive,
+                  exit: styles.exit,
+                  exitActive: styles.exitActive,
+                }}
+                unmountOnExit
+              >
+                <Grid
+                  item
+                  xs={9}
+                  container
+                  direction="row"
+                  justify="space-between"
+                  spacing={1}
+                >
+                  <Grid item>
+                    <Link
+                      href="/paperdetails/[id]"
+                      as={{
+                        pathname: "/paperdetails/" + _Search__id,
+                        query: { servers: servers + "#showFigures" },
+                      }}
+                    >
+                      <a
+                        rel="noopener noreferrer"
+                        alt="Link to Paper Charts"
+                        target="_blank"
                       >
-                        <a rel="noopener noreferrer">
-                          <img src="/images/figures-icon.png" />
-                        </a>
-                      </Link>
-                    </Grid>
-                    <Grid item>
-                      <Link
-                        href="/paperdetails/[id]"
-                        as={{
-                          pathname: "/paperdetails/" + _Search__id,
-                          query: { servers: servers },
-                        }}
-                      >
-                        <a rel="noopener noreferrer">
-                          <img src="/images/workflow-icon.png" />
-                        </a>
-                      </Link>
-                    </Grid>
-                    <Grid item>
-                      <a href={globusDownLoadUrl} rel="noopener noreferrer">
-                        <img src="/images/download-icon.png" />
+                        <img src="/images/figures-icon.png" />
                       </a>
-                    </Grid>
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <Link
+                      href="/paperdetails/[id]"
+                      as={{
+                        pathname: "/paperdetails/" + _Search__id,
+                        query: { servers: servers },
+                      }}
+                    >
+                      <a
+                        rel="noopener noreferrer"
+                        alt="Link to Paper Workflow"
+                        target="_blank"
+                      >
+                        <img src="/images/workflow-icon.png" />
+                      </a>
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <a
+                      href={globusDownLoadUrl}
+                      rel="noopener noreferrer"
+                      alt="Download Paper Using Globus"
+                      target="_blank"
+                    >
+                      <img src="/images/download-icon.png" />
+                    </a>
+                  </Grid>
+                  {_Search__notebookFile ? (
                     <Grid item>
-                      {" "}
                       <a
                         href={
                           _Search__notebookPath + "/" + _Search__notebookFile
                         }
                         rel="noopener noreferrer"
+                        alt="View DEfault Notebook File"
+                        target="_blank"
                       >
                         <img src="/images/jupyter-icon.png" />
                       </a>
                     </Grid>
-                  </Grid>
-                </StyledPaper>
-              </div>
+                  ) : null}
+                </Grid>
+              </CSSTransition>
             </Grid>
-          </Grid>
-          <Grid item xs={1}>
-            <IconButton onClick={handleChange}>
-              {checked ? <ExpandMoreRounded /> : <ExpandLessRounded />}
-            </IconButton>
           </Grid>
         </Grid>
       </StyledPaper>
@@ -169,12 +218,9 @@ const Summary = ({ rowdata, servers }) => {
           color: #777777;
         }
         img {
-          margin: 8px 8px 0px;
-          height: 36px;
-          width: 36 px;
-        }
-        .accordion {
-          transition: visibility 2s ease-in 2s;
+          margin: 8px 0px 0px;
+          height: 32px;
+          width: 32px;
         }
       `}</style>
     </Fragment>
