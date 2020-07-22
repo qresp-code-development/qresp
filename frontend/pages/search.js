@@ -47,7 +47,7 @@ const search = ({ data, error, servers }) => {
   return (
     <Fragment>
       <SEO
-        title="Qresp | Explorer"
+        title="Qresp | Search"
         description={searchDescription}
         author={searchAuthor}
       />
@@ -73,7 +73,6 @@ const search = ({ data, error, servers }) => {
 export async function getServerSideProps(ctx) {
   // Query contains the args from the url
   const { query } = ctx;
-  console.log(query);
   var error = false;
   var data = null;
 
