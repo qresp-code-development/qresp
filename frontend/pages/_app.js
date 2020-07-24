@@ -8,6 +8,7 @@ import Layout from "../components/layout";
 import "../styles/global.css";
 
 import AlertState from "../Context/Alert/AlertState";
+import LoadingState from "../Context/Loading/LoadingState";
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
@@ -21,11 +22,13 @@ export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider theme={Theme}>
       <CssBaseline />
-      <AlertState>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </AlertState>
+      <LoadingState>
+        <AlertState>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </AlertState>
+      </LoadingState>
     </ThemeProvider>
   );
 }
