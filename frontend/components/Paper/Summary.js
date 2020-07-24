@@ -4,8 +4,6 @@ import { CSSTransition } from "react-transition-group";
 
 import Link from "next/link";
 
-import styles from "./Summary.module.css";
-
 import {
   Typography,
   Grid,
@@ -21,18 +19,15 @@ import {
   KeyboardArrowLeftRounded,
 } from "@material-ui/icons";
 
+import styles from "./Summary.module.css";
+
+import Tag from "../tag";
+
 const StyledPaper = withStyles({
   root: {
     backgroundColor: "inherit",
   },
 })(Paper);
-
-const StyledChip = withStyles({
-  root: {
-    margin: "4px",
-    color: "rgba(0,0,0,0.60)",
-  },
-})(Chip);
 
 const StyledButton = withStyles({
   root: {
@@ -113,7 +108,7 @@ const Summary = ({ rowdata, servers }) => {
             </Grid>
             <Grid item xs={12}>
               {_Search__tags.map((tag) => (
-                <StyledChip label={tag} key={tag} size="small" />
+                <Tag label={tag} key={tag} size="small" />
               ))}
             </Grid>
 
@@ -184,7 +179,7 @@ const Summary = ({ rowdata, servers }) => {
                     <a
                       href={globusDownLoadUrl}
                       rel="noopener noreferrer"
-                      alt="Download Paper Using Globus"
+                      alt="Download data associated to the paper Using Globus"
                       target="_blank"
                     >
                       <img src="/images/download-icon.png" />
@@ -194,7 +189,10 @@ const Summary = ({ rowdata, servers }) => {
                     <Grid item>
                       <a
                         href={
-                          _Search__notebookPath + "/" + _Search__notebookFile
+                          "https://nbviewer.jupyter.org/url/" +
+                          _Search__notebookPath +
+                          "/" +
+                          _Search__notebookFile
                         }
                         rel="noopener noreferrer"
                         alt="View DEfault Notebook File"
