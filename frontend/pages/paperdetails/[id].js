@@ -1,34 +1,48 @@
 import { Fragment, useContext, useEffect } from "react";
+import PropTypes from "prop-types";
+
 import { useRouter } from "next/router";
-import {
-  Container,
-  Box,
-  Typography,
-  Divider,
-  Chip,
-  withStyles,
-} from "@material-ui/core";
+import { Container, Box, Typography } from "@material-ui/core";
 
 import SEO from "../../components/seo";
 import apiEndpoint from "../../Context/axios";
 import AlertContext from "../../Context/Alert/alertContext";
 import { SmallStyledButton } from "../../components/button";
+import ReferenceInfo from "../../components/Paper/Reference";
 
-const StyledChip = withStyles({
-  root: {
-    margin: "4px",
-    color: "rgba(0,0,0,0.60)",
-    clipPath: "polygon(0% 0%, 75% 0%, 85% 50%, 75% 100%, 0% 100%)",
-    borderRadius: 0,
-    paddingRight: "16px",
-  },
-  labelSmall: {
-    paddingRight: "16px",
-  },
-})(Chip);
+const PaperDetails = ({ data, error, preview }) => {
+  const {
+    title,
+    authors,
+    tags,
+    collections,
+    PIs,
+    publication,
+    year,
+    doi,
+    cite,
+    downloadPath,
+    notebookFile,
+    notebookPath,
+    abstract,
+  } = data;
 
-const paperdetails = ({ data, error }) => {
-  const { title, authors, tags } = data;
+  const referenceData = {
+    title,
+    authors,
+    tags,
+    collections,
+    PIs,
+    publication,
+    year,
+    doi,
+    cite,
+    downloadPath,
+    notebookFile,
+    notebookPath,
+    abstract,
+  };
+
   const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const router = useRouter();
@@ -53,16 +67,14 @@ const paperdetails = ({ data, error }) => {
       <SEO title="Qresp | Paper" description={title} author={authors} />
       <Container>
         <Box mt={5}>
-          <Typography variant="h4" gutterBottom>
-            <Box fontWeight="bold">{title}</Box>
-          </Typography>
-          <Typography variant="subtitle1" color="secondary" gutterBottom>
-            by {authors}
-          </Typography>
+          {" "}
+          {preview ? (
+            <Typography variant="subtitle2" color="error" gutterBottom>
+              <Box fontWeight="bold">* This is unpublished content !</Box>
+            </Typography>
+          ) : null}
         </Box>
-        {tags.map((tag) => (
-          <StyledChip label={tag} key={tag} size="small" />
-        ))}
+        <ReferenceInfo referenceData={referenceData} />
       </Container>
     </Fragment>
   );
@@ -88,4 +100,12 @@ export async function getServerSideProps(ctx) {
   };
 }
 
-export default paperdetails;
+PaperDetails.defaultProps = {
+  preview: true,
+};
+
+PaperDetails.propTypes = {
+  preview: PropTypes.bool,
+};
+
+export default PaperDetails;
