@@ -10,7 +10,6 @@ import {
   Box,
   Paper,
   withStyles,
-  Chip,
   IconButton,
 } from "@material-ui/core";
 
@@ -36,23 +35,18 @@ const StyledButton = withStyles({
   },
 })(IconButton);
 
-const Summary = ({ rowdata, servers }) => {
+const Summary = ({ rowdata }) => {
   const {
-    _Search__abstract,
     _Search__authors,
-    _Search__collections,
     _Search__doi,
     _Search__downloadPath,
-    _Search__fileServerPath,
-    _Search__folderAbsolutePath,
     _Search__id,
     _Search__notebookFile,
     _Search__notebookPath,
     _Search__publication,
-    _Search__serverPath,
     _Search__tags,
     _Search__title,
-    _Search__year,
+    _Search__servers,
   } = rowdata;
 
   const [checked, setChecked] = useState(false);
@@ -60,10 +54,6 @@ const Summary = ({ rowdata, servers }) => {
   const handleChange = async () => {
     setChecked((prev) => !prev);
   };
-
-  const downloadUrl = _Search__doi.slice(_Search__doi.lastIndexOf("/") + 1);
-
-  const globusDownLoadUrl = `https://app.globus.org/file-manager?origin_id=${process.env.NEXT_PUBLIC_GLOBUS_ORIGIN_ID}&origin_path=${downloadUrl}`;
 
   return (
     <Fragment>
@@ -75,7 +65,7 @@ const Summary = ({ rowdata, servers }) => {
                 href="/paperdetails/[id]"
                 as={{
                   pathname: "/paperdetails/" + _Search__id,
-                  query: { servers: servers },
+                  query: { servers: _Search__servers },
                 }}
               >
                 <a>
@@ -106,11 +96,11 @@ const Summary = ({ rowdata, servers }) => {
                 </Typography>
               </a>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               {_Search__tags.map((tag) => (
                 <Tag label={tag} key={tag} size="small" />
               ))}
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={12} container direction="row">
               <Grid item xs={2}>
@@ -146,7 +136,7 @@ const Summary = ({ rowdata, servers }) => {
                       href="/paperdetails/[id]"
                       as={{
                         pathname: "/paperdetails/" + _Search__id,
-                        query: { servers: servers + "#showFigures" },
+                        query: { servers: _Search__servers + "#showFigures" },
                       }}
                     >
                       <a
@@ -163,7 +153,7 @@ const Summary = ({ rowdata, servers }) => {
                       href="/paperdetails/[id]"
                       as={{
                         pathname: "/paperdetails/" + _Search__id,
-                        query: { servers: servers },
+                        query: { servers: _Search__servers },
                       }}
                     >
                       <a
@@ -177,7 +167,7 @@ const Summary = ({ rowdata, servers }) => {
                   </Grid>
                   <Grid item>
                     <a
-                      href={globusDownLoadUrl}
+                      href={_Search__downloadPath}
                       rel="noopener noreferrer"
                       alt="Download data associated to the paper Using Globus"
                       target="_blank"
@@ -227,7 +217,6 @@ const Summary = ({ rowdata, servers }) => {
 
 Summary.propTypes = {
   rowdata: PropTypes.object.isRequired,
-  servers: PropTypes.string.isRequired,
 };
 
 export default Summary;
