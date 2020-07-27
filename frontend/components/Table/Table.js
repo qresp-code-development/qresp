@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, createElement, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -30,13 +30,7 @@ const StyledLastTableCell = withStyles({
 })(TableCell);
 
 const RecordTable = (props) => {
-  const { rows, servers } = props;
-
-  // Table Headers
-  const TableHeaders = [
-    { label: "Record", isNumeric: false, value: "_Search__title" },
-    { label: "Year", isNumeric: true, value: "_Search__year" },
-  ];
+  const { rows, views, headers, displayorder } = props;
 
   // Pagination Controls
   const [page, setPage] = React.useState(0);
@@ -56,7 +50,7 @@ const RecordTable = (props) => {
 
   // Sorting Controls
   const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("Year");
+  const [orderBy, setOrderBy] = React.useState("year");
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -85,6 +79,7 @@ const RecordTable = (props) => {
   // Sorting Function
   function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
+
     stabilizedThis.sort((a, b) => {
       const order = comparator(a[0], b[0]);
       if (order !== 0) return order;
@@ -109,33 +104,30 @@ const RecordTable = (props) => {
       <TableContainer>
         <Table aria-label="Record (Paper) Table">
           <EnhancedTableHeader
-            headers={TableHeaders}
+            headers={headers}
             order={order}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
           />
           <TableBody>
             {sortedData.map((row, index) => {
-              if (index == sortedData.length - 1) {
-                return (
-                  <TableRow key={row._Search__title}>
-                    <StyledLastTableCell scope="row">
-                      <Summary rowdata={row} servers={servers} />
-                    </StyledLastTableCell>
-                    <StyledLastTableCell align="right">
-                      {row._Search__year}
-                    </StyledLastTableCell>
-                  </TableRow>
-                );
-              }
               return (
-                <TableRow key={row._Search__id}>
-                  <StyledTableCell scope="row">
-                    <Summary rowdata={row} servers={servers} />
-                  </StyledTableCell>
-                  <StyledTableCell align="right">
-                    {row._Search__year}
-                  </StyledTableCell>
+                <TableRow key={index}>
+                  {displayorder.map((td, i) => {
+                    const element = views[td]
+                      ? createElement(views[td], { rowdata: row[td] })
+                      : row[td];
+
+                    return index == sortedData.length - 1 ? (
+                      <StyledLastTableCell key={i} align={headers[i].align}>
+                        {element}
+                      </StyledLastTableCell>
+                    ) : (
+                      <StyledTableCell key={i} align={headers[i].align}>
+                        {element}
+                      </StyledTableCell>
+                    );
+                  })}
                 </TableRow>
               );
             })}
@@ -159,8 +151,20 @@ const RecordTable = (props) => {
 };
 
 RecordTable.propTypes = {
+  headers: PropTypes.array.isRequired,
   rows: PropTypes.array.isRequired,
-  servers: PropTypes.string.isRequired,
+  displayorder: function (props, propName, componentName) {
+    if (!props[propName]) {
+      return new Error("Required Prop views cannot be null!");
+    }
+    if (!Array.isArray(props[propName])) {
+      return new Error("views should be of type Array");
+    }
+    if (props[propName].length !== props["headers"].length) {
+      return new Error("Number of Views and Headers MisMatch");
+    }
+  },
+  views: PropTypes.object.isRequired,
 };
 
 export default RecordTable;
