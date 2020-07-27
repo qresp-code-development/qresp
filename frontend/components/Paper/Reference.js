@@ -43,7 +43,7 @@ const ReferenceInfo = ({ referenceData }) => {
       </Box>
       <Box>
         {tags.map((tag) => (
-          <Tag label={tag} key={tag} />
+          <Tag label={tag} key={tag} size="small" />
         ))}
       </Box>
       <Box my={2}>
@@ -69,7 +69,7 @@ const ReferenceInfo = ({ referenceData }) => {
             image="/images/jupyter-icon.png"
           />
         ) : null}
-        <LabelValue label="Abstract" value={abstract} />
+        <LabelValue label="Abstract" value={abstract} textVariant="body2" />
       </Box>
     </Fragment>
   );
