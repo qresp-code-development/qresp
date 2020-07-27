@@ -8,9 +8,14 @@ const BigTypography = withStyles({
     color: "#777777",
     textAlign: "justify",
   },
+  body2: {
+    fontSize: "0.95rem",
+    color: "#777777",
+    textAlign: "justify",
+  },
 })(Typography);
 
-const LabelValue = ({ label, value, link, image }) => {
+const LabelValue = ({ label, value, link, image, textVariant }) => {
   if (typeof value === "array") {
     value = value.join(",");
   }
@@ -25,16 +30,24 @@ const LabelValue = ({ label, value, link, image }) => {
           justify="flex-start"
         >
           <Grid item>
-            <span>{label}:&nbsp;&nbsp;</span>
+            <BigTypography variant="body1" color="secondary" component="div">
+              <span>{label}:&nbsp;&nbsp;</span>
+            </BigTypography>
           </Grid>
           <Grid item>
-            {link ? (
-              <a href={link} target="_blank" rel="noopener noreferer">
-                {image ? <img src={image} alt={value} /> : value}
-              </a>
-            ) : (
-              value
-            )}
+            <BigTypography
+              variant={textVariant}
+              color="secondary"
+              component="div"
+            >
+              {link ? (
+                <a href={link} target="_blank" rel="noopener noreferer">
+                  {image ? <img src={image} alt={value} /> : value}
+                </a>
+              ) : (
+                value
+              )}
+            </BigTypography>
           </Grid>
         </Grid>
       </BigTypography>
@@ -68,7 +81,7 @@ const LabelValue = ({ label, value, link, image }) => {
 LabelValue.defaultProps = {
   link: null,
   image: null,
-  textVariant: "",
+  textVariant: "body1",
 };
 
 LabelValue.propTypes = {
