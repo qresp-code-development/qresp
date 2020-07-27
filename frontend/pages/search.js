@@ -9,6 +9,7 @@ import SEO from "../components/seo";
 import { SmallStyledButton } from "../components/button";
 import RecordTable from "../components/Table/Table";
 import AdvancedSearch from "../components/Search/AdvancedSearch";
+import Summary from "../components/Paper/Summary";
 
 import apiEndpoint from "../Context/axios";
 import AlertContext from "../Context/Alert/alertContext";
@@ -33,6 +34,24 @@ const search = ({ data, error, servers }) => {
     collectionlist = null,
     publicationlist = null,
   } = data || {};
+
+  const TableHeaders = [
+    { label: "Record", align: "left", value: "title" },
+    { label: "Year", align: "right", value: "year" },
+  ];
+
+  const TableDisplayOrder = ["paper", "year"];
+
+  const rows = allpaperslist.map((paper) => {
+    paper["_Search__servers"] = servers;
+    return {
+      paper: paper,
+      title: paper["_Search__title"],
+      year: paper["_Search__year"],
+    };
+  });
+
+  const views = { paper: Summary, year: null };
 
   useEffect(() => {
     if (error || (data && data.error)) {
@@ -63,7 +82,12 @@ const search = ({ data, error, servers }) => {
           </Box>
           <AdvancedSearch />
           <Divider />
-          <RecordTable rows={allpaperslist} servers={servers} />
+          <RecordTable
+            rows={rows}
+            headers={TableHeaders}
+            views={views}
+            displayorder={TableDisplayOrder}
+          />
         </Box>
       </Container>
     </Fragment>
