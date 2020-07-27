@@ -9,6 +9,7 @@ import apiEndpoint from "../../Context/axios";
 import AlertContext from "../../Context/Alert/alertContext";
 import { SmallStyledButton } from "../../components/button";
 import ReferenceInfo from "../../components/Paper/Reference";
+import ChartInfo from "../../components/Paper/Charts";
 
 const PaperDetails = ({ data, error, preview }) => {
   const {
@@ -25,6 +26,8 @@ const PaperDetails = ({ data, error, preview }) => {
     notebookFile,
     notebookPath,
     abstract,
+    charts,
+    fileServerPath,
   } = data;
 
   const referenceData = {
@@ -52,7 +55,6 @@ const PaperDetails = ({ data, error, preview }) => {
   };
 
   useEffect(() => {
-    console.log(data);
     if (error || (data && data.error)) {
       setAlert(
         "Error Getting Paper Data !",
@@ -75,6 +77,9 @@ const PaperDetails = ({ data, error, preview }) => {
           ) : null}
         </Box>
         <ReferenceInfo referenceData={referenceData} />
+        <Box mb={7} mt={1}>
+          <ChartInfo charts={charts} fileserverpath={fileServerPath} />
+        </Box>
       </Container>
     </Fragment>
   );
@@ -101,7 +106,7 @@ export async function getServerSideProps(ctx) {
 }
 
 PaperDetails.defaultProps = {
-  preview: true,
+  preview: false,
 };
 
 PaperDetails.propTypes = {
