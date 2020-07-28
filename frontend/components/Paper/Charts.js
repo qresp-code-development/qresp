@@ -1,31 +1,13 @@
-import React from "react";
+import { Fragment } from "react";
 import PropTypes from "prop-types";
 
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  Box,
-  withStyles,
-  Tooltip,
-} from "@material-ui/core";
+import { SRLWrapper, useLightbox } from "simple-react-lightbox";
+
+import { Typography, ButtonBase } from "@material-ui/core";
 
 import RecordTable from "../Table/Table";
-
-const StyledAccordion = withStyles({
-  root: {
-    borderRadius: "5px",
-  },
-})(Accordion);
-
-const StyledAccordionSummary = withStyles({
-  root: {
-    backgroundColor: "rgba(0,0,0,.03)",
-  },
-})(AccordionSummary);
-
-import { ExpandMore } from "@material-ui/icons";
+import Drawer from "../drawer";
+import StyledTooltip from "../tooltip";
 
 const PropsView = ({ rowdata }) => {
   return (
@@ -45,6 +27,8 @@ const FilesView = ({ rowdata }) => {
             href={rowdata["server"] + "/" + file}
             key={index}
             style={{ color: "#007bff" }}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             {index != 0 ? ", " : null}
             {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
@@ -55,29 +39,25 @@ const FilesView = ({ rowdata }) => {
   );
 };
 
-const StyledTooltip = withStyles((theme) => ({
-  tooltip: {
-    backgroundColor: "#f5f5f9",
-    color: "rgba(0, 0, 0, 0.87)",
-    fontSize: theme.typography.pxToRem(12),
-    border: "1px solid #dadde9",
-  },
-}))(Tooltip);
-
-const FigureView = ({ rowdata }) => {
-  return (
-    <StyledTooltip title={rowdata.caption} placement="left" arrow>
-      <img
-        src={rowdata["server"] + "/" + rowdata["imageFile"]}
-        style={{ maxWidth: "100%" }}
-        alt={rowdata.caption}
-        loading="lazy"
-      ></img>
-    </StyledTooltip>
-  );
-};
-
 const ChartInfo = ({ charts, fileserverpath }) => {
+  // Light Box Controls
+  const { openLightbox } = useLightbox();
+
+  const FigureView = ({ rowdata }) => {
+    return (
+      <StyledTooltip title={rowdata.caption} placement="left" arrow>
+        <ButtonBase focusRipple onClick={() => openLightbox(rowdata.index)}>
+          <img
+            src={rowdata["server"] + "/" + rowdata["imageFile"]}
+            style={{ maxWidth: "100%" }}
+            alt={rowdata.caption}
+            loading="lazy"
+          ></img>
+        </ButtonBase>
+      </StyledTooltip>
+    );
+  };
+
   const TableHeaders = [
     { label: "Figure/Table", align: "center", value: "index" },
     { label: "Properties", align: "center", value: null },
@@ -86,8 +66,26 @@ const ChartInfo = ({ charts, fileserverpath }) => {
 
   const TableDisplayOrder = ["figure", "props", "files"];
 
-  const rows = charts.map((row) => {
+  const Gallery = [];
+  const options = {
+    settings: {
+      lightboxTransitionSpeed: 0.3,
+    },
+    caption: {
+      captionContainerPadding: "16px",
+    },
+    thumbnails: {
+      showThumbnails: false,
+    },
+  };
+
+  const rows = charts.map((row, index) => {
+    row["index"] = index;
     row["server"] = fileserverpath;
+    Gallery.push({
+      src: row["server"] + "/" + row["imageFile"],
+      caption: row["caption"],
+    });
     return {
       figure: row,
       props: {
@@ -104,25 +102,18 @@ const ChartInfo = ({ charts, fileserverpath }) => {
 
   const views = { figure: FigureView, props: PropsView, files: FilesView };
 
-  // console.log(charts);
   return (
-    <StyledAccordion elevation={4} square={true}>
-      <StyledAccordionSummary expandIcon={<ExpandMore />}>
-        <Typography variant="h4">
-          <Box fontWeight="bold">Charts</Box>
-        </Typography>
-      </StyledAccordionSummary>
-      <AccordionDetails>
-        <Box display="flex" flexDirection="column" m={2}>
-          <RecordTable
-            rows={rows}
-            headers={TableHeaders}
-            views={views}
-            displayorder={TableDisplayOrder}
-          />
-        </Box>
-      </AccordionDetails>
-    </StyledAccordion>
+    <Fragment>
+      <SRLWrapper images={Gallery} options={options} />
+      <Drawer heading="Charts">
+        <RecordTable
+          rows={rows}
+          headers={TableHeaders}
+          views={views}
+          displayorder={TableDisplayOrder}
+        />
+      </Drawer>
+    </Fragment>
   );
 };
 
