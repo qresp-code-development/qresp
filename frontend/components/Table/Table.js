@@ -132,11 +132,11 @@ const RecordTable = (props) => {
               );
             })}
 
-            {emptyRows > 0 && emptyRows < 10 ? (
+            {/* {emptyRows > 0 && emptyRows < 10 ? (
               <TableRow style={{ height: 47 * emptyRows }}>
                 <TableCell colSpan={6} />
               </TableRow>
-            ) : null}
+            ) : null} */}
           </TableBody>
         </Table>
       </TableContainer>

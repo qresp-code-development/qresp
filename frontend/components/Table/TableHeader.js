@@ -28,7 +28,7 @@ const EnhancedTableHeader = (props) => {
       <TableRow>
         {headers.map((header) => (
           <StyledTableCell
-            key={header.value}
+            key={header.label}
             align={header.align}
             sortDirection={
               header.value && orderBy === header.value ? order : false
