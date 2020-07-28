@@ -10,6 +10,10 @@ import AlertContext from "../../Context/Alert/alertContext";
 import { SmallStyledButton } from "../../components/button";
 import ReferenceInfo from "../../components/Paper/Reference";
 import ChartInfo from "../../components/Paper/Charts";
+import DatasetInfo from "../../components/Paper/Datasets";
+import ToolsInfo from "../../components/Paper/Tools";
+
+import SimpleReactLightbox from "simple-react-lightbox";
 
 const PaperDetails = ({ data, error, preview }) => {
   const {
@@ -28,6 +32,8 @@ const PaperDetails = ({ data, error, preview }) => {
     abstract,
     charts,
     fileServerPath,
+    datasets,
+    tools,
   } = data;
 
   const referenceData = {
@@ -66,7 +72,7 @@ const PaperDetails = ({ data, error, preview }) => {
 
   return (
     <Fragment>
-      <SEO title="Qresp | Paper" description={title} author={authors} />
+      <SEO title={"Qresp | " + title} description={abstract} author={authors} />
       <Container>
         <Box mt={5}>
           {" "}
@@ -78,7 +84,11 @@ const PaperDetails = ({ data, error, preview }) => {
         </Box>
         <ReferenceInfo referenceData={referenceData} />
         <Box mb={7} mt={1}>
-          <ChartInfo charts={charts} fileserverpath={fileServerPath} />
+          <SimpleReactLightbox>
+            <ChartInfo charts={charts} fileserverpath={fileServerPath} />
+          </SimpleReactLightbox>
+          <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
+          <ToolsInfo tools={tools} />
         </Box>
       </Container>
     </Fragment>
