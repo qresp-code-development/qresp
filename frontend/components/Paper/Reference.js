@@ -54,7 +54,7 @@ const ReferenceInfo = ({ referenceData }) => {
           value={publication + " (" + year + ")"}
           link={"https://doi.org/" + doi}
         />
-        <LabelValue label="Cite" value={cite.length > 0 ? cite : ""} />
+        <LabelValue label="Cite" value={cite && cite.length > 0 ? cite : ""} />
         <LabelValue
           label="Download"
           value="Download data associated to the paper Using Globus"
