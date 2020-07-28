@@ -15,6 +15,37 @@ const BigTypography = withStyles({
   },
 })(Typography);
 
+const SimpleLabelValue = ({ label, value }) => {
+  return (
+    <div>
+      <Grid container direction="row" alignItems="center" justify="flex-start">
+        <Grid item>
+          <Typography variant="body2" color="secondary" component="span">
+            <span>{label}:&nbsp;&nbsp;</span>
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Typography variant="body2" color="secondary" component="div">
+            {value}
+          </Typography>
+        </Grid>
+      </Grid>
+      <style jsx>
+        {`
+          span {
+            font-weight: bold;
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
+SimpleLabelValue.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+};
+
 const LabelValue = ({ label, value, link, image, textVariant }) => {
   if (typeof value === "array") {
     value = value.join(",");
@@ -22,35 +53,28 @@ const LabelValue = ({ label, value, link, image, textVariant }) => {
 
   return (
     <div>
-      <BigTypography variant="body1" color="secondary" component="div">
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          justify="flex-start"
-        >
-          <Grid item>
-            <BigTypography variant="body1" color="secondary" component="div">
-              <span>{label}:&nbsp;&nbsp;</span>
-            </BigTypography>
-          </Grid>
-          <Grid item>
-            <BigTypography
-              variant={textVariant}
-              color="secondary"
-              component="div"
-            >
-              {link ? (
-                <a href={link} target="_blank" rel="noopener noreferer">
-                  {image ? <img src={image} alt={value} /> : value}
-                </a>
-              ) : (
-                value
-              )}
-            </BigTypography>
-          </Grid>
+      <Grid container direction="row" alignItems="center" justify="flex-start">
+        <Grid item>
+          <BigTypography variant="body1" color="secondary" component="div">
+            <span>{label}:&nbsp;&nbsp;</span>
+          </BigTypography>
         </Grid>
-      </BigTypography>
+        <Grid item>
+          <BigTypography
+            variant={textVariant}
+            color="secondary"
+            component="div"
+          >
+            {link ? (
+              <a href={link} target="_blank" rel="noopener noreferer">
+                {image ? <img src={image} alt={value} /> : value}
+              </a>
+            ) : (
+              value
+            )}
+          </BigTypography>
+        </Grid>
+      </Grid>
       <style jsx>
         {`
           span {
@@ -96,4 +120,5 @@ LabelValue.propTypes = {
   ]),
 };
 
+export { SimpleLabelValue };
 export default LabelValue;
