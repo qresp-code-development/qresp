@@ -12,6 +12,11 @@ import ReferenceInfo from "../../components/Paper/Reference";
 import ChartInfo from "../../components/Paper/Charts";
 import DatasetInfo from "../../components/Paper/Datasets";
 import ToolsInfo from "../../components/Paper/Tools";
+import ScriptsInfo from "../../components/Paper/Scripts";
+import Documentation from "../../components/Paper/Documentation";
+import CuratorInfo from "../../components/Paper/Curator";
+import FileServerInfo from "../../components/Paper/FileServer";
+import Workflow from "../../components/Paper/Workflow";
 
 import SimpleReactLightbox from "simple-react-lightbox";
 
@@ -34,7 +39,17 @@ const PaperDetails = ({ data, error, preview }) => {
     fileServerPath,
     datasets,
     tools,
+    scripts,
+    documentation,
+    firstName,
+    middleName,
+    lastName,
+    emailId,
+    affiliation,
+    workflows,
   } = data;
+
+  const curator = { firstName, middleName, lastName, emailId, affiliation };
 
   const referenceData = {
     title,
@@ -89,6 +104,11 @@ const PaperDetails = ({ data, error, preview }) => {
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
+          <ScriptsInfo scripts={scripts} fileserverpath={fileServerPath} />
+          <Workflow workflow={workflows} />
+          <Documentation documentation={documentation} />
+          <CuratorInfo curator={curator} />
+          <FileServerInfo fileserverpath={fileServerPath} />
         </Box>
       </Container>
     </Fragment>
