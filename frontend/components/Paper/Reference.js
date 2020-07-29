@@ -34,7 +34,7 @@ const ReferenceInfo = ({ referenceData }) => {
   return (
     <Fragment>
       <Box my={1}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom style={{ color: "#333333" }}>
           <Box fontWeight="bold">{title}</Box>
         </Typography>
         <Typography variant="subtitle1" color="secondary" gutterBottom>
