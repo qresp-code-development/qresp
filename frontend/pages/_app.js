@@ -7,6 +7,9 @@ import Theme from "../theme/theme";
 import Layout from "../components/layout";
 import "../styles/global.css";
 
+// Vis Network CSS
+import "vis-network/styles/vis-network.css";
+
 import AlertState from "../Context/Alert/AlertState";
 import LoadingState from "../Context/Loading/LoadingState";
 
