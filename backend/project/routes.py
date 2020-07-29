@@ -645,7 +645,8 @@ def authorized():
     try:
         token = google.fetch_token(
             Config.get_setting('GOOGLE_API', 'TOKEN_URI'),
-            client_secret=Config.get_setting(app.config['env'], 'GOOGLE_CLIENT_SECRET'),
+            client_secret=Config.get_setting(
+                app.config['env'], 'GOOGLE_CLIENT_SECRET'),
             authorization_response=request.url)
     except Exception as e:
         print(e)
@@ -767,7 +768,8 @@ def verifypasscode():
     This method verifies with input passcode of flask connection.
     """
     form = PassCodeForm(request.form)
-    confirmpasscode = Config.get_setting(app.config['env'], 'QRESP_DB_SECRET_KEY')
+    confirmpasscode = Config.get_setting(
+        app.config['env'], 'QRESP_DB_SECRET_KEY')
     if request.method == 'POST' and form.validate():
         if confirmpasscode == form.passcode.data:
             return jsonify(msg="success"), 200
@@ -817,7 +819,21 @@ def qrespexplorer():
     return render_template('qrespexplorer.html', form=form)
 
 
-@app.route('/backend/search', methods=['GET'])
+@app.route('/qrespserver')
+def qrespservers():
+    """
+    Returns the list of Qresp Servers
+    """
+    try:
+        servers = Servers().getServersList()
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return jsonify({}), 500
+
+    return jsonify(servers), 200
+
+
+@app.route('/search', methods=['GET'])
 def search():
     """
     This method helps in filtering paper content
@@ -831,7 +847,7 @@ def search():
         allpaperslist = fetchdata.fetchOutput('/api/search')
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error":e}), 500
+        return jsonify({"error": e}), 500
 
     try:
         collectionlist = fetchdata.fetchOutput('/api/collections')
@@ -840,11 +856,11 @@ def search():
         allPapersSize = len(allpaperslist)
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"allpaperslist":allpaperslist, "error":str(e)}), 500
+        return jsonify({"allpaperslist": allpaperslist, "error": str(e)}), 500
         # return render_template('search.html', allpaperslist=allpaperslist)
 
     return jsonify({"allpaperslist": allpaperslist, "collectionlist": collectionlist, "authorslist": authorslist,
-                    "publicationlist": publicationlist, "allPapersSize": allPapersSize, "error":None}), 200
+                    "publicationlist": publicationlist, "allPapersSize": allPapersSize, "error": None}), 200
 
     # return render_template('search.html', allpaperslist=allpaperslist, collectionlist=collectionlist, authorslist=authorslist,
     #                        publicationlist=publicationlist, allPapersSize=allPapersSize)

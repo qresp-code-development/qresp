@@ -150,7 +150,7 @@ export async function getServerSideProps(ctx) {
   var servers = [];
 
   try {
-    const response = await apiEndpoint.get("/backend/qrespserver");
+    const response = await apiEndpoint.get("/qrespserver");
     servers = response.data;
   } catch (e) {
     console.error(e);

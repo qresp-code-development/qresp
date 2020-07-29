@@ -101,7 +101,7 @@ export async function getServerSideProps(ctx) {
   var data = null;
 
   try {
-    const response = await apiEndpoint.get("/backend/search", {
+    const response = await apiEndpoint.get("/search", {
       params: query,
     });
     data = response.data;
