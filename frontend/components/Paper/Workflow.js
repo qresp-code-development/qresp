@@ -1,89 +1,66 @@
-import { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
-// import { DataSet } from "vis-data/peer/umd/vis-data.min";
-// import { Network } from "vis-network/peer/umd/vis-network.min";
-
-import {
-  Network,
-  DataSet,
-} from "vis-network/standalone/umd/vis-network.min.js";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import Drawer from "../drawer";
+import Graph from "../Workflow/Graph";
+import Legend from "../Workflow/Legend";
 
-import { Typography, Box } from "@material-ui/core";
+import { Box, Grid, useTheme } from "@material-ui/core";
 
-const changeChosenEdgeMiddleArrowScale = (values, id, selected, hovering) => {
-  values.middleArrowScale = 1.1;
-};
+const Workflow = ({ workflow, charts, tools, scripts, datasets, external }) => {
+  const theme = useTheme();
+  const direction = useMediaQuery(theme.breakpoints.down("sm"))
+    ? "row"
+    : "column";
 
-const Workflow = ({ workflow }) => {
-  console.log(workflow);
+  const data = {
+    c: {},
+    t: {},
+    s: {},
+    d: {},
+    h: {},
+  };
 
-  // A reference to the div rendered by this component
-  const domNode = useRef(null);
-
-  // A reference to the vis network instance
-  const network = useRef(null);
-
-  useEffect(() => {
-    // create an array with nodes
-    const nodes = new DataSet([
-      { id: 1, label: "Node 1", color: "orange", shape: "square" },
-      { id: 2, label: "Node 2" },
-      { id: 3, label: "Node 3" },
-      { id: 4, label: "Node 4" },
-      { id: 5, label: "Node 5" },
-    ]);
-
-    // create an array with edges
-    const edges = new DataSet([
-      { from: 1, to: 3 },
-      { from: 1, to: 2 },
-      { from: 2, to: 4 },
-      { from: 2, to: 5 },
-      { from: 3, to: 3 },
-    ]);
-
-    // create a network
-    const data = {
-      nodes: nodes,
-      edges: edges,
-    };
-    const options = {
-      edges: {
-        arrows: {
-          middle: true,
-        },
-        chosen: {
-          label: false,
-          edge: changeChosenEdgeMiddleArrowScale,
-        },
-      },
-      physics: {
-        minVelocity: 0.75,
-      },
-      interaction: {
-        hover: true,
-        dragNodes: true,
-      },
-      layout: {
-        improvedLayout: true,
-        randomSeed: undefined,
-      },
-    };
-    network.current = new Network(domNode.current, data, options);
-  }, []);
+  charts.forEach((element) => {
+    data.c[element.id] = element;
+  });
+  tools.forEach((element) => {
+    data.t[element.id] = element;
+  });
+  scripts.forEach((element) => {
+    data.s[element.id] = element;
+  });
+  datasets.forEach((element) => {
+    data.d[element.id] = element;
+  });
+  external.forEach((element) => {
+    data.h[element.id] = element;
+  });
 
   return (
     <Drawer heading="Workflow">
-      <div ref={domNode}></div>
+      <Box mt={1}>
+        <Grid container direction="row">
+          <Grid item xs={12} md={10}>
+            <Graph workflow={workflow} data={data} />
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Legend direction={direction} />
+          </Grid>
+        </Grid>
+      </Box>
     </Drawer>
   );
 };
 
 Workflow.propTypes = {
   workflow: PropTypes.object.isRequired,
+  charts: PropTypes.array.isRequired,
+  tools: PropTypes.array.isRequired,
+  scripts: PropTypes.array.isRequired,
+  datasets: PropTypes.array.isRequired,
+  external: PropTypes.array.isRequired,
 };
 
 export default Workflow;
