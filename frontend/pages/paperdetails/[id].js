@@ -21,6 +21,8 @@ import Workflow from "../../components/Paper/Workflow";
 import SimpleReactLightbox from "simple-react-lightbox";
 
 const PaperDetails = ({ data, error, preview }) => {
+  console.log(data);
+
   const {
     title,
     authors,
@@ -47,6 +49,7 @@ const PaperDetails = ({ data, error, preview }) => {
     emailId,
     affiliation,
     workflows,
+    heads,
   } = data;
 
   const curator = { firstName, middleName, lastName, emailId, affiliation };
@@ -105,7 +108,14 @@ const PaperDetails = ({ data, error, preview }) => {
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
           <ScriptsInfo scripts={scripts} fileserverpath={fileServerPath} />
-          <Workflow workflow={workflows} />
+          <Workflow
+            workflow={workflows}
+            charts={charts}
+            datasets={datasets}
+            tools={tools}
+            scripts={scripts}
+            external={heads}
+          />
           <Documentation documentation={documentation} />
           <CuratorInfo curator={curator} />
           <FileServerInfo fileserverpath={fileServerPath} />
