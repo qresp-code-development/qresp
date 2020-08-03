@@ -23,7 +23,12 @@ const StyledAccordionSummary = withStyles({
 const Drawer = (props) => {
   const { heading, children } = props;
   return (
-    <StyledAccordion elevation={4} square={true} defaultExpanded>
+    <StyledAccordion
+      elevation={4}
+      square={true}
+      TransitionProps={{ timeout: 250 }}
+      defaultExpanded
+    >
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h4" style={{ color: "#333333" }}>
           <Box fontWeight="bold">{heading}</Box>
