@@ -1,7 +1,52 @@
 import { IdTypeMap, NodeType } from "./Types";
 
-const changeChosenNodeSize = (values, id, selected, hovering) => {
-  values.size = 30;
+const hoverTooltip = (type, id, nodeData) => {
+  const maxCaptionLength = 200;
+  const displayId = id.charAt(0).toUpperCase() + id.slice(1);
+  switch (type) {
+    case "CHART":
+      return `
+        <p style="
+          max-width:400px;
+          white-space:normal;
+          text-align:justify;
+          word-break:break-all;
+          ">
+          <img
+            src=${nodeData["server"] + "/" + nodeData["imageFile"]}
+            style="
+              max-width:400px;
+              max-height:400px;
+              "
+            alt="${nodeData.caption}"
+            loading="lazy"
+          ></img>
+          <br>
+          <strong>${type + " " + displayId}:</strong> ${nodeData.caption.slice(
+        0,
+        maxCaptionLength
+      )}${nodeData.caption.length > maxCaptionLength ? "..." : ""}</p>
+      `;
+    case "TOOL":
+      if (nodeData.kind == "software") {
+        return `<p>
+        <strong>Tool ${displayId}:</strong> Software<br>
+        <strong>Package Name:</strong> ${nodeData.packageName}<br>
+        <strong>Version:</strong> ${nodeData.version}<br>
+        </p>`;
+      }
+
+      return `<p>
+      <strong>Tool ${displayId}:</strong> Experiment<br>
+      <strong>Facility Name:</strong> ${nodeData.facilityName}<br>
+      <strong>Measurement:</strong> ${nodeData.measurement}<br>
+      </p>`;
+
+    default:
+      return `<p><strong>${type + " " + displayId}:</strong> ${
+        nodeData.readme
+      }</p>`;
+  }
 };
 
 const createNode = (id, data) => {
@@ -10,12 +55,8 @@ const createNode = (id, data) => {
   const node = {
     id: id,
     ...NodeType[IdTypeMap[type]], // Set Shape Size and Color
-    // title: "Hello",
+    title: hoverTooltip(IdTypeMap[type], id, nodeData),
     // info: val.details,
-    chosen: {
-      label: false,
-      node: changeChosenNodeSize,
-    },
     font: {
       multi: true,
       size: 25,
