@@ -72,7 +72,7 @@ const ChartInfo = ({ charts, fileserverpath }) => {
       lightboxTransitionSpeed: 0.3,
     },
     caption: {
-      captionContainerPadding: "16px",
+      captionContainerPadding: "32px",
     },
     thumbnails: {
       showThumbnails: false,
