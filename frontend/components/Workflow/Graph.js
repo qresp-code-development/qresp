@@ -1,4 +1,4 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -8,13 +8,27 @@ import {
 
 import createNode from "./Nodes";
 import createEdge from "./Edges";
+import DetailsDialog from "./Details";
 
+// Global Edge Setting
 const changeChosenEdgeMiddleArrowScale = (values, id, selected, hovering) => {
-  values.middleArrowScale = 1.1;
+  values.middleArrowScale = 1.25;
 };
 
+// Global Node Setting
+const changeChosenNodeSize = (values, id, selected, hovering) => {
+  values.size = 30;
+};
+
+// Network Settings
 const options = {
   height: "700px",
+  nodes: {
+    chosen: {
+      label: false,
+      node: changeChosenNodeSize,
+    },
+  },
   edges: {
     arrows: {
       middle: true,
@@ -30,6 +44,8 @@ const options = {
   interaction: {
     hover: true,
     dragNodes: true,
+    dragView: false,
+    tooltipDelay: 500,
   },
   layout: {
     improvedLayout: true,
@@ -38,6 +54,9 @@ const options = {
 };
 
 const Graph = ({ workflow, data }) => {
+  const [details, setDetails] = useState({});
+  const [showDetails, setShowDetails] = useState(false);
+
   // A reference to the div rendered by this component
   const domNode = useRef(null);
 
@@ -47,6 +66,16 @@ const Graph = ({ workflow, data }) => {
   const workflowNodes = workflow.nodes.map((id) => createNode(id, data));
   const workflowEdges = workflow.edges.map((pair) => createEdge(pair));
 
+  const showDetailsDialog = (params) => {
+    if (params.nodes.length > 0) {
+      const id = params.nodes[0];
+      const type = id.charAt(0);
+      const nodeData = data[type][id];
+      setDetails(nodeData);
+      setShowDetails(true);
+    }
+  };
+
   useEffect(() => {
     // create a network
     const data = {
@@ -55,11 +84,21 @@ const Graph = ({ workflow, data }) => {
     };
 
     const wflow = new Network(domNode.current, data, options);
-    wflow.fit();
     network.current = wflow;
+    wflow.on("click", showDetailsDialog);
+    wflow.fit();
   }, [workflow]);
 
-  return <div ref={domNode} style={{ border: "1px solid lightgrey" }}></div>;
+  return (
+    <Fragment>
+      <DetailsDialog
+        showDetails={showDetails}
+        details={details}
+        setShowDetails={setShowDetails}
+      />
+      <div ref={domNode} style={{ border: "1px solid lightgrey" }}></div>
+    </Fragment>
+  );
 };
 
 Graph.propTypes = {
