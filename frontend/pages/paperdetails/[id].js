@@ -17,12 +17,11 @@ import Documentation from "../../components/Paper/Documentation";
 import CuratorInfo from "../../components/Paper/Curator";
 import FileServerInfo from "../../components/Paper/FileServer";
 import Workflow from "../../components/Paper/Workflow";
+import LicenseInfo from "../../components/Paper/License";
 
 import SimpleReactLightbox from "simple-react-lightbox";
 
 const PaperDetails = ({ data, error, preview }) => {
-  console.log(data);
-
   const {
     title,
     authors,
@@ -50,6 +49,7 @@ const PaperDetails = ({ data, error, preview }) => {
     affiliation,
     workflows,
     heads,
+    license,
   } = data;
 
   const curator = { firstName, middleName, lastName, emailId, affiliation };
@@ -116,9 +116,12 @@ const PaperDetails = ({ data, error, preview }) => {
             scripts={scripts}
             external={heads}
           />
-          <Documentation documentation={documentation} />
+          {documentation ? (
+            <Documentation documentation={documentation} />
+          ) : null}
           <CuratorInfo curator={curator} />
           <FileServerInfo fileserverpath={fileServerPath} />
+          {license ? <LicenseInfo type={license} /> : null}
         </Box>
       </Container>
     </Fragment>
