@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { Fragment, useContext } from "react";
 import { LinearProgress, withStyles, Box } from "@material-ui/core";
 
 import LoadingContext from "../Context/Loading/loadingContext";
@@ -15,7 +15,24 @@ const LinearLoader = withStyles({
 const Loader = () => {
   const { loading } = useContext(LoadingContext);
 
-  return <Box>{loading ? <LinearLoader /> : null}</Box>;
+  return (
+    <Box
+      style={{
+        top: 0,
+        left: 0,
+        position: "fixed",
+        zIndex: 10000,
+        width: "100%",
+      }}
+    >
+      {loading ? (
+        <Fragment>
+          <LinearProgress color="secondary" />
+          <LinearLoader />
+        </Fragment>
+      ) : null}
+    </Box>
+  );
 };
 
 export default Loader;
