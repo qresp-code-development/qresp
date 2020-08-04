@@ -14,8 +14,6 @@ import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
 import EnhancedTableFooter from "./TableFooter";
 
-import Summary from "../Paper/Summary";
-
 const StyledTableCell = withStyles({
   root: {
     padding: "8px",
@@ -102,7 +100,7 @@ const RecordTable = (props) => {
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
       <TableContainer>
-        <Table aria-label="Record (Paper) Table">
+        <Table>
           <EnhancedTableHeader
             headers={headers}
             order={order}
