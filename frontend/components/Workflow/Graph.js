@@ -11,13 +11,15 @@ import createEdge from "./Edges";
 import DetailsDialog from "./Details";
 
 // Global Edge Setting
+// Enlarge Edge of the node being hovered
 const changeChosenEdgeMiddleArrowScale = (values, id, selected, hovering) => {
-  values.middleArrowScale = 1.25;
+  if (hovering) values.middleArrowScale = 1.25;
 };
 
 // Global Node Setting
+// Enlarge the node being hovered
 const changeChosenNodeSize = (values, id, selected, hovering) => {
-  values.size = 30;
+  if (hovering) values.size = 30;
 };
 
 // Network Settings
@@ -44,7 +46,7 @@ const options = {
   interaction: {
     hover: true,
     dragNodes: true,
-    dragView: false,
+    dragView: true,
     tooltipDelay: 500,
   },
   layout: {
@@ -85,7 +87,20 @@ const Graph = ({ workflow, data }) => {
 
     const wflow = new Network(domNode.current, data, options);
     network.current = wflow;
+
+    // To Show the Details Dialog Component on click on a node
     wflow.on("click", showDetailsDialog);
+
+    // Change mouse pointer to a small hand
+    wflow.on("hoverNode", function (params) {
+      wflow.canvas.body.container.style.cursor = "pointer";
+    });
+    // Have to set pointer to regular after exiting a node hover
+    wflow.on("blurNode", function (params) {
+      wflow.canvas.body.container.style.cursor = "default";
+    });
+
+    // Fitting the workflow, to the canvas
     wflow.fit();
   }, [workflow]);
 
