@@ -1,6 +1,8 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 import LoadingContext from "./loadingContext";
 import loadingReducer from "./loadingReducer";
+
+import { useRouter } from "next/router";
 
 import { SHOW_LOADER, HIDE_LOADER } from "../types";
 
@@ -17,6 +19,20 @@ const LoadingState = (props) => {
   const hideLoader = () => {
     dispatch({ type: HIDE_LOADER });
   };
+
+  const router = useRouter();
+
+  useEffect(() => {
+    router.events.on("routeChangeStart", () => showLoader());
+    router.events.on("routeChangeComplete", () => hideLoader());
+    router.events.on("routeChangeError", () => hideLoader());
+
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
+    };
+  }, []);
 
   return (
     <LoadingContext.Provider
