@@ -3,6 +3,7 @@ import { IdTypeMap, NodeType } from "./Types";
 const hoverTooltip = (type, id, nodeData) => {
   const maxCaptionLength = 200;
   const displayId = id.charAt(0).toUpperCase() + id.slice(1);
+  const displayType = type.charAt(0) + type.slice(1).toLowerCase();
   switch (type) {
     case "CHART":
       return `
@@ -22,10 +23,11 @@ const hoverTooltip = (type, id, nodeData) => {
             loading="lazy"
           ></img>
           <br>
-          <strong>${type + " " + displayId}:</strong> ${nodeData.caption.slice(
-        0,
-        maxCaptionLength
-      )}${nodeData.caption.length > maxCaptionLength ? "..." : ""}</p>
+          <strong>${
+            displayType + " " + displayId
+          }:</strong> ${nodeData.caption.slice(0, maxCaptionLength)}${
+        nodeData.caption.length > maxCaptionLength ? "..." : ""
+      }</p>
       `;
     case "TOOL":
       if (nodeData.kind == "software") {
@@ -43,7 +45,12 @@ const hoverTooltip = (type, id, nodeData) => {
       </p>`;
 
     default:
-      return `<p><strong>${type + " " + displayId}:</strong> ${
+      return `<p style="
+      max-width:400px;
+      white-space:normal;
+      text-align:justify;
+      word-break:break-all;">
+        <strong>${displayType + " " + displayId}:</strong> ${
         nodeData.readme
       }</p>`;
   }
