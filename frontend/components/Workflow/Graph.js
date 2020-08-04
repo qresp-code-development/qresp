@@ -48,10 +48,11 @@ const options = {
     dragNodes: true,
     dragView: true,
     tooltipDelay: 500,
+    navigationButtons: true,
+    zoomView: false,
   },
   layout: {
     improvedLayout: true,
-    randomSeed: 2020,
   },
 };
 
