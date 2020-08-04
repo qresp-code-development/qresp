@@ -13,6 +13,8 @@ import {
 import LabelValue from "../labelvalue";
 import { IdTypeMap } from "./Types";
 
+import { capitalizeFirstLetter } from "../../Utils/utils";
+
 const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
   const handleClose = () => {
     setShowDetails(false);
@@ -21,12 +23,11 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
   const type = details.id ? IdTypeMap[details.id.charAt(0)] : null;
 
   const title = type
-    ? type[0] +
-      type.slice(1).toLowerCase() +
-      " " +
-      details.id[0].toUpperCase() +
-      details.id.slice(1)
+    ? capitalizeFirstLetter(type) + " " + capitalizeFirstLetter(details.id)
     : null;
+
+  var URLs = null;
+  var files = null;
 
   var content = "";
   switch (type) {
@@ -61,15 +62,15 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
       );
       break;
     case "TOOL":
-      console.log(details);
       details.URLs = details.URLs.filter((el) => (el.length > 0 ? el : null));
-      const URLs = (
+      URLs = (
         <Fragment>
           <LabelValue
             label="URLs"
             value={details.URLs.map((el, index) => (
               <a
                 href={el}
+                style={{ color: "#007bff" }}
                 rel="noopener noreferrer"
                 target="_blank"
                 key={index}
@@ -104,13 +105,57 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
       }
       break;
     case "EXTERNAL":
-      content = <Fragment></Fragment>;
-      break;
     case "SCRIPT":
-      content = <Fragment></Fragment>;
-      break;
     case "DATASET":
-      content = <Fragment></Fragment>;
+      details.URLs = details.URLs.filter((el) => (el.length > 0 ? el : null));
+      URLs = (
+        <Fragment>
+          <LabelValue
+            label="URLs"
+            value={details.URLs.map((el, index) => (
+              <a
+                href={el}
+                rel="noopener noreferrer"
+                style={{ color: "#007bff" }}
+                target="_blank"
+                key={index}
+              >
+                {index == 0 ? el : " ," + el}
+              </a>
+            ))}
+          />
+        </Fragment>
+      );
+      files = details.files.map((file, index) => {
+        file = file.trim();
+        if (file[0] === ".") {
+          file = file.slice(1);
+        }
+        return (
+          <a
+            href={
+              file[0] === "/"
+                ? details.server + file
+                : details.server + "/" + file
+            }
+            key={index}
+            style={{ color: "#007bff" }}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {index != 0 ? ", " : null}
+            {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
+          </a>
+        );
+      });
+
+      content = (
+        <Fragment>
+          <LabelValue label="Description" value={details.readme} />
+          {details.URLs.length > 0 ? URLs : null}
+          {files.length > 0 ? <LabelValue label="Files" value={files} /> : null}
+        </Fragment>
+      );
       break;
     default:
       break;
