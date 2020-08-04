@@ -23,14 +23,14 @@ const LoadingState = (props) => {
   const router = useRouter();
 
   useEffect(() => {
-    router.events.on("routeChangeStart", () => showLoader());
-    router.events.on("routeChangeComplete", () => hideLoader());
-    router.events.on("routeChangeError", () => hideLoader());
+    router.events.on("routeChangeStart", showLoader);
+    router.events.on("routeChangeComplete", hideLoader);
+    router.events.on("routeChangeError", hideLoader);
 
     return () => {
-      router.events.off("routeChangeStart", handleStart);
-      router.events.off("routeChangeComplete", handleComplete);
-      router.events.off("routeChangeError", handleComplete);
+      router.events.off("routeChangeStart", showLoader);
+      router.events.off("routeChangeComplete", hideLoader);
+      router.events.off("routeChangeError", hideLoader);
     };
   }, []);
 
