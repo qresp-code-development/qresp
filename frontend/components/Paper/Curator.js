@@ -13,7 +13,11 @@ const CuratorInfo = ({ curator }) => {
         <LabelValue
           label="Name"
           value={
-            firstName.trim() + " " + middleName.trim() + " " + lastName.trim()
+            firstName.trim() +
+            " " +
+            (middleName ? middleName.trim() : "") +
+            " " +
+            lastName.trim()
           }
         />
         <LabelValue label="Email Address" value={emailId} />
