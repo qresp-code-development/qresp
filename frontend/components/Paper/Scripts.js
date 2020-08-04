@@ -7,14 +7,14 @@ import Drawer from "../drawer";
 
 const DescriptionView = ({ rowdata }) => {
   return (
-    <Typography variant="body2" color="secondary">
+    <Typography variant="body2" color="secondary" style={{ minWidth: "25vw" }}>
       {rowdata["readme"].charAt(0).toUpperCase(0) + rowdata["readme"].slice(1)}
     </Typography>
   );
 };
 
 const FilesView = ({ rowdata }) => {
-  return rowdata["files"].map((file, index) => {
+  const fileLinks = rowdata["files"].map((file, index) => {
     file = file.trim();
     if (file[0] === ".") {
       file = file.slice(1);
@@ -36,6 +36,19 @@ const FilesView = ({ rowdata }) => {
       </a>
     );
   });
+  return (
+    <div
+      style={{
+        wordBreak: "break-all",
+        maxHeight: "10vh",
+        overflowY: "auto",
+        paddingRight: "8px",
+        whiteSpace: "normal",
+      }}
+    >
+      {fileLinks}
+    </div>
+  );
 };
 
 const ScriptsInfo = ({ scripts, fileserverpath }) => {

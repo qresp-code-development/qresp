@@ -18,24 +18,40 @@ const PropsView = ({ rowdata }) => {
 };
 
 const FilesView = ({ rowdata }) => {
+  const fileLinks = rowdata["files"].map((file, index) => {
+    file = file.trim();
+    if (file[0] === ".") {
+      file = file.slice(1);
+    }
+    return (
+      <a
+        href={
+          file[0] === "/"
+            ? rowdata["server"] + file
+            : rowdata["server"] + "/" + file
+        }
+        key={index}
+        style={{ color: "#007bff" }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {index != 0 ? ", " : null}
+        {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
+      </a>
+    );
+  });
   return (
-    <p style={{ maxWidth: "250px" }}>
-      {rowdata["files"].map((file, index) => {
-        file = file.trim();
-        return (
-          <a
-            href={rowdata["server"] + "/" + file}
-            key={index}
-            style={{ color: "#007bff" }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {index != 0 ? ", " : null}
-            {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
-          </a>
-        );
-      })}
-    </p>
+    <div
+      style={{
+        wordBreak: "break-all",
+        maxHeight: "10vh",
+        overflowY: "auto",
+        paddingRight: "8px",
+        whiteSpace: "normal",
+      }}
+    >
+      {fileLinks}
+    </div>
   );
 };
 
