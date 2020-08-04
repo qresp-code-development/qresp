@@ -41,6 +41,7 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
               marginLeft: "auto",
               marginRight: "auto",
               display: "block",
+              border: "solid 1px gray",
             }}
             alt={details.caption}
             loading="lazy"
