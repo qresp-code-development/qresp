@@ -11,7 +11,7 @@ const Legend = ({ direction }) => {
   };
 
   const individualStyle = {
-    margin: "12px 8px",
+    margin: "16px",
   };
 
   const tooltipInfo = {
@@ -31,7 +31,7 @@ const Legend = ({ direction }) => {
     <Grid
       container
       direction={direction}
-      justify="center"
+      justify="space-around"
       alignItems="center"
       style={styles}
     >
@@ -43,14 +43,7 @@ const Legend = ({ direction }) => {
           Nodes
         </Typography>
       </Grid>
-      <Grid
-        item
-        container
-        direction="column"
-        justify="center"
-        alignItems="center"
-        style={individualStyle}
-      >
+      <Grid item style={individualStyle}>
         <StyledTooltip title={tooltipInfo.external} arrow>
           <div className="external"></div>
         </StyledTooltip>
@@ -87,6 +80,7 @@ const Legend = ({ direction }) => {
             height: 24px;
             background: red;
             border-radius: 50%;
+            margin: auto;
           }
           .dataset {
             width: 64px;
