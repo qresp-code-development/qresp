@@ -15,3 +15,46 @@ body {
 a {
   text-decoration: none;
 }
+
+/* Navigation Button CSS for Workflow */
+
+div.vis-network div.vis-navigation div.vis-button {
+  background-size: cover !important;
+  background-position: 0 !important;
+}
+
+.vis-up {
+  background-image: url("/images/arrow_circle.svg") !important;
+  background-size: cover !important;
+}
+
+.vis-down {
+  background-image: url("/images/arrow_circle.svg") !important;
+  transform: rotate(180deg);
+}
+
+.vis-left {
+  background-image: url("/images/arrow_circle.svg") !important;
+  transform: rotate(270deg);
+}
+
+.vis-right {
+  background-image: url("/images/arrow_circle.svg") !important;
+  transform: rotate(90deg);
+}
+
+.vis-zoomIn {
+  background-image: url("/images/zoom_in.svg") !important;
+}
+
+.vis-zoomOut {
+  background-image: url("/images/zoom_out.svg") !important;
+}
+
+.vis-zoomExtends {
+  background-image: url("/images/fit.svg") !important;
+}
+
+div.vis-network div.vis-navigation div.vis-button:hover {
+  box-shadow: 0px 0px 5px 1px #800000 !important;
+}
