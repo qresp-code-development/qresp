@@ -30,20 +30,17 @@ const EnhancedTableHeader = (props) => {
           <StyledTableCell
             key={header.label}
             align={header.align}
-            sortDirection={
-              header.value && orderBy === header.value ? order : false
-            }
+            sortDirection={orderBy === header.value ? order : false}
           >
             <TableSortLabel
-              active={header.value && orderBy === header.value}
-              direction={
-                header.value && orderBy === header.value ? order : "asc"
-              }
+              active={orderBy === header.value}
+              direction={orderBy === header.value ? order : "asc"}
               onClick={header.value ? createSortHandler(header.value) : null}
               hideSortIcon={header.value ? true : false}
+              disabled={header.value ? false : true}
             >
               {header.label}
-              {header.value && orderBy === header.value ? (
+              {orderBy === header.value ? (
                 <Hidden xlDown xlUp>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
                 </Hidden>
