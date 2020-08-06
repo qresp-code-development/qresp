@@ -13,7 +13,7 @@ const RowsPerPageSelector = (props) => {
   ];
 
   return (
-    <Box m={1} mt={3} display="flex" alignItems="center">
+    <Box m={1} mt={2} display="flex" alignItems="center">
       <Box mr={1}>
         <Typography variant="subtitle2">Show</Typography>
       </Box>
