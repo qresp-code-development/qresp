@@ -74,13 +74,41 @@ const ChartInfo = ({ charts, fileserverpath }) => {
     );
   };
 
-  const TableHeaders = [
-    { label: "Figure/Table", align: "center", value: "index" },
-    { label: "Properties", align: "center", value: null },
-    { label: "Files", align: "right", value: null },
+  const columns = [
+    {
+      label: "Figure/Table",
+      name: "figure",
+      view: FigureView,
+      options: {
+        align: "center",
+        sort: true,
+        searchable: false,
+        value: (data) => data.number,
+      },
+    },
+    {
+      label: "Properties",
+      name: "props",
+      view: PropsView,
+      options: {
+        align: "center",
+        sort: true,
+        searchable: true,
+        value: (data) => data.properties.join(""),
+      },
+    },
+    {
+      label: "Files",
+      name: "files",
+      view: FilesView,
+      options: {
+        align: "right",
+        sort: false,
+        searchable: false,
+        value: null,
+      },
+    },
   ];
-
-  const TableDisplayOrder = ["figure", "props", "files"];
 
   const Gallery = [];
   const options = {
@@ -112,22 +140,14 @@ const ChartInfo = ({ charts, fileserverpath }) => {
         server: fileserverpath,
         files: row["files"],
       },
-      index: row["number"],
     };
   });
-
-  const views = { figure: FigureView, props: PropsView, files: FilesView };
 
   return (
     <Fragment>
       <SRLWrapper images={Gallery} options={options} />
       <Drawer heading="Charts">
-        <RecordTable
-          rows={rows}
-          headers={TableHeaders}
-          views={views}
-          displayorder={TableDisplayOrder}
-        />
+        <RecordTable rows={rows} columns={columns} />
       </Drawer>
     </Fragment>
   );

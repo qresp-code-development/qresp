@@ -41,12 +41,33 @@ const DetailsView = ({ rowdata }) => {
 };
 
 const ToolsInfo = ({ tools }) => {
-  const TableHeaders = [
-    { label: "Kind", align: "left", value: "kind" },
-    { label: "Details", align: "left", value: null },
+  const columns = [
+    {
+      label: "Kind",
+      name: "kind",
+      view: KindView,
+      options: {
+        align: "left",
+        sort: true,
+        searchable: true,
+        value: (data) => data,
+      },
+    },
+    {
+      label: "Details",
+      name: "details",
+      view: DetailsView,
+      options: {
+        align: "left",
+        sort: true,
+        searchable: true,
+        value: (data) => {
+          if (data.packageName.length > 0) return data.packageName;
+          return data.facilityName;
+        },
+      },
+    },
   ];
-
-  const TableDisplayOrder = ["kind", "details"];
 
   const rows = tools.map((row) => {
     return {
@@ -59,12 +80,7 @@ const ToolsInfo = ({ tools }) => {
 
   return (
     <Drawer heading="Tools">
-      <RecordTable
-        rows={rows}
-        headers={TableHeaders}
-        views={views}
-        displayorder={TableDisplayOrder}
-      />
+      <RecordTable rows={rows} columns={columns} />
     </Drawer>
   );
 };

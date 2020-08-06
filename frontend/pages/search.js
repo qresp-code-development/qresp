@@ -35,18 +35,35 @@ const search = ({ data, error, servers }) => {
     publicationlist = null,
   } = data || {};
 
-  const TableHeaders = [
-    { label: "Record", align: "left", value: "title" },
-    { label: "Year", align: "right", value: "year" },
+  const columns = [
+    {
+      label: "Record",
+      name: "paper",
+      view: Summary,
+      options: {
+        align: "left",
+        sort: true,
+        searchable: true,
+        value: (data) => data._Search__title,
+      },
+    },
+    {
+      label: "Year",
+      name: "year",
+      view: null,
+      options: {
+        align: "right",
+        sort: true,
+        searchable: true,
+        value: (data) => data,
+      },
+    },
   ];
-
-  const TableDisplayOrder = ["paper", "year"];
 
   const rows = allpaperslist.map((paper) => {
     paper["_Search__servers"] = servers;
     return {
       paper: paper,
-      title: paper["_Search__title"],
       year: paper["_Search__year"],
     };
   });
@@ -82,12 +99,7 @@ const search = ({ data, error, servers }) => {
           </Box>
           <AdvancedSearch />
           <Divider />
-          <RecordTable
-            rows={rows}
-            headers={TableHeaders}
-            views={views}
-            displayorder={TableDisplayOrder}
-          />
+          <RecordTable rows={rows} columns={columns} />
         </Box>
       </Container>
     </Fragment>

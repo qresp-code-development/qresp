@@ -52,12 +52,30 @@ const FilesView = ({ rowdata }) => {
 };
 
 const ScriptsInfo = ({ scripts, fileserverpath }) => {
-  const TableHeaders = [
-    { label: "Description", align: "left", value: "sortLabel" },
-    { label: "Files", align: "left", value: null },
+  const columns = [
+    {
+      label: "Description",
+      name: "description",
+      view: DescriptionView,
+      options: {
+        align: "left",
+        sort: true,
+        searchable: true,
+        value: (data) => data.readme,
+      },
+    },
+    {
+      label: "Files",
+      name: "files",
+      view: FilesView,
+      options: {
+        align: "left",
+        sort: false,
+        searchable: false,
+        value: null,
+      },
+    },
   ];
-
-  const TableDisplayOrder = ["description", "files"];
 
   const rows = scripts.map((row) => {
     row["server"] = fileserverpath;
@@ -68,16 +86,9 @@ const ScriptsInfo = ({ scripts, fileserverpath }) => {
     };
   });
 
-  const views = { description: DescriptionView, files: FilesView };
-
   return (
     <Drawer heading="Scripts">
-      <RecordTable
-        rows={rows}
-        headers={TableHeaders}
-        views={views}
-        displayorder={TableDisplayOrder}
-      />
+      <RecordTable rows={rows} columns={columns} />
     </Drawer>
   );
 };
