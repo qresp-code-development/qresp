@@ -7,10 +7,12 @@ import Drawer from "../drawer";
 import { SimpleLabelValue } from "../labelvalue";
 import { Fragment } from "react";
 
+import { capitalizeFirstLetter } from "../../Utils/utils";
+
 const KindView = ({ rowdata }) => {
   return (
     <Typography variant="body2" color="secondary">
-      {rowdata["kind"].charAt(0).toUpperCase(0) + rowdata["kind"].slice(1)}
+      {capitalizeFirstLetter(rowdata)}
     </Typography>
   );
 };
@@ -48,7 +50,7 @@ const ToolsInfo = ({ tools }) => {
 
   const rows = tools.map((row) => {
     return {
-      kind: row,
+      kind: row.kind,
       details: row,
     };
   });
