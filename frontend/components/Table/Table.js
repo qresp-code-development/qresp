@@ -1,4 +1,4 @@
-import { Fragment, createElement, useEffect } from "react";
+import { Fragment, createElement } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -30,7 +30,7 @@ const StyledLastTableCell = withStyles({
 })(TableCell);
 
 const RecordTable = (props) => {
-  const { rows, views, headers, displayorder } = props;
+  const { rows, columns } = props;
 
   // Pagination Controls
   const [page, setPage] = React.useState(0);
@@ -47,7 +47,7 @@ const RecordTable = (props) => {
 
   // Sorting Controls
   const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("year");
+  const [orderBy, setOrderBy] = React.useState("");
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -56,29 +56,32 @@ const RecordTable = (props) => {
   };
 
   // Descending Comparator
-  function comparator(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
+  function comparator(a, b) {
+    if (b < a) return -1;
+    if (b > a) return 1;
     return 0;
   }
 
   // Switch b/w Ascending & Descending
   function getComparator(order, orderBy) {
+    // Get function to get value from data object
+    var sortVal;
+    columns.forEach((col) => {
+      if (col.name == orderBy) {
+        sortVal = col.options.value;
+      }
+    });
     return order === "desc"
-      ? (a, b) => comparator(a, b, orderBy)
-      : (a, b) => -comparator(a, b, orderBy);
+      ? (a, b) => comparator(sortVal(a), sortVal(b))
+      : (a, b) => -comparator(sortVal(a), sortVal(b));
   }
 
   // Sorting Function
-  function stableSort(array, comparator) {
+  function stableSort(array, comparator, orderBy) {
     const stabilizedThis = array.map((el, index) => [el, index]);
 
     stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
+      const order = comparator(a[0][orderBy], b[0][orderBy]);
       if (order !== 0) return order;
       return a[1] - b[1];
     });
@@ -86,10 +89,10 @@ const RecordTable = (props) => {
   }
 
   // Sorted Data
-  const sortedData = stableSort(rows, getComparator(order, orderBy)).slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const sortedData = (orderBy.length > 0
+    ? stableSort(rows, getComparator(order, orderBy), orderBy)
+    : rows
+  ).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Fragment>
@@ -108,7 +111,7 @@ const RecordTable = (props) => {
       <TableContainer>
         <Table>
           <EnhancedTableHeader
-            headers={headers}
+            headers={columns}
             order={order}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
@@ -117,17 +120,17 @@ const RecordTable = (props) => {
             {sortedData.map((row, index) => {
               return (
                 <TableRow key={index}>
-                  {displayorder.map((td, i) => {
-                    const element = views[td]
-                      ? createElement(views[td], { rowdata: row[td] })
-                      : row[td];
+                  {columns.map((col, i) => {
+                    const element = col.view
+                      ? createElement(col.view, { rowdata: row[col.name] })
+                      : row[col.name];
 
                     return index == sortedData.length - 1 ? (
-                      <StyledLastTableCell key={i} align={headers[i].align}>
+                      <StyledLastTableCell key={i} align={col.options.align}>
                         {element}
                       </StyledLastTableCell>
                     ) : (
-                      <StyledTableCell key={i} align={headers[i].align}>
+                      <StyledTableCell key={i} align={col.options.align}>
                         {element}
                       </StyledTableCell>
                     );
@@ -149,20 +152,8 @@ const RecordTable = (props) => {
 };
 
 RecordTable.propTypes = {
-  headers: PropTypes.array.isRequired,
+  columns: PropTypes.array.isRequired,
   rows: PropTypes.array.isRequired,
-  displayorder: function (props, propName, componentName) {
-    if (!props[propName]) {
-      return new Error("Required Prop views cannot be null!");
-    }
-    if (!Array.isArray(props[propName])) {
-      return new Error("views should be of type Array");
-    }
-    if (props[propName].length !== props["headers"].length) {
-      return new Error("Number of Views and Headers MisMatch");
-    }
-  },
-  views: PropTypes.object.isRequired,
 };
 
 export default RecordTable;

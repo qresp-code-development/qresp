@@ -29,18 +29,17 @@ const EnhancedTableHeader = (props) => {
         {headers.map((header) => (
           <StyledTableCell
             key={header.label}
-            align={header.align}
-            sortDirection={orderBy === header.value ? order : false}
+            align={header.options.align ? header.options.align : "left"}
+            sortDirection={orderBy === header.name ? order : false}
           >
             <TableSortLabel
-              active={orderBy === header.value}
-              direction={orderBy === header.value ? order : "asc"}
-              onClick={header.value ? createSortHandler(header.value) : null}
-              hideSortIcon={header.value ? true : false}
-              disabled={header.value ? false : true}
+              active={orderBy === header.name}
+              direction={orderBy === header.name ? order : "asc"}
+              onClick={createSortHandler(header.name)}
+              disabled={header.options.sort ? false : true}
             >
               {header.label}
-              {orderBy === header.value ? (
+              {orderBy === header.name ? (
                 <Hidden xlDown xlUp>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
                 </Hidden>
