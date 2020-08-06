@@ -8,11 +8,13 @@ import {
   TableContainer,
   TableRow,
   withStyles,
+  Grid,
 } from "@material-ui/core";
 
 import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
 import EnhancedTableFooter from "./TableFooter";
+import TableSearch from "../Search/Search";
 
 const StyledTableCell = withStyles({
   root: {
@@ -33,9 +35,6 @@ const RecordTable = (props) => {
   // Pagination Controls
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -94,11 +93,18 @@ const RecordTable = (props) => {
 
   return (
     <Fragment>
-      <RowsPerPageSelector
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
+      <Grid container direction="row" alignItems="center">
+        <Grid item xs={12} sm={6}>
+          <RowsPerPageSelector
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TableSearch />
+        </Grid>
+      </Grid>
       <TableContainer>
         <Table>
           <EnhancedTableHeader
@@ -129,12 +135,6 @@ const RecordTable = (props) => {
                 </TableRow>
               );
             })}
-
-            {/* {emptyRows > 0 && emptyRows < 10 ? (
-              <TableRow style={{ height: 47 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
-            ) : null} */}
           </TableBody>
         </Table>
       </TableContainer>
