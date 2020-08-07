@@ -1,4 +1,4 @@
-import { Fragment, createElement } from "react";
+import { Fragment, createElement, useState } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -14,7 +14,8 @@ import {
 import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
 import EnhancedTableFooter from "./TableFooter";
-import TableSearch from "../Search/Search";
+import TableSearch, { searchFilter } from "./TableSearch";
+import { getComparator, stableSort } from "./TableSort";
 
 const StyledTableCell = withStyles({
   root: {
@@ -33,8 +34,8 @@ const RecordTable = (props) => {
   const { rows, columns } = props;
 
   // Pagination Controls
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -46,8 +47,8 @@ const RecordTable = (props) => {
   };
 
   // Sorting Controls
-  const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("");
+  const [order, setOrder] = useState("desc");
+  const [orderBy, setOrderBy] = useState("");
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -55,44 +56,20 @@ const RecordTable = (props) => {
     setOrderBy(property);
   };
 
-  // Descending Comparator
-  function comparator(a, b) {
-    if (b < a) return -1;
-    if (b > a) return 1;
-    return 0;
-  }
-
-  // Switch b/w Ascending & Descending
-  function getComparator(order, orderBy) {
-    // Get function to get value from data object
-    var sortVal;
-    columns.forEach((col) => {
-      if (col.name == orderBy) {
-        sortVal = col.options.value;
-      }
-    });
-    return order === "desc"
-      ? (a, b) => comparator(sortVal(a), sortVal(b))
-      : (a, b) => -comparator(sortVal(a), sortVal(b));
-  }
-
-  // Sorting Function
-  function stableSort(array, comparator, orderBy) {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0][orderBy], b[0][orderBy]);
-      if (order !== 0) return order;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  }
+  // Search/Filter Controls
+  const [query, setQuery] = useState("");
 
   // Sorted Data
-  const sortedData = (orderBy.length > 0
-    ? stableSort(rows, getComparator(order, orderBy), orderBy)
+  const sortedFilteredData = (orderBy.length > 0
+    ? stableSort(rows, getComparator(order, orderBy, columns), orderBy)
     : rows
-  ).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  ).filter(searchFilter(columns, query)); // Filtering Data
+
+  // Paginating
+  const paginatedData = sortedFilteredData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Fragment>
@@ -105,7 +82,7 @@ const RecordTable = (props) => {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TableSearch />
+          <TableSearch columns={columns} query={query} setQuery={setQuery} />
         </Grid>
       </Grid>
       <TableContainer>
@@ -117,7 +94,7 @@ const RecordTable = (props) => {
             onRequestSort={handleRequestSort}
           />
           <TableBody>
-            {sortedData.map((row, index) => {
+            {paginatedData.map((row, index) => {
               return (
                 <TableRow key={index}>
                   {columns.map((col, i) => {
@@ -125,7 +102,7 @@ const RecordTable = (props) => {
                       ? createElement(col.view, { rowdata: row[col.name] })
                       : row[col.name];
 
-                    return index == sortedData.length - 1 ? (
+                    return index == paginatedData.length - 1 ? (
                       <StyledLastTableCell key={i} align={col.options.align}>
                         {element}
                       </StyledLastTableCell>
@@ -143,6 +120,7 @@ const RecordTable = (props) => {
       </TableContainer>
       <EnhancedTableFooter
         rows={rows.length}
+        filtered={sortedFilteredData.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
