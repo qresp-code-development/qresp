@@ -8,7 +8,7 @@ import SEO from "../components/seo";
 
 import { SmallStyledButton } from "../components/button";
 import RecordTable from "../components/Table/Table";
-import AdvancedSearch from "../components/Search/AdvancedSearch";
+import AdvancedSearch from "../components/AdvancedSearch";
 import Summary from "../components/Paper/Summary";
 
 import apiEndpoint from "../Context/axios";
