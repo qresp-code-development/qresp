@@ -3,13 +3,15 @@ import PropTypes from "prop-types";
 import { Typography, Box } from "@material-ui/core";
 
 const DisplayedRowsLabel = (props) => {
-  const { rows, page, rowsPerPage } = props;
+  const { rows, page, rowsPerPage, filtered } = props;
   const start = rowsPerPage * page;
-  const end = Math.min(start + rowsPerPage, rows);
+  const end = Math.min(start + rowsPerPage, filtered);
   return (
     <Box m={1}>
       <Typography variant="overline">
-        Showing {start + 1} to {end} of {rows} records
+        Showing {start + 1} to {end} of {filtered}{" "}
+        {filtered != rows ? "filtered" : null} records{" "}
+        {filtered != rows ? " (Total Records: " + rows + ")" : null}
       </Typography>
     </Box>
   );

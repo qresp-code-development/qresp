@@ -6,13 +6,14 @@ import TablePaginationActions from "./TablePagination";
 import RowsDisplayedLabel from "./RowsDisplayedLabel";
 
 const EnhancedTableFooter = (props) => {
-  const { rows, page, rowsPerPage, onChangePage } = props;
+  const { rows, filtered, page, rowsPerPage, onChangePage } = props;
   return (
     <Grid container direction="row">
       <Hidden xsDown>
         <Grid item sm={6} container justify="flex-start">
           <RowsDisplayedLabel
             rows={rows}
+            filtered={filtered}
             page={page}
             rowsPerPage={rowsPerPage}
           />
@@ -49,6 +50,7 @@ const EnhancedTableFooter = (props) => {
 
 EnhancedTableFooter.propTypes = {
   rows: PropTypes.number.isRequired,
+  filtered: PropTypes.number.isRequired,
   onChangePage: PropTypes.func.isRequired,
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
