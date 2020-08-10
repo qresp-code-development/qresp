@@ -1,13 +1,21 @@
-import { Fragment } from "react";
+import { Fragment, useState, useContext } from "react";
 import PropTypes from "prop-types";
 
 import { SRLWrapper, useLightbox } from "simple-react-lightbox";
 
-import { Typography, ButtonBase } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
 
 import RecordTable from "../Table/Table";
 import Drawer from "../drawer";
+import Slider from "../HorizontalSlider/Slider";
 import StyledTooltip from "../tooltip";
+import ChartWorkflow from "./ChartWorkflow";
+import { formatData } from "../Workflow/util";
+
+import { useRouter } from "next/router";
+import LoadingContext from "../../Context/Loading/loadingContext";
+import AlertContext from "../../Context/Alert/alertContext";
+import axios from "axios";
 
 const PropsView = ({ rowdata }) => {
   return (
@@ -55,22 +63,100 @@ const FilesView = ({ rowdata }) => {
   );
 };
 
-const ChartInfo = ({ charts, fileserverpath }) => {
+const ChartInfo = ({
+  charts,
+  fileserverpath,
+  downloadPath,
+  tools,
+  scripts,
+  datasets,
+  external,
+}) => {
   // Light Box Controls
   const { openLightbox } = useLightbox();
 
+  // Chart Workflow Controls
+  const [chartWorkflow, setChartWorkflow] = useState({});
+  const [showChartWorkflow, setShowChartWorkflow] = useState(false);
+  const router = useRouter();
+
+  const { showLoader, hideLoader } = useContext(LoadingContext);
+  const { setAlert } = useContext(AlertContext);
+
+  const handleClick = async (e, id, query) => {
+    e.preventDefault();
+    showLoader();
+    try {
+      const data = await axios
+        .post(`/api/chartworkflow`, {
+          paperid: query.id,
+          chartid: id,
+        })
+        .then((res) => res.data);
+      setChartWorkflow(data);
+      setShowChartWorkflow(true);
+    } catch (error) {
+      console.error(error);
+      setAlert(
+        "Error",
+        "There was an error trying to fetch the chart workflow. Please try again later, if problems persist please contact the administrator. ",
+        null
+      );
+    }
+    hideLoader();
+  };
+
+  const workflowData = formatData(charts, tools, external, datasets, scripts);
+
   const FigureView = ({ rowdata }) => {
     return (
-      <StyledTooltip title={rowdata.caption} placement="left" arrow>
-        <ButtonBase focusRipple onClick={() => openLightbox(rowdata.index)}>
-          <img
-            src={rowdata["server"] + "/" + rowdata["imageFile"]}
-            style={{ maxWidth: "100%" }}
-            alt={rowdata.caption}
-            loading="lazy"
-          ></img>
-        </ButtonBase>
-      </StyledTooltip>
+      <Fragment>
+        <StyledTooltip title={rowdata.caption} placement="left" arrow>
+          <Button focusRipple onClick={() => openLightbox(rowdata.index)}>
+            <img
+              src={rowdata["server"] + "/" + rowdata["imageFile"]}
+              style={{ maxWidth: "60vh" }}
+              alt={rowdata.caption}
+              loading="lazy"
+            ></img>
+          </Button>
+        </StyledTooltip>
+        <Slider>
+          <a onClick={(e) => handleClick(e, rowdata.id, router.query)} href="#">
+            <img src="/images/workflow-icon.png" className="imgButton" />
+          </a>
+          <a
+            href={rowdata.downloadPath}
+            rel="noopener noreferrer"
+            alt="Download data associated to the paper Using Globus"
+            target="_blank"
+          >
+            <img src="/images/download-icon.png" className="imgButton" />
+          </a>
+          {rowdata.notebookFile ? (
+            <a
+              href={
+                "https://nbviewer.jupyter.org/url/" +
+                rowdata.server +
+                "/" +
+                rowdata.notebookFile
+              }
+              rel="noopener noreferrer"
+              alt="View DEfault Notebook File"
+              target="_blank"
+            >
+              <img src="/images/jupyter-icon.png" className="imgButton" />
+            </a>
+          ) : null}
+        </Slider>
+        <style jsx>{`
+          .imgButton {
+            margin: auto;
+            height: 32px;
+            width: 32px;
+          }
+        `}</style>
+      </Fragment>
     );
   };
 
@@ -126,6 +212,7 @@ const ChartInfo = ({ charts, fileserverpath }) => {
   const rows = charts.map((row, index) => {
     row["index"] = index;
     row["server"] = fileserverpath;
+    row["downloadPath"] = downloadPath;
     Gallery.push({
       src: row["server"] + "/" + row["imageFile"],
       caption: row["caption"],
@@ -149,6 +236,12 @@ const ChartInfo = ({ charts, fileserverpath }) => {
       <Drawer heading="Charts">
         <RecordTable rows={rows} columns={columns} />
       </Drawer>
+      <ChartWorkflow
+        showChartWorkflow={showChartWorkflow}
+        setShowChartWorkflow={setShowChartWorkflow}
+        data={workflowData}
+        workflow={chartWorkflow}
+      />
     </Fragment>
   );
 };

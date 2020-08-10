@@ -103,7 +103,15 @@ const PaperDetails = ({ data, error, preview }) => {
         <ReferenceInfo referenceData={referenceData} />
         <Box mb={7} mt={1}>
           <SimpleReactLightbox>
-            <ChartInfo charts={charts} fileserverpath={fileServerPath} />
+            <ChartInfo
+              charts={charts}
+              fileserverpath={fileServerPath}
+              downloadPath={downloadPath}
+              datasets={datasets}
+              tools={tools}
+              scripts={scripts}
+              external={heads}
+            />
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
