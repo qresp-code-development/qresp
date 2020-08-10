@@ -1,18 +1,11 @@
 import { useState } from "react";
 
-import { Grid, withStyles, IconButton } from "@material-ui/core";
+import { Grid, IconButton } from "@material-ui/core";
 import { CSSTransition } from "react-transition-group";
 import {
   KeyboardArrowRightRounded,
   KeyboardArrowLeftRounded,
 } from "@material-ui/icons";
-
-const StyledButton = withStyles({
-  root: {
-    paddingLeft: 0,
-    paddingRight: 0,
-  },
-})(IconButton);
 
 import styles from "./Slider.module.css";
 
@@ -20,7 +13,7 @@ const Slider = ({ children }) => {
   const [checked, setChecked] = useState(false);
 
   const handleChange = async () => {
-    setChecked((prev) => !prev);
+    setChecked(!checked);
   };
 
   if (!children) {
@@ -28,15 +21,15 @@ const Slider = ({ children }) => {
   }
 
   return (
-    <Grid container direction="row">
+    <Grid container direction="row" alignItems="center">
       <Grid item xs={2}>
-        <StyledButton onClick={handleChange}>
+        <IconButton onClick={handleChange}>
           {checked ? (
             <KeyboardArrowLeftRounded />
           ) : (
             <KeyboardArrowRightRounded />
           )}
-        </StyledButton>
+        </IconButton>
       </Grid>
       <CSSTransition
         in={checked}
@@ -55,15 +48,22 @@ const Slider = ({ children }) => {
           container
           direction="row"
           justify="space-between"
+          alignItems="center"
           spacing={1}
         >
-          {children.map((child, index) => {
-            return (
-              <Grid item key={index}>
-                {child}
-              </Grid>
-            );
-          })}
+          {Array.isArray(children) ? (
+            children.map((child, index) => {
+              return (
+                <Grid item key={index}>
+                  {child}
+                </Grid>
+              );
+            })
+          ) : (
+            <Grid item key={index}>
+              {children}
+            </Grid>
+          )}
         </Grid>
       </CSSTransition>
     </Grid>
