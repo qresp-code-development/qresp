@@ -10,7 +10,6 @@ const searchFilter = (columns, query) => {
     for (let index = 0; index < columns.length; index++) {
       const element = columns[index];
       if (element.options.searchable) {
-        console.log(element.options.value, data);
         return element.options.value(data[element.name]).match(regex);
       }
     }
