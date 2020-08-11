@@ -7,41 +7,41 @@ import RowsDisplayedLabel from "./RowsDisplayedLabel";
 
 const EnhancedTableFooter = (props) => {
   const { rows, filtered, page, rowsPerPage, onChangePage } = props;
+
+  const displayLabel = (
+    <RowsDisplayedLabel
+      rows={rows}
+      filtered={filtered}
+      page={page}
+      rowsPerPage={rowsPerPage}
+    />
+  );
+
+  const paginator = (
+    <TablePaginationActions
+      count={filtered}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onChangePage={onChangePage}
+    />
+  );
+
   return (
     <Grid container direction="row">
       <Hidden xsDown>
         <Grid item sm={6} container justify="flex-start">
-          <RowsDisplayedLabel
-            rows={rows}
-            filtered={filtered}
-            page={page}
-            rowsPerPage={rowsPerPage}
-          />
+          {displayLabel}
         </Grid>
         <Grid item sm={6} container justify="flex-end">
-          <TablePaginationActions
-            count={rows}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={onChangePage}
-          />
+          {paginator}
         </Grid>
       </Hidden>
       <Hidden smUp>
         <Grid item sm={12} container justify="center">
-          <RowsDisplayedLabel
-            rows={rows}
-            page={page}
-            rowsPerPage={rowsPerPage}
-          />
+          {displayLabel}
         </Grid>
         <Grid item sm={12} container justify="center">
-          <TablePaginationActions
-            count={rows}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={onChangePage}
-          />
+          {paginator}
         </Grid>
       </Hidden>
     </Grid>

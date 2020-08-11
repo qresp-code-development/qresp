@@ -1,31 +1,41 @@
+import { useState } from "react";
+
 import PropTypes from "prop-types";
 
 import { TextField, InputAdornment, IconButton, Box } from "@material-ui/core";
 import { Search, Close } from "@material-ui/icons";
 
-const searchFilter = (columns, query) => {
-  return (data) => {
-    if (query.length < 1) return data;
-    const regex = new RegExp(query, "gi");
-    for (let index = 0; index < columns.length; index++) {
-      const element = columns[index];
-      if (element.options.searchable) {
-        return element.options.value(data[element.name]).match(regex);
-      }
-    }
-  };
-};
-
-const TableSearch = ({ query, setQuery }) => {
+const TableSearch = ({ rows, setFiltered, columns }) => {
   const onSubmit = (e) => {
     e.preventDefault();
-    if (query.length > 0) {
-      console.log(query);
-    }
+  };
+
+  const [query, setQuery] = useState("");
+
+  const clearSearch = () => {
+    setQuery("");
+    setFiltered(rows);
   };
 
   const onChange = (e) => {
     setQuery(e.target.value);
+    if (query.length > 0) {
+      const regex = new RegExp(query, "gi");
+      setFiltered(
+        rows.filter((data) => {
+          for (let index = 0; index < columns.length; index++) {
+            const col = columns[index];
+            if (col.options.searchable) {
+              if (col.options.searchValue)
+                return col.options.searchValue(data[col.name]).match(regex);
+              return col.options.value(data[col.name]).match(regex);
+            }
+          }
+        })
+      );
+    } else {
+      setFiltered(rows);
+    }
   };
 
   return (
@@ -43,7 +53,7 @@ const TableSearch = ({ query, setQuery }) => {
             endAdornment: (
               <InputAdornment position="end">
                 {" "}
-                <IconButton size="small" onClick={() => setQuery("")}>
+                <IconButton size="small" onClick={clearSearch}>
                   <Close color="primary" />
                 </IconButton>
               </InputAdornment>
@@ -63,9 +73,8 @@ const TableSearch = ({ query, setQuery }) => {
 
 TableSearch.propTypes = {
   columns: PropTypes.array.isRequired,
-  query: PropTypes.string.isRequired,
-  setQuery: PropTypes.func.isRequired,
+  setFiltered: PropTypes.func.isRequired,
+  rows: PropTypes.array.isRequired,
 };
 
 export default TableSearch;
-export { searchFilter };

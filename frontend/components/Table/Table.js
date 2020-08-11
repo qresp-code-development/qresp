@@ -57,16 +57,16 @@ const RecordTable = (props) => {
   };
 
   // Search/Filter Controls
-  const [query, setQuery] = useState("");
+  const [filtered, setFiltered] = useState(rows);
 
   // Sorted Data
-  const sortedFilteredData = (orderBy.length > 0
-    ? stableSort(rows, getComparator(order, orderBy, columns), orderBy)
-    : rows
-  ).filter(searchFilter(columns, query)); // Filtering Data
+  const sortedData =
+    orderBy.length > 0
+      ? stableSort(filtered, getComparator(order, orderBy, columns), orderBy)
+      : filtered;
 
   // Paginating
-  const paginatedData = sortedFilteredData.slice(
+  const paginatedData = sortedData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
@@ -82,10 +82,14 @@ const RecordTable = (props) => {
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TableSearch columns={columns} query={query} setQuery={setQuery} />
+          <TableSearch
+            columns={columns}
+            setFiltered={setFiltered}
+            rows={rows}
+          />
         </Grid>
       </Grid>
-      <TableContainer>
+      <TableContainer style={{ transition: "all 0.2s linear" }}>
         <Table>
           <EnhancedTableHeader
             headers={columns}
@@ -120,7 +124,7 @@ const RecordTable = (props) => {
       </TableContainer>
       <EnhancedTableFooter
         rows={rows.length}
-        filtered={sortedFilteredData.length}
+        filtered={filtered.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
