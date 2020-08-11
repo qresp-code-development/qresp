@@ -45,6 +45,7 @@ const search = ({ data, error, servers }) => {
         sort: true,
         searchable: true,
         value: (data) => data._Search__title,
+        searchValue: (data) => data._Search__title + data._Search__authors,
       },
     },
     {
