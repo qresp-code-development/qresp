@@ -109,6 +109,15 @@ const ChartInfo = ({
   const workflowData = formatData(charts, tools, external, datasets, scripts);
 
   const FigureView = ({ rowdata }) => {
+    const datatreeLink =
+      rowdata.server +
+      "/" +
+      rowdata.imageFile.slice(
+        rowdata.imageFile.startsWith("/") ? 1 : 0,
+        rowdata.imageFile.lastIndexOf("/")
+      );
+
+    console.log(datatreeLink);
     return (
       <Fragment>
         <StyledTooltip title={rowdata.caption} placement="left" arrow>
@@ -122,7 +131,18 @@ const ChartInfo = ({
           </Button>
         </StyledTooltip>
         <Slider>
-          <a onClick={(e) => handleClick(e, rowdata.id, router.query)} href="#">
+          <a
+            href={datatreeLink}
+            rel="noopener noreferrer"
+            alt="View the data tree"
+            target="_blank"
+          >
+            <img src="/images/datatree.png" className="imgButton" />
+          </a>
+          <a
+            onClick={(e) => handleClick(e, rowdata.id, router.query)}
+            href="showChartWorkflow"
+          >
             <img src="/images/workflow-icon.png" className="imgButton" />
           </a>
           <a
@@ -142,7 +162,7 @@ const ChartInfo = ({
                 rowdata.notebookFile
               }
               rel="noopener noreferrer"
-              alt="View DEfault Notebook File"
+              alt="View Default Notebook File"
               target="_blank"
             >
               <img src="/images/jupyter-icon.png" className="imgButton" />
