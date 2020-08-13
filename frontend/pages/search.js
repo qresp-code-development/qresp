@@ -1,4 +1,4 @@
-import { useEffect, useContext, Fragment } from "react";
+import { useEffect, useContext, Fragment, useState } from "react";
 
 import { useRouter } from "next/router";
 
@@ -14,7 +14,7 @@ import Summary from "../components/Paper/Summary";
 import apiEndpoint from "../Context/axios";
 import AlertContext from "../Context/Alert/alertContext";
 
-const search = ({ data, error, servers }) => {
+const search = ({ initialdata, error, servers }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const searchDescription =
@@ -26,6 +26,8 @@ const search = ({ data, error, servers }) => {
     router.reload();
     unsetAlert();
   };
+
+  const [data, setData] = useState(initialdata);
 
   const {
     allPapersSize = null,
@@ -61,8 +63,13 @@ const search = ({ data, error, servers }) => {
     },
   ];
 
+  const taglist = new Set();
+
   const rows = allpaperslist.map((paper) => {
     paper["_Search__servers"] = servers;
+    paper["_Search__tags"].forEach((element) => {
+      taglist.add(element.toLowerCase());
+    });
     return {
       paper: paper,
       year: paper["_Search__year"],
@@ -98,7 +105,15 @@ const search = ({ data, error, servers }) => {
               </Box>{" "}
             </Typography>
           </Box>
-          <AdvancedSearch />
+          <Box>
+            <AdvancedSearch
+              collections={collectionlist}
+              authors={authorslist}
+              publications={publicationlist}
+              tags={taglist}
+              setRows={setData}
+            />
+          </Box>
           <Divider />
           <RecordTable rows={rows} columns={columns} />
         </Box>
@@ -124,7 +139,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { data, error, servers: query.servers },
+    props: { initialdata: data, error, servers: query.servers },
   };
 }
 
