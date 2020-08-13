@@ -1,4 +1,4 @@
-import apiEndpoint from "../../Context/axios";
+import apiEndpoint from "../../../Context/axios";
 
 export default async (req, res) => {
   if (req.method == "POST") {
