@@ -15,10 +15,15 @@ const BigTypography = withStyles({
   },
 })(Typography);
 
-const SimpleLabelValue = ({ label, value }) => {
+const SimpleLabelValue = ({ label, value, direction }) => {
   return (
     <div>
-      <Grid container direction="row" alignItems="center" justify="flex-start">
+      <Grid
+        container
+        direction={direction}
+        alignItems="center"
+        justify="flex-start"
+      >
         <Grid item>
           <Typography variant="body2" color="secondary" component="span">
             <span>{label}:&nbsp;&nbsp;</span>
@@ -41,19 +46,29 @@ const SimpleLabelValue = ({ label, value }) => {
   );
 };
 
+SimpleLabelValue.defaultProps = {
+  direction: "row",
+};
+
 SimpleLabelValue.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
+  direction: PropTypes.string,
 };
 
-const LabelValue = ({ label, value, link, image, textVariant }) => {
+const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
   if (typeof value === "array") {
     value = value.join(",");
   }
 
   return (
     <div>
-      <Grid container direction="row" alignItems="center" justify="flex-start">
+      <Grid
+        container
+        direction={direction}
+        alignItems="center"
+        justify="flex-start"
+      >
         <Grid item>
           <BigTypography variant="body1" color="secondary" component="div">
             <span>{label}:&nbsp;&nbsp;</span>
@@ -106,6 +121,7 @@ LabelValue.defaultProps = {
   link: null,
   image: null,
   textVariant: "body1",
+  direction: "row",
 };
 
 LabelValue.propTypes = {
@@ -118,6 +134,7 @@ LabelValue.propTypes = {
     PropTypes.array.isRequired,
     PropTypes.object.isRequired,
   ]),
+  direction: PropTypes.string,
 };
 
 export { SimpleLabelValue };
