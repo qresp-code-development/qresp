@@ -88,7 +88,7 @@ const ChartInfo = ({
     showLoader();
     try {
       const data = await axios
-        .post(`/api/chartworkflow`, {
+        .post(`/api/explorer/chartworkflow`, {
           paperid: query.id,
           chartid: id,
         })
