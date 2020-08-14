@@ -108,9 +108,8 @@ const search = ({ initialdata, error, servers }) => {
           <Box display="flex" alignItems="center" justifyContent="center" p={2}>
             <Typography variant="h3">
               <Box fontWeight="bold">
-                {" "}
-                Search {allPapersSize} records for...
-              </Box>{" "}
+                {`${allpaperslist.length}  Records Available`}
+              </Box>
             </Typography>
           </Box>
           <Box>
