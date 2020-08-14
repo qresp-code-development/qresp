@@ -1,4 +1,4 @@
-import { Fragment, createElement, useState } from "react";
+import { Fragment, createElement, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -58,6 +58,10 @@ const RecordTable = (props) => {
 
   // Search/Filter Controls
   const [filtered, setFiltered] = useState(rows);
+
+  useEffect(() => {
+    setFiltered(rows);
+  }, [rows]);
 
   // Sorted Data
   const sortedData =
