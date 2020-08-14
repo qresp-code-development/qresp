@@ -29,13 +29,17 @@ const search = ({ initialdata, error, servers }) => {
 
   const [data, setData] = useState(initialdata);
 
+  const clearSearch = (e) => {
+    setData(initialdata);
+  };
+
   const {
     allPapersSize = null,
     allpaperslist = null,
     authorslist = null,
     collectionlist = null,
     publicationlist = null,
-  } = data || {};
+  } = { ...initialdata, ...data } || {};
 
   const columns = [
     {
@@ -64,12 +68,16 @@ const search = ({ initialdata, error, servers }) => {
   ];
 
   const taglist = new Set();
+  if (initialdata.allpaperslist) {
+    initialdata.allpaperslist.forEach((paper) => {
+      paper["_Search__tags"].forEach((element) => {
+        taglist.add(element.toLowerCase());
+      });
+    });
+  }
 
   const rows = allpaperslist.map((paper) => {
     paper["_Search__servers"] = servers;
-    paper["_Search__tags"].forEach((element) => {
-      taglist.add(element.toLowerCase());
-    });
     return {
       paper: paper,
       year: paper["_Search__year"],
@@ -107,11 +115,12 @@ const search = ({ initialdata, error, servers }) => {
           </Box>
           <Box>
             <AdvancedSearch
-              collections={collectionlist}
-              authors={authorslist}
-              publications={publicationlist}
-              tags={taglist}
-              setRows={setData}
+              collections={collectionlist || []}
+              authors={authorslist || []}
+              publications={publicationlist || []}
+              tags={Array.from(taglist) || []}
+              setData={setData}
+              clearSearch={clearSearch}
             />
           </Box>
           <Divider />
