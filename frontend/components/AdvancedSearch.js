@@ -72,6 +72,7 @@ const ChipSearchField = ({
           onChange={(event, values) => onChange(name, values)}
           size="small"
           fullWidth
+          limitTags={2}
         />
       </Grid>
     </Grid>
