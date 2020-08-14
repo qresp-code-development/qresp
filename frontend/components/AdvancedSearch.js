@@ -1,4 +1,4 @@
-import { Fragment, useState, useContext } from "react";
+import { Fragment, useState, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -9,7 +9,7 @@ import {
   TextField,
   Box,
 } from "@material-ui/core";
-import { Search, ExpandMore } from "@material-ui/icons";
+import { Search, ExpandMore, Clear } from "@material-ui/icons";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import LoadingContext from "../Context/Loading/loadingContext";
@@ -40,7 +40,14 @@ const TextSearchField = ({ title, placeholder, value, onChange, name }) => {
   );
 };
 
-const ChipSearchField = ({ title, onChange, options, name, placeholder }) => {
+const ChipSearchField = ({
+  title,
+  onChange,
+  options,
+  name,
+  placeholder,
+  value,
+}) => {
   return (
     <Grid container direction="column" alignItems="stretch" justify="center">
       <Grid item xs={12}>
@@ -50,6 +57,7 @@ const ChipSearchField = ({ title, onChange, options, name, placeholder }) => {
       </Grid>
       <Grid item xs={12}>
         <Autocomplete
+          value={value}
           multiple
           options={Array.from(options)}
           filterSelectedOptions
@@ -76,6 +84,7 @@ const AdvancedSearch = ({
   tags,
   collections,
   setData,
+  clearSearch,
 }) => {
   const [show, setShow] = useState(false);
 
@@ -132,6 +141,11 @@ const AdvancedSearch = ({
     hideLoader();
   };
 
+  const onClear = () => {
+    setSearch(initialState);
+    clearSearch();
+  };
+
   return (
     <Fragment>
       <Button
@@ -175,7 +189,7 @@ const AdvancedSearch = ({
                   <TextSearchField
                     title="Title"
                     placeholder="Enter a title"
-                    value={search.title}
+                    value={search.paperTitle}
                     onChange={onChange}
                     name="paperTitle"
                   />
@@ -196,6 +210,7 @@ const AdvancedSearch = ({
                     onChange={onChange}
                     name="tags"
                     placeholder="Enter Tag(s)"
+                    value={search.tags}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -205,6 +220,7 @@ const AdvancedSearch = ({
                     onChange={onChange}
                     name="collectionList"
                     placeholder="Enter Collection(s) Name"
+                    value={search.collectionList}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -214,6 +230,7 @@ const AdvancedSearch = ({
                     onChange={onChange}
                     name="authorsList"
                     placeholder="Enter Author(s) name"
+                    value={search.authorsList}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -223,13 +240,29 @@ const AdvancedSearch = ({
                     onChange={onChange}
                     name="publicationList"
                     placeholder="Enter publication(s) name"
+                    value={search.publicationList}
                   />
                 </Grid>
               </Grid>
-              <Grid item>
-                <Button variant="contained" type="submit">
-                  <Search />
-                </Button>
+              <Grid item container spacing={1} justify="center">
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    endIcon={<Search />}
+                    type="submit"
+                  >
+                    Search
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    endIcon={<Clear />}
+                    onClick={onClear}
+                  >
+                    Clear
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </form>
@@ -245,6 +278,7 @@ AdvancedSearch.propTypes = {
   publications: PropTypes.array.isRequired,
   tags: PropTypes.array.isRequired,
   collections: PropTypes.array.isRequired,
+  clearSearch: PropTypes.func.isRequired,
 };
 
 export default AdvancedSearch;
