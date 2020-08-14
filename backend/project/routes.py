@@ -876,7 +876,7 @@ def searchWord():
         searchWord = ""
         paperTitle = request.args.get('paperTitle', type=str)
         doi = request.args.get('doi', type=str)
-        tags = request.args.get('tags', type=str)
+        tags = json.loads(request.args.get('tags'))
         collectionList = json.loads(request.args.get('collectionList'))
         authorsList = json.loads(request.args.get('authorsList'))
         publicationList = json.loads(request.args.get('publicationList'))
@@ -884,7 +884,7 @@ def searchWord():
             request.args.get('servers', type=str, default=''))
         fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip(
             "/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
-        url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
+        url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+",".join(tags)+"&collectionList="+",".join(collectionList) + \
               "&authorsList="+",".join(authorsList) + \
             "&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)

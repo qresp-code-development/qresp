@@ -1,8 +1,9 @@
 from project.paperdao import *
 
-#edit swagger.yml file for method changes
+# edit swagger.yml file for method changes
 
-def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=None,authorsList=None,publicationList=None):
+
+def search(searchWord=None, paperTitle=None, doi=None, tags=None, collectionList=None, authorsList=None, publicationList=None):
     """
     This function responds to a request for /api/search
     with the complete lists of papers
@@ -12,20 +13,23 @@ def search(searchWord=None,paperTitle=None,doi=None,tags=None,collectionList=Non
     allpaperslist = []
     try:
         dao = PaperDAO()
+        if tags:
+            tags = tags.split(",")
         if collectionList:
             collectionList = collectionList.split(",")
         if authorsList:
             authorsList = authorsList.split(",")
         if publicationList:
             publicationList = publicationList.split(",")
-        allpaperslist = dao.getAllFilteredSearchObjects(searchWord=searchWord,paperTitle=paperTitle,doi=doi,
-                                                        tags=tags,collectionList=collectionList,
-                                                        authorsList=authorsList,publicationList=publicationList)
+        allpaperslist = dao.getAllFilteredSearchObjects(searchWord=searchWord, paperTitle=paperTitle, doi=doi,
+                                                        tags=tags, collectionList=collectionList,
+                                                        authorsList=authorsList, publicationList=publicationList)
     except Exception as e:
         msg = "Exception in search api " + str(e)
         print(msg)
         return msg, 400
     return allpaperslist, 200
+
 
 def collections():
     """
@@ -44,6 +48,7 @@ def collections():
         return msg, 400
     return list(allcollectionlist), 200
 
+
 def authors():
     """
     This function responds to a request for /api/authors
@@ -60,6 +65,7 @@ def authors():
         print(msg)
         return msg, 400
     return list(allauthorlist), 200
+
 
 def publications():
     """
@@ -78,6 +84,7 @@ def publications():
         return msg, 400
     return list(allpublist), 200
 
+
 def paper(id):
     """
     This function responds to a request for /api/paper/{id}
@@ -95,6 +102,7 @@ def paper(id):
         return msg, 400
     return paperdetail, 200
 
+
 def workflow(id):
     """
     This function responds to a request for /api/workflow/{id}
@@ -109,10 +117,11 @@ def workflow(id):
     except Exception as e:
         msg = "Exception in workflow api " + str(e)
         print(msg)
-        return msg,400
+        return msg, 400
     return workflowdetail, 200
 
-def chart(id,cid):
+
+def chart(id, cid):
     """
     This function responds to a request for /api/paper/{id}/chart/{cid}
     with the chart given id
@@ -126,5 +135,5 @@ def chart(id,cid):
     except Exception as e:
         msg = "Exception in chart api " + str(e)
         print(msg)
-        return msg,400
+        return msg, 400
     return chartworkflowdetail, 200
