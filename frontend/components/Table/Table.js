@@ -61,7 +61,12 @@ const RecordTable = (props) => {
 
   useEffect(() => {
     setFiltered(rows);
+    setPage(0);
   }, [rows]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filtered]);
 
   // Sorted Data
   const sortedData =

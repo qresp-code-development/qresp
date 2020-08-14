@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import PropTypes from "prop-types";
 
 import { TextField, InputAdornment, IconButton, Box } from "@material-ui/core";
@@ -10,17 +8,13 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
     e.preventDefault();
   };
 
-  const [query, setQuery] = useState("");
-
   const clearSearch = () => {
-    setQuery("");
     setFiltered(rows);
   };
 
   const onChange = (e) => {
-    setQuery(e.target.value);
-    if (query.length > 0) {
-      const regex = new RegExp(query, "gi");
+    if (e.target.value.length > 0) {
+      const regex = new RegExp(e.target.value, "gi");
       setFiltered(
         rows.filter((data) => {
           for (let index = 0; index < columns.length; index++) {
@@ -60,7 +54,6 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
             ),
           }}
           placeholder="Search..."
-          value={query}
           onChange={onChange}
           size="small"
           variant="outlined"
