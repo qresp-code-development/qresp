@@ -7,7 +7,7 @@ import { Typography, Grid, Box, Paper, withStyles } from "@material-ui/core";
 
 import Tag from "../tag";
 
-import Slider from "../HorizontalSlider/Slider";
+import Slider from "../HorizontalSlider";
 
 const StyledPaper = withStyles({
   root: {

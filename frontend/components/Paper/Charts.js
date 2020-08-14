@@ -7,7 +7,7 @@ import { Typography, Button } from "@material-ui/core";
 
 import RecordTable from "../Table/Table";
 import Drawer from "../drawer";
-import Slider from "../HorizontalSlider/Slider";
+import Slider from "../HorizontalSlider";
 import StyledTooltip from "../tooltip";
 import ChartWorkflow from "./ChartWorkflow";
 import { formatData } from "../Workflow/util";
