@@ -14,7 +14,7 @@ import {
 import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
 import EnhancedTableFooter from "./TableFooter";
-import TableSearch, { searchFilter } from "./TableSearch";
+import TableSearch, { TableSearchState } from "./TableSearch";
 import { getComparator, stableSort } from "./TableSort";
 
 const StyledTableCell = withStyles({
@@ -81,7 +81,7 @@ const RecordTable = (props) => {
   );
 
   return (
-    <Fragment>
+    <TableSearchState>
       <Grid container direction="row" alignItems="center">
         <Grid item xs={12} sm={6}>
           <RowsPerPageSelector
@@ -138,7 +138,7 @@ const RecordTable = (props) => {
         page={page}
         onChangePage={handleChangePage}
       />
-    </Fragment>
+    </TableSearchState>
   );
 };
 
