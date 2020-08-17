@@ -51,7 +51,10 @@ const search = ({ initialdata, error, servers }) => {
         sort: true,
         searchable: true,
         value: (data) => data._Search__title,
-        searchValue: (data) => data._Search__title + data._Search__authors,
+        searchValue: (data) =>
+          data._Search__title +
+          data._Search__authors +
+          data._Search__tags.join(" "),
       },
     },
     {
@@ -83,8 +86,6 @@ const search = ({ initialdata, error, servers }) => {
       year: paper["_Search__year"],
     };
   });
-
-  const views = { paper: Summary, year: null };
 
   useEffect(() => {
     if (error || (data && data.error)) {
