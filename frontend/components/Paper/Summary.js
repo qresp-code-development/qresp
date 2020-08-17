@@ -1,13 +1,13 @@
-import { Fragment, useState } from "react";
+import { Fragment, useContext } from "react";
 import PropTypes from "prop-types";
 
 import Link from "next/link";
-
 import { Typography, Grid, Box, Paper, withStyles } from "@material-ui/core";
 
 import Tag from "../tag";
-
 import Slider from "../HorizontalSlider";
+
+import { TableSearchContext } from "../Table/TableSearch";
 
 const StyledPaper = withStyles({
   root: {
@@ -28,6 +28,8 @@ const Summary = ({ rowdata }) => {
     _Search__title,
     _Search__servers,
   } = rowdata;
+
+  const { setQuery } = useContext(TableSearchContext);
 
   return (
     <Fragment>
@@ -54,6 +56,7 @@ const Summary = ({ rowdata }) => {
                 variant="subtitle1"
                 component="div"
                 color="secondary"
+                style={{ wordBreak: "break-all" }}
                 gutterBottom
               >
                 {_Search__authors}
@@ -72,7 +75,15 @@ const Summary = ({ rowdata }) => {
             </Grid>
             <Grid item xs={12}>
               {_Search__tags.map((tag) => (
-                <Tag label={tag} key={tag} size="small" />
+                <Tag
+                  label={tag
+                    .slice(0, 32)
+                    .trim()
+                    .concat(tag.length > 32 ? "..." : "")}
+                  key={tag}
+                  size="small"
+                  onClick={() => setQuery(tag)}
+                />
               ))}
             </Grid>
             <Grid item xs={12}>
@@ -81,7 +92,7 @@ const Summary = ({ rowdata }) => {
                   href="/paperdetails/[id]"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
-                    query: { servers: _Search__servers + "#showFigures" },
+                    query: { servers: _Search__servers + "%23showFigures" },
                   }}
                 >
                   <a
@@ -93,11 +104,12 @@ const Summary = ({ rowdata }) => {
                   </a>
                 </Link>
                 <Link
-                  href="/paperdetails/[id]"
+                  href="/paperdetails/[id]#workflow"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
                     query: { servers: _Search__servers },
                   }}
+                  passHref={true}
                 >
                   <a
                     rel="noopener noreferrer"
