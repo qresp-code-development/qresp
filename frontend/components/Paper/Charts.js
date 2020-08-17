@@ -71,6 +71,7 @@ const ChartInfo = ({
   scripts,
   datasets,
   external,
+  showWorkflows,
 }) => {
   // Light Box Controls
   const { openLightbox } = useLightbox();
@@ -138,12 +139,14 @@ const ChartInfo = ({
           >
             <img src="/images/datatree.png" className="imgButton" />
           </a>
-          <a
-            onClick={(e) => handleClick(e, rowdata.id, router.query)}
-            href="showChartWorkflow"
-          >
-            <img src="/images/workflow-icon.png" className="imgButton" />
-          </a>
+          {showWorkflows ? (
+            <a
+              onClick={(e) => handleClick(e, rowdata.id, router.query)}
+              href="showChartWorkflow"
+            >
+              <img src="/images/workflow-icon.png" className="imgButton" />
+            </a>
+          ) : null}
           <a
             href={rowdata.downloadPath}
             rel="noopener noreferrer"
@@ -252,22 +255,34 @@ const ChartInfo = ({
   return (
     <Fragment>
       <SRLWrapper images={Gallery} options={options} />
-      <Drawer heading="Charts" id="charts">
+      <Drawer heading="Charts">
         <RecordTable rows={rows} columns={columns} />
       </Drawer>
-      <ChartWorkflow
-        showChartWorkflow={showChartWorkflow}
-        setShowChartWorkflow={setShowChartWorkflow}
-        data={workflowData}
-        workflow={chartWorkflow}
-      />
+      {showWorkflows ? (
+        <ChartWorkflow
+          showChartWorkflow={showChartWorkflow}
+          setShowChartWorkflow={setShowChartWorkflow}
+          data={workflowData}
+          workflow={chartWorkflow}
+        />
+      ) : null}
     </Fragment>
   );
+};
+
+ChartInfo.defaultProps = {
+  showWorkflows: true,
 };
 
 ChartInfo.propTypes = {
   charts: PropTypes.array.isRequired,
   fileserverpath: PropTypes.string.isRequired,
+  downloadPath: PropTypes.string.isRequired,
+  tools: PropTypes.array.isRequired,
+  scripts: PropTypes.array.isRequired,
+  datasets: PropTypes.array.isRequired,
+  external: PropTypes.array.isRequired,
+  showWorkflows: PropTypes.bool,
 };
 
 export default ChartInfo;
