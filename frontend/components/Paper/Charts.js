@@ -72,6 +72,7 @@ const ChartInfo = ({
   datasets,
   external,
   showWorkflows,
+  servers,
 }) => {
   // Light Box Controls
   const { openLightbox } = useLightbox();
@@ -92,9 +93,11 @@ const ChartInfo = ({
         .post(`/api/explorer/chartworkflow`, {
           paperid: query.id,
           chartid: id,
+          servers: servers,
         })
         .then((res) => res.data);
-      setChartWorkflow(data);
+      console.log(data);
+      setChartWorkflow(data.chartworkflowdetail);
       setShowChartWorkflow(true);
     } catch (error) {
       console.error(error);
@@ -124,7 +127,7 @@ const ChartInfo = ({
           <Button focusRipple onClick={() => openLightbox(rowdata.index)}>
             <img
               src={rowdata["server"] + "/" + rowdata["imageFile"]}
-              style={{ maxWidth: "60vh" }}
+              style={{ maxWidth: "30vw" }}
               alt={rowdata.caption}
               loading="lazy"
             ></img>
@@ -283,6 +286,7 @@ ChartInfo.propTypes = {
   datasets: PropTypes.array.isRequired,
   external: PropTypes.array.isRequired,
   showWorkflows: PropTypes.bool,
+  servers: PropTypes.string.isRequired,
 };
 
 export default ChartInfo;
