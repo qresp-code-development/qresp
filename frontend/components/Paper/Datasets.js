@@ -7,7 +7,7 @@ import Drawer from "../drawer";
 
 const DescriptionView = ({ rowdata }) => {
   return (
-    <Typography variant="body2" color="secondary" style={{ minWidth: "25vw" }}>
+    <Typography variant="body2" color="secondary" style={{ maxWidth: "40vw" }}>
       {rowdata["readme"]}
     </Typography>
   );
