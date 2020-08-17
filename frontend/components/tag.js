@@ -2,7 +2,7 @@ import { Chip, withStyles } from "@material-ui/core";
 
 const Tag = withStyles({
   root: {
-    margin: "2px 4px",
+    margin: "1px 4px 1px 0px",
     color: "#999",
     background: "#e0e0e0",
     clipPath: "polygon(0% 0%, 93% 0, 100% 50%, 93% 100%, 0 100%)",
@@ -10,6 +10,12 @@ const Tag = withStyles({
   },
   labelSmall: {
     paddingRight: "12px",
+  },
+  clickable: {
+    "&:hover": {
+      background: "#800000",
+      color: "#FFF",
+    },
   },
 })(Chip);
 
