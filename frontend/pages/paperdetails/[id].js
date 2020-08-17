@@ -47,11 +47,11 @@ const PaperDetails = ({ data, error, preview }) => {
     lastName,
     emailId,
     affiliation,
-    workflows,
     heads,
     license,
-  } = data;
+  } = data.paperdetail;
 
+  const workflows = data.workflowdetail;
   const curator = { firstName, middleName, lastName, emailId, affiliation };
 
   const referenceData = {
@@ -88,6 +88,9 @@ const PaperDetails = ({ data, error, preview }) => {
     }
   }, []);
 
+  const showWorkflows =
+    workflows.edges.length > 0 && Object.keys(workflows.nodes).length > 0;
+
   return (
     <Fragment>
       <SEO title={"Qresp | " + title} description={abstract} author={authors} />
@@ -111,19 +114,22 @@ const PaperDetails = ({ data, error, preview }) => {
               tools={tools}
               scripts={scripts}
               external={heads}
+              showWorkflows={showWorkflows}
             />
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
           <ScriptsInfo scripts={scripts} fileserverpath={fileServerPath} />
-          <Workflow
-            workflow={workflows}
-            charts={charts}
-            datasets={datasets}
-            tools={tools}
-            scripts={scripts}
-            external={heads}
-          />
+          {showWorkflows ? (
+            <Workflow
+              workflow={workflows}
+              charts={charts}
+              datasets={datasets}
+              tools={tools}
+              scripts={scripts}
+              external={heads}
+            />
+          ) : null}
           {documentation ? (
             <Documentation documentation={documentation} />
           ) : null}
@@ -144,7 +150,11 @@ export async function getServerSideProps(ctx) {
   var data = null;
 
   try {
-    const response = await apiEndpoint.get("/api/paper/" + query.id);
+    const response = await apiEndpoint.get("/paperdetails/" + query.id, {
+      params: {
+        servers: query.servers,
+      },
+    });
     data = response.data;
   } catch (e) {
     console.error(e);
