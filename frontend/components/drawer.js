@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import {
   Accordion,
   AccordionSummary,
@@ -21,7 +23,7 @@ const StyledAccordionSummary = withStyles({
 })(AccordionSummary);
 
 const Drawer = (props) => {
-  const { heading, children } = props;
+  const { heading, children, id } = props;
   return (
     <StyledAccordion
       elevation={4}
@@ -29,6 +31,7 @@ const Drawer = (props) => {
       TransitionProps={{ timeout: 250 }}
       defaultExpanded
     >
+      {id ? <div id={id}></div> : null}
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h4" style={{ color: "#333333" }}>
           <Box fontWeight="bold">{heading}</Box>
@@ -44,4 +47,11 @@ const Drawer = (props) => {
 };
 
 export { StyledAccordion, StyledAccordionSummary };
+
+Drawer.propTypes = {
+  heading: PropTypes.string.isRequired,
+  children: PropTypes.any,
+  id: PropTypes.string,
+};
+
 export default Drawer;
