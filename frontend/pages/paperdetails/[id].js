@@ -21,7 +21,7 @@ import LicenseInfo from "../../components/Paper/License";
 
 import SimpleReactLightbox from "simple-react-lightbox";
 
-const PaperDetails = ({ data, error, preview }) => {
+const PaperDetails = ({ data, error, preview, query }) => {
   const {
     title,
     authors,
@@ -115,6 +115,7 @@ const PaperDetails = ({ data, error, preview }) => {
               scripts={scripts}
               external={heads}
               showWorkflows={showWorkflows}
+              servers={query.servers}
             />
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
@@ -162,7 +163,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { data, error },
+    props: { data, error, query },
   };
 }
 
