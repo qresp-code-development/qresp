@@ -30,4 +30,14 @@ const formatData = (charts, tools, external, datasets, scripts) => {
   return data;
 };
 
-export { formatData };
+const formatWorkflow = (workflow) => {
+  workflow = workflow || {};
+  const newWorkflow = {
+    edges: workflow.edges ? workflow.edges : [],
+    nodes: workflow.nodes ? Object.keys(workflow.nodes) : [],
+  };
+
+  return newWorkflow;
+};
+
+export { formatData, formatWorkflow };

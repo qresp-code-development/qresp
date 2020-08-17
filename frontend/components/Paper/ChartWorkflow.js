@@ -14,16 +14,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import Graph from "../Workflow/Graph";
 import Legend from "../Workflow/Legend";
-
-const formatWorkflow = (workflow) => {
-  workflow = workflow || {};
-  const newWorkflow = {
-    edges: workflow.edges ? workflow.edges : [],
-    nodes: workflow.nodes ? Object.keys(workflow.nodes) : [],
-  };
-
-  return newWorkflow;
-};
+import { formatWorkflow } from "../Workflow/util";
 
 const ChartWorkflow = ({
   showChartWorkflow,
