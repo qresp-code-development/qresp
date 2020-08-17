@@ -23,15 +23,15 @@ const StyledAccordionSummary = withStyles({
 })(AccordionSummary);
 
 const Drawer = (props) => {
-  const { heading, children, id } = props;
+  const { heading, children } = props;
   return (
     <StyledAccordion
       elevation={4}
       square={true}
       TransitionProps={{ timeout: 250 }}
       defaultExpanded
+      id={heading.toLowerCase()}
     >
-      {id ? <div id={id}></div> : null}
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h4" style={{ color: "#333333" }}>
           <Box fontWeight="bold">{heading}</Box>
@@ -51,7 +51,6 @@ export { StyledAccordion, StyledAccordionSummary };
 Drawer.propTypes = {
   heading: PropTypes.string.isRequired,
   children: PropTypes.any,
-  id: PropTypes.string,
 };
 
 export default Drawer;
