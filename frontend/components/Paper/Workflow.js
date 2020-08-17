@@ -18,7 +18,7 @@ const Workflow = ({ workflow, charts, tools, scripts, datasets, external }) => {
   const data = formatData(charts, tools, external, datasets, scripts);
 
   return (
-    <Drawer heading="Workflow">
+    <Drawer heading="Workflow" id="workflow">
       <Box mt={1}>
         <Grid container direction="row">
           <Grid item xs={12} md={10}>

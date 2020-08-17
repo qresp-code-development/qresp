@@ -117,7 +117,6 @@ const ChartInfo = ({
         rowdata.imageFile.lastIndexOf("/")
       );
 
-    console.log(datatreeLink);
     return (
       <Fragment>
         <StyledTooltip title={rowdata.caption} placement="left" arrow>
@@ -253,7 +252,7 @@ const ChartInfo = ({
   return (
     <Fragment>
       <SRLWrapper images={Gallery} options={options} />
-      <Drawer heading="Charts">
+      <Drawer heading="Charts" id="charts">
         <RecordTable rows={rows} columns={columns} />
       </Drawer>
       <ChartWorkflow
