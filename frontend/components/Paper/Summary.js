@@ -92,7 +92,7 @@ const Summary = ({ rowdata }) => {
                   href="/paperdetails/[id]"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
-                    query: { servers: _Search__servers + "%23showFigures" },
+                    query: { servers: _Search__servers, scrollTo: "charts" },
                   }}
                 >
                   <a
@@ -107,7 +107,7 @@ const Summary = ({ rowdata }) => {
                   href="/paperdetails/[id]#workflow"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
-                    query: { servers: _Search__servers },
+                    query: { servers: _Search__servers, scrollTo: "workflow" },
                   }}
                   passHref={true}
                 >
