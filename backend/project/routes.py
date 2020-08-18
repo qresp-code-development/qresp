@@ -890,8 +890,7 @@ def searchWord():
         allpaperslist = fetchdata.fetchOutput(url)
         return jsonify(allpaperslist=allpaperslist), 200
     except Exception as e:
-        print(e)
-        flash('Error in search. ' + str(e))
+        print(e, file=sys.stderr)
         return jsonify(allpaperslist=allpaperslist), 400
 
 
@@ -911,11 +910,10 @@ def paperdetails(paperid):
         paperdetail = fetchdata.fetchOutput(url)
         url = '/api/workflow/'+paperid
         workflowdetail = fetchdata.fetchOutput(url)
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=False)
+        return jsonify(paperdetail=paperdetail, workflowdetail=workflowdetail), 200
     except Exception as e:
-        print(e)
-        flash('Error in paperdetails. ' + str(e))
-        return render_template('paperdetails.html', paperdetail=paperdetail, workflowdetail=workflowdetail, preview=False)
+        print(e, file=sys.stderr)
+        return jsonify({'error': True}), 500
 
 
 # Fetches workflow of chart based on user click
