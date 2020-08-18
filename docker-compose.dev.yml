@@ -20,8 +20,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    ports:
-      - "5000:5000"
     environment:
       - PYTHONUNBUFFERED=TRUE
     volumes:
@@ -40,13 +38,22 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
     volumes:
       - ./frontend:/usr/src/app
     networks: 
       - frontend
     command: yarn dev
+  
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - "9000:9000"
+    networks: 
+      - frontend
+      - backend
 
 networks:
   frontend:
