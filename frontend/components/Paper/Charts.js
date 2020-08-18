@@ -96,7 +96,6 @@ const ChartInfo = ({
           servers: servers,
         })
         .then((res) => res.data);
-      console.log(data);
       setChartWorkflow(data.chartworkflowdetail);
       setShowChartWorkflow(true);
     } catch (error) {
