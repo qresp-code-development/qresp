@@ -11,10 +11,10 @@ import RecordTable from "../components/Table/Table";
 import AdvancedSearch from "../components/AdvancedSearch";
 import Summary from "../components/Paper/Summary";
 
-import apiEndpoint from "../Context/axios";
+import axios from "axios";
 import AlertContext from "../Context/Alert/alertContext";
 
-const search = ({ initialdata, error, servers }) => {
+const search = ({ initialdata, error, selectedservers }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const searchDescription =
@@ -33,13 +33,8 @@ const search = ({ initialdata, error, servers }) => {
     setData(initialdata);
   };
 
-  const {
-    allPapersSize = null,
-    allpaperslist = null,
-    authorslist = null,
-    collectionlist = null,
-    publicationlist = null,
-  } = { ...initialdata, ...data } || {};
+  const { papers, authors, collections, publications } =
+    { ...initialdata, ...data } || {};
 
   const columns = [
     {
@@ -71,27 +66,33 @@ const search = ({ initialdata, error, servers }) => {
   ];
 
   const taglist = new Set();
-  if (initialdata.allpaperslist) {
-    initialdata.allpaperslist.forEach((paper) => {
-      paper["_Search__tags"].forEach((element) => {
-        taglist.add(element.toLowerCase());
+  if (initialdata.papers) {
+    Object.keys(initialdata.papers).forEach((server) => {
+      initialdata.papers[server].forEach((paper) => {
+        paper["_Search__tags"].forEach((element) => {
+          taglist.add(element.toLowerCase());
+        });
       });
     });
   }
 
-  const rows = allpaperslist.map((paper) => {
-    paper["_Search__servers"] = servers;
-    return {
-      paper: paper,
-      year: paper["_Search__year"],
-    };
-  });
+  const rows = Object.keys(papers)
+    .map((server) => {
+      return papers[server].map((paper) => {
+        paper["_Search__server"] = server;
+        return {
+          paper: paper,
+          year: paper["_Search__year"],
+        };
+      });
+    })
+    .flat();
 
   useEffect(() => {
-    if (error || (data && data.error)) {
+    if (error.is || (data && data.error)) {
       setAlert(
         "Search Error !",
-        "There was error trying to search on the selected nodes. Please try again ! If problems persist please contact the administrator.",
+        error.msg,
         <SmallStyledButton onClick={refresh}>Retry</SmallStyledButton>
       );
     }
@@ -108,17 +109,15 @@ const search = ({ initialdata, error, servers }) => {
         <Box display="flex" flexDirection="column" m={2}>
           <Box display="flex" alignItems="center" justifyContent="center" p={2}>
             <Typography variant="h3">
-              <Box fontWeight="bold">
-                {`${allpaperslist.length}  Records Available`}
-              </Box>
+              <Box fontWeight="bold">{`${rows.length}  Records Available`}</Box>
             </Typography>
           </Box>
           <Box>
             <AdvancedSearch
-              collections={collectionlist || []}
-              authors={authorslist || []}
-              publications={publicationlist || []}
-              tags={Array.from(taglist) || []}
+              collections={collections}
+              authors={authors}
+              publications={publications}
+              tags={Array.from(taglist)}
               setData={setData}
               clearSearch={clearSearch}
             />
@@ -134,21 +133,58 @@ const search = ({ initialdata, error, servers }) => {
 export async function getServerSideProps(ctx) {
   // Query contains the args from the url
   const { query } = ctx;
-  var error = false;
-  var data = null;
+  const error = { is: false, msg: "" };
+  const data = {
+    papers: {},
+    authors: [],
+    collections: [],
+    publications: [],
+  };
 
-  try {
-    const response = await apiEndpoint.get("/search", {
-      params: query,
-    });
-    data = response.data;
-  } catch (e) {
-    console.error(e);
-    error = true;
+  if (!query.servers || query.servers.length == 0) {
+    error["msg"] = "No servers selected to be searched";
+    return {
+      props: { initialdata: data, error: true, servers: query.servers },
+    };
+  }
+
+  const urls = [
+    { endpoint: "search", value: "papers" },
+    { endpoint: "collections", value: "collections" },
+    { endpoint: "authors", value: "authors" },
+    { endpoint: "publications", value: "publications" },
+  ];
+  const servers = query.servers.split(",");
+
+  for (let i = 0; i < servers.length; i++) {
+    const server = servers[i];
+    for (let j = 0; j < urls.length; j++) {
+      const url = urls[j];
+      try {
+        var response = await axios
+          .get(`${server}/api/${url.endpoint}`)
+          .then((res) => res.data);
+
+        if (url.endpoint === "search") {
+          data[url.value][server] = response;
+        } else {
+          data[url.value].push(...response);
+        }
+      } catch (e) {
+        console.error(e);
+        error.is = true;
+        error.msg += (i == 0 ? "" : ", ") + server;
+        break;
+      }
+    }
+  }
+
+  if (error.is) {
+    error.msg = "Could not fetch data from these servers: " + error.msg;
   }
 
   return {
-    props: { initialdata: data, error, servers: query.servers },
+    props: { initialdata: data, error: error, selectedservers: query.servers },
   };
 }
 
