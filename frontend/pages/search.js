@@ -13,9 +13,11 @@ import Summary from "../components/Paper/Summary";
 
 import axios from "axios";
 import AlertContext from "../Context/Alert/alertContext";
+import ServerContext from "../Context/Servers/serverContext";
 
 const search = ({ initialdata, error, selectedservers }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);
+  const { setSelected } = useContext(ServerContext);
 
   const searchDescription =
     "Search allows users to find data on specific Qresp instances using various filters";
@@ -89,6 +91,7 @@ const search = ({ initialdata, error, selectedservers }) => {
     .flat();
 
   useEffect(() => {
+    setSelected(selectedservers);
     if (error.is || (data && data.error)) {
       setAlert(
         "Search Error !",
@@ -184,7 +187,7 @@ export async function getServerSideProps(ctx) {
   }
 
   return {
-    props: { initialdata: data, error: error, selectedservers: query.servers },
+    props: { initialdata: data, error: error, selectedservers: servers },
   };
 }
 
