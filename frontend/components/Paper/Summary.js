@@ -26,7 +26,7 @@ const Summary = ({ rowdata }) => {
     _Search__publication,
     _Search__tags,
     _Search__title,
-    _Search__servers,
+    _Search__server,
   } = rowdata;
 
   const { setQuery } = useContext(TableSearchContext);
@@ -41,7 +41,7 @@ const Summary = ({ rowdata }) => {
                 href="/paperdetails/[id]"
                 as={{
                   pathname: "/paperdetails/" + _Search__id,
-                  query: { servers: _Search__servers },
+                  query: { server: _Search__server },
                 }}
               >
                 <a>
@@ -92,7 +92,7 @@ const Summary = ({ rowdata }) => {
                   href="/paperdetails/[id]"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
-                    query: { servers: _Search__servers, scrollTo: "charts" },
+                    query: { server: _Search__server, scrollTo: "charts" },
                   }}
                 >
                   <a
@@ -107,7 +107,7 @@ const Summary = ({ rowdata }) => {
                   href="/paperdetails/[id]#workflow"
                   as={{
                     pathname: "/paperdetails/" + _Search__id,
-                    query: { servers: _Search__servers, scrollTo: "workflow" },
+                    query: { server: _Search__server, scrollTo: "workflow" },
                   }}
                   passHref={true}
                 >
