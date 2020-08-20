@@ -14,6 +14,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import LoadingContext from "../Context/Loading/loadingContext";
 import AlertContext from "../Context/Alert/alertContext";
+import ServerContext from "../Context/Servers/serverContext";
 
 import { useRouter } from "next/router";
 import axios from "axios";
@@ -112,30 +113,45 @@ const AdvancedSearch = ({
 
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const { setAlert } = useContext(AlertContext);
+  const { selected } = useContext(ServerContext);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     showLoader();
-    try {
-      const data = await axios
-        .get(`/api/explorer/search`, {
-          params: { ...router.query, ...search },
-          paramsSerializer: (params) => {
-            for (const [key, value] of Object.entries(params)) {
-              if (Array.isArray(value)) {
-                params[key] = JSON.stringify(value);
-              }
-            }
-            return new URLSearchParams(params).toString();
-          },
-        })
-        .then((res) => res.data);
+    const data = { papers: {} };
+    const error = { is: false, msg: "" };
+    const query = [];
+
+    for (let [key, value] of Object.entries(search)) {
+      if (Array.isArray(value)) {
+        query.push(`${key}=${value.join(",")}`);
+      } else {
+        query.push(`${key}=${value}`);
+      }
+    }
+
+    for (let i = 0; i < selected.length; i++) {
+      const server = selected[i];
+      try {
+        var response = await axios
+          .get(`${server}/api/search?${query.join("&")}`)
+          .then((res) => res.data);
+        data.papers[server] = response;
+      } catch (e) {
+        console.error(e);
+        error.is = true;
+        error.msg += (i == 0 ? "" : ", ") + server;
+      }
+    }
+    if (Object.keys(data.papers).length == selected.length && !error.is) {
       setData(data);
-    } catch (error) {
-      console.error(error);
+    } else if (Object.keys(data.papers).length > 0) {
+      setData(data);
+    }
+    if (error.is) {
       setAlert(
-        "Error",
-        "There was an error trying to search. Please try again with some different keywords. If problems persist please contact the administrator. ",
+        "Error encountered while searching !",
+        "Could not search in the following servers: " + error.msg,
         null
       );
     }
