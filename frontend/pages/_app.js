@@ -12,6 +12,7 @@ import "vis-network/styles/vis-network.css";
 
 import AlertState from "../Context/Alert/AlertState";
 import LoadingState from "../Context/Loading/LoadingState";
+import ServerState from "../Context/Servers/ServerState";
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
@@ -27,9 +28,11 @@ export default function App({ Component, pageProps }) {
       <CssBaseline />
       <LoadingState>
         <AlertState>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <ServerState>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </ServerState>
         </AlertState>
       </LoadingState>
     </ThemeProvider>
