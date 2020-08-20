@@ -72,7 +72,7 @@ const ChartInfo = ({
   datasets,
   external,
   showWorkflows,
-  servers,
+  server,
 }) => {
   // Light Box Controls
   const { openLightbox } = useLightbox();
@@ -85,18 +85,14 @@ const ChartInfo = ({
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const { setAlert } = useContext(AlertContext);
 
-  const handleClick = async (e, id, query) => {
+  const handleClick = async (e, chartid, paperid) => {
     e.preventDefault();
     showLoader();
     try {
       const data = await axios
-        .post(`/api/explorer/chartworkflow`, {
-          paperid: query.id,
-          chartid: id,
-          servers: servers,
-        })
+        .get(`${server}/api/paper/${paperid}/chart/${chartid}`)
         .then((res) => res.data);
-      setChartWorkflow(data.chartworkflowdetail);
+      setChartWorkflow(data);
       setShowChartWorkflow(true);
     } catch (error) {
       console.error(error);
@@ -143,7 +139,9 @@ const ChartInfo = ({
           </a>
           {showWorkflows ? (
             <a
-              onClick={(e) => handleClick(e, rowdata.id, router.query)}
+              onClick={(e) =>
+                handleClick(e, rowdata.id, router.query.id, rowdata)
+              }
               href="showChartWorkflow"
             >
               <img src="/images/workflow-icon.png" className="imgButton" />
@@ -285,7 +283,7 @@ ChartInfo.propTypes = {
   datasets: PropTypes.array.isRequired,
   external: PropTypes.array.isRequired,
   showWorkflows: PropTypes.bool,
-  servers: PropTypes.string.isRequired,
+  server: PropTypes.string.isRequired,
 };
 
 export default ChartInfo;
