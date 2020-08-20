@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { Container, Box, Typography } from "@material-ui/core";
 
 import SEO from "../../components/seo";
-import apiEndpoint from "../../Context/axios";
 import AlertContext from "../../Context/Alert/alertContext";
 import { SmallStyledButton } from "../../components/button";
 import ReferenceInfo from "../../components/Paper/Reference";
@@ -20,6 +19,8 @@ import Workflow from "../../components/Paper/Workflow";
 import LicenseInfo from "../../components/Paper/License";
 
 import SimpleReactLightbox from "simple-react-lightbox";
+
+import axios from "axios";
 
 const PaperDetails = ({ data, error, preview, query }) => {
   const {
@@ -123,7 +124,7 @@ const PaperDetails = ({ data, error, preview, query }) => {
               scripts={scripts}
               external={heads}
               showWorkflows={showWorkflows}
-              servers={query.servers}
+              server={query.server}
             />
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
@@ -156,15 +157,18 @@ export async function getServerSideProps(ctx) {
   const { query } = ctx;
 
   var error = false;
-  var data = null;
+  const data = { paperdetail: {}, workflowdetail: {} };
 
   try {
-    const response = await apiEndpoint.get("/paperdetails/" + query.id, {
-      params: {
-        servers: query.servers,
-      },
-    });
-    data = response.data;
+    const paperdetails = await axios
+      .get(`${query.server}/api/paper/${query.id}`)
+      .then((res) => res.data);
+    data.paperdetail = paperdetails;
+
+    const workflowdetails = await axios
+      .get(`${query.server}/api/workflow/${query.id}`)
+      .then((res) => res.data);
+    data.workflowdetail = workflowdetails;
   } catch (e) {
     console.error(e);
     error = true;
