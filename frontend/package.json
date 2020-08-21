@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@egjs/hammerjs": "^2.0.0",
@@ -21,5 +24,12 @@
     "simple-react-lightbox": "^3.2.3-3",
     "vis-network": "^7.10.2"
   },
-  "license": "GPLv3"
+  "license": "GPLv3",
+  "devDependencies": {
+    "@babel/core": "^7.11.4",
+    "babel-jest": "^26.3.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.3",
+    "jest": "^26.4.1"
+  }
 }
