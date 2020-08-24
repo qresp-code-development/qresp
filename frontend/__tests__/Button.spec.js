@@ -1,5 +1,5 @@
 import React from "react";
-import { mount } from "enzyme";
+import { shallow } from "enzyme";
 
 import StyledButton, {
   InternalStyledButton,
@@ -10,14 +10,14 @@ import Link from "next/link";
 
 describe("Button Tests", () => {
   describe("StyledButton", () => {
-    const tree = mount(<StyledButton>Click</StyledButton>);
+    const tree = shallow(<StyledButton>Click</StyledButton>);
     it("should have correct text", () => {
       expect(tree.text()).toEqual("Click");
     });
   });
 
   describe("Internal Styled Button", () => {
-    const tree = mount(
+    const tree = shallow(
       <InternalStyledButton
         text="Click"
         url="http://click.com"
@@ -35,7 +35,7 @@ describe("Button Tests", () => {
   });
 
   describe("External Styled Button", () => {
-    const tree = mount(
+    const tree = shallow(
       <ExternalStyledButton
         text="Click"
         url="http://click.com"
