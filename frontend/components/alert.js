@@ -23,17 +23,12 @@ const ContentText = withStyles({
   },
 })(DialogContentText);
 
-const AlertDialog = (props) => {
-  // const [open, setOpen] = useState(true);
-
+const AlertDialog = () => {
   const { open, title, msg, buttons, unsetAlert } = useContext(AlertContext);
 
   const handleClose = () => {
-    // setOpen(false);
     unsetAlert();
   };
-
-  // const { title, msg, buttons } = props;
 
   return (
     <Dialog
