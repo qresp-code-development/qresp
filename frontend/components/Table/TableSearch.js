@@ -36,14 +36,19 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
     const regex = new RegExp(query, "gi");
     setFiltered(
       rows.filter((data) => {
+        var keep = false;
         for (let index = 0; index < columns.length; index++) {
           const col = columns[index];
           if (col.options.searchable) {
-            if (col.options.searchValue)
-              return col.options.searchValue(data[col.name]).match(regex);
-            return col.options.value(data[col.name]).match(regex);
+            if (col.options.searchValue) {
+              keep =
+                keep || col.options.searchValue(data[col.name]).match(regex);
+            } else {
+              keep = keep || col.options.value(data[col.name]).match(regex);
+            }
           }
         }
+        return keep;
       })
     );
   };
