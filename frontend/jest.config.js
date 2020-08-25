@@ -17,4 +17,5 @@ module.exports = {
   moduleNameMapper: {
     "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
   },
+  snapshotSerializers: ["enzyme-to-json/serializer"],
 };
