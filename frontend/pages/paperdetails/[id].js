@@ -92,7 +92,7 @@ const PaperDetails = ({ data, error, preview, query }) => {
 
     if (!scroll && router.query.scrollTo) {
       const el = document.getElementById(router.query.scrollTo);
-      setTimeout(() => el.scrollIntoView(true), 500);
+      setTimeout(() => el.scrollIntoView(true), 1000);
       setScroll(true);
     }
   }, []);
