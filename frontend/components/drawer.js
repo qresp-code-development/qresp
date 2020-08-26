@@ -29,7 +29,7 @@ const Drawer = (props) => {
       elevation={4}
       square={true}
       TransitionProps={{ timeout: 250 }}
-      defaultExpanded
+      // defaultExpanded
       id={heading.toLowerCase()}
     >
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
