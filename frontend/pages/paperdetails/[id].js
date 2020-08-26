@@ -104,8 +104,8 @@ const PaperDetails = ({ data, error, preview, query }) => {
             </Typography>
           ) : null}
         </Box>
-        <ReferenceInfo referenceData={referenceData} />
         <Box mb={7} mt={1}>
+          <ReferenceInfo referenceData={referenceData} />
           <SimpleReactLightbox>
             <ChartInfo
               charts={charts}
