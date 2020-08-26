@@ -42,9 +42,12 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
           if (col.options.searchable) {
             if (col.options.searchValue) {
               keep =
-                keep || col.options.searchValue(data[col.name]).match(regex);
+                keep ||
+                col.options.searchValue(data[col.name]).toString().match(regex);
             } else {
-              keep = keep || col.options.value(data[col.name]).match(regex);
+              keep =
+                keep ||
+                col.options.value(data[col.name]).toString().match(regex);
             }
           }
         }
