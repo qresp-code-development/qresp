@@ -11,7 +11,9 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import AlertContext from "../Context/Alert/alertContext";
 
-const explorer = ({ servers, error }) => {
+import servers from "../Context/Servers/qresp_servers";
+
+const explorer = ({ error }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const explorerDescription =
@@ -144,22 +146,5 @@ const explorer = ({ servers, error }) => {
     </Fragment>
   );
 };
-
-export async function getServerSideProps(ctx) {
-  var error = false;
-  var servers = [];
-
-  try {
-    const response = await apiEndpoint.get("/qrespserver");
-    servers = response.data;
-  } catch (e) {
-    console.error(e);
-    error = true;
-  }
-
-  return {
-    props: { servers, error },
-  };
-}
 
 export default explorer;
