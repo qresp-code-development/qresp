@@ -79,8 +79,6 @@ const PaperDetails = ({ data, error, preview, query }) => {
     unsetAlert();
   };
 
-  const [scroll, setScroll] = useState(false);
-
   useEffect(() => {
     if (error || (data && data.error)) {
       setAlert(
@@ -88,12 +86,6 @@ const PaperDetails = ({ data, error, preview, query }) => {
         "There was error trying to get paper details. Please try again ! If problems persist please contact the administrator.",
         <SmallStyledButton onClick={refresh}>Retry</SmallStyledButton>
       );
-    }
-
-    if (!scroll && router.query.scrollTo) {
-      const el = document.getElementById(router.query.scrollTo);
-      setTimeout(() => el.scrollIntoView(true), 1000);
-      setScroll(true);
     }
   }, []);
 
