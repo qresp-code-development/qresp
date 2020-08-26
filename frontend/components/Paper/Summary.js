@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Typography, Grid, Box, Paper, withStyles } from "@material-ui/core";
 
 import Tag from "../tag";
-import Slider from "../HorizontalSlider";
 
 import { TableSearchContext } from "../Table/TableSearch";
 
@@ -19,10 +18,7 @@ const Summary = ({ rowdata }) => {
   const {
     _Search__authors,
     _Search__doi,
-    _Search__downloadPath,
     _Search__id,
-    _Search__notebookFile,
-    _Search__notebookPath,
     _Search__publication,
     _Search__tags,
     _Search__title,
@@ -85,64 +81,6 @@ const Summary = ({ rowdata }) => {
                   onClick={() => setQuery(tag)}
                 />
               ))}
-            </Grid>
-            <Grid item xs={12}>
-              <Slider>
-                <Link
-                  href="/paperdetails/[id]"
-                  as={{
-                    pathname: "/paperdetails/" + _Search__id,
-                    query: { server: _Search__server, scrollTo: "charts" },
-                  }}
-                >
-                  <a
-                    rel="noopener noreferrer"
-                    alt="Link to Paper Charts"
-                    target="_blank"
-                  >
-                    <img src="/images/figures-icon.png" />
-                  </a>
-                </Link>
-                <Link
-                  href="/paperdetails/[id]#workflow"
-                  as={{
-                    pathname: "/paperdetails/" + _Search__id,
-                    query: { server: _Search__server, scrollTo: "workflow" },
-                  }}
-                  passHref={true}
-                >
-                  <a
-                    rel="noopener noreferrer"
-                    alt="Link to Paper Workflow"
-                    target="_blank"
-                  >
-                    <img src="/images/workflow-icon.png" />
-                  </a>
-                </Link>
-                <a
-                  href={_Search__downloadPath}
-                  rel="noopener noreferrer"
-                  alt="Download data associated to the paper Using Globus"
-                  target="_blank"
-                >
-                  <img src="/images/download-icon.png" />
-                </a>
-                {_Search__notebookFile ? (
-                  <a
-                    href={
-                      "https://nbviewer.jupyter.org/url/" +
-                      _Search__notebookPath +
-                      "/" +
-                      _Search__notebookFile
-                    }
-                    rel="noopener noreferrer"
-                    alt="View DEfault Notebook File"
-                    target="_blank"
-                  >
-                    <img src="/images/jupyter-icon.png" />
-                  </a>
-                ) : null}
-              </Slider>
             </Grid>
           </Grid>
         </Grid>
