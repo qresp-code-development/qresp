@@ -9,7 +9,7 @@ const DisplayedRowsLabel = (props) => {
   return (
     <Box m={1}>
       <Typography variant="overline">
-        Showing {start + 1} to {end} of {filtered}{" "}
+        Showing {filtered == 0 ? 0 : start + 1} to {end} of {filtered}{" "}
         {filtered != rows ? "filtered" : null} records{" "}
         {filtered != rows ? " (Total Records: " + rows + ")" : null}
       </Typography>
