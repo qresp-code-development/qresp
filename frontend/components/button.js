@@ -33,6 +33,16 @@ const SmallStyledButton = withStyles({
   },
 })(Button);
 
+const RegularStyledButton = withStyles({
+  root: {
+    backgroundColor: "#800000",
+    color: "#FFF",
+    "&:hover": {
+      backgroundColor: "#9a0000",
+    },
+  },
+})(Button);
+
 const ExternalStyledButton = (props) => {
   const { text, url } = props;
 
@@ -72,5 +82,10 @@ InternalStyledButton.propTypes = {
   url: PropTypes.string.isRequired,
 };
 
-export { InternalStyledButton, ExternalStyledButton, SmallStyledButton };
+export {
+  InternalStyledButton,
+  ExternalStyledButton,
+  SmallStyledButton,
+  RegularStyledButton,
+};
 export default StyledButton;
