@@ -23,13 +23,13 @@ const StyledAccordionSummary = withStyles({
 })(AccordionSummary);
 
 const Drawer = (props) => {
-  const { heading, children } = props;
+  const { heading, children, defaultOpen } = props;
   return (
     <StyledAccordion
       elevation={4}
       square={true}
       TransitionProps={{ timeout: 250 }}
-      // defaultExpanded
+      defaultExpanded={defaultOpen}
       id={heading.toLowerCase()}
     >
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
@@ -48,9 +48,14 @@ const Drawer = (props) => {
 
 export { StyledAccordion, StyledAccordionSummary };
 
+Drawer.defaultProps = {
+  defaultOpen: false,
+};
+
 Drawer.propTypes = {
   heading: PropTypes.string.isRequired,
   children: PropTypes.any,
+  defaultOpen: PropTypes.bool,
 };
 
 export default Drawer;
