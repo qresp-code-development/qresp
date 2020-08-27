@@ -18,7 +18,6 @@ const explorer = ({ error }) => {
 
   const explorerDescription =
     "The explorer provides a portal for the scientific community to access datasets, explore workflows and download curated data, published in scientific papers.";
-  const explorerAuthor = "Giulia Galli, Macro Govoni";
 
   const [selectedServers, setSelectedServers] = useState("");
 
@@ -85,11 +84,7 @@ const explorer = ({ error }) => {
 
   return (
     <Fragment>
-      <SEO
-        title="Qresp | Explorer"
-        description={explorerDescription}
-        author={explorerAuthor}
-      />
+      <SEO title="Qresp | Explorer" description={explorerDescription} />
       <Container>
         <div>
           <Box display="flex" alignItems="center" justifyContent="center" m={2}>
