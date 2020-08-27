@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import { useRouter } from "next/router";
