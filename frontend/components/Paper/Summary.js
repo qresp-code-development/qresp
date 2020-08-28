@@ -78,7 +78,10 @@ const Summary = ({ rowdata }) => {
                     .concat(tag.length > 32 ? "..." : "")}
                   key={tag}
                   size="small"
-                  onClick={() => setQuery(tag)}
+                  onClick={() => {
+                    setQuery(tag);
+                    window.scrollTo(0, 0);
+                  }}
                 />
               ))}
             </Grid>
