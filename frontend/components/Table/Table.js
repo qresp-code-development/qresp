@@ -1,4 +1,4 @@
-import { Fragment, createElement, useState, useEffect } from "react";
+import { createElement, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -10,6 +10,8 @@ import {
   withStyles,
   Grid,
 } from "@material-ui/core";
+
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 import RowsPerPageSelector from "./RowsPerPageSelector";
 import EnhancedTableHeader from "./TableHeader";
@@ -98,7 +100,7 @@ const RecordTable = (props) => {
           />
         </Grid>
       </Grid>
-      <TableContainer style={{ transition: "all 0.2s linear" }}>
+      <TableContainer>
         <Table>
           <EnhancedTableHeader
             headers={columns}
@@ -107,27 +109,34 @@ const RecordTable = (props) => {
             onRequestSort={handleRequestSort}
           />
           <TableBody>
-            {paginatedData.map((row, index) => {
-              return (
-                <TableRow key={index}>
-                  {columns.map((col, i) => {
-                    const element = col.view
-                      ? createElement(col.view, { rowdata: row[col.name] })
-                      : row[col.name];
+            <TransitionGroup component={null}>
+              {paginatedData.map((row, index) => {
+                return (
+                  <CSSTransition timeout={100} key={index} classNames="fade">
+                    <TableRow key={index}>
+                      {columns.map((col, i) => {
+                        const element = col.view
+                          ? createElement(col.view, { rowdata: row[col.name] })
+                          : row[col.name];
 
-                    return index == paginatedData.length - 1 ? (
-                      <StyledLastTableCell key={i} align={col.options.align}>
-                        {element}
-                      </StyledLastTableCell>
-                    ) : (
-                      <StyledTableCell key={i} align={col.options.align}>
-                        {element}
-                      </StyledTableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+                        return index == paginatedData.length - 1 ? (
+                          <StyledLastTableCell
+                            key={i}
+                            align={col.options.align}
+                          >
+                            {element}
+                          </StyledLastTableCell>
+                        ) : (
+                          <StyledTableCell key={i} align={col.options.align}>
+                            {element}
+                          </StyledTableCell>
+                        );
+                      })}
+                    </TableRow>
+                  </CSSTransition>
+                );
+              })}
+            </TransitionGroup>
           </TableBody>
         </Table>
       </TableContainer>
