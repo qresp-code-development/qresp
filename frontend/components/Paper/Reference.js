@@ -2,8 +2,10 @@ import { Fragment } from "react";
 import PropTypes from "prop-types";
 
 import { Typography, Box } from "@material-ui/core";
+
 import LabelValue from "../labelvalue";
 import Tag from "../tag";
+import SocialShare from "../social";
 
 const ReferenceInfo = ({ referenceData }) => {
   const {
@@ -35,7 +37,9 @@ const ReferenceInfo = ({ referenceData }) => {
     <Fragment>
       <Box my={1}>
         <Typography variant="h4" gutterBottom style={{ color: "#333333" }}>
-          <Box fontWeight="bold">{title}</Box>
+          <Box fontWeight="bold">
+            {title} <SocialShare url="abcd" />
+          </Box>
         </Typography>
         <Typography variant="subtitle1" color="secondary" gutterBottom>
           by {authors}
