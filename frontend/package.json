@@ -21,6 +21,7 @@
     "next": "9.4.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-transition-group": "^4.4.1",
     "simple-react-lightbox": "^3.2.3-3",
     "vis-network": "^7.10.2"
   },
