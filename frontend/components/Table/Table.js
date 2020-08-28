@@ -1,4 +1,4 @@
-import { createElement, useState, useEffect } from "react";
+import { createElement, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -35,12 +35,19 @@ const StyledLastTableCell = withStyles({
 const RecordTable = (props) => {
   const { rows, columns } = props;
 
+  // Scroll to Top of Table
+  const tableRef = useRef(null);
+
   // Pagination Controls
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    window.scrollTo(
+      0,
+      tableRef.current.getBoundingClientRect().top + window.pageYOffset - 96
+    );
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -84,7 +91,7 @@ const RecordTable = (props) => {
 
   return (
     <TableSearchState>
-      <Grid container direction="row" alignItems="center">
+      <Grid container direction="row" alignItems="center" ref={tableRef}>
         <Grid item xs={12} sm={6}>
           <RowsPerPageSelector
             count={rows.length}
