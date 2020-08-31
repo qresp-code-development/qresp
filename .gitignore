@@ -20,3 +20,8 @@ __pycache__
 
 # Pytest
 .pytest_cache
+
+# Certificate Files
+*.certs
+*.crt
+*.key
