@@ -11,6 +11,7 @@ export default class MyDocument extends Document {
             name="viewport"
             content="initial-scale=1.0, width=device-width"
           />
+          <meta name="theme-color" content="#800000" />
           <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
           <link
             rel="stylesheet"
