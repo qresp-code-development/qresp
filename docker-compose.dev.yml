@@ -45,6 +45,9 @@ services:
     command: yarn dev
   
   nginx:
+    depends_on: 
+      - backend
+      - frontend
     restart: always
     build:
       context: ./nginx
