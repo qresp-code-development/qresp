@@ -1,27 +1,52 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useRef } from "react";
 import PropTypes from "prop-types";
 
-import { Popover, IconButton, Paper, Snackbar } from "@material-ui/core";
+import {
+  Popover,
+  IconButton,
+  Paper,
+  Snackbar,
+  makeStyles,
+} from "@material-ui/core";
+
 import { Share, Facebook, Twitter, Link, Email } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
 
+const useStyles = makeStyles((theme) => ({
+  popover: {
+    pointerEvents: "none",
+  },
+  popoverContent: {
+    pointerEvents: "auto",
+  },
+}));
+
 const SocialShare = ({ url }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const classes = useStyles();
+
+  const anchorEl = useRef(null);
+
   const [alert, setAlert] = useState({
     show: false,
     type: "success",
     msg: "Link copied successfully",
   });
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const [showPopover, setShowPopover] = useState(false);
+
+  const handlePopoverOpen = () => {
+    setShowPopover(true);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handlePopoverClose = () => {
+    setShowPopover(false);
   };
 
-  const handleAlertClose = (event, reason) => {
+  const handleButtonClick = () => {
+    setShowPopover(!showPopover);
+  };
+
+  const handleAlertClose = () => {
     setAlert({ ...alert, show: false });
   };
 
@@ -31,13 +56,13 @@ const SocialShare = ({ url }) => {
       `https://www.facebook.com/sharer/sharer.php?u=${link}`,
       "_blank"
     );
-    handleClose();
+    handlePopoverClose();
   };
 
   const shareTwitter = () => {
     const link = window.location.href;
     window.open(`https://twitter.com/home?status=${link}`, "_blank");
-    handleClose();
+    handlePopoverClose();
   };
 
   const shareEmail = () => {
@@ -47,7 +72,6 @@ const SocialShare = ({ url }) => {
 
   const shareLink = () => {
     const link = window.location.href;
-    console.log(navigator);
     navigator.clipboard
       .writeText(link)
       .then(() => {
@@ -63,43 +87,55 @@ const SocialShare = ({ url }) => {
         });
       });
 
-    handleClose();
+    handlePopoverClose();
   };
-
-  const open = Boolean(anchorEl);
 
   return (
     <Fragment>
-      <IconButton color="primary" onClick={handleClick}>
+      <IconButton
+        color="primary"
+        onMouseEnter={handlePopoverOpen}
+        onClick={handleButtonClick}
+        onMouseLeave={handlePopoverClose}
+        ref={anchorEl}
+      >
         <Share />
       </IconButton>
       <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
+        className={classes.popover}
+        classes={{
+          paper: classes.popoverContent,
+        }}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: "center",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: "center",
+          horizontal: "left",
+        }}
+        open={showPopover}
+        anchorEl={anchorEl.current}
+        disableRestoreFocus
+        PaperProps={{
+          onMouseEnter: handlePopoverOpen,
+          onMouseLeave: handlePopoverClose,
         }}
       >
-        <Paper>
-          <IconButton onClick={shareFacebook}>
-            <Facebook style={{ color: "#1877f2" }} />
-          </IconButton>
-          <IconButton onClick={shareTwitter}>
-            <Twitter style={{ color: "#1da0f2" }} />
-          </IconButton>
-          <IconButton onClick={shareEmail}>
-            <Email />
-          </IconButton>
-          <IconButton onClick={shareLink}>
-            <Link color="primary" />
-          </IconButton>
-        </Paper>
+        {/* <Paper> */}
+        <IconButton onClick={shareFacebook}>
+          <Facebook style={{ color: "#1877f2" }} />
+        </IconButton>
+        <IconButton onClick={shareTwitter}>
+          <Twitter style={{ color: "#1da0f2" }} />
+        </IconButton>
+        <IconButton onClick={shareEmail}>
+          <Email />
+        </IconButton>
+        <IconButton onClick={shareLink}>
+          <Link color="primary" />
+        </IconButton>
+        {/* </Paper> */}
       </Popover>
       <Snackbar
         open={alert.show}
