@@ -76,7 +76,7 @@ const Slider = ({ children }) => {
               margin: auto;
               transform: scaleX(0);
               overflow: hidden;
-              transform-origin: -15% 50%;
+              transform-origin: -10% 50%;
               transition: all 0.3s linear;
               transform: ${checked ? `scaleX(1)` : ""};
             }
