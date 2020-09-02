@@ -49,7 +49,7 @@ const TopActions = () => {
         <Hidden smUp>
           <Grid item xs={4}>
             <Tooltip title={tooltipTexts.resume} arrow>
-              <RegularStyledButton fullWidth>Resume</RegularStyledButton>{" "}
+              <RegularStyledButton fullWidth>Resume</RegularStyledButton>
             </Tooltip>
           </Grid>
           <Grid item xs={8}>
