@@ -12,3 +12,6 @@ export const HIDE_LOADER = "HIDE_LOADER";
 
 // Server Actions
 export const SET_SELECTED = "SET_SELECTED";
+
+// Curator Actions
+export const SET_CURATORINFO = "SET_CURATORINFO";
