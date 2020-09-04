@@ -1,3 +1,5 @@
+import { useContext } from "react";
+
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
@@ -7,26 +9,26 @@ import {
   TextInputField,
   NameInputField,
 } from "../../components/Form/InputFields";
-import NameInput from "../../components/Form/NameInput";
-import { SaveAndReset, FormInputLabel } from "../../components/Form/Util";
+import { SaveAndReset } from "../../components/Form/Util";
 import Drawer from "../drawer";
 
+import CuratorContext from "../../Context/Curator/curatorContext";
+
 const CuratorInfo = () => {
+  const { curatorInfo, setCuratorInfo } = useContext(CuratorContext);
+
   const nameIds = {
     fname: "curatorFirstName",
     mname: "curatorMiddleName",
     lname: "curatorLastName",
   };
 
+  const heading = "Who is Curating the paper";
+
   return (
-    <Drawer heading="Who is Curating the paper" defaultOpen={true}>
+    <Drawer heading={heading} defaultOpen={true}>
       <Formik
-        initialValues={{
-          firstName: "",
-          lastName: "",
-          email: "",
-          affiliation: "",
-        }}
+        initialValues={curatorInfo}
         validationSchema={Yup.object({
           firstName: Yup.string()
             .max(15, "Must be 15 characters or less")
@@ -41,7 +43,7 @@ const CuratorInfo = () => {
           affiliation: Yup.string(),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          alert(JSON.stringify(values, null, 2));
+          setCuratorInfo(values);
           setSubmitting(false);
         }}
       >
