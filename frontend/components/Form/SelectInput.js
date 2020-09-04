@@ -1,12 +1,12 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 
-import { TextField, Typography, Tooltip } from "@material-ui/core";
+import { TextField, MenuItem, Typography, Tooltip } from "@material-ui/core";
 
 import { useField } from "formik";
 
 const SelectInput = (props) => {
-  const { id, placeholder, type, helperText, name } = props;
+  const { id, placeholder, type, helperText, name, options } = props;
 
   const [field, meta] = useField(props);
   const [focused, setFocused] = useState(false);
@@ -44,23 +44,33 @@ const SelectInput = (props) => {
           onMouseEnter: () => setHovering(true),
           onMouseLeave: () => setHovering(false),
         }}
-      />
+        select
+      >
+        {options.map((options) => {
+          return (
+            <MenuItem key={options.value} value={options.value}>
+              {options.label}
+            </MenuItem>
+          );
+        })}
+      </TextField>
     </Tooltip>
   );
 };
 
-TextInput.defaultProps = {
+SelectInput.defaultProps = {
   type: "text",
   helperText: "",
   required: false,
 };
 
-TextInput.propTypes = {
+SelectInput.propTypes = {
   id: PropTypes.string.isRequired,
   placeholder: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   type: PropTypes.string,
   helperText: PropTypes.string,
+  options: PropTypes.array.isRequired,
 };
 
 export default SelectInput;
