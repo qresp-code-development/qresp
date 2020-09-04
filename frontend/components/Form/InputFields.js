@@ -52,4 +52,33 @@ NameInputField.propTypes = {
   required: PropTypes.bool,
 };
 
-export { TextInputField, NameInputField };
+import SelectInput from "./SelectInput";
+
+const SelectInputField = (props) => {
+  const {
+    id,
+    placeholder,
+    type,
+    helperText,
+    name,
+    label,
+    required,
+    options,
+  } = props;
+
+  return (
+    <Fragment>
+      <FormInputLabel forId={id} label={label} required={required} />
+      <SelectInput
+        id={id}
+        placeholder={placeholder}
+        name={name}
+        helperText={helperText}
+        type={type}
+        options={options}
+      />
+    </Fragment>
+  );
+};
+
+export { TextInputField, NameInputField, SelectInputField };
