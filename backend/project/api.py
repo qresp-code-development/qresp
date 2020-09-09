@@ -1,5 +1,5 @@
 from project.paperdao import *
-
+from project.util import Dtree
 # edit swagger.yml file for method changes
 
 
@@ -137,3 +137,25 @@ def chart(id, cid):
         print(msg)
         return msg, 400
     return chartworkflowdetail, 200
+
+
+def dircontents(req):
+    """
+    This function responds to the request for /api/dircont
+
+    :return: structure object
+    """
+    link = req['link']
+    src = req['src']
+    try:
+        structure = Dtree(link)
+        if src == 'http':
+            files = structure.fetchForTreeFromHttp()
+        else:
+            files = structure.fetchForTreeFromZenodo()
+    except Exception as e:
+        msg = "Exception in Directory Structure API "+str(e)
+        print(msg)
+        return msg, 500
+
+    return files, 200
