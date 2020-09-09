@@ -74,11 +74,20 @@ const SelectInputField = (props) => {
         placeholder={placeholder}
         name={name}
         helperText={helperText}
-        type={type}
         options={options}
       />
     </Fragment>
   );
+};
+
+SelectInputField.propTypes = {
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  helperText: PropTypes.string,
+  options: PropTypes.array.isRequired,
+  label: PropTypes.string.isRequired,
+  required: PropTypes.bool,
 };
 
 export { TextInputField, NameInputField, SelectInputField };
