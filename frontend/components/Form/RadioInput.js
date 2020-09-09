@@ -17,7 +17,7 @@ import {
 import { useField } from "formik";
 
 const RadioInput = (props) => {
-  const { label, name, helperText, options } = props;
+  const { label, name, helperText, options, row } = props;
   const [field, meta] = useField(props);
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -29,15 +29,34 @@ const RadioInput = (props) => {
       arrow
       open={hovering || focused}
     >
-      <RadioGroup name={name} {...field} style={{ width: "max-content" }}>
+      <RadioGroup
+        name={name}
+        {...field}
+        style={{ width: "max-content" }}
+        row={row}
+        onFocus={() => setFocused(true)}
+        onBlur={(e) => {
+          setFocused(false);
+          field.onBlur(e);
+        }}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        onChange={(e) => {
+          setFocused(false);
+          field.onChange(e);
+        }}
+      >
         {options.map((option) => {
           return (
             <FormControlLabel
+              key={option.value}
               value={option.value}
               control={<Radio color="primary" />}
               label={
                 <Typography color="secondary">
-                  <Box fontWeight="bold">{option.label}</Box>
+                  <Box fontWeight="bold" component="span">
+                    {option.label}
+                  </Box>
                 </Typography>
               }
             />
@@ -52,6 +71,7 @@ const RadioInput = (props) => {
 RadioInput.defaultProps = {
   label: "",
   helperText: "",
+  row: false,
 };
 
 RadioInput.protoTypes = {
@@ -59,6 +79,7 @@ RadioInput.protoTypes = {
   name: PropTypes.string.isRequired,
   helperText: PropTypes.string.isRequired,
   options: PropTypes.array.isRequired,
+  row: PropTypes.bool,
 };
 
 export default RadioInput;
