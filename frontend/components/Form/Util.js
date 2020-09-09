@@ -37,4 +37,23 @@ const SaveAndReset = () => {
   );
 };
 
-export { SaveAndReset, FormInputLabel };
+const SearchAndReset = () => {
+  return (
+    <Box mt={1}>
+      <Grid container direction="row" spacing={1}>
+        <Grid item xs={6} sm={1}>
+          <RegularStyledButton type="save" fullWidth>
+            Search
+          </RegularStyledButton>
+        </Grid>
+        <Grid item xs={6} sm={1}>
+          <RegularStyledButton type="reset" fullWidth>
+            Reset
+          </RegularStyledButton>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+export { SaveAndReset, SearchAndReset, FormInputLabel };
