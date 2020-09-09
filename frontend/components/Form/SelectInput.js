@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { Fragment, useState, useRef } from "react";
 import PropTypes from "prop-types";
 
-import { TextField, MenuItem, Typography, Tooltip } from "@material-ui/core";
+import {
+  FormHelperText,
+  MenuItem,
+  Typography,
+  Tooltip,
+  Select,
+} from "@material-ui/core";
 
 import { useField } from "formik";
 
@@ -12,54 +18,61 @@ const SelectInput = (props) => {
   const [focused, setFocused] = useState(false);
   const [hovering, setHovering] = useState(false);
 
+  const el = useRef(null);
+
   return (
-    <Tooltip
-      title={
-        helperText ? (
-          <Typography variant="subtitle2">{helperText}</Typography>
-        ) : (
-          ""
-        )
-      }
-      placement="top"
-      arrow
-      open={focused || hovering}
-    >
-      <TextField
-        name={name}
-        id={id}
-        fullWidth
-        variant="outlined"
-        placeholder={placeholder}
-        type={type}
-        {...field}
-        error={meta.touched && meta.error && !focused}
-        helperText={meta.touched && meta.error && !focused ? meta.error : ""}
-        InputProps={{
-          onFocus: () => setFocused(true),
-          onBlur: (e) => {
-            field.onBlur(e);
-            setFocused(false);
-          },
-          onMouseEnter: () => setHovering(true),
-          onMouseLeave: () => setHovering(false),
-        }}
-        select
+    <Fragment>
+      <Tooltip
+        title={
+          helperText ? (
+            <Typography variant="subtitle2">{helperText}</Typography>
+          ) : (
+            ""
+          )
+        }
+        placement="top"
+        arrow
+        open={focused || hovering}
       >
-        {options.map((options) => {
-          return (
-            <MenuItem key={options.value} value={options.value}>
-              {options.label}
-            </MenuItem>
-          );
-        })}
-      </TextField>
-    </Tooltip>
+        <Select
+          name={name}
+          id={id}
+          fullWidth
+          variant="outlined"
+          {...field}
+          error={meta.touched && meta.error && !focused}
+          inputProps={{
+            onFocus: () => setFocused(true),
+            onBlur: (e) => {
+              field.onBlur(e);
+              setFocused(false);
+              setHovering(false);
+            },
+          }}
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>
+            {placeholder}
+          </MenuItem>
+          {options.map((options) => {
+            return (
+              <MenuItem key={options.value} value={options.value}>
+                {options.label}
+              </MenuItem>
+            );
+          })}
+        </Select>
+      </Tooltip>
+      <FormHelperText style={{ color: "red" }}>
+        {meta.error && meta.error}
+      </FormHelperText>
+    </Fragment>
   );
 };
 
 SelectInput.defaultProps = {
-  type: "text",
   helperText: "",
   required: false,
 };
@@ -68,7 +81,6 @@ SelectInput.propTypes = {
   id: PropTypes.string.isRequired,
   placeholder: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  type: PropTypes.string,
   helperText: PropTypes.string,
   options: PropTypes.array.isRequired,
 };
