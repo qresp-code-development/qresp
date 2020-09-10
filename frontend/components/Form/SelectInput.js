@@ -1,24 +1,18 @@
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
 
-import {
-  FormHelperText,
-  MenuItem,
-  Typography,
-  Tooltip,
-  Select,
-} from "@material-ui/core";
+import { Typography, Tooltip, TextField } from "@material-ui/core";
+
+import { Autocomplete } from "@material-ui/lab";
 
 import { useField } from "formik";
 
 const SelectInput = (props) => {
-  const { id, placeholder, type, helperText, name, options } = props;
+  const { id, placeholder, helperText, options, freeSolo, name } = props;
 
   const [field, meta] = useField(props);
   const [focused, setFocused] = useState(false);
   const [hovering, setHovering] = useState(false);
-
-  const el = useRef(null);
 
   return (
     <Fragment>
@@ -34,40 +28,45 @@ const SelectInput = (props) => {
         arrow
         open={focused || hovering}
       >
-        <Select
+        <Autocomplete
           name={name}
           id={id}
+          options={options}
+          freeSolo={freeSolo}
+          getOptionLabel={(option) => option.value}
+          renderOption={(option) => option.label}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              error={meta.touched && meta.error && !focused}
+              helperText={
+                meta.touched && meta.error && !focused ? meta.error : ""
+              }
+              placeholder={placeholder}
+            />
+          )}
+          blurOnSelect
           fullWidth
-          variant="outlined"
-          {...field}
-          error={meta.touched && meta.error && !focused}
-          inputProps={{
-            onFocus: () => setFocused(true),
-            onBlur: (e) => {
-              field.onBlur(e);
-              setFocused(false);
-              setHovering(false);
-            },
-          }}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
-          displayEmpty
-        >
-          <MenuItem value="" disabled>
-            {placeholder}
-          </MenuItem>
-          {options.map((options) => {
-            return (
-              <MenuItem key={options.value} value={options.value}>
-                {options.label}
-              </MenuItem>
-            );
-          })}
-        </Select>
+          onFocus={() => setFocused(true)}
+          onBlur={(e) => {
+            field.onBlur(e);
+            setFocused(false);
+          }}
+          onChange={(e, obj) => {
+            if (obj) {
+              field.onChange({
+                target: {
+                  name: name,
+                  value: obj.value,
+                },
+              });
+            }
+          }}
+        />
       </Tooltip>
-      <FormHelperText style={{ color: "red" }}>
-        {meta.error && meta.error}
-      </FormHelperText>
     </Fragment>
   );
 };
@@ -75,14 +74,16 @@ const SelectInput = (props) => {
 SelectInput.defaultProps = {
   helperText: "",
   required: false,
+  freeSolo: false,
 };
 
 SelectInput.propTypes = {
+  name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   placeholder: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   helperText: PropTypes.string,
   options: PropTypes.array.isRequired,
+  freeSolo: PropTypes.bool,
 };
 
 export default SelectInput;
