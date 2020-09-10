@@ -1,34 +1,35 @@
+import { useContext, useEffect } from "react";
 import { Grid } from "@material-ui/core";
 
 import Drawer from "../drawer";
 import RadioInput from "../Form/RadioInput";
 import { SelectInputField, TextInputField } from "../Form/InputFields";
-import { SearchAndReset } from "../../components/Form/Util";
+import { SubmitAndReset } from "../../components/Form/Util";
 
 import { getList } from "../../Utils/Scraper";
 
 import { Formik, Form, useFormikContext } from "formik";
 import * as Yup from "yup";
 
-const FormField = () => {
-  const { values } = useFormikContext();
+import ServerContext from "../../Context/Servers/serverContext";
 
-  const httpServerOptions = [
-    {
-      label: "RCC (https://notebook.rcc.uchicago.edu/files/)",
-      value: "https://notebook.rcc.uchicago.edu/files/",
-    },
-  ];
+const FormField = ({ httpServers }) => {
+  const { values, setFieldValue, setFieldTouched } = useFormikContext();
 
-  if (values.connectiontype == "http") {
+  useEffect(() => {
+    setFieldValue("dataServer", "");
+    setFieldTouched("dataServer", false, true);
+  }, [values.connectionType]);
+
+  if (values.connectionType == "http") {
     return (
       <SelectInputField
         id="connectionType"
         placeholder="Select a server"
         helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
-        name="dataserver"
+        name="dataServer"
         label="File Server"
-        options={httpServerOptions}
+        options={httpServers}
       />
     );
   } else {
@@ -36,7 +37,7 @@ const FormField = () => {
       <TextInputField
         id="connectionType"
         placeholder="Enter zenodo record URL"
-        name="dataserver"
+        name="dataServer"
         type="email"
         helperText="eg. https://zenodo.org/record/3981451"
         label="Zenodo"
@@ -57,40 +58,42 @@ const LocationInfo = () => {
     },
   ];
 
+  const { httpServers, setSelectedHttp } = useContext(ServerContext);
+
   return (
     <Drawer heading="Where is the paper">
       <Formik
         initialValues={{
-          connectiontype: "http",
-          dataserver: "",
+          connectionType: "http",
+          dataServer: "",
         }}
         validationSchema={Yup.object({
-          connectiontype: Yup.string().required("Required"),
-          dataserver: Yup.string().required("Required"),
+          connectionType: Yup.string().required("Required"),
+          dataServer: Yup.string().required("Required"),
         })}
         onSubmit={(values, { setSubmitting }) => {
           alert(JSON.stringify(values));
           setSubmitting(false);
-          getList(values.dataserver, values.connectiontype).then((el) =>
-            console.log(el)
-          );
+          getList(values.dataServer, values.connectionType, true).then((el) => {
+            setSelectedHttp(el.details);
+          });
         }}
       >
         <Form>
           <Grid direction="column" container spacing={1}>
             <Grid item>
               <RadioInput
-                name="connectiontype"
+                name="connectionType"
                 helperText="Select location type of the data source"
                 options={options}
                 row={true}
               />
             </Grid>
             <Grid item>
-              <FormField />
+              <FormField httpServers={httpServers} />
             </Grid>
             <Grid item>
-              <SearchAndReset />
+              <SubmitAndReset submitText="Search" />
             </Grid>
           </Grid>
         </Form>
