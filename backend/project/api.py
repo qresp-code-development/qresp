@@ -147,10 +147,16 @@ def dircontents(req):
     """
     link = req['link']
     src = req['src']
+    service = req['service']
+    services = {}
+
     try:
         structure = Dtree(link)
         if src == 'http':
             files = structure.fetchForTreeFromHttp()
+            if service:
+                services = structure.openFileToReadConfigFromHttp('qresp.ini')
+
         else:
             files = structure.fetchForTreeFromZenodo()
     except Exception as e:
@@ -158,4 +164,4 @@ def dircontents(req):
         print(msg)
         return msg, 500
 
-    return files, 200
+    return {"files": files, "services": services}, 200

@@ -202,11 +202,14 @@ paths:
             required:
               - link
               - src
+              - service
             properties:
               link:
                 type: string
               src:
                 type: string
+              service:
+                type: boolean
       responses:
         200:
           description: Contents returned
