@@ -18,42 +18,34 @@ FormInputLabel.propTypes = {
   forId: PropTypes.string.isRequired,
 };
 
-const SaveAndReset = () => {
+const SubmitAndReset = ({ submitText, reset }) => {
   return (
     <Box mt={1}>
       <Grid container direction="row" spacing={1}>
-        <Grid item xs={6} sm={1}>
+        <Grid item xs={6} sm={2} md={1}>
           <RegularStyledButton type="save" fullWidth>
-            Save
+            {submitText}
           </RegularStyledButton>
         </Grid>
-        <Grid item xs={6} sm={1}>
-          <RegularStyledButton type="reset" fullWidth>
-            Reset
-          </RegularStyledButton>
-        </Grid>
+        {reset ? (
+          <Grid item xs={6} sm={2} md={1}>
+            <RegularStyledButton type="reset" fullWidth>
+              Reset
+            </RegularStyledButton>
+          </Grid>
+        ) : null}
       </Grid>
     </Box>
   );
 };
 
-const SearchAndReset = () => {
-  return (
-    <Box mt={1}>
-      <Grid container direction="row" spacing={1}>
-        <Grid item xs={6} sm={1}>
-          <RegularStyledButton type="save" fullWidth>
-            Search
-          </RegularStyledButton>
-        </Grid>
-        <Grid item xs={6} sm={1}>
-          <RegularStyledButton type="reset" fullWidth>
-            Reset
-          </RegularStyledButton>
-        </Grid>
-      </Grid>
-    </Box>
-  );
+SubmitAndReset.defaultProps = {
+  reset: false,
 };
 
-export { SaveAndReset, SearchAndReset, FormInputLabel };
+SubmitAndReset.propTypes = {
+  submitText: PropTypes.string.isRequired,
+  reset: PropTypes.bool,
+};
+
+export { SubmitAndReset, FormInputLabel };
