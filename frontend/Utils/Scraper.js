@@ -10,7 +10,7 @@ const node = (label, value, folder) => {
   return node;
 };
 
-const getList = async (url, type) => {
+const getList = async (url, type, service) => {
   const server = window.location.href.slice(
     0,
     window.location.href.lastIndexOf("/")
@@ -19,15 +19,21 @@ const getList = async (url, type) => {
   try {
     const response = await apiEndpoint.post(
       server + "/api/dircont",
-      JSON.stringify({ link: url, src: type }),
+      JSON.stringify({ link: url, src: type, service: service }),
       {
         headers: {
           "Content-Type": "application/json",
         },
       }
     );
-    const list = response.data.map((el) => node(el.title, el.key, el.folder));
-    return list;
+
+    const files = response.data.files.map((el) =>
+      node(el.title, el.key, el.folder)
+    );
+
+    const details = response.data.services;
+
+    return { files, details };
   } catch (error) {
     console.error(error);
     return false;
