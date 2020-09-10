@@ -9,7 +9,7 @@ import {
   TextInputField,
   NameInputField,
 } from "../../components/Form/InputFields";
-import { SaveAndReset } from "../../components/Form/Util";
+import { SubmitAndReset } from "../../components/Form/Util";
 import Drawer from "../drawer";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
@@ -73,7 +73,7 @@ const CuratorInfo = () => {
               />
             </Grid>
             <Grid item>
-              <SaveAndReset />
+              <SubmitAndReset submitText="Save" reset />
             </Grid>
           </Grid>
         </Form>
