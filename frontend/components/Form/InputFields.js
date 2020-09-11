@@ -64,6 +64,7 @@ const SelectInputField = (props) => {
     label,
     required,
     options,
+    freeSolo,
   } = props;
 
   return (
@@ -75,6 +76,7 @@ const SelectInputField = (props) => {
         name={name}
         helperText={helperText}
         options={options}
+        freeSolo={freeSolo}
       />
     </Fragment>
   );
@@ -88,6 +90,7 @@ SelectInputField.propTypes = {
   options: PropTypes.array.isRequired,
   label: PropTypes.string.isRequired,
   required: PropTypes.bool,
+  freeSolo: PropTypes.bool,
 };
 
 export { TextInputField, NameInputField, SelectInputField };
