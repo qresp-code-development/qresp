@@ -6,6 +6,7 @@ import { Typography, Tooltip, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 
 import { useField } from "formik";
+import { string } from "yup";
 
 const SelectInput = (props) => {
   const { id, placeholder, helperText, options, freeSolo, name } = props;
@@ -33,8 +34,21 @@ const SelectInput = (props) => {
           id={id}
           options={options}
           freeSolo={freeSolo}
-          getOptionLabel={(option) => option.value}
-          renderOption={(option) => option.label}
+          autoSelect
+          blurOnSelect
+          selectOnFocus
+          getOptionLabel={(option) => {
+            if (option instanceof Object) {
+              return option.value;
+            }
+            return option;
+          }}
+          renderOption={(option) => {
+            if (option instanceof Object) {
+              return option.label;
+            }
+            return option;
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -46,7 +60,6 @@ const SelectInput = (props) => {
               placeholder={placeholder}
             />
           )}
-          blurOnSelect
           fullWidth
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
@@ -56,14 +69,18 @@ const SelectInput = (props) => {
             setFocused(false);
           }}
           onChange={(e, obj) => {
-            if (obj) {
-              field.onChange({
-                target: {
-                  name: name,
-                  value: obj.value,
-                },
-              });
+            var value;
+            if (obj instanceof Object) {
+              value = obj.value;
+            } else if (typeof obj == "string") {
+              value = obj;
             }
+            field.onChange({
+              target: {
+                name: name,
+                value: value,
+              },
+            });
           }}
         />
       </Tooltip>
