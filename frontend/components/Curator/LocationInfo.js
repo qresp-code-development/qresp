@@ -12,24 +12,21 @@ import { Formik, Form, useFormikContext } from "formik";
 import * as Yup from "yup";
 
 import ServerContext from "../../Context/Servers/serverContext";
+import AlertContext from "../../Context/Alert/alertContext";
 
-const FormField = ({ httpServers }) => {
-  const { values, setFieldValue, setFieldTouched } = useFormikContext();
-
-  useEffect(() => {
-    setFieldValue("dataServer", "");
-    setFieldTouched("dataServer", false, true);
-  }, [values.connectionType]);
+const FormField = ({ httpServers, fieldName }) => {
+  const { values } = useFormikContext();
 
   if (values.connectionType == "http") {
     return (
       <SelectInputField
         id="connectionType"
-        placeholder="Select a server"
+        placeholder="Select a server from a list  or enter one"
         helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
-        name="dataServer"
+        name={fieldName}
         label="File Server"
         options={httpServers}
+        freeSolo={true}
       />
     );
   } else {
@@ -37,8 +34,7 @@ const FormField = ({ httpServers }) => {
       <TextInputField
         id="connectionType"
         placeholder="Enter zenodo record URL"
-        name="dataServer"
-        type="email"
+        name={fieldName}
         helperText="eg. https://zenodo.org/record/3981451"
         label="Zenodo"
       />
@@ -59,6 +55,7 @@ const LocationInfo = () => {
   ];
 
   const { httpServers, setSelectedHttp } = useContext(ServerContext);
+  const { setAlert } = useContext(AlertContext);
 
   return (
     <Drawer heading="Where is the paper">
@@ -69,14 +66,24 @@ const LocationInfo = () => {
         }}
         validationSchema={Yup.object({
           connectionType: Yup.string().required("Required"),
-          dataServer: Yup.string().required("Required"),
+          dataServer: Yup.string()
+            .required("Required")
+            .url("Please enter a valid url"),
         })}
         onSubmit={(values, { setSubmitting }) => {
-          alert(JSON.stringify(values));
           setSubmitting(false);
-          getList(values.dataServer, values.connectionType, true).then((el) => {
-            setSelectedHttp(el.details);
-          });
+          getList(values.dataServer, values.connectionType, true)
+            .then((el) => {
+              setSelectedHttp(el.details);
+            })
+            .catch((err) => {
+              console.error(err);
+              setAlert(
+                "Error",
+                "There was an error retrieving data from the url provided, please check the URL and try again",
+                null
+              );
+            });
         }}
       >
         <Form>
@@ -90,7 +97,7 @@ const LocationInfo = () => {
               />
             </Grid>
             <Grid item>
-              <FormField httpServers={httpServers} />
+              <FormField httpServers={httpServers} fieldName="dataServer" />
             </Grid>
             <Grid item>
               <SubmitAndReset submitText="Search" />
