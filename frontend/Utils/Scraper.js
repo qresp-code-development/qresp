@@ -35,8 +35,7 @@ const getList = async (url, type, service) => {
 
     return { files, details };
   } catch (error) {
-    console.error(error);
-    return false;
+    throw error;
   }
 };
 
