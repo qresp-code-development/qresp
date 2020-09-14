@@ -2,11 +2,13 @@ import { Fragment, useEffect } from "react";
 import { Container, Box } from "@material-ui/core";
 
 import CuratorState from "../Context/Curator/CuratorState";
+import SourceTreeState from "../Context/SourceTree/SourceTreeState";
 
 import SEO from "../components/seo";
 import TopActions from "../components/Curator/TopActions";
 import CuratorInfo from "../components/Curator/CuratorInfo";
 import LocationInfo from "../components/Curator/LocationInfo";
+import FileTree from "../components/FileTree";
 
 const curator = () => {
   const curatorDescription =
@@ -14,14 +16,17 @@ const curator = () => {
 
   return (
     <CuratorState>
-      <SEO title={"Qresp | Curator"} description={curatorDescription} />
-      <Container>
-        <Box mt={4} mb={4}>
-          <TopActions />
-        </Box>
-        <CuratorInfo />
-        <LocationInfo />
-      </Container>
+      <SourceTreeState>
+        <SEO title={"Qresp | Curator"} description={curatorDescription} />
+        <FileTree />
+        <Container>
+          <Box mt={4} mb={4}>
+            <TopActions />
+          </Box>
+          <CuratorInfo />
+          <LocationInfo />
+        </Container>
+      </SourceTreeState>
     </CuratorState>
   );
 };
