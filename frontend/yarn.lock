@@ -1026,7 +1026,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.10.1", "@babel/runtime@^7.10.5", "@babel/runtime@^7.11.1":
+"@babel/runtime@^7.10.5":
   version "7.11.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.11.2.tgz#f549c13c754cc40b87644b9fa9f09a6a95fe0736"
   integrity sha512-TeWkU52so0mPtDcaCTxNBI/IHiz0pZgr8VEFqXFtZWpYD08ZB6FaSwVAS8MKRQAP3bYKiVjwysOJgMFY28o6Tw==
@@ -2655,7 +2655,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@2.2.6, classnames@2.x, classnames@^2.2.1, classnames@^2.2.6:
+classnames@2.2.6, classnames@^2.2.5:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
@@ -3311,11 +3311,6 @@ discontinuous-range@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/discontinuous-range/-/discontinuous-range-1.0.0.tgz#e38331f0844bba49b9a9cb71c771585aab1bc65a"
   integrity sha1-44Mx8IRLukm5qctxx3FYWqsbxlo=
-
-dom-align@^1.7.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/dom-align/-/dom-align-1.12.0.tgz#56fb7156df0b91099830364d2d48f88963f5a29c"
-  integrity sha512-YkoezQuhp3SLFGdOlr5xkqZ640iXrnHAwVYcDg8ZKRUtO7mSzSC2BA5V0VuyAwPSJA4CLIc6EDDJh4bEsD2+zA==
 
 dom-helpers@^5.0.1:
   version "5.1.4"
@@ -5555,7 +5550,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@^4.15.0, lodash@^4.17.14, lodash@^4.17.19:
+lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.14, lodash@^4.17.19:
   version "4.17.20"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
@@ -5858,6 +5853,11 @@ nano-css@^5.2.1:
     sourcemap-codec "^1.4.1"
     stacktrace-js "^2.0.0"
     stylis "3.5.0"
+
+nanoid@^2.0.0:
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-2.1.11.tgz#ec24b8a758d591561531b4176a01e3ab4f0f0280"
+  integrity sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==
 
 nanomatch@^1.2.9:
   version "1.2.13"
@@ -6893,7 +6893,7 @@ prop-types-exact@1.2.0, prop-types-exact@^1.2.0:
     object.assign "^4.1.0"
     reflect.ownkeys "^0.2.0"
 
-prop-types@15.7.2, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@15.7.2, prop-types@^15.5.8, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -7032,100 +7032,15 @@ randomfill@^1.0.3:
     randombytes "^2.0.5"
     safe-buffer "^5.1.0"
 
-rc-align@^4.0.0:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/rc-align/-/rc-align-4.0.3.tgz#9f83e816efd9ec66bb57adf22918794cec0dd7ed"
-  integrity sha512-TpI0t1tvAo/wYdoZbZlkCK+MkQBqNuPyRZesfsji4tMlqoqQ0q0MhnC9JD5KGPitMvmSB+KWgFpaN2uTz4hw6Q==
+react-checkbox-tree@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/react-checkbox-tree/-/react-checkbox-tree-1.6.0.tgz#6c471a610f1598c5f2e2c7b50bf11036159f5285"
+  integrity sha512-Hi5FeRCtyxClxZEiLvmCT5e/7w8iz0ppkoQyIEayZ35Nscdo4fbwow57EIs+MW0f7L+qnAHGTDmpfHnhxkljXg==
   dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "2.x"
-    dom-align "^1.7.0"
-    rc-util "^5.0.1"
-    resize-observer-polyfill "^1.5.1"
-
-rc-motion@^1.0.0, rc-motion@^1.0.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/rc-motion/-/rc-motion-1.1.2.tgz#07212f1b96c715b8245ec121339146c4a9b0968c"
-  integrity sha512-YC/E7SSWKBFakYg4PENhSRWD4ZLDqkI7FKmutJcrMewZ91/ZIWfoZSDvPaBdKO0hsFrrzWepFhXQIq0FNnCMWA==
-  dependencies:
-    "@babel/runtime" "^7.11.1"
-    classnames "^2.2.1"
-    raf "^3.4.1"
-    rc-util "^5.0.6"
-
-rc-resize-observer@^0.2.3:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/rc-resize-observer/-/rc-resize-observer-0.2.5.tgz#03e3a5c3dfccd6c996a547e4f82721e4f20f6156"
-  integrity sha512-cc4sOI722MVoCkGf/ZZybDVsjxvnH0giyDdA7wBJLTiMSFJ0eyxBMnr0JLYoClxftjnr75Xzl/VUB3HDrAx04Q==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "^2.2.1"
-    rc-util "^5.0.0"
-    resize-observer-polyfill "^1.5.1"
-
-rc-select@^11.1.1:
-  version "11.2.0"
-  resolved "https://registry.yarnpkg.com/rc-select/-/rc-select-11.2.0.tgz#6372dca772779104eadd9f832633fcb79bb86844"
-  integrity sha512-rw9XH2ALt/lpXDM/gULWiPDkEh5UndLDMqZo5FRiZji7MYLg+CbmcFpvJ6iYN5KpKosyLsCWrwvzeWZOCL6q0Q==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "2.x"
-    rc-motion "^1.0.1"
-    rc-trigger "^4.3.0"
-    rc-util "^5.0.1"
-    rc-virtual-list "^3.0.3"
-    warning "^4.0.3"
-
-rc-tree-select@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/rc-tree-select/-/rc-tree-select-4.1.2.tgz#bf012c3c32cf2e82fc7ffbdd60cb596163a290a0"
-  integrity sha512-2tRwZ4ChY+BarVKHoPR65kSZtopgwKCig6ngJiiTVgYfRdAhfdQp2j2+L8YW9TkosYGmwgTOhmlphlG3QNy7Pg==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "2.x"
-    rc-select "^11.1.1"
-    rc-tree "^3.8.0"
-    rc-util "^5.0.5"
-
-rc-tree@^3.8.0:
-  version "3.9.5"
-  resolved "https://registry.yarnpkg.com/rc-tree/-/rc-tree-3.9.5.tgz#07bab1baf11414ec910578759e69f9373e93f424"
-  integrity sha512-ZGVl1o83hZoz971pzY9Y7yZM+f9qcia1Gym+QNyc3zMGQVshbr6CX2WZ8xUK18tTkdRSqbTXmZFnvYf1lfqT8A==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "2.x"
-    rc-motion "^1.0.0"
-    rc-util "^5.0.0"
-    rc-virtual-list "^3.0.1"
-
-rc-trigger@^4.3.0:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/rc-trigger/-/rc-trigger-4.4.2.tgz#74f7ebcfdcdc191b7c82380def68fbba79ed5aec"
-  integrity sha512-uw2/s7j1b/RXyixa4omPuxZWv/3ln+H+p0v3trIUBxseolbdj8TTFpXYjXMZdGtMpAEAIbN1yo/K+r7wRB+xtQ==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "^2.2.6"
-    raf "^3.4.1"
-    rc-align "^4.0.0"
-    rc-motion "^1.0.0"
-    rc-util "^5.0.1"
-
-rc-util@^5.0.0, rc-util@^5.0.1, rc-util@^5.0.5, rc-util@^5.0.6, rc-util@^5.0.7:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/rc-util/-/rc-util-5.2.1.tgz#c01a3e25b4d65570e433f46f85fdf36ed44de6af"
-  integrity sha512-OnIKp4DsYZpT3St9LwiGARXyMR38wNbk7C4jXS6NGAGHZEQWck7W6qfiJwj+MUmhJiUisAknU6BUs65exbhFTw==
-  dependencies:
-    react-is "^16.12.0"
-    shallowequal "^1.1.0"
-
-rc-virtual-list@^3.0.1, rc-virtual-list@^3.0.3:
-  version "3.0.14"
-  resolved "https://registry.yarnpkg.com/rc-virtual-list/-/rc-virtual-list-3.0.14.tgz#9df4a524b6b7855e9a25c81c16f992b8bf45acf8"
-  integrity sha512-sbiPmSaDmO+2IY91eHyFYVHH8mJH0QYS1t4I5EKbqeVFgY/RZIHkwezKX/nvxULQlZHdTU6l/wh7yBxfp4QUyg==
-  dependencies:
-    classnames "^2.2.6"
-    rc-resize-observer "^0.2.3"
-    rc-util "^5.0.7"
+    classnames "^2.2.5"
+    lodash "^4.17.10"
+    nanoid "^2.0.0"
+    prop-types "^15.5.8"
 
 react-dom@16.13.1:
   version "16.13.1"
@@ -7703,11 +7618,6 @@ shallow-clone@^3.0.0:
   integrity sha512-/6KqX+GVUdqPuPPd2LxDDxzX6CAbjJehAAOKlNpqqUpAqPM6HeL8f+o3a+JsyGjn2lv0WY8UsTgUJjU9Ok55NA==
   dependencies:
     kind-of "^6.0.2"
-
-shallowequal@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-1.1.0.tgz#188d521de95b9087404fd4dcb68b13df0ae4e7f8"
-  integrity sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==
 
 shebang-command@^1.2.0:
   version "1.2.0"
@@ -8754,13 +8664,6 @@ walker@^1.0.7, walker@~1.0.5:
   integrity sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
   dependencies:
     makeerror "1.0.x"
-
-warning@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
-  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
-  dependencies:
-    loose-envify "^1.0.0"
 
 watchpack-chokidar2@^2.0.0:
   version "2.0.0"
