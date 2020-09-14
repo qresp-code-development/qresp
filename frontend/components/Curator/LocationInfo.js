@@ -13,6 +13,7 @@ import * as Yup from "yup";
 
 import ServerContext from "../../Context/Servers/serverContext";
 import AlertContext from "../../Context/Alert/alertContext";
+import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 
 const FormField = ({ httpServers, fieldName }) => {
   const { values } = useFormikContext();
@@ -56,6 +57,7 @@ const LocationInfo = () => {
 
   const { httpServers, setSelectedHttp } = useContext(ServerContext);
   const { setAlert } = useContext(AlertContext);
+  const { setTree, openSelector } = useContext(SourceTreeContext);
 
   return (
     <Drawer heading="Where is the paper">
@@ -75,6 +77,8 @@ const LocationInfo = () => {
           getList(values.dataServer, values.connectionType, true)
             .then((el) => {
               setSelectedHttp(el.details);
+              // setTree(el.files);
+              openSelector();
             })
             .catch((err) => {
               console.error(err);
