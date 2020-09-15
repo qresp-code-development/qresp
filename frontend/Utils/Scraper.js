@@ -5,8 +5,10 @@ const node = (label, value, folder) => {
     label: label,
     value: value,
     folder: folder,
-    children: [],
   };
+  if (folder) {
+    node["children"] = null;
+  }
   return node;
 };
 
@@ -39,15 +41,25 @@ const getList = async (url, type, service) => {
   }
 };
 
-const getStructure = (url, maxDepth) => {
-  const structure = {
-    label: "",
-    value: "",
-    children: [],
-  };
-  const stack = [structure];
+const getStructure = async (url, type, service) => {
+  const list = await getList(url, type, service);
+  const details = list.details;
+
+  const subFolders = await Promise.all(
+    list.files.map((el) => {
+      if (el.folder) {
+        const data = getList(el.value, type, false).then((data) => data.files);
+        return data;
+      }
+      return [];
+    })
+  );
+
+  list.files.forEach((element, i) => {
+    element.children = subFolders[i];
+  });
+
+  return { files: list.files, details };
 };
 
-export { getList };
-
-export default getStructure;
+export { getList, getStructure };
