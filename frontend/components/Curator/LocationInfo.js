@@ -6,7 +6,7 @@ import RadioInput from "../Form/RadioInput";
 import { SelectInputField, TextInputField } from "../Form/InputFields";
 import { SubmitAndReset } from "../../components/Form/Util";
 
-import { getList } from "../../Utils/Scraper";
+import { getStructure } from "../../Utils/Scraper";
 
 import { Formik, Form, useFormikContext } from "formik";
 import * as Yup from "yup";
@@ -14,6 +14,7 @@ import * as Yup from "yup";
 import ServerContext from "../../Context/Servers/serverContext";
 import AlertContext from "../../Context/Alert/alertContext";
 import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
+import LoadingContext from "../../Context/Loading/loadingContext";
 
 const FormField = ({ httpServers, fieldName }) => {
   const { values } = useFormikContext();
@@ -58,6 +59,7 @@ const LocationInfo = () => {
   const { httpServers, setSelectedHttp } = useContext(ServerContext);
   const { setAlert } = useContext(AlertContext);
   const { setTree, openSelector } = useContext(SourceTreeContext);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   return (
     <Drawer heading="Where is the paper">
@@ -74,11 +76,12 @@ const LocationInfo = () => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
-          getList(values.dataServer, values.connectionType, true)
+          showLoader();
+          getStructure(values.dataServer, values.connectionType, true)
             .then((el) => {
               setSelectedHttp(el.details);
-              // setTree(el.files);
-              openSelector();
+              setTree(el.files);
+              setTimeout(() => openSelector(), 1);
             })
             .catch((err) => {
               console.error(err);
@@ -87,7 +90,8 @@ const LocationInfo = () => {
                 "There was an error retrieving data from the url provided, please check the URL and try again",
                 null
               );
-            });
+            })
+            .finally(() => hideLoader());
         }}
       >
         <Form>
