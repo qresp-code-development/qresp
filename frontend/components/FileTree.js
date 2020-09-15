@@ -1,13 +1,31 @@
-import { useContext } from "react";
-
-import TreeSelect, { TreeNode, SHOW_PARENT } from "rc-tree-select";
+import { useContext, useState, useEffect } from "react";
 
 import {
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  useTheme,
 } from "@material-ui/core";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import {
+  faChevronRight,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
+
+import {
+  faCheckSquare,
+  faSquare,
+  faPlusSquare,
+  faMinusSquare,
+  faFolder,
+  faFolderOpen,
+  faFile,
+} from "@fortawesome/free-regular-svg-icons";
+
+import CheckboxTree from "react-checkbox-tree";
 
 import { RegularStyledButton } from "../components/button";
 
@@ -18,43 +36,105 @@ const FileTree = () => {
     tree,
     showSelector,
     closeSelector,
-    selected,
-    selectedMultiple,
-    multiple,
+    checked,
+    setChecked,
     title,
-    setSelected,
-    setSelectedMultiple,
+    multiple,
   } = useContext(SourceTreeContext);
 
-  const onChange = (value, ...rest) => {
-    console.log("onSingleCheck", value, rest);
-    setSelected(value);
-  };
+  const [expanded, setExpanded] = useState([]);
 
-  const onMultipleChange = (value) => {
-    console.log("onMultipleChange", value);
-    setSelectedMultiple(value);
-  };
+  useEffect(() => {
+    setExpanded([]);
+    setChecked([]);
+  }, [tree]);
+
+  const theme = useTheme();
 
   return (
-    <Dialog open={showSelector} onClose={closeSelector}>
+    <Dialog open={showSelector} onClose={closeSelector} maxWidth="sm" fullWidth>
       <DialogTitle onClose={closeSelector}>{title}</DialogTitle>
       <DialogContent>
-        <TreeSelect
-          style={{ zIndex: 100000 }}
-          transitionName="rc-tree-select-dropdown-slide-up"
-          choiceTransitionName="rc-tree-select-selection__choice-zoom"
-          dropdownStyle={{
-            maxHeight: "50vh",
-            overflow: "auto",
-            zIndex: 100000,
+        <CheckboxTree
+          nodes={tree}
+          checked={checked}
+          expanded={expanded}
+          onCheck={(newChecked) => {
+            if (!multiple) {
+              setChecked(newChecked.filter((el) => !checked.includes(el)));
+              return;
+            }
+            setChecked(newChecked);
           }}
-          multiple={multiple}
-          value={multiple ? selectedMultiple : selected}
-          treeData={tree}
-          treeNodeFilterProp="title"
-          onChange={multiple ? onMultipleChange : onChange}
-          allowClear
+          onExpand={(expanded) => setExpanded(expanded)}
+          iconsClass="fa5"
+          icons={{
+            check: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-check"
+                icon={faCheckSquare}
+                color={theme.palette.primary.main}
+              />
+            ),
+            uncheck: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-uncheck"
+                icon={faSquare}
+              />
+            ),
+            halfCheck: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-half-check"
+                icon={faCheckSquare}
+              />
+            ),
+            expandClose: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-expand-close"
+                icon={faChevronRight}
+              />
+            ),
+            expandOpen: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-expand-open"
+                icon={faChevronDown}
+              />
+            ),
+            expandAll: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-expand-all"
+                icon={faPlusSquare}
+              />
+            ),
+            collapseAll: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-collapse-all"
+                icon={faMinusSquare}
+              />
+            ),
+            parentClose: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-parent-close"
+                icon={faFolder}
+                color={theme.palette.primary.main}
+              />
+            ),
+            parentOpen: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-parent-open"
+                icon={faFolderOpen}
+                color={theme.palette.primary.main}
+              />
+            ),
+            leaf: (
+              <FontAwesomeIcon
+                className="rct-icon rct-icon-leaf-close"
+                icon={faFile}
+                color={theme.palette.primary.main}
+              />
+            ),
+          }}
+          noCascade
         />
       </DialogContent>
       <DialogActions>
