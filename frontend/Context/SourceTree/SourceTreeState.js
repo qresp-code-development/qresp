@@ -7,24 +7,17 @@ import {
   SET_TREE,
   SHOW_TREE_SELECTOR,
   HIDE_TREE_SELECTOR,
-  SET_FILETREE_SELECTED,
-  SET_FILETREE_SELECTED_MULTIPLE,
+  SET_FILETREE_CHECKED,
+  TOGGLE_MULTIPLE,
 } from "../types";
 
 const SourceTreeState = (props) => {
   const initialState = {
     open: false,
-    tree: [
-      { label: "test1", value: "test1" },
-      { label: "test2", value: "test2" },
-      { label: "test11", value: "test11" },
-      { label: "test12", value: "test12" },
-      { label: "test111", value: "test111" },
-    ],
-    selected: "",
-    selectedMultiple: [],
-    multiple: false,
+    tree: [],
+    checked: [],
     title: "Select the server",
+    multiple: false,
   };
 
   const [state, dispatch] = useReducer(SourceTreeReducer, initialState);
@@ -41,12 +34,8 @@ const SourceTreeState = (props) => {
     dispatch({ type: HIDE_TREE_SELECTOR });
   };
 
-  const setSelected = (value) => {
-    dispatch({ type: SET_FILETREE_SELECTED, payload: value });
-  };
-
-  const setSelectedMultiple = (value) => {
-    dispatch({ type: SET_FILETREE_SELECTED_MULTIPLE, payload: value });
+  const setChecked = (value) => {
+    dispatch({ type: SET_FILETREE_CHECKED, payload: value });
   };
 
   return (
@@ -54,14 +43,13 @@ const SourceTreeState = (props) => {
       value={{
         tree: state.tree,
         showSelector: state.open,
-        selected: state.selected,
-        selectedMultiple: state.selectedMultiple,
+        checked: state.checked,
         title: state.title,
+        multiple: state.multiple,
         setTree,
         openSelector,
         closeSelector,
-        setSelected,
-        setSelectedMultiple,
+        setChecked,
       }}
     >
       {props.children}
