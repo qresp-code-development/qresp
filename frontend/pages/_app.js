@@ -10,6 +10,9 @@ import "../styles/global.css";
 // Vis Network CSS
 import "vis-network/styles/vis-network.css";
 
+// File Tree CSS Class
+import "react-checkbox-tree/lib/react-checkbox-tree.css";
+
 import AlertState from "../Context/Alert/AlertState";
 import LoadingState from "../Context/Loading/LoadingState";
 import ServerState from "../Context/Servers/ServerState";
