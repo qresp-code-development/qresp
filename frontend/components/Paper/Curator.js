@@ -5,10 +5,14 @@ import LabelValue from "../labelvalue";
 
 import { Box } from "@material-ui/core";
 
-const CuratorInfo = ({ curator }) => {
+const CuratorInfo = ({ curator, editor, defaultOpen }) => {
   const { firstName, middleName, lastName, emailId, affiliation } = curator;
   return (
-    <Drawer heading="Curator Information">
+    <Drawer
+      heading="Curator Information"
+      editor={editor}
+      defaultOpen={defaultOpen}
+    >
       <Box my={1}>
         <LabelValue
           label="Name"
@@ -29,6 +33,8 @@ const CuratorInfo = ({ curator }) => {
 
 CuratorInfo.propTypes = {
   curator: PropTypes.object.isRequired,
+  editor: PropTypes.func,
+  defaultOpen: PropTypes.bool,
 };
 
 export default CuratorInfo;
