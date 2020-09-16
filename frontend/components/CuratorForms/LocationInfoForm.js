@@ -4,7 +4,7 @@ import { Grid } from "@material-ui/core";
 import Drawer from "../drawer";
 import RadioInput from "../Form/RadioInput";
 import { SelectInputField, TextInputField } from "../Form/InputFields";
-import { SubmitAndReset } from "../../components/Form/Util";
+import { SubmitAndReset } from "../Form/Util";
 
 import { getStructure } from "../../Utils/Scraper";
 
@@ -44,7 +44,7 @@ const FormField = ({ httpServers, fieldName }) => {
   }
 };
 
-const LocationInfo = () => {
+const LocationForm = () => {
   const options = [
     {
       label: "File Server",
@@ -62,7 +62,7 @@ const LocationInfo = () => {
   const { showLoader, hideLoader } = useContext(LoadingContext);
 
   return (
-    <Drawer heading="Where is the paper">
+    <Drawer heading="Where is the paper" key="locationForm">
       <Formik
         initialValues={{
           connectionType: "http",
@@ -117,4 +117,4 @@ const LocationInfo = () => {
   );
 };
 
-export default LocationInfo;
+export default LocationForm;
