@@ -10,7 +10,7 @@ const CuratorState = (props) => {
       firstName: "",
       middleName: "",
       lastName: "",
-      email: "",
+      emailId: "",
       affaliation: "",
     },
     referenceInfo: {
