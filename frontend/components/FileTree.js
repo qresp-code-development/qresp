@@ -6,6 +6,9 @@ import {
   DialogContent,
   DialogTitle,
   useTheme,
+  Typography,
+  Box,
+  Grid,
 } from "@material-ui/core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -52,9 +55,52 @@ const FileTree = () => {
   const theme = useTheme();
 
   return (
-    <Dialog open={showSelector} onClose={closeSelector} maxWidth="sm" fullWidth>
-      <DialogTitle onClose={closeSelector}>{title}</DialogTitle>
-      <DialogContent>
+    <Dialog open={showSelector} onClose={closeSelector} maxWidth="md" fullWidth>
+      <DialogTitle onClose={closeSelector} disableTypography>
+        <Grid container direction="column" spacing={1} justify="center">
+          <Grid item container spacing={1}>
+            <Grid item xs={12} sm={9}>
+              <Typography variant="h6">
+                {multiple
+                  ? title
+                  : checked.length == 0
+                  ? title
+                  : "Current Selection:"}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={3} container spacing={1}>
+              <Grid item xs={6}>
+                <RegularStyledButton fullWidth>Save</RegularStyledButton>
+              </Grid>
+              <Grid item xs={6}>
+                <RegularStyledButton onClick={closeSelector} fullWidth>
+                  Cancel
+                </RegularStyledButton>
+              </Grid>
+            </Grid>
+          </Grid>
+          {!multiple ? (
+            <Grid item xs={12}>
+              <Typography variant="body1" component="div">
+                <Box
+                  style={{
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                    borderRadius: "4px",
+                    padding: "8px",
+                    borderColor: theme.palette.secondary.main,
+                  }}
+                >
+                  {checked.length == 0
+                    ? "Nothing currently selected"
+                    : checked[0]}
+                </Box>
+              </Typography>
+            </Grid>
+          ) : null}
+        </Grid>
+      </DialogTitle>
+      <DialogContent dividers>
         <CheckboxTree
           nodes={tree}
           checked={checked}
@@ -137,12 +183,6 @@ const FileTree = () => {
           noCascade
         />
       </DialogContent>
-      <DialogActions>
-        <RegularStyledButton>Save</RegularStyledButton>
-        <RegularStyledButton onClick={closeSelector}>
-          Cancel
-        </RegularStyledButton>
-      </DialogActions>
     </Dialog>
   );
 };
