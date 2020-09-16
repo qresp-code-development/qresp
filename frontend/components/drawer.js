@@ -7,8 +7,10 @@ import {
   withStyles,
   Typography,
   Box,
+  IconButton,
+  Tooltip,
 } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import { ExpandMore, Edit } from "@material-ui/icons";
 
 const StyledAccordion = withStyles({
   root: {
@@ -23,7 +25,7 @@ const StyledAccordionSummary = withStyles({
 })(AccordionSummary);
 
 const Drawer = (props) => {
-  const { heading, children, defaultOpen } = props;
+  const { heading, children, defaultOpen, editor } = props;
   return (
     <StyledAccordion
       elevation={4}
@@ -34,7 +36,19 @@ const Drawer = (props) => {
     >
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h4" style={{ color: "#333333" }}>
-          <Box fontWeight="bold">{heading}</Box>
+          <Box fontWeight="bold">
+            {heading}{" "}
+            {editor ? (
+              <Tooltip
+                title={<Typography variant="subtitle2">Edit</Typography>}
+                arrow
+              >
+                <IconButton onClick={() => editor(true)}>
+                  <Edit color="primary" />
+                </IconButton>
+              </Tooltip>
+            ) : null}
+          </Box>
         </Typography>
       </StyledAccordionSummary>
       <AccordionDetails>
@@ -56,6 +70,7 @@ Drawer.propTypes = {
   heading: PropTypes.string.isRequired,
   children: PropTypes.any,
   defaultOpen: PropTypes.bool,
+  editor: PropTypes.func,
 };
 
 export default Drawer;
