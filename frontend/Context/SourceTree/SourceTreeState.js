@@ -16,7 +16,7 @@ const SourceTreeState = (props) => {
     open: false,
     tree: [],
     checked: [],
-    title: "Select the server",
+    title: "Please select the source directory on the server",
     multiple: false,
   };
 
