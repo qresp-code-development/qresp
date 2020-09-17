@@ -43,6 +43,7 @@ const CuratorInfoForm = ({ editor }) => {
           setSubmitting(false);
           editor(false);
         }}
+        enableReinitialize={true}
       >
         <Form>
           <Grid container direction="column" spacing={1}>
