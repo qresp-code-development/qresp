@@ -7,7 +7,7 @@ import SourceTreeState from "../Context/SourceTree/SourceTreeState";
 import SEO from "../components/seo";
 import TopActions from "../components/CuratorElements/TopActions";
 import CuratorElement from "../components/CuratorElements/CuratorElement";
-import LocationForm from "../components/CuratorForms/LocationInfoForm";
+import FileServerElement from "../components/CuratorElements/FileServerElement";
 import FileTree from "../components/FileTree";
 
 const curator = () => {
@@ -24,6 +24,7 @@ const curator = () => {
             <TopActions />
           </Box>
           <CuratorElement />
+          <FileServerElement />
         </Container>
       </SourceTreeState>
     </CuratorState>
