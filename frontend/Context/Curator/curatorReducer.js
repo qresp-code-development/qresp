@@ -1,4 +1,4 @@
-import { SET_CURATORINFO } from "../types";
+import { SET_CURATORINFO, SET_ALL } from "../types";
 
 export default (state, action) => {
   switch (action.type) {
@@ -7,6 +7,8 @@ export default (state, action) => {
         ...state,
         curatorInfo: action.payload,
       };
+    case SET_ALL:
+      return action.payload;
     default:
       return state;
   }
