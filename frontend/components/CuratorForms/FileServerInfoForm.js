@@ -15,6 +15,7 @@ import ServerContext from "../../Context/Servers/serverContext";
 import AlertContext from "../../Context/Alert/alertContext";
 import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import LoadingContext from "../../Context/Loading/loadingContext";
+import CuratorContext from "../../Context/Curator/curatorContext";
 
 const FormField = ({ httpServers, fieldName }) => {
   const { values } = useFormikContext();
@@ -44,7 +45,7 @@ const FormField = ({ httpServers, fieldName }) => {
   }
 };
 
-const LocationForm = () => {
+const FileServerInfoForm = () => {
   const options = [
     {
       label: "File Server",
@@ -60,9 +61,10 @@ const LocationForm = () => {
   const { setAlert } = useContext(AlertContext);
   const { setTree, openSelector } = useContext(SourceTreeContext);
   const { showLoader, hideLoader } = useContext(LoadingContext);
+  const { setFileServerPath } = useContext(CuratorContext);
 
   return (
-    <Drawer heading="Where is the paper" key="locationForm">
+    <Drawer heading="Where is the paper" defaultOpen={true}>
       <Formik
         initialValues={{
           connectionType: "http",
@@ -76,12 +78,13 @@ const LocationForm = () => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
+          setFileServerPath(values.dataServer);
           showLoader();
           getStructure(values.dataServer, values.connectionType, true)
             .then((el) => {
               setSelectedHttp(el.details);
               setTree(el.files);
-              setTimeout(() => openSelector(), 1);
+              openSelector();
             })
             .catch((err) => {
               console.error(err);
@@ -117,4 +120,4 @@ const LocationForm = () => {
   );
 };
 
-export default LocationForm;
+export default FileServerInfoForm;
