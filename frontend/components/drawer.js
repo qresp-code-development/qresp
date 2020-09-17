@@ -41,6 +41,7 @@ const Drawer = (props) => {
             {editor ? (
               <Tooltip
                 title={<Typography variant="subtitle2">Edit</Typography>}
+                placement="right"
                 arrow
               >
                 <IconButton onClick={() => editor(true)}>
