@@ -59,7 +59,9 @@ const FileServerInfoForm = () => {
 
   const { httpServers, setSelectedHttp } = useContext(ServerContext);
   const { setAlert } = useContext(AlertContext);
-  const { setTree, openSelector } = useContext(SourceTreeContext);
+  const { setTree, openSelector, setSaveMethod } = useContext(
+    SourceTreeContext
+  );
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const { setFileServerPath } = useContext(CuratorContext);
 
@@ -78,7 +80,7 @@ const FileServerInfoForm = () => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
-          setFileServerPath(values.dataServer);
+          setSaveMethod(setFileServerPath);
           showLoader();
           getStructure(values.dataServer, values.connectionType, true)
             .then((el) => {
