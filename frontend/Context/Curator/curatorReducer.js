@@ -1,4 +1,4 @@
-import { SET_CURATORINFO, SET_ALL } from "../types";
+import { SET_CURATORINFO, SET_ALL, SET_FILESERVERPATH } from "../types";
 
 export default (state, action) => {
   switch (action.type) {
@@ -9,6 +9,8 @@ export default (state, action) => {
       };
     case SET_ALL:
       return action.payload;
+    case SET_FILESERVERPATH:
+      return { ...state, fileServerPath: action.payload };
     default:
       return state;
   }
