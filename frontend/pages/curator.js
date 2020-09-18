@@ -8,6 +8,7 @@ import SEO from "../components/seo";
 import TopActions from "../components/CuratorElements/TopActions";
 import CuratorElement from "../components/CuratorElements/CuratorElement";
 import FileServerElement from "../components/CuratorElements/FileServerElement";
+import PaperInfoElement from "../components/CuratorElements/PaperInfoElement";
 import FileTree from "../components/FileTree";
 
 const curator = () => {
@@ -25,6 +26,7 @@ const curator = () => {
           </Box>
           <CuratorElement />
           <FileServerElement />
+          <PaperInfoElement />
         </Container>
       </SourceTreeState>
     </CuratorState>
