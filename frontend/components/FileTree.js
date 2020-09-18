@@ -43,6 +43,7 @@ const FileTree = () => {
     setChecked,
     title,
     multiple,
+    save,
   } = useContext(SourceTreeContext);
 
   const [expanded, setExpanded] = useState([]);
@@ -70,7 +71,16 @@ const FileTree = () => {
             </Grid>
             <Grid item xs={12} sm={3} container spacing={1}>
               <Grid item xs={6}>
-                <RegularStyledButton fullWidth>Save</RegularStyledButton>
+                <RegularStyledButton
+                  fullWidth
+                  onClick={() => {
+                    save(checked[0]);
+                    closeSelector();
+                  }}
+                  disabled={checked.length == 0}
+                >
+                  Save
+                </RegularStyledButton>
               </Grid>
               <Grid item xs={6}>
                 <RegularStyledButton onClick={closeSelector} fullWidth>
