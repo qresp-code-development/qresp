@@ -8,7 +8,8 @@ import {
   SHOW_TREE_SELECTOR,
   HIDE_TREE_SELECTOR,
   SET_FILETREE_CHECKED,
-  TOGGLE_MULTIPLE,
+  SET_MULTIPLE,
+  SET_SAVE_BUTTON_ACTION,
 } from "../types";
 
 const SourceTreeState = (props) => {
@@ -18,6 +19,7 @@ const SourceTreeState = (props) => {
     checked: [],
     title: "Please select the source directory on the server",
     multiple: false,
+    save: null,
   };
 
   const [state, dispatch] = useReducer(SourceTreeReducer, initialState);
@@ -38,6 +40,14 @@ const SourceTreeState = (props) => {
     dispatch({ type: SET_FILETREE_CHECKED, payload: value });
   };
 
+  const setMultiple = (value) => {
+    dispatch({ type: SET_MULTIPLE, payload: value });
+  };
+
+  const setSaveMethod = (value) => {
+    dispatch({ type: SET_SAVE_BUTTON_ACTION, payload: value });
+  };
+
   return (
     <SourceTreeContext.Provider
       value={{
@@ -46,10 +56,13 @@ const SourceTreeState = (props) => {
         checked: state.checked,
         title: state.title,
         multiple: state.multiple,
+        save: state.save,
         setTree,
         openSelector,
         closeSelector,
         setChecked,
+        setMultiple,
+        setSaveMethod,
       }}
     >
       {props.children}

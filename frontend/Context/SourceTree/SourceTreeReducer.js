@@ -3,7 +3,8 @@ import {
   SHOW_TREE_SELECTOR,
   HIDE_TREE_SELECTOR,
   SET_FILETREE_CHECKED,
-  TOGGLE_MULTIPLE,
+  SET_MULTIPLE,
+  SET_SAVE_BUTTON_ACTION,
 } from "../types";
 
 export default (state, action) => {
@@ -16,8 +17,10 @@ export default (state, action) => {
       return { ...state, open: false };
     case SET_FILETREE_CHECKED:
       return { ...state, checked: action.payload };
-    case TOGGLE_MULTIPLE:
-      return { ...state, multiple: !state.multiple };
+    case SET_MULTIPLE:
+      return { ...state, multiple: action.payload };
+    case SET_SAVE_BUTTON_ACTION:
+      return { ...state, save: action.payload };
     default:
       return state;
   }
