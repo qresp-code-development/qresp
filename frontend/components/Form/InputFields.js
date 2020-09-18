@@ -37,11 +37,11 @@ TextInputField.propTypes = {
 import NameInput from "./NameInput";
 
 const NameInputField = (props) => {
-  const { ids, label, required } = props;
+  const { ids, label, required, names } = props;
   return (
     <Fragment>
       <FormInputLabel forId={ids.fname} label={label} required={required} />
-      <NameInput ids={ids} />
+      <NameInput ids={ids} names={names} />
     </Fragment>
   );
 };
@@ -50,6 +50,7 @@ NameInputField.propTypes = {
   label: PropTypes.string.isRequired,
   ids: PropTypes.object.isRequired,
   required: PropTypes.bool,
+  names: PropTypes.object,
 };
 
 import SelectInput from "./SelectInput";
