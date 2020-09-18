@@ -5,8 +5,11 @@ import { RegularStyledButton } from "../button";
 const FormInputLabel = ({ label, required, forId }) => {
   return (
     <InputLabel htmlFor={forId}>
-      <Typography variant="h6" color="secondary">
-        {label} {required ? <span style={{ color: "red" }}> *</span> : null}
+      <Typography color="secondary" style={{ fontSize: "1.1rem" }}>
+        <Box fontWeight="bold">
+          {label}
+          {required ? <span style={{ color: "red" }}> *</span> : null}
+        </Box>
       </Typography>
     </InputLabel>
   );
