@@ -1,3 +1,4 @@
+import { useState } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -26,18 +27,24 @@ const StyledAccordionSummary = withStyles({
 
 const Drawer = (props) => {
   const { heading, children, defaultOpen, editor } = props;
+
+  const [open, setOpen] = useState(defaultOpen ? true : false);
+
   return (
     <StyledAccordion
       elevation={4}
       square={true}
-      TransitionProps={{ timeout: 250 }}
-      defaultExpanded={defaultOpen}
+      TransitionProps={{ timeout: 200 }}
       id={heading.toLowerCase()}
+      expanded={open}
+      onChange={(event, expanded) => {
+        setOpen(expanded);
+      }}
     >
       <StyledAccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h4" style={{ color: "#333333" }}>
           <Box fontWeight="bold">
-            {heading}{" "}
+            {heading}
             {editor ? (
               <Tooltip
                 title={<Typography variant="subtitle2">Edit</Typography>}
