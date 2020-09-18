@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import Link from "next/link";
 import { Button } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles, useTheme } from "@material-ui/core/styles";
 
 const StyledButton = withStyles({
   root: {
@@ -40,6 +40,10 @@ const RegularStyledButton = withStyles({
     "&:hover": {
       backgroundColor: "#9a0000",
     },
+  },
+  disabled: {
+    backgroundColor: "#bdc3c7",
+    borderColor: "#800000",
   },
 })(Button);
 
