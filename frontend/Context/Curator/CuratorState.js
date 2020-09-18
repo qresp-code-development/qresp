@@ -41,6 +41,7 @@ const CuratorState = (props) => {
   const setCuratorInfo = (info) => {
     dispatch({ type: SET_CURATORINFO, payload: info });
   };
+
   const setFileServerPath = (path) => {
     dispatch({ type: SET_FILESERVERPATH, payload: path });
   };
