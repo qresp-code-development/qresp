@@ -5,16 +5,7 @@ import { Grid } from "@material-ui/core";
 import TextInput from "./TextInput";
 
 const TextInputField = (props) => {
-  const {
-    id,
-    placeholder,
-    type,
-    helperText,
-    name,
-    label,
-    required,
-    action,
-  } = props;
+  const { id, label, required, action, ...rest } = props;
   return (
     <Fragment>
       <Grid
@@ -29,13 +20,7 @@ const TextInputField = (props) => {
         </Grid>
         <Grid item>{action}</Grid>
       </Grid>
-      <TextInput
-        id={id}
-        placeholder={placeholder}
-        name={name}
-        helperText={helperText}
-        type={type}
-      />
+      <TextInput id={id} {...rest} />
     </Fragment>
   );
 };
@@ -58,11 +43,11 @@ TextInputField.propTypes = {
 import NameInput from "./NameInput";
 
 const NameInputField = (props) => {
-  const { ids, label, required, names, id } = props;
+  const { id, label, required, ...rest } = props;
   return (
     <Fragment>
       <FormInputLabel forId={id} label={label} required={required} />
-      <NameInput ids={ids} names={names} id={id} />
+      <NameInput id={id} {...rest} />
     </Fragment>
   );
 };
@@ -73,6 +58,8 @@ NameInputField.propTypes = {
   required: PropTypes.bool,
   names: PropTypes.object,
   id: PropTypes.string.isRequired,
+  register: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
 };
 
 import SelectInput from "./SelectInput";

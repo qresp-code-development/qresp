@@ -6,9 +6,9 @@ import { TextField, Typography, Tooltip } from "@material-ui/core";
 import { useField } from "formik";
 
 const TextInput = (props) => {
-  const { id, placeholder, type, helperText, name, label } = props;
+  const { helperText, id, label, error, ...rest } = props;
 
-  const [field, meta] = useField(props);
+  // const [field, meta] = useField(props);
   const [focused, setFocused] = useState(false);
   const [hovering, setHovering] = useState(false);
   return (
@@ -25,20 +25,14 @@ const TextInput = (props) => {
       open={focused || hovering}
     >
       <TextField
-        name={name}
+        {...rest}
         fullWidth
         variant="outlined"
-        placeholder={placeholder}
-        type={type}
-        {...field}
-        error={meta.touched && meta.error && !focused}
-        helperText={meta.touched && meta.error && !focused ? meta.error : ""}
+        error={error && !focused}
+        helperText={error && !focused ? error.message : ""}
         InputProps={{
           onFocus: () => setFocused(true),
-          onBlur: (e) => {
-            field.onBlur(e);
-            setFocused(false);
-          },
+          onBlur: (e) => setFocused(false),
           onMouseEnter: () => setHovering(true),
           onMouseLeave: () => setHovering(false),
           id: id,

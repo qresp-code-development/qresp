@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Grid } from "@material-ui/core";
 import TextInput from "./TextInput";
 
-const NameInput = ({ ids, names, remove, id }) => {
+const NameInput = ({ ids, names, remove, id, register, errors }) => {
   const width = 4;
   return (
     <Grid container direction="row" spacing={2} justify="space-around" id={id}>
@@ -14,6 +14,10 @@ const NameInput = ({ ids, names, remove, id }) => {
           placeholder="Enter first name"
           name={names.firstName}
           helperText="eg. Jane"
+          inputRef={register({
+            required: true,
+          })}
+          error={errors[names.firstName]}
         />
       </Grid>
       <Grid item xs={12} sm={remove ? width - 1 : width}>
@@ -23,6 +27,8 @@ const NameInput = ({ ids, names, remove, id }) => {
           placeholder="Enter middle name"
           name={names.middleName}
           helperText="eg. L."
+          inputRef={register()}
+          error={errors[names.middleName]}
         />
       </Grid>
       <Grid item xs={12} sm={width}>
@@ -32,6 +38,10 @@ const NameInput = ({ ids, names, remove, id }) => {
           placeholder="Enter last name"
           name={names.lastName}
           helperText="eg. Doe"
+          inputRef={register({
+            required: true,
+          })}
+          error={errors[names.lastName]}
         />
       </Grid>
       {remove ? (
@@ -62,6 +72,8 @@ NameInput.propTypes = {
   id: PropTypes.string.isRequired,
   names: PropTypes.object,
   remove: PropTypes.object,
+  register: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
 };
 
 export default NameInput;
