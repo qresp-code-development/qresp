@@ -1,7 +1,8 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import { Formik, Form } from "formik";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers";
 import * as Yup from "yup";
 
 import { Grid } from "@material-ui/core";
@@ -11,78 +12,95 @@ import { SubmitAndReset } from "../Form/Util";
 import Drawer from "../drawer";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import curator from "../../pages/curator";
 
 const CuratorInfoForm = ({ editor }) => {
   const { curatorInfo, setCuratorInfo } = useContext(CuratorContext);
 
-  const nameIds = {
+  const nameFields = {
     firstName: "curatorFirstName",
     middleName: "curatorMiddleName",
     lastName: "curatorLastName",
   };
 
+  const schema = Yup.object({
+    [nameFields.firstName]: Yup.string().required("Required"),
+    [nameFields.middleName]: Yup.string(),
+    [nameFields.lastName]: Yup.string().required("Required"),
+    curatorEmailId: Yup.string()
+      .email("Invalid email address")
+      .required("Required"),
+    curatorAffiliation: Yup.string(),
+  });
+
+  const { register, handleSubmit, errors, setValue } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (values) => {
+    setCuratorInfo({
+      firstName: values[nameFields.firstName],
+      middleName: values[nameFields.middleName],
+      lastName: values[nameFields.lastName],
+      emailId: values.curatorEmailId,
+      affiliation: values.curatorAffiliation,
+    });
+    editor(false);
+  };
+
+  useEffect(() => {
+    if (curatorInfo.firstName !== "") {
+      setValue(nameFields.firstName, curatorInfo.firstName);
+      setValue(nameFields.middleName, curatorInfo.middleName);
+      setValue(nameFields.lastName, curatorInfo.lastName);
+      setValue("curatorEmailId", curatorInfo.emailId);
+      setValue("curatorAffiliation", curatorInfo.affiliation);
+    }
+  }, []);
+
   return (
     <Drawer heading="Who is Curating the paper" defaultOpen={true}>
-      <Formik
-        initialValues={curatorInfo}
-        validationSchema={Yup.object({
-          firstName: Yup.string()
-            .max(15, "Must be 15 characters or less")
-            .required("Required"),
-          middleName: Yup.string().max(20, "Must be 20 character or less"),
-          lastName: Yup.string()
-            .max(20, "Must be 20 characters or less")
-            .required("Required"),
-          emailId: Yup.string()
-            .email("Invalid email address")
-            .required("Required"),
-          affiliation: Yup.string(),
-        })}
-        onSubmit={(values, { setSubmitting }) => {
-          setCuratorInfo(values);
-          setSubmitting(false);
-          editor(false);
-        }}
-        validateOnChange={false}
-        validateOnBlur={false}
-        enableReinitialize={true}
-      >
-        <Form>
-          <Grid container direction="column" spacing={1}>
-            <Grid item>
-              <NameInputField
-                ids={nameIds}
-                label="Name"
-                required={true}
-                id="curatorname"
-              />
-            </Grid>
-            <Grid item>
-              <TextInputField
-                id="curatorEmail"
-                placeholder="Enter email address"
-                name="emailId"
-                type="email"
-                helperText="eg. Jane@univ.com"
-                label="Email"
-                required={true}
-              />
-            </Grid>
-            <Grid item>
-              <TextInputField
-                id="curatorAffiliation"
-                placeholder="Enter your university/organization"
-                name="affiliation"
-                helperText="eg. Dept. of Physics, University of XYZ"
-                label="Affiliation"
-              />
-            </Grid>
-            <Grid item>
-              <SubmitAndReset submitText="Save" />
-            </Grid>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Grid container direction="column" spacing={1}>
+          <Grid item>
+            <NameInputField
+              ids={nameFields}
+              label="Name"
+              required={true}
+              id="curatorname"
+              register={register}
+              errors={errors}
+              names={nameFields}
+            />
           </Grid>
-        </Form>
-      </Formik>
+          <Grid item>
+            <TextInputField
+              id="curatorEmail"
+              placeholder="Enter an email address"
+              name="curatorEmailId"
+              helperText="eg. Jane@univ.com"
+              label="Email"
+              required={true}
+              error={errors["curatorEmailId"]}
+              inputRef={register}
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="curatorAffiliation"
+              placeholder="Enter your university/organization"
+              name="curatorAffiliation"
+              helperText="eg. Dept. of Physics, University of XYZ"
+              label="Affiliation"
+              inputRef={register}
+              errore={errors["curatorAffiliation"]}
+            />
+          </Grid>
+          <Grid item>
+            <SubmitAndReset submitText="Save" />
+          </Grid>
+        </Grid>
+      </form>
     </Drawer>
   );
 };

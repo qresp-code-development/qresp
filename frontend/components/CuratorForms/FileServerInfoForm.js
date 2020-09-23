@@ -6,9 +6,11 @@ import RadioInput from "../Form/RadioInput";
 import { SelectInputField, TextInputField } from "../Form/InputFields";
 import { SubmitAndReset } from "../Form/Util";
 
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers";
+
 import { getStructure } from "../../Utils/Scraper";
 
-import { Formik, Form, useFormikContext } from "formik";
 import * as Yup from "yup";
 
 import ServerContext from "../../Context/Servers/serverContext";
@@ -46,6 +48,21 @@ const FormField = ({ httpServers, fieldName }) => {
 };
 
 const FileServerInfoForm = () => {
+  const schema = Yup.object({
+    connectionType: Yup.string().required("Required"),
+    dataServer: Yup.string()
+      .required("Required")
+      .url("Please enter a valid url"),
+  });
+
+  const { register, handleSubmit, errors, setValue } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (values) => {
+    console.log(data);
+  };
+
   const options = [
     {
       label: "File Server",
@@ -67,17 +84,30 @@ const FileServerInfoForm = () => {
 
   return (
     <Drawer heading="Where is the paper" defaultOpen={true}>
-      <Formik
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Grid direction="column" container spacing={1}>
+          <Grid item>
+            <RadioInput
+              name="connectionType"
+              helperText="Select location type of the data source"
+              options={options}
+              row={true}
+            />
+          </Grid>
+          <Grid item>
+            <FormField httpServers={httpServers} fieldName="dataServer" />
+          </Grid>
+          <Grid item>
+            <SubmitAndReset submitText="Search" />
+          </Grid>
+        </Grid>
+      </form>
+      {/* <Formik
         initialValues={{
           connectionType: "http",
           dataServer: "",
         }}
-        validationSchema={Yup.object({
-          connectionType: Yup.string().required("Required"),
-          dataServer: Yup.string()
-            .required("Required")
-            .url("Please enter a valid url"),
-        })}
+        validationSchema={}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
           setSaveMethod(setFileServerPath);
@@ -120,7 +150,7 @@ const FileServerInfoForm = () => {
             </Grid>
           </Grid>
         </Form>
-      </Formik>
+      </Formik> */}
     </Drawer>
   );
 };
