@@ -98,6 +98,9 @@ const FileServerInfoForm = () => {
             })
             .finally(() => hideLoader());
         }}
+        validateOnChange={false}
+        validateOnBlur={false}
+        enableReinitialize={true}
       >
         <Form>
           <Grid direction="column" container spacing={1}>
