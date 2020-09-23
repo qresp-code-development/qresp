@@ -16,9 +16,9 @@ const CuratorInfoForm = ({ editor }) => {
   const { curatorInfo, setCuratorInfo } = useContext(CuratorContext);
 
   const nameIds = {
-    fname: "curatorFirstName",
-    mname: "curatorMiddleName",
-    lname: "curatorLastName",
+    firstName: "curatorFirstName",
+    middleName: "curatorMiddleName",
+    lastName: "curatorLastName",
   };
 
   return (
@@ -43,12 +43,19 @@ const CuratorInfoForm = ({ editor }) => {
           setSubmitting(false);
           editor(false);
         }}
+        validateOnChange={false}
+        validateOnBlur={false}
         enableReinitialize={true}
       >
         <Form>
           <Grid container direction="column" spacing={1}>
             <Grid item>
-              <NameInputField ids={nameIds} label="Name" required={true} />
+              <NameInputField
+                ids={nameIds}
+                label="Name"
+                required={true}
+                id="curatorname"
+              />
             </Grid>
             <Grid item>
               <TextInputField
