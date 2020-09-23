@@ -1,14 +1,34 @@
 import { Fragment } from "react";
 import PropTypes from "prop-types";
 import { FormInputLabel } from "./Util";
-
+import { Grid } from "@material-ui/core";
 import TextInput from "./TextInput";
 
 const TextInputField = (props) => {
-  const { id, placeholder, type, helperText, name, label, required } = props;
+  const {
+    id,
+    placeholder,
+    type,
+    helperText,
+    name,
+    label,
+    required,
+    action,
+  } = props;
   return (
     <Fragment>
-      <FormInputLabel forId={id} label={label} required={required} />
+      <Grid
+        container
+        direction="row"
+        spacing={0}
+        alignItems="center"
+        alignContent="center"
+      >
+        <Grid item>
+          <FormInputLabel forId={id} label={label} required={required} />
+        </Grid>
+        <Grid item>{action}</Grid>
+      </Grid>
       <TextInput
         id={id}
         placeholder={placeholder}
@@ -32,16 +52,17 @@ TextInputField.propTypes = {
   type: PropTypes.string,
   helperText: PropTypes.string,
   required: PropTypes.bool,
+  action: PropTypes.object,
 };
 
 import NameInput from "./NameInput";
 
 const NameInputField = (props) => {
-  const { ids, label, required, names } = props;
+  const { ids, label, required, names, id } = props;
   return (
     <Fragment>
-      <FormInputLabel forId={ids.fname} label={label} required={required} />
-      <NameInput ids={ids} names={names} />
+      <FormInputLabel forId={id} label={label} required={required} />
+      <NameInput ids={ids} names={names} id={id} />
     </Fragment>
   );
 };
@@ -51,6 +72,7 @@ NameInputField.propTypes = {
   ids: PropTypes.object.isRequired,
   required: PropTypes.bool,
   names: PropTypes.object,
+  id: PropTypes.string.isRequired,
 };
 
 import SelectInput from "./SelectInput";
