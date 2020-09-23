@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { SwitchTransition, Transition } from "react-transition-group";
 
 const FadeTransition = ({ children, ...rest }) => (
-  <Transition {...rest}>
+  <Transition {...rest} unmountOnExit mountOnEnter>
     {(state) => (
       <Fragment>
         <div>{children}</div>
