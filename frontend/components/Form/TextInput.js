@@ -6,12 +6,11 @@ import { TextField, Typography, Tooltip } from "@material-ui/core";
 import { useField } from "formik";
 
 const TextInput = (props) => {
-  const { id, placeholder, type, helperText, name } = props;
+  const { id, placeholder, type, helperText, name, label } = props;
 
   const [field, meta] = useField(props);
   const [focused, setFocused] = useState(false);
   const [hovering, setHovering] = useState(false);
-
   return (
     <Tooltip
       title={
@@ -44,6 +43,7 @@ const TextInput = (props) => {
           onMouseLeave: () => setHovering(false),
           id: id,
         }}
+        label={label}
       />
     </Tooltip>
   );
@@ -60,6 +60,7 @@ TextInput.propTypes = {
   name: PropTypes.string.isRequired,
   type: PropTypes.string,
   helperText: PropTypes.string,
+  label: PropTypes.string,
 };
 
 export default TextInput;
