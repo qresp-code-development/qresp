@@ -7,7 +7,7 @@ const NameInput = ({ ids, names, remove, id, register, errors, defaults }) => {
   const width = 4;
 
   return (
-    <Grid container direction="row" spacing={2} justify="space-around" id={id}>
+    <Grid container direction="row" spacing={2} justify="space-around" id={id} style={{marginTop:remove?0:"0.1rem"}}>
       <Grid item xs={12} sm={width}>
         <TextInput
           id={ids.firstName}
@@ -20,6 +20,7 @@ const NameInput = ({ ids, names, remove, id, register, errors, defaults }) => {
           })}
           error={errors?.firstName || errors?.[names.firstName]}
           defaultValue={defaults?.firstName || ""}
+          InputLabelProps={{shrink:true}}
         />
       </Grid>
       <Grid item xs={12} sm={remove ? width - 1 : width}>
@@ -32,6 +33,7 @@ const NameInput = ({ ids, names, remove, id, register, errors, defaults }) => {
           inputRef={register()}
           error={errors?.middleName || errors?.[names.middleName]}
           defaultValue={defaults?.middleName || ""}
+          InputLabelProps={{shrink:true}}
         />
       </Grid>
       <Grid item xs={12} sm={width}>
@@ -46,6 +48,7 @@ const NameInput = ({ ids, names, remove, id, register, errors, defaults }) => {
           })}
           error={errors?.lastName || errors?.[names.lastName]}
           defaultValue={defaults?.lastName || ""}
+          InputLabelProps={{shrink:true}}
         />
       </Grid>
       {remove ? (
@@ -78,7 +81,7 @@ NameInput.propTypes = {
   remove: PropTypes.object,
   register: PropTypes.func.isRequired,
   errors: PropTypes.object,
-  defaults: PropTypes.object.isRequired,
+  defaults: PropTypes.object,
 };
 
 export default NameInput;
