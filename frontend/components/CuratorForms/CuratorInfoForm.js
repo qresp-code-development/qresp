@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import PropTypes from "prop-types";
 
 import { useForm } from "react-hook-form";
@@ -12,25 +12,22 @@ import { SubmitAndReset } from "../Form/Util";
 import Drawer from "../drawer";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
-import curator from "../../pages/curator";
 
 const CuratorInfoForm = ({ editor }) => {
   const { curatorInfo, setCuratorInfo } = useContext(CuratorContext);
 
   const nameFields = {
-    firstName: "curatorFirstName",
-    middleName: "curatorMiddleName",
-    lastName: "curatorLastName",
+    firstName: "firstName",
+    middleName: "middleName",
+    lastName: "lastName",
   };
 
   const schema = Yup.object({
     [nameFields.firstName]: Yup.string().required("Required"),
     [nameFields.middleName]: Yup.string(),
     [nameFields.lastName]: Yup.string().required("Required"),
-    curatorEmailId: Yup.string()
-      .email("Invalid email address")
-      .required("Required"),
-    curatorAffiliation: Yup.string(),
+    emailId: Yup.string().email("Invalid email address").required("Required"),
+    affiliation: Yup.string(),
   });
 
   const { register, handleSubmit, errors, setValue } = useForm({
@@ -38,25 +35,9 @@ const CuratorInfoForm = ({ editor }) => {
   });
 
   const onSubmit = (values) => {
-    setCuratorInfo({
-      firstName: values[nameFields.firstName],
-      middleName: values[nameFields.middleName],
-      lastName: values[nameFields.lastName],
-      emailId: values.curatorEmailId,
-      affiliation: values.curatorAffiliation,
-    });
+    setCuratorInfo(values);
     editor(false);
   };
-
-  useEffect(() => {
-    if (curatorInfo.firstName !== "") {
-      setValue(nameFields.firstName, curatorInfo.firstName);
-      setValue(nameFields.middleName, curatorInfo.middleName);
-      setValue(nameFields.lastName, curatorInfo.lastName);
-      setValue("curatorEmailId", curatorInfo.emailId);
-      setValue("curatorAffiliation", curatorInfo.affiliation);
-    }
-  }, []);
 
   return (
     <Drawer heading="Who is Curating the paper" defaultOpen={true}>
@@ -71,29 +52,32 @@ const CuratorInfoForm = ({ editor }) => {
               register={register}
               errors={errors}
               names={nameFields}
+              defaults={{ ...curatorInfo }}
             />
           </Grid>
           <Grid item>
             <TextInputField
               id="curatorEmail"
               placeholder="Enter an email address"
-              name="curatorEmailId"
+              name="emailId"
               helperText="eg. Jane@univ.com"
               label="Email"
               required={true}
-              error={errors["curatorEmailId"]}
+              error={errors["emailId"]}
               inputRef={register}
+              defaultValue={curatorInfo.emailId}
             />
           </Grid>
           <Grid item>
             <TextInputField
               id="curatorAffiliation"
               placeholder="Enter your university/organization"
-              name="curatorAffiliation"
+              name="affiliation"
               helperText="eg. Dept. of Physics, University of XYZ"
               label="Affiliation"
               inputRef={register}
-              errore={errors["curatorAffiliation"]}
+              errore={errors["affiliation"]}
+              defaultValue={curatorInfo.affiliation}
             />
           </Grid>
           <Grid item>

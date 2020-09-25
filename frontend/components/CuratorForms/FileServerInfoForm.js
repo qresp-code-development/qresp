@@ -19,33 +19,31 @@ import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import LoadingContext from "../../Context/Loading/loadingContext";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
-const FormField = ({ httpServers, fieldName }) => {
-  const { values } = useFormikContext();
-
-  if (values.connectionType == "http") {
-    return (
-      <SelectInputField
-        id="connectionType"
-        placeholder="Select a server from a list  or enter one"
-        helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
-        name={fieldName}
-        label="File Server"
-        options={httpServers}
-        freeSolo={true}
-      />
-    );
-  } else {
-    return (
-      <TextInputField
-        id="connectionType"
-        placeholder="Enter zenodo record URL"
-        name={fieldName}
-        helperText="eg. https://zenodo.org/record/3981451"
-        label="Zenodo"
-      />
-    );
-  }
-};
+// const FormField = ({ httpServers, fieldName }) => {
+//   if (values.connectionType == "http") {
+//     return (
+// <SelectInputField
+//   id="connectionType"
+//   placeholder="Select a server from a list  or enter one"
+//   helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
+//   name={fieldName}
+//   label="File Server"
+//   options={httpServers}
+//   freeSolo={true}
+// />
+//     );
+//   } else {
+//     return (
+//       <TextInputField
+//         id="connectionType"
+//         placeholder="Enter zenodo record URL"
+//         name={fieldName}
+//         helperText="eg. https://zenodo.org/record/3981451"
+//         label="Zenodo"
+//       />
+//     );
+//   }
+// };
 
 const FileServerInfoForm = () => {
   const schema = Yup.object({
@@ -55,13 +53,31 @@ const FileServerInfoForm = () => {
       .url("Please enter a valid url"),
   });
 
-  const { register, handleSubmit, errors, setValue } = useForm({
+  const { register, handleSubmit, errors, watch, control } = useForm({
     resolver: yupResolver(schema),
   });
 
   const onSubmit = (values) => {
-    console.log(data);
+    setSaveMethod(setFileServerPath);
+    showLoader();
+    getStructure(values.dataServer, values.connectionType, true)
+      .then((el) => {
+        setSelectedHttp(el.details);
+        setTree(el.files);
+        openSelector();
+      })
+      .catch((err) => {
+        console.error(err);
+        setAlert(
+          "Error",
+          "There was an error retrieving data from the url provided, please check the URL and try again",
+          null
+        );
+      })
+      .finally(() => hideLoader());
   };
+
+  const watchConnectionType = watch("connectionType");
 
   const options = [
     {
@@ -92,10 +108,35 @@ const FileServerInfoForm = () => {
               helperText="Select location type of the data source"
               options={options}
               row={true}
+              register={register}
+              error={errors.connectionType}
             />
           </Grid>
           <Grid item>
-            <FormField httpServers={httpServers} fieldName="dataServer" />
+            {watchConnectionType == "http" ? (
+              <SelectInputField
+                id="dataServer"
+                placeholder="Select a server from a list  or enter one"
+                helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
+                label="File Server"
+                options={httpServers}
+                required={true}
+                name="dataServer"
+                error={errors.dataServer}
+                control={control}
+              />
+            ) : (
+              <TextInputField
+                id="dataServer"
+                placeholder="Enter zenodo record URL"
+                name="dataServer"
+                helperText="eg. https://zenodo.org/record/3981451"
+                label="Zenodo"
+                required={true}
+                error={errors.dataServer}
+                inputRef={register}
+              />
+            )}
           </Grid>
           <Grid item>
             <SubmitAndReset submitText="Search" />
