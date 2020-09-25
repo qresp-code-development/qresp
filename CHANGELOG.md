@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v1.2.2 (2020/09/25)
+-------------------
+
+- Fixed bug impacting workflow hover info cards.
+- Updated File server parser to make compatible with new file server.
+
 v1.2.1 (2020/05/26)
 -------------------
 
