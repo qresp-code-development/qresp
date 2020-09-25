@@ -55,6 +55,7 @@ const FileServerInfoForm = () => {
 
   const { register, handleSubmit, errors, watch, control } = useForm({
     resolver: yupResolver(schema),
+    defaultValues:{connectionType:'http'}
   });
 
   const onSubmit = (values) => {
@@ -110,6 +111,7 @@ const FileServerInfoForm = () => {
               row={true}
               register={register}
               error={errors.connectionType}
+              defVal="http"
             />
           </Grid>
           <Grid item>
