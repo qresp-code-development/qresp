@@ -4,7 +4,12 @@ import CuratorContext from "./curatorContext";
 
 import WebStore from "../../Utils/Persist";
 
-import { SET_ALL, SET_CURATORINFO, SET_FILESERVERPATH } from "../types";
+import {
+  SET_ALL,
+  SET_CURATORINFO,
+  SET_FILESERVERPATH,
+  SET_PAPERINFO,
+} from "../types";
 
 const CuratorState = (props) => {
   const initialState = {
@@ -19,6 +24,12 @@ const CuratorState = (props) => {
       authors: [{ firstName: "", middleName: "", lastName: "" }],
     },
     fileServerPath: "",
+    paperInfo: {
+      PIs: [{ firstName: "", middleName: "", lastName: "" }],
+      collections: "",
+      tags: "",
+      notebookFile: "",
+    },
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -34,17 +45,16 @@ const CuratorState = (props) => {
     WebStore.set("state", state);
   }, [state]);
 
-  const setAll = (data) => {
-    dispatch({ type: SET_ALL, payload: data });
-  };
+  const setAll = (data) => dispatch({ type: SET_ALL, payload: data });
 
-  const setCuratorInfo = (info) => {
+  const setCuratorInfo = (info) =>
     dispatch({ type: SET_CURATORINFO, payload: info });
-  };
 
-  const setFileServerPath = (path) => {
+  const setFileServerPath = (path) =>
     dispatch({ type: SET_FILESERVERPATH, payload: path });
-  };
+
+  const setPaperInfo = (data) =>
+    dispatch({ type: SET_PAPERINFO, payload: data });
 
   return (
     <CuratorContext.Provider
@@ -52,9 +62,11 @@ const CuratorState = (props) => {
         reference: state.reference,
         curatorInfo: state.curatorInfo,
         fileServerPath: state.fileServerPath,
+        paperInfo: state.paperInfo,
         metadata: state,
         setCuratorInfo: setCuratorInfo,
         setFileServerPath: setFileServerPath,
+        setPaperInfo: setPaperInfo,
       }}
     >
       {props.children}

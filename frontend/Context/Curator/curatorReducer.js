@@ -1,4 +1,9 @@
-import { SET_CURATORINFO, SET_ALL, SET_FILESERVERPATH } from "../types";
+import {
+  SET_CURATORINFO,
+  SET_ALL,
+  SET_FILESERVERPATH,
+  SET_PAPERINFO,
+} from "../types";
 
 export default (state, action) => {
   switch (action.type) {
@@ -11,6 +16,8 @@ export default (state, action) => {
       return action.payload;
     case SET_FILESERVERPATH:
       return { ...state, fileServerPath: action.payload };
+    case SET_PAPERINFO:
+      return { ...state, paperInfo: action.payload };
     default:
       return state;
   }
