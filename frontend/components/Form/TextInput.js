@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 
 import { TextField, Typography, Tooltip } from "@material-ui/core";
 
-import { useField } from "formik";
-
 const TextInput = (props) => {
   const { helperText, id, label, error, ...rest } = props;
 

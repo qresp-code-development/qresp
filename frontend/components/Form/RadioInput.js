@@ -6,19 +6,14 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  FormControl,
-  FormLabel,
   FormHelperText,
   Tooltip,
   Typography,
   Box,
 } from "@material-ui/core";
 
-import { useField } from "formik";
-
 const RadioInput = (props) => {
-  const { label, name, helperText, options, row } = props;
-  const [field, meta] = useField(props);
+  const { name, helperText, options, row, register, error } = props;
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -31,20 +26,13 @@ const RadioInput = (props) => {
     >
       <RadioGroup
         name={name}
-        {...field}
         style={{ width: "max-content" }}
         row={row}
         onFocus={() => setFocused(true)}
-        onBlur={(e) => {
-          setFocused(false);
-          field.onBlur(e);
-        }}
+        onBlur={(e) => setFocused(false)}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        onChange={(e) => {
-          setFocused(false);
-          field.onChange(e);
-        }}
+        onChange={(e) => setFocused(false)}
       >
         {options.map((option) => {
           return (
@@ -52,6 +40,7 @@ const RadioInput = (props) => {
               key={option.value}
               value={option.value}
               control={<Radio color="primary" />}
+              inputRef={register}
               label={
                 <Typography color="secondary">
                   <Box fontWeight="bold" component="span">
@@ -62,23 +51,22 @@ const RadioInput = (props) => {
             />
           );
         })}
-        <FormHelperText>{meta.error && meta.error}</FormHelperText>
+        <FormHelperText>{error && error.message}</FormHelperText>
       </RadioGroup>
     </Tooltip>
   );
 };
 
 RadioInput.defaultProps = {
-  label: "",
   helperText: "",
   row: false,
 };
 
 RadioInput.protoTypes = {
-  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   helperText: PropTypes.string.isRequired,
   options: PropTypes.array.isRequired,
+  register: PropTypes.func.isRequired,
   row: PropTypes.bool,
 };
 

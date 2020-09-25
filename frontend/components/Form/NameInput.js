@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import { Grid } from "@material-ui/core";
 import TextInput from "./TextInput";
 
-const NameInput = ({ ids, names, remove, id, register, errors }) => {
+const NameInput = ({ ids, names, remove, id, register, errors, defaults }) => {
   const width = 4;
+
   return (
     <Grid container direction="row" spacing={2} justify="space-around" id={id}>
       <Grid item xs={12} sm={width}>
@@ -17,7 +18,8 @@ const NameInput = ({ ids, names, remove, id, register, errors }) => {
           inputRef={register({
             required: true,
           })}
-          error={errors[names.firstName]}
+          error={errors?.firstName || errors?.[names.firstName]}
+          defaultValue={defaults?.firstName || ""}
         />
       </Grid>
       <Grid item xs={12} sm={remove ? width - 1 : width}>
@@ -28,7 +30,8 @@ const NameInput = ({ ids, names, remove, id, register, errors }) => {
           name={names.middleName}
           helperText="eg. L."
           inputRef={register()}
-          error={errors[names.middleName]}
+          error={errors?.middleName || errors?.[names.middleName]}
+          defaultValue={defaults?.middleName || ""}
         />
       </Grid>
       <Grid item xs={12} sm={width}>
@@ -41,7 +44,8 @@ const NameInput = ({ ids, names, remove, id, register, errors }) => {
           inputRef={register({
             required: true,
           })}
-          error={errors[names.lastName]}
+          error={errors?.lastName || errors?.[names.lastName]}
+          defaultValue={defaults?.lastName || ""}
         />
       </Grid>
       {remove ? (
@@ -73,7 +77,8 @@ NameInput.propTypes = {
   names: PropTypes.object,
   remove: PropTypes.object,
   register: PropTypes.func.isRequired,
-  errors: PropTypes.object.isRequired,
+  errors: PropTypes.object,
+  defaults: PropTypes.object.isRequired,
 };
 
 export default NameInput;

@@ -1,17 +1,12 @@
 import { Fragment, useState } from "react";
 import PropTypes from "prop-types";
 
-import { Typography, Tooltip, TextField } from "@material-ui/core";
-
-import { Autocomplete } from "@material-ui/lab";
-
-import { useField } from "formik";
-import { string } from "yup";
+import { Typography, Tooltip, TextField, MenuItem } from "@material-ui/core";
+import { Controller } from "react-hook-form";
 
 const SelectInput = (props) => {
-  const { id, placeholder, helperText, options, freeSolo, name } = props;
+  const { id, placeholder, helperText, options, error, name, control } = props;
 
-  const [field, meta] = useField(props);
   const [focused, setFocused] = useState(false);
   const [hovering, setHovering] = useState(false);
 
@@ -19,70 +14,55 @@ const SelectInput = (props) => {
     <Fragment>
       <Tooltip
         title={
-          helperText ? (
+          helperText && (
             <Typography variant="subtitle2">{helperText}</Typography>
-          ) : (
-            ""
           )
         }
         placement="top"
         arrow
         open={focused || hovering}
+        ref={null}
       >
-        <Autocomplete
-          name={name}
-          id={id}
-          options={options}
-          freeSolo={freeSolo}
-          autoSelect
-          blurOnSelect
-          selectOnFocus
-          getOptionLabel={(option) => {
-            if (option instanceof Object) {
-              return option.value;
+        <div>
+          <Controller
+            control={control}
+            name={name}
+            defaultValue=""
+            as={
+              <TextField
+                id={id}
+                select
+                variant="outlined"
+                name={name}
+                // onFocus={() => setFocused(true)}
+                // onBlur={() => setFocused(false)}
+                // onMouseEnter={() => setHovering(true)}
+                // onMouseLeave={() => setHovering(false)}
+                InputProps={{
+                  onFocus: () => setFocused(true),
+                  onBlur: (e) => setFocused(false),
+                  onMouseEnter: () => setHovering(true),
+                  onMouseLeave: () => setHovering(false),
+                }}
+                placeholder={placeholder}
+                error={error && !focused}
+                helperText={error && !focused ? error.message : ""}
+                fullWidth
+              >
+                <MenuItem value="">Select a value ...</MenuItem>
+                {options.map((option) => (
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                    onMouseLeave={() => setHovering(false)}
+                  >
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
             }
-            return option;
-          }}
-          renderOption={(option) => {
-            if (option instanceof Object) {
-              return option.label;
-            }
-            return option;
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              error={meta.touched && meta.error && !focused}
-              helperText={
-                meta.touched && meta.error && !focused ? meta.error : ""
-              }
-              placeholder={placeholder}
-            />
-          )}
-          fullWidth
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-          onFocus={() => setFocused(true)}
-          onBlur={(e) => {
-            field.onBlur(e);
-            setFocused(false);
-          }}
-          onChange={(e, obj) => {
-            var value;
-            if (obj instanceof Object) {
-              value = obj.value;
-            } else if (typeof obj == "string") {
-              value = obj;
-            }
-            field.onChange({
-              target: {
-                name: name,
-                value: value,
-              },
-            });
-          }}
-        />
+          />
+        </div>
       </Tooltip>
     </Fragment>
   );
@@ -90,8 +70,6 @@ const SelectInput = (props) => {
 
 SelectInput.defaultProps = {
   helperText: "",
-  required: false,
-  freeSolo: false,
 };
 
 SelectInput.propTypes = {
@@ -100,7 +78,7 @@ SelectInput.propTypes = {
   placeholder: PropTypes.string.isRequired,
   helperText: PropTypes.string,
   options: PropTypes.array.isRequired,
-  freeSolo: PropTypes.bool,
+  control: PropTypes.object.isRequired,
 };
 
 export default SelectInput;

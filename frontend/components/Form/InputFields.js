@@ -65,29 +65,12 @@ NameInputField.propTypes = {
 import SelectInput from "./SelectInput";
 
 const SelectInputField = (props) => {
-  const {
-    id,
-    placeholder,
-    type,
-    helperText,
-    name,
-    label,
-    required,
-    options,
-    freeSolo,
-  } = props;
+  const { id, label, required, ...rest } = props;
 
   return (
     <Fragment>
       <FormInputLabel forId={id} label={label} required={required} />
-      <SelectInput
-        id={id}
-        placeholder={placeholder}
-        name={name}
-        helperText={helperText}
-        options={options}
-        freeSolo={freeSolo}
-      />
+      <SelectInput id={id} {...rest} />
     </Fragment>
   );
 };
@@ -95,12 +78,13 @@ const SelectInputField = (props) => {
 SelectInputField.propTypes = {
   id: PropTypes.string.isRequired,
   placeholder: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   helperText: PropTypes.string,
   options: PropTypes.array.isRequired,
   label: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  freeSolo: PropTypes.bool,
+  error: PropTypes.object.isRequired,
+  name: PropTypes.string.isRequired,
+  control: PropTypes.object.isRequired,
 };
 
 export { TextInputField, NameInputField, SelectInputField };
