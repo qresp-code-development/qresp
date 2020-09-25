@@ -38,7 +38,7 @@ const ReferenceInfo = ({ referenceData }) => {
       <Box my={1}>
         <Typography variant="h4" gutterBottom style={{ color: "#333333" }}>
           <Box fontWeight="bold">
-            {title} <SocialShare url="abcd" />
+            {title} <SocialShare />
           </Box>
         </Typography>
         <Typography variant="subtitle1" color="secondary" gutterBottom>
