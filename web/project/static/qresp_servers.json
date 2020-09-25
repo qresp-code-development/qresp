@@ -1,13 +1,1 @@
-[
-  {
-    "qresp_server_url": "https://paperstack.uchicago.edu",
-    "isActive": "Yes",
-    "qresp_maintainer_emails": ["datadev@lists.uchicago.edu"]
-  },
-  {
-    "qresp_server_url": "http://localhost:5000",
-    "isActive": "Yes",
-    "qresp_maintainer_emails": ["test"]
-  }
-
-]
+[{"qresp_server_url": "https://paperstack.uchicago.edu", "isActive": "Yes","qresp_maintainer_emails": ["datadev@lists.uchicago.edu"]}]

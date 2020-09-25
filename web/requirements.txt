@@ -1,5 +1,5 @@
 setuptools
-jsonschema==3.2.0
+jsonschema==2.6.0
 Flask
 Flask-API
 Flask-Cors

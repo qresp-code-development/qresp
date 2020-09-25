@@ -238,38 +238,6 @@ function buildPaperInfo(paperDetails) {
     } else {
         $("#showDocumentation").hide();
     }
-    if (paperDetails.license) {
-        /* Fetch data corresponding to the license value*/ 
-
-        $.ajax({
-            type: "POST",
-            url: "../../license",
-            data: paperDetails.license,
-            success: function (data) {
-                $('#showLicense').show();
-
-                // Set Link and Title of the License chosen
-                $("#mediaLicenseLink").attr('href', data.link);
-                $("#mediaLicenseText").html(data.title);
-
-                // Link infographics to Licenses 
-                $("#mediaLicenseImages").attr('href', data.link);
-
-                // Add infographics to page
-                infographics = ""
-                data.infographics.forEach(image => {
-                    imageName = image.substring(0, 2).toUpperCase()
-                    infographics += '<img src=/static/./images/' + image + ' style="margin:4px;" alt=' + imageName + ' title=' + imageName + ' />'
-                });
-                $('#mediaLicenseImages').html(infographics)
-            },
-            error: function (data) {
-                alert("Unable to display license data, please contact the administrator " + (data.error));
-            }
-        });
-    }
-
-
 }
 
 function buildChartTables(chartDetails, paperDetails) {

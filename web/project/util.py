@@ -1,15 +1,11 @@
 import json
 import re
 import requests
-from jsonschema import Draft7Validator
+from jsonschema import Draft4Validator
 from requests_oauthlib import OAuth2Session
 from lxml import html
 from urllib.request import urlopen
 from project.config import Config
-
-from os import listdir, path
-import string
-
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -74,7 +70,7 @@ class Servers():
         try:
             url = requests.get(self.__schemaString, headers=self.__headers, verify = False)
             schema_coll_data = json.loads(url.text)
-            a = Draft7Validator(schema_coll_data)
+            a = Draft4Validator(schema_coll_data)
             for error in sorted(a.iter_errors(coll_data), key=str):
                 message = ""
                 try:
@@ -805,67 +801,3 @@ class DirectoryTree:
     lazy = ""
     folder = ""
     source = ""
-
-class Licenses:
-    """
-    License Manage License Files
-    All licenses are stored in the licenses directory
-    The file 'LIST' in the directory contains a comma seperated list of all 
-    license titles and file names. Like: file_name, License Title ...
-    Each License file contains formatted fields wherever applicable. 
-    """
-    def __init__(self):
-        super().__init__()
-        self.path = path.dirname(path.realpath(__file__))+"/licenses/"
-        self.codeLicenses = []
-        self.mediaLicenses = None
-    
-    # For Future Use -> START
-    # def getCodeLicenses(self):
-    #     """
-    #     Return all License Names Available in List
-    #     """
-    #     with open(self.path+"CODELIST","r") as f:
-    #         licenses = f.readlines()
-
-    #     for license in licenses:
-    #         value, label = license.split(",")
-    #         self.codeLicenses.append((value, label))
-
-    #     return self.codeLicenses
-    # For Future Use -> END
-    
-    def getMediaLicenses(self):
-        """
-        Return all License Names Available in List
-        """
-        with open(self.path+"CC_Licenses.json","r") as f:
-            self.mediaLicenses = json.load(f)
-
-        licenses = []
-
-        for license in self.mediaLicenses.keys():
-            licenses.append((license, self.mediaLicenses[license]['title']))
-
-        return licenses
-
-    def getLicense(self, license, **kwargs):
-        """
-        Get License Text
-        Completed with the required Fields
-        """
-        # For Future Use -> START
-        # fname = kwargs.get("fullname","")
-        # year = kwargs.get("year","")
-        # email = kwargs.get("email","")
-        # title = kwargs.get("title","")
-        # project = kwargs.get("project","")
-        # org = kwargs.get("organization","")
-        # l = frontmatter.load(self.path+license)
-        # licenseText =  l.content.format(fullname=fname, year=year, email=email, title=title, project=project, organization=org)
-        # licenseText = licenseText.replace('\n','<br>')
-        # For Future Use -> END
-
-        return self.mediaLicenses[license]
-
-

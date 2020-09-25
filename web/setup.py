@@ -26,7 +26,7 @@ setup(
         'mongoengine==0.19.0',
         'cryptography',
         'jinja2',
-        'jsonschema==3.2.0',
+        'jsonschema==2.6.0',
         'pyOpenSSL',
         'werkzeug==0.16.0',
         'itsdangerous',

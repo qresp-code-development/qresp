@@ -9,7 +9,6 @@ from datetime import timedelta, datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import render_template, request, flash, redirect, url_for, jsonify, session,send_file, abort
-
 from project import app
 from project.paperdao import *
 from project.util import *
@@ -80,9 +79,6 @@ def uploadFile():
         # Stores in documentation
         session[CURATOR_FIELD.DOCUMENTATION] = paperform.documentation.data
 
-        # Stores the License
-        session[CURATOR_FIELD.LICENSE] = paperform.license.data
-
         return jsonify(success="success"), 200
     except Exception as e:
         print(e)
@@ -146,17 +142,11 @@ def qrespcurator():
         publishform.server.choices = [(qrespserver['qresp_server_url'], qrespserver['qresp_server_url']) for qrespserver in
                                serverslist.getServersList()]
 
-        
-        licenseform = LicenseForm(**session.get(CURATOR_FIELD.LICENSE,request.form))
-        # Populate License Choices List
-        licenseform.mediaLicense.choices = Licenses().getMediaLicenses()
-        
         return render_template('curatordetails.html', detailsform=detailsform, serverform=serverform,
                                projectform=projectform, infoform=infoform, referenceform=referenceform, chartlistform=chartlist, chartform=chartform,
                                toollistform=toollist, toolform=toolform, datasetlistform=datasetlist,
                                datasetform=datasetform, scriptlistform=scriptlist, scriptform=scriptform,
-                               documentationform=documentationform, publishform=publishform,
-                               licenseform=licenseform)
+                               documentationform=documentationform, publishform=publishform)
 
 
 @app.route('/details', methods=['POST'])
@@ -403,22 +393,6 @@ def documentation():
     return jsonify(data=docform.errors), 400
 
 
-@app.route('/license', methods=["POST"])
-def licensing():
-    """
-    Add the project data usage License
-    """
-    licenses = Licenses()
-    licenseForm = LicenseForm(request.form)
-    licenseForm.mediaLicense.choices = licenses.getMediaLicenses()        
-    
-    if request.method == "POST" and licenseForm.validate():
-        session[CURATOR_FIELD.LICENSE] = licenseForm.data
-        mediaL = licenses.getLicense(licenseForm.data['mediaLicense'])
-        return jsonify(mediaL), 200
-    
-    return licenseForm.errors, 400
-
 
 
 @app.route('/addToWorkflow', methods=['POST', 'GET'])
@@ -529,7 +503,6 @@ def download():
     workflow = session.get(CURATOR_FIELD.WORKFLOW,{})
     heads = session.get(CURATOR_FIELD.HEADS,[])
     documentation = session.get(CURATOR_FIELD.DOCUMENTATION,{})
-    license = session.get(CURATOR_FIELD.LICENSE,{})
 
     #fill other parts of project form
     pubdate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -560,7 +533,7 @@ def download():
     paperform = PaperForm(PIs = PIs, charts = charts, collections=ConvertField.convertToList([],[],collections), datasets = datasets, info = projectForm.data,
                           reference = reference, scripts = scripts, tools = tools,
                           tags = ConvertField.convertToList([],[],tags),versions = versions, workflow=workflow, heads=heads,
-                          schema='http://paperstack.uchicago.edu/v1_1.json',version=2, documentation=documentation, license=license)
+                          schema='http://paperstack.uchicago.edu/v1_1.json',version=2, documentation=documentation)
     #make fields to list
     paperdata = ConvertField.convertToList(["files","properties","URLs","patches"],
                                    [CURATOR_FIELD.CHARTS,CURATOR_FIELD.TOOLS,CURATOR_FIELD.DATASETS,CURATOR_FIELD.SCRIPTS,CURATOR_FIELD.HEADS],
@@ -603,7 +576,7 @@ def publish():
             for item in serverslist.getServersList():
                 if form.server.data in item['qresp_server_url']:
                     session['maintaineraddresses'] = item['qresp_maintainer_emails']
-            googleauth = GoogleAuth(Config.get_setting(app.config['env'],'GOOGLE_CLIENT_ID'), Config.get_setting(app.config['env'],'REDIRECT_URI'), Config.get_setting('GOOGLE_API','SCOPE'))
+            googleauth = GoogleAuth(Config.get_setting('PROD','GOOGLE_CLIENT_ID'), Config.get_setting('PROD','REDIRECT_URI'), Config.get_setting('GOOGLE_API','SCOPE'))
             google = googleauth.getGoogleAuth()
             auth_url, state = google.authorization_url(Config.get_setting('GOOGLE_API','AUTH_URI'), access_type='offline')
             session['oauth_state'] = state
@@ -628,12 +601,12 @@ def authorized():
     if 'code' not in request.args and 'state' not in request.args:
         print('denied access.')
         return redirect(url_for('qrespcurator'))
-    googleauth = GoogleAuth(Config.get_setting(app.config['env'],'GOOGLE_CLIENT_ID'), Config.get_setting(app.config['env'],'REDIRECT_URI'))
+    googleauth = GoogleAuth(Config.get_setting('PROD','GOOGLE_CLIENT_ID'), Config.get_setting('PROD','REDIRECT_URI'))
     google = googleauth.getGoogleAuth(state=session.get('oauth_state'))
     try:
         token = google.fetch_token(
             Config.get_setting('GOOGLE_API', 'TOKEN_URI'),
-            client_secret=Config.get_setting(app.config['env'],'GOOGLE_CLIENT_SECRET'),
+            client_secret=Config.get_setting('PROD','GOOGLE_CLIENT_SECRET'),
             authorization_response=request.url)
     except Exception as e:
         print(e)
@@ -645,7 +618,6 @@ def authorized():
             user_data = resp.json()
             emailAddress = session.get('emailAddress')
             server = session.get("publishserver")
-            print("SERVER", server)
             if user_data['email'] in emailAddress:
                 try:
                     fileServerPath = session.get(CURATOR_FIELD.PROJECT, {}).get("fileServerPath", "")
@@ -745,7 +717,7 @@ def verifypasscode():
     This method verifies with input passcode of flask connection.
     """
     form = PassCodeForm(request.form)
-    confirmpasscode = Config.get_setting(app.config['env'],'QRESP_DB_SECRET_KEY')
+    confirmpasscode = Config.get_setting('PROD','QRESP_DB_SECRET_KEY')
     if request.method == 'POST' and form.validate():
         if confirmpasscode == form.passcode.data:
             return jsonify(msg="success"),200
@@ -800,7 +772,7 @@ def search():
     """
     try:
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         allpaperslist = fetchdata.fetchOutput('/api/search')
         collectionlist = fetchdata.fetchOutput('/api/collections')
         authorslist = fetchdata.fetchOutput('/api/authors')
@@ -830,7 +802,7 @@ def searchWord():
         authorsList = json.loads(request.args.get('authorsList'))
         publicationList = json.loads(request.args.get('publicationList'))
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/search'+"?searchWord="+searchWord+"&paperTitle="+paperTitle+"&doi="+doi+"&tags="+tags+"&collectionList="+",".join(collectionList) + \
               "&authorsList="+",".join(authorsList)+"&publicationList="+",".join(publicationList)
         allpaperslist = fetchdata.fetchOutput(url)
@@ -850,7 +822,7 @@ def paperdetails(paperid):
     workflowdetail = []
     try:
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/paper/'+paperid
         paperdetail = fetchdata.fetchOutput(url)
         url = '/api/workflow/'+paperid
@@ -877,7 +849,7 @@ def chartworkflow():
         chartid = request.args.get('chartid', 0, type=str)
         chartid = str(chartid).strip()
         selected_servers = urllib.parse.unquote(request.args.get('servers', type=str, default=''))
-        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting(app.config['env'], 'MONGODB_HOST') else None)
+        fetchdata = FetchDataFromAPI(selected_servers, str(request.host_url).strip("/") if Config.get_setting('PROD', 'MONGODB_HOST') else None)
         url = '/api/paper/' + paperid + '/chart/' + chartid
         chartworkflowdetail = fetchdata.fetchOutput(url)
         return jsonify(chartworkflowdetail=chartworkflowdetail), 200
@@ -886,7 +858,7 @@ def chartworkflow():
         flash('Error in chartdetails. ' + str(e))
         return jsonify(chartworkflowdetail=chartworkflowdetail), 400
 
- 
+
 @app.route('/getDescriptor', methods=['POST','GET'])
 def getDescriptor():
     """
