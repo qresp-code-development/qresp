@@ -11,7 +11,7 @@ const FadeTransition = ({ children, ...rest }) => (
         <style jsx>{`
           div {
             margin: 8px 0px;
-            transition: 0.1s;
+            transition: 0.035s;
             opacity: ${state === "entered" ? 1 : 0};
             display: ${state === "exited" ? "none" : "block"};
           }
@@ -23,7 +23,7 @@ const FadeTransition = ({ children, ...rest }) => (
 
 const SwitchFade = ({ editing, form, display }) => (
   <SwitchTransition mode="out-in">
-    <FadeTransition key={editing ? "form" : "display"} timeout={100}>
+    <FadeTransition key={editing ? "form" : "display"} timeout={35}>
       {editing ? form : display}
     </FadeTransition>
   </SwitchTransition>
