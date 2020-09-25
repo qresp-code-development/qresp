@@ -82,7 +82,7 @@ SelectInputField.propTypes = {
   options: PropTypes.array.isRequired,
   label: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  error: PropTypes.object.isRequired,
+  error: PropTypes.object,
   name: PropTypes.string.isRequired,
   control: PropTypes.object.isRequired,
 };
