@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 
 const RadioInput = (props) => {
-  const { name, helperText, options, row, register, error } = props;
+  const { name, helperText, options, row, register, error, defVal } = props;
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -33,6 +33,7 @@ const RadioInput = (props) => {
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
         onChange={(e) => setFocused(false)}
+        defaultValue={defVal || ""}
       >
         {options.map((option) => {
           return (
@@ -68,6 +69,7 @@ RadioInput.protoTypes = {
   options: PropTypes.array.isRequired,
   register: PropTypes.func.isRequired,
   row: PropTypes.bool,
+  defVal:PropTypes.string,
 };
 
 export default RadioInput;
