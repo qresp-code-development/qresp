@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SocialShare = ({ url }) => {
+const SocialShare = () => {
   const classes = useStyles();
 
   const anchorEl = useRef(null);
@@ -152,10 +152,6 @@ const SocialShare = ({ url }) => {
       </Snackbar>
     </Fragment>
   );
-};
-
-SocialShare.propTypes = {
-  url: PropTypes.string.isRequired,
 };
 
 export default SocialShare;
