@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 
 const RadioInput = (props) => {
-  const { name, helperText, options, row, register, error, defVal } = props;
+  const { id, name, helperText, options, row, register, error, defVal } = props;
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -25,6 +25,7 @@ const RadioInput = (props) => {
       open={hovering || focused}
     >
       <RadioGroup
+        id={id}
         name={name}
         style={{ width: "max-content" }}
         row={row}
@@ -52,7 +53,7 @@ const RadioInput = (props) => {
             />
           );
         })}
-        <FormHelperText>{error && error.message}</FormHelperText>
+        {error && <FormHelperText>{error.message}</FormHelperText>}
       </RadioGroup>
     </Tooltip>
   );
@@ -64,12 +65,14 @@ RadioInput.defaultProps = {
 };
 
 RadioInput.protoTypes = {
+  id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   helperText: PropTypes.string.isRequired,
   options: PropTypes.array.isRequired,
   register: PropTypes.func.isRequired,
   row: PropTypes.bool,
-  defVal:PropTypes.string,
+  defVal: PropTypes.string,
+  error: PropTypes.object,
 };
 
 export default RadioInput;
