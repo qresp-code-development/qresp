@@ -2,26 +2,31 @@ import { Fragment } from "react";
 import PropTypes from "prop-types";
 import { FormInputLabel } from "./Util";
 import { Grid } from "@material-ui/core";
+
 import TextInput from "./TextInput";
 
 const TextInputField = (props) => {
   const { id, label, required, action, ...rest } = props;
   return (
-    <Fragment>
-      <Grid
-        container
-        direction="row"
-        spacing={0}
-        alignItems="center"
-        alignContent="center"
-      >
-        <Grid item>
-          <FormInputLabel forId={id} label={label} required={required} />
+      <Grid container spacing={1}>
+        <Grid
+          item
+          xs={12}
+          container
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          alignContent="center"
+        >
+          <Grid item>
+            <FormInputLabel forId={id} label={label} required={required} />
+          </Grid>
+          <Grid item>{action}</Grid>
         </Grid>
-        <Grid item>{action}</Grid>
+        <Grid item xs={12}>
+          <TextInput id={id} {...rest} />
+        </Grid>
       </Grid>
-      <TextInput id={id} {...rest} />
-    </Fragment>
   );
 };
 
@@ -87,4 +92,29 @@ SelectInputField.propTypes = {
   control: PropTypes.object.isRequired,
 };
 
-export { TextInputField, NameInputField, SelectInputField };
+import RadioInput from "./RadioInput";
+
+const RadioInputField = (props) => {
+  const { id, label, required, ...rest } = props;
+
+  return (
+    <Fragment>
+      <FormInputLabel forId={id} label={label} required={required} />
+      <RadioInput id={id} {...rest} />
+    </Fragment>
+  );
+};
+
+RadioInputField.propTypes = {
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  options: PropTypes.array.isRequired,
+  helperText: PropTypes.string.isRequired,
+  register: PropTypes.func.isRequired,
+  error: PropTypes.object,
+  required: PropTypes.bool,
+  defVal: PropTypes.string,
+};
+
+export { TextInputField, NameInputField, SelectInputField, RadioInputField };
