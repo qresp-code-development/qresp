@@ -112,6 +112,7 @@ const FileServerInfoForm = () => {
               register={register}
               error={errors.connectionType}
               defVal="http"
+              id="connectionTypeRadio"
             />
           </Grid>
           <Grid item>
@@ -145,55 +146,6 @@ const FileServerInfoForm = () => {
           </Grid>
         </Grid>
       </form>
-      {/* <Formik
-        initialValues={{
-          connectionType: "http",
-          dataServer: "",
-        }}
-        validationSchema={}
-        onSubmit={(values, { setSubmitting }) => {
-          setSubmitting(false);
-          setSaveMethod(setFileServerPath);
-          showLoader();
-          getStructure(values.dataServer, values.connectionType, true)
-            .then((el) => {
-              setSelectedHttp(el.details);
-              setTree(el.files);
-              openSelector();
-            })
-            .catch((err) => {
-              console.error(err);
-              setAlert(
-                "Error",
-                "There was an error retrieving data from the url provided, please check the URL and try again",
-                null
-              );
-            })
-            .finally(() => hideLoader());
-        }}
-        validateOnChange={false}
-        validateOnBlur={false}
-        enableReinitialize={true}
-      >
-        <Form>
-          <Grid direction="column" container spacing={1}>
-            <Grid item>
-              <RadioInput
-                name="connectionType"
-                helperText="Select location type of the data source"
-                options={options}
-                row={true}
-              />
-            </Grid>
-            <Grid item>
-              <FormField httpServers={httpServers} fieldName="dataServer" />
-            </Grid>
-            <Grid item>
-              <SubmitAndReset submitText="Search" />
-            </Grid>
-          </Grid>
-        </Form>
-      </Formik> */}
     </Drawer>
   );
 };
