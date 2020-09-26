@@ -1,27 +1,27 @@
 import { useState, useContext, useEffect } from "react";
 
 import PaperInfoForm from "../CuratorForms/PaperInfoForm";
-import FileServerInfo from "../Paper/FileServer";
+import PaperInfo from "../Paper/Info";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import SwitchFade from "../switchFade";
 
 const FileServerElement = () => {
-  //   const { fileServerPath } = useContext(CuratorContext);
+  const { paperInfo } = useContext(CuratorContext);
 
   const [editing, setEditing] = useState(true);
 
-  //   useEffect(() => {
-  //     if (fileServerPath != "") {
-  //       setEditing(false);
-  //     }
-  //   }, [fileServerPath]);
+    useEffect(() => {
+      if (paperInfo.tags.length > 0 ) {
+        setEditing(false);
+      }
+    }, [paperInfo]);
 
   return (
     <SwitchFade
       editing={editing}
-      form={<PaperInfoForm editor={setEditing} />}
-      display={<div>okay</div>}
+      form={<PaperInfoForm editor={setEditing}/>}
+      display={<PaperInfo paperInfo={paperInfo} editor={setEditing} defaultOpen={true}/>}
     />
   );
 };
