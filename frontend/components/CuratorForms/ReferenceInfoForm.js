@@ -8,10 +8,11 @@ import {
   DescriptionOutlined,
 } from "@material-ui/icons";
 
-import { TextInputField } from "../Form/InputFields";
+import { TextInputField, RadioInputField } from "../Form/InputFields";
 import { SubmitAndReset, FormInputLabel } from "../Form/Util";
 import NameInput from "../Form//NameInput";
 import Drawer from "../drawer";
+import { RegularStyledButton } from "../button";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
@@ -19,9 +20,8 @@ import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 
-const PaperInfoForm = ({ editor }) => {
-
-    const fetchFromDoi = {
+const ReferenceInfoForm = ({ editor }) => {
+  const fetchFromDoi = {
     url: (doi) => `http://dx.doi.org/10.1021/acs.chemmater.6b04126`,
     headers: "Accept: application/json; style=json",
   };
@@ -29,7 +29,9 @@ const PaperInfoForm = ({ editor }) => {
   const { paperInfo, setPaperInfo } = useContext(CuratorContext);
 
   const schema = Yup.object({
-    PIs: Yup.array()
+    kind: Yup.string().required("Required"),
+    doi: Yup.string().required("Required"),
+    authors: Yup.array()
       .of(
         Yup.object().shape({
           firstName: Yup.string().required("Required"),
@@ -51,7 +53,7 @@ const PaperInfoForm = ({ editor }) => {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "PIs",
+    name: "authors",
   });
 
   const onSubmit = (values) => {
@@ -59,20 +61,63 @@ const PaperInfoForm = ({ editor }) => {
     editor(false);
   };
 
-  const pId = {
+  const author = {
     get: (index) => {
       return {
-        firstName: `PIs[${index}].firstName`,
-        middleName: `PIs[${index}].middleName`,
-        lastName: `PIs[${index}].lastName`,
+        firstName: `authors[${index}].firstName`,
+        middleName: `authors[${index}].middleName`,
+        lastName: `authors[${index}].lastName`,
       };
     },
   };
 
+  const radioOptions = [
+    { label: "Preprint", value: "preprint" },
+    { label: "Journal", value: "journal" },
+    { label: "Dissertation", value: "dissertation" },
+  ];
+
   return (
-    <Drawer heading="Add info about your paper" defaultOpen={true}>
+    <Drawer heading="Add Reference to your paper" defaultOpen={true}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container direction="column" spacing={1}>
+        <Grid container direction="column" spacing={2}>
+          <Grid item>
+            <RadioInputField
+              id="kind"
+              name="kind"
+              label="Kind"
+              helperText="Select Preprint, Dissertation or Journal"
+              error={errors.kind}
+              required={true}
+              options={radioOptions}
+              row={true}
+              register={register}
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="doi"
+              placeholder="Enter doi of the paper"
+              name="doi"
+              helperText="Enter DOI of the paper (e.g. 10.201/jacs.23wbn) if published"
+              label="DOI"
+              action={
+                <Tooltip
+                  title={
+                    <Typography variant="subtitle2">
+                      Get values for the fields below using the DOI
+                    </Typography>
+                  }
+                  placement="right"
+                  arrow
+                >
+                  <RegularStyledButton size="small">Fetch</RegularStyledButton>
+                </Tooltip>
+              }
+              inputRef={register}
+              error={errors.doi}
+            />
+          </Grid>
           <Grid item>
             <Grid
               container
@@ -81,13 +126,13 @@ const PaperInfoForm = ({ editor }) => {
               spacing={1}
             >
               <Grid item>
-                <FormInputLabel label="Principal Investigators" forId="pis" />
+                <FormInputLabel label="Authors" forId="authors" />
               </Grid>
               <Grid item>
                 <Tooltip
                   title={
                     <Typography variant="subtitle2">
-                      Add a principle investigator
+                      Add an author
                     </Typography>
                   }
                   placement="right"
@@ -112,20 +157,20 @@ const PaperInfoForm = ({ editor }) => {
               return (
                 <Grid item key={index}>
                   <NameInput
-                    ids={pId.get(index)}
-                    names={pId.get(index)}
+                    ids={author.get(index)}
+                    names={author.get(index)}
                     key={index}
-                    id={`pi${index}`}
+                    id={`authors${index}`}
                     register={register}
-                    errors={errors.pis && errors.pis[index]}
-                    defaults={paperInfo.PIs[index]}
+                    errors={errors.authors && errors.authors[index]}
+                    // defaults={paperInfo.authors[index]}
                     remove={
                       <Tooltip
                         title={
                           <Typography variant="subtitle2">
                             {fields.length == 1
-                              ? "Required (minimum one P.I.)"
-                              : "Remove principle investigator"}
+                              ? "Required (minimum one author)"
+                              : "Remove author"}
                           </Typography>
                         }
                         placement="right"
@@ -361,8 +406,8 @@ const PaperInfoForm = ({ editor }) => {
   );
 };
 
-PaperInfoForm.propTypes = {
+ReferenceInfoForm.propTypes = {
   editor: PropTypes.func.isRequired,
 };
 
-export default PaperInfoForm;
+export default ReferenceInfoForm;
