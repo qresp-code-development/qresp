@@ -117,11 +117,11 @@ class Dtree():
         """
         page = requests.get(self.__path, headers=self.__headers, verify=False)
         tree = html.fromstring(page.content)
-        for xtag in tree.xpath('//li/a'):
-            file = xtag.text_content().strip()
-            if 'Parent Directory' not in file:
+        for xtag in tree.xpath('//table//tr/td[2]/a'):
+            name, file = xtag.text_content().strip(), xtag.attrib['href']
+            if 'Parent Directory' not in name:
                 dataFile = DirectoryTree()
-                dataFile.title = file
+                dataFile.title = name
                 parent = self.__path.split("/")
                 parentName = parent[len(parent) - 2]
                 dataFile.key = self.__path + "/" + file.strip("/")
