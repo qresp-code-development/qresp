@@ -8,6 +8,8 @@ import {
   DescriptionOutlined,
 } from "@material-ui/icons";
 
+import { namesUtil } from "../../Utils/utils";
+
 import { TextInputField } from "../Form/InputFields";
 import { SubmitAndReset, FormInputLabel } from "../Form/Util";
 import NameInput from "../Form//NameInput";
@@ -20,8 +22,9 @@ import * as Yup from "yup";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
 const PaperInfoForm = ({ editor }) => {
-
-  const {paperInfo, setPaperInfo} = useContext(CuratorContext);
+  const { paperInfo, setPaperInfo, setReferenceAuthors } = useContext(
+    CuratorContext
+  );
 
   const schema = Yup.object({
     PIs: Yup.array()
@@ -41,7 +44,7 @@ const PaperInfoForm = ({ editor }) => {
 
   const { register, handleSubmit, errors, watch, control } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: paperInfo ,
+    defaultValues: paperInfo,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -50,7 +53,8 @@ const PaperInfoForm = ({ editor }) => {
   });
 
   const onSubmit = (values) => {
-    setPaperInfo(values)
+    setPaperInfo(values);
+    setReferenceAuthors(namesUtil.set(values.PIs));
     editor(false);
   };
 
