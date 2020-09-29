@@ -8,7 +8,7 @@ import TextInput from "./TextInput";
 const TextInputField = (props) => {
   const { id, label, required, action, ...rest } = props;
   return (
-      <Grid container spacing={1}>
+      <Grid container spacing={0}>
         <Grid
           item
           xs={12}
