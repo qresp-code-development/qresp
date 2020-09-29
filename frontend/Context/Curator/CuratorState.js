@@ -9,6 +9,8 @@ import {
   SET_CURATORINFO,
   SET_FILESERVERPATH,
   SET_PAPERINFO,
+  SET_REFERENCE_AUTHORS,
+  SET_REFERENCEINFO,
 } from "../types";
 
 const CuratorState = (props) => {
@@ -20,15 +22,20 @@ const CuratorState = (props) => {
       emailId: "",
       affaliation: "",
     },
-    referenceInfo: {
-      authors: [{ firstName: "", middleName: "", lastName: "" }],
-    },
     fileServerPath: "",
     paperInfo: {
       PIs: [{ firstName: "", middleName: "", lastName: "" }],
       collections: "",
       tags: "",
       notebookFile: "",
+    },
+    referenceInfo: {
+      kind: "",
+      doi: "",
+      authors: "",
+      title: "",
+      publication: "",
+      year: null,
     },
   };
 
@@ -56,6 +63,12 @@ const CuratorState = (props) => {
   const setPaperInfo = (data) =>
     dispatch({ type: SET_PAPERINFO, payload: data });
 
+  const setReferenceAuthors = (authors) =>
+    dispatch({ type: SET_REFERENCE_AUTHORS, payload: authors });
+
+  const setReferenceInfo = (data) =>
+    dispatch({ type: SET_REFERENCEINFO, payload: data });
+
   return (
     <CuratorContext.Provider
       value={{
@@ -63,10 +76,13 @@ const CuratorState = (props) => {
         curatorInfo: state.curatorInfo,
         fileServerPath: state.fileServerPath,
         paperInfo: state.paperInfo,
+        referenceInfo: state.referenceInfo,
         metadata: state,
         setCuratorInfo: setCuratorInfo,
         setFileServerPath: setFileServerPath,
         setPaperInfo: setPaperInfo,
+        setReferenceAuthors: setReferenceAuthors,
+        setReferenceInfo: setReferenceInfo,
       }}
     >
       {props.children}

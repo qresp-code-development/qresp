@@ -3,6 +3,8 @@ import {
   SET_ALL,
   SET_FILESERVERPATH,
   SET_PAPERINFO,
+  SET_REFERENCE_AUTHORS,
+  SET_REFERENCEINFO,
 } from "../types";
 
 export default (state, action) => {
@@ -18,6 +20,13 @@ export default (state, action) => {
       return { ...state, fileServerPath: action.payload };
     case SET_PAPERINFO:
       return { ...state, paperInfo: action.payload };
+    case SET_REFERENCE_AUTHORS:
+      return {
+        ...state,
+        referenceInfo: { ...state.referenceInfo, authors: action.payload },
+      };
+    case SET_REFERENCEINFO:
+      return { ...state, referenceInfo: action.payload };
     default:
       return state;
   }
