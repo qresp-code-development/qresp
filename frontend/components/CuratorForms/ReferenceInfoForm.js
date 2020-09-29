@@ -2,35 +2,33 @@ import { useContext } from "react";
 import PropTypes from "prop-types";
 
 import { Grid, Tooltip, Typography, IconButton } from "@material-ui/core";
-import {
-  AddCircleOutline,
-  RemoveCircleOutline,
-  DescriptionOutlined,
-} from "@material-ui/icons";
+import { AddCircleOutline, RemoveCircleOutline } from "@material-ui/icons";
 
+import { RegularStyledButton } from "../button";
 import { TextInputField, RadioInputField } from "../Form/InputFields";
 import { SubmitAndReset, FormInputLabel } from "../Form/Util";
+import { namesUtil, referenceUtil } from "../../Utils/utils";
+import { doiUtil } from "../../Utils/doi";
 import NameInput from "../Form//NameInput";
 import Drawer from "../drawer";
-import { RegularStyledButton } from "../button";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
 import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import AlertContext from "../../Context/Alert/alertContext";
 
 const ReferenceInfoForm = ({ editor }) => {
-  const fetchFromDoi = {
-    url: (doi) => `http://dx.doi.org/10.1021/acs.chemmater.6b04126`,
-    headers: "Accept: application/json; style=json",
-  };
-
-  const { paperInfo, setPaperInfo } = useContext(CuratorContext);
+  const { referenceInfo, setReferenceInfo } = useContext(CuratorContext);
+  const { setAlert } = useContext(AlertContext);
 
   const schema = Yup.object({
     kind: Yup.string().required("Required"),
-    doi: Yup.string().required("Required"),
+    doi: Yup.string().matches(
+      /^(10[.][0-9]{4,}(?:[.][0-9]+)*\/(?:(?!["&\'<>])\S)+)$/,
+      "Please enter a valid DOI"
+    ),
     authors: Yup.array()
       .of(
         Yup.object().shape({
@@ -41,27 +39,65 @@ const ReferenceInfoForm = ({ editor }) => {
       )
       .required("Required")
       .min(1, "Minimum of 1 PrincipalInvestigator"),
-    collections: Yup.string().required("Required"),
-    tags: Yup.string().required("Required"),
-    notebookFile: Yup.string(),
+    title: Yup.string().required("Required"),
+    journal: Yup.string().required("Required"),
+    page: Yup.string().required("Required"),
+    abstract: Yup.string().required("Required"),
+    volume: Yup.number()
+      .min(1, "Minimum volume number is 1")
+      .required("Required"),
+    year: Yup.number()
+      .min(1750, "Cannot be less than 1750")
+      .required("Required"),
+    url: Yup.string().url("Please enter a valid url"),
   });
 
-  const { register, handleSubmit, errors, watch, control } = useForm({
+  const defaults = {
+    authors: namesUtil.get(referenceInfo.authors),
+    ...referenceUtil.get(referenceInfo.publication),
+  };
+
+  const { register, handleSubmit, errors, control, getValues } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: paperInfo,
+    defaultValues: {
+      ...defaults,
+    },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, insert } = useFieldArray({
     control,
     name: "authors",
   });
 
-  const onSubmit = (values) => {
-    setPaperInfo(values);
-    editor(false);
+  const fetchFromDOI = () => {
+    const currentDoi = getValues("doi");
+    Yup.reach(schema, "doi")
+      .validate(doi)
+      .then(() =>
+        doiUtil
+          .get(currentDoi)
+          .then((res) => console.log(res))
+          .catch((err) => {
+            console.error(err);
+            setAlert(
+              "Error",
+              "There was an error getting data usig the doi, please contact the admin if problems persist",
+              null
+            );
+          })
+      )
+      .catch((err) => {
+        setAlert("Error", "Please enter a valid doi", null);
+      });
   };
 
-  const author = {
+  const onSubmit = (values) => {
+    // setPaperInfo(values);
+    // editor(false);
+    console.log(values);
+  };
+
+  const nameid = {
     get: (index) => {
       return {
         firstName: `authors[${index}].firstName`,
@@ -80,7 +116,7 @@ const ReferenceInfoForm = ({ editor }) => {
   return (
     <Drawer heading="Add Reference to your paper" defaultOpen={true}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container direction="column" spacing={2}>
+        <Grid container direction="column" spacing={1}>
           <Grid item>
             <RadioInputField
               id="kind"
@@ -92,6 +128,7 @@ const ReferenceInfoForm = ({ editor }) => {
               options={radioOptions}
               row={true}
               register={register}
+              defVal={referenceInfo.kind}
             />
           </Grid>
           <Grid item>
@@ -101,6 +138,7 @@ const ReferenceInfoForm = ({ editor }) => {
               name="doi"
               helperText="Enter DOI of the paper (e.g. 10.201/jacs.23wbn) if published"
               label="DOI"
+              defaultValue={referenceInfo.doi}
               action={
                 <Tooltip
                   title={
@@ -111,7 +149,13 @@ const ReferenceInfoForm = ({ editor }) => {
                   placement="right"
                   arrow
                 >
-                  <RegularStyledButton size="small">Fetch</RegularStyledButton>
+                  <RegularStyledButton
+                    size="small"
+                    style={{ padding: "2px", margin: "4px" }}
+                    onClick={fetchFromDOI}
+                  >
+                    Fetch
+                  </RegularStyledButton>
                 </Tooltip>
               }
               inputRef={register}
@@ -131,9 +175,7 @@ const ReferenceInfoForm = ({ editor }) => {
               <Grid item>
                 <Tooltip
                   title={
-                    <Typography variant="subtitle2">
-                      Add an author
-                    </Typography>
+                    <Typography variant="subtitle2">Add an author</Typography>
                   }
                   placement="right"
                   arrow
@@ -153,17 +195,17 @@ const ReferenceInfoForm = ({ editor }) => {
                 </Tooltip>
               </Grid>
             </Grid>
-            {fields.map((pi, index) => {
+            {fields.map((el, index) => {
               return (
-                <Grid item key={index}>
+                <Grid item key={el.id}>
                   <NameInput
-                    ids={author.get(index)}
-                    names={author.get(index)}
+                    ids={nameid.get(index)}
+                    names={nameid.get(index)}
                     key={index}
                     id={`authors${index}`}
                     register={register}
                     errors={errors.authors && errors.authors[index]}
-                    // defaults={paperInfo.authors[index]}
+                    defaults={defaults.authors[index]}
                     remove={
                       <Tooltip
                         title={
@@ -198,42 +240,95 @@ const ReferenceInfoForm = ({ editor }) => {
           </Grid>
           <Grid item>
             <TextInputField
-              id="paperstack"
-              placeholder="Enter collection to which project belongs to"
-              name="collections"
-              helperText="Enter names(s) defining group of papers (eg. according to the source of fundings)"
-              label="PaperStack"
+              id="title"
+              placeholder="Enter title"
+              name="title"
+              helperText="Enter title of the paper"
+              label="Title"
               required
               inputRef={register}
-              error={errors.collections}
+              error={errors.title}
+              defaultValue={referenceInfo.title}
             />
           </Grid>
           <Grid item>
             <TextInputField
-              id="tags"
-              placeholder="Ener tags for the project"
-              name="tags"
-              helperText="Enter keywords(s) (e.g. DFT, oragnic materials, charge transfer)"
-              label="Keywords"
-              required
+              id="journal"
+              placeholder="Enter full journal name"
+              name="journal"
+              helperText="Enter full journal name"
+              label="Journal Name"
               inputRef={register}
-              error={errors.tags}
+              error={errors.journal}
+              defaultValue={defaults.journal}
+              required
             />
           </Grid>
           <Grid item>
             <TextInputField
-              id="mainNotebookFile"
-              placeholder="Enter main notebook filename"
-              name="notebookFile"
-              helperText="Enter name of a notebook file, thid file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the file picker button to fill this field. "
-              label="Main Notebook File"
-              action={
-                <IconButton size="small">
-                  <DescriptionOutlined color="primary" />
-                </IconButton>
-              }
+              id="page"
+              placeholder="Enter page number"
+              name="page"
+              helperText="Enter page number of the journal"
+              label="Page"
               inputRef={register}
-              error={errors.notebookFile}
+              error={errors.page}
+              defaultValue={defaults.page}
+              required
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="abstract"
+              placeholder="Enter abstract"
+              name="abstract"
+              helperText="Enter abstract"
+              label="Abstract"
+              inputRef={register}
+              error={errors.abstract}
+              multiline
+              rows={4}
+              defaultValue={referenceInfo.abstract}
+              required
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="volume"
+              placeholder="Enter volume number"
+              name="volume"
+              helperText="Enter volume of the journal"
+              label="Volume"
+              inputRef={register}
+              error={errors.volume}
+              defaultValue={defaults.volume}
+              required
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="year"
+              placeholder="Enter year of publication"
+              name="year"
+              helperText="Enter year of publication"
+              label="Year"
+              inputRef={register}
+              error={errors.year}
+              defaultValue={defaults.year}
+              required
+            />
+          </Grid>
+          <Grid item>
+            <TextInputField
+              id="url"
+              placeholder="Enter url"
+              name="url"
+              helperText="Enter paper url"
+              label="URLs"
+              inputRef={register}
+              error={errors.url}
+              defaultValue={referenceInfo.url}
+              required
             />
           </Grid>
           <Grid item>
@@ -241,167 +336,6 @@ const ReferenceInfoForm = ({ editor }) => {
           </Grid>
         </Grid>
       </form>
-      {/* <Formik
-        initialValues={{
-          paperStack: "",
-          tags: "",
-          mainNotebookFile: "",
-          pis: [{ firstName: "", middleName: "", lastName: "" }],
-        }}
-        validationSchema={Yup.object({
-          paperStack: Yup.string().required("Required"),
-          tags: Yup.string().required("Required"),
-          mainNotebookFile: Yup.string(),
-          pis: Yup.array()
-            .of(
-              Yup.object().shape({
-                firstName: Yup.string().required("Required"),
-                middleName: Yup.string(),
-                lastName: Yup.string().required("Required"),
-              })
-            )
-            .required("Required")
-            .min(1, "Minimum of 1 PrincipalInvestigator"),
-        })}
-        onSubmit={(values, { setSubmitting }) => {
-          setSubmitting(false);
-          alert(JSON.stringify(values, null, 2));
-        }}
-        validateOnChange={false}
-        validateOnBlur={false}
-        enableReinitialize={true}
-      >
-        {({ values }) => (
-          <Form>
-            <Grid direction="column" container spacing={1}>
-              <FieldArray name="pis" id="pis">
-                {({ remove, push }) => {
-                  return (
-                    <Grid item>
-                      <Grid
-                        container
-                        spacing={2}
-                        justify="flex-start"
-                        alignItems="center"
-                      >
-                        <Grid item>
-                          <FormInputLabel
-                            label="Principal Investigators"
-                            forId="pis"
-                          />
-                        </Grid>
-                        <Grid item>
-                          <Tooltip
-                            title={
-                              <Typography variant="subtitle2">
-                                Add a principle investigator
-                              </Typography>
-                            }
-                            placement="right"
-                            arrow
-                          >
-                            <IconButton
-                              onClick={() =>
-                                push({
-                                  firstName: "",
-                                  middleName: "",
-                                  lastName: "",
-                                })
-                              }
-                              style={{ padding: 0 }}
-                            >
-                              <AddCircleOutline color="primary" />
-                            </IconButton>
-                          </Tooltip>
-                        </Grid>
-                      </Grid>
-                      {values.pis.map((pi, index) => {
-                        return (
-                          <NameInput
-                            ids={pId.get(index)}
-                            names={pId.get(index)}
-                            key={index}
-                            id={`pi${index}`}
-                            remove={
-                              <Tooltip
-                                title={
-                                  <Typography variant="subtitle2">
-                                    {values.pis.length == 1
-                                      ? "Required (minimum one P.I.)"
-                                      : "Remove principle investigator"}
-                                  </Typography>
-                                }
-                                placement="right"
-                                arrow
-                              >
-                                <IconButton
-                                  size="small"
-                                  onClick={() => {
-                                    if (values.pis.length > 1) {
-                                      remove(index);
-                                    }
-                                  }}
-                                  style={{ padding: 0 }}
-                                >
-                                  <RemoveCircleOutline
-                                    color={
-                                      values.pis.length == 1
-                                        ? "disabled"
-                                        : "primary"
-                                    }
-                                  />
-                                </IconButton>
-                              </Tooltip>
-                            }
-                          />
-                        );
-                      })}
-                    </Grid>
-                  );
-                }}
-              </FieldArray>
-
-              <Grid item>
-                <TextInputField
-                  id="paperstack"
-                  placeholder="Enter collection to which project belongs to"
-                  name="paperStack"
-                  helperText="Enter names(s) defining group of papers (eg. according to the source of fundings)"
-                  label="PaperStack"
-                  required
-                />
-              </Grid>
-              <Grid item>
-                <TextInputField
-                  id="tags"
-                  placeholder="Ener tags for the project"
-                  name="tags"
-                  helperText="Enter keywords(s) (e.g. DFT, oragnic materials, charge transfer)"
-                  label="Keywords"
-                  required
-                />
-              </Grid>
-              <Grid item>
-                <TextInputField
-                  id="mainNotebookFile"
-                  placeholder="Enter main notebook filename"
-                  name="mainNotebookFile"
-                  helperText="Enter name of a notebook file, thid file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the file picker button to fill this field. "
-                  label="Main Notebook File"
-                  action={
-                    <IconButton size="small">
-                      <DescriptionOutlined color="primary" />
-                    </IconButton>
-                  }
-                />
-              </Grid>
-              <Grid item>
-                <SubmitAndReset submitText="Save" />
-              </Grid>
-            </Grid>
-          </Form>
-        )}
-      </Formik> */}
     </Drawer>
   );
 };
