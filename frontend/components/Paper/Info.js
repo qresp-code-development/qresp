@@ -14,7 +14,7 @@ const PaperInfo = ({ paperInfo, editor, defaultOpen }) => {
 
   return (
     <Drawer
-      heading="Curator Information"
+      heading="Paper Information"
       editor={editor}
       defaultOpen={defaultOpen}
     >
