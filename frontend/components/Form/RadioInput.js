@@ -53,7 +53,11 @@ const RadioInput = (props) => {
             />
           );
         })}
-        {error && <FormHelperText>{error.message}</FormHelperText>}
+        {error && (
+          <FormHelperText style={{ color: "#f44336" }}>
+            {error.message}
+          </FormHelperText>
+        )}
       </RadioGroup>
     </Tooltip>
   );
