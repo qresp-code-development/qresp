@@ -69,26 +69,33 @@ const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
         alignItems="center"
         justify="flex-start"
       >
-        <Grid item>
-          <BigTypography variant="body1" color="secondary" component="div">
-            <span>{label}:&nbsp;&nbsp;</span>
-          </BigTypography>
-        </Grid>
-        <Grid item>
-          <BigTypography
-            variant={textVariant}
-            color="secondary"
-            component="div"
-          >
-            {link ? (
-              <a href={link} target="_blank" rel="noopener noreferer">
-                {image ? <img src={image} alt={value} /> : value}
-              </a>
-            ) : (
-              value
-            )}
-          </BigTypography>
-        </Grid>
+        {label && (
+          <Grid item>
+            <BigTypography variant="body1" color="secondary" component="div">
+              <span>
+                {label}
+                {label && value && ":"}&nbsp;&nbsp;
+              </span>
+            </BigTypography>
+          </Grid>
+        )}
+        {value && (
+          <Grid item>
+            <BigTypography
+              variant={textVariant}
+              color="secondary"
+              component="div"
+            >
+              {link ? (
+                <a href={link} target="_blank" rel="noopener noreferer">
+                  {image ? <img src={image} alt={value} /> : value}
+                </a>
+              ) : (
+                value
+              )}
+            </BigTypography>
+          </Grid>
+        )}
       </Grid>
       <style jsx>
         {`
@@ -128,11 +135,11 @@ LabelValue.propTypes = {
   textVariant: PropTypes.string,
   image: PropTypes.string,
   link: PropTypes.string,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   value: PropTypes.oneOfType([
-    PropTypes.string.isRequired,
-    PropTypes.array.isRequired,
-    PropTypes.object.isRequired,
+    PropTypes.string,
+    PropTypes.array,
+    PropTypes.object,
   ]),
   direction: PropTypes.string,
 };
