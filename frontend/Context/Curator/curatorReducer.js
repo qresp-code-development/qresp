@@ -5,6 +5,7 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
+  SET_CHARTS,
 } from "../types";
 
 export default (state, action) => {
@@ -27,6 +28,8 @@ export default (state, action) => {
       };
     case SET_REFERENCEINFO:
       return { ...state, referenceInfo: action.payload };
+    case SET_CHARTS:
+      return { ...state, charts: [...action.payload] };
     default:
       return state;
   }

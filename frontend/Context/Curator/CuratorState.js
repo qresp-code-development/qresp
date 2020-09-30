@@ -11,6 +11,7 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
+  SET_CHARTS,
 } from "../types";
 
 const CuratorState = (props) => {
@@ -39,6 +40,7 @@ const CuratorState = (props) => {
       url: "",
       abstract: "",
     },
+    charts: [],
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -71,6 +73,8 @@ const CuratorState = (props) => {
   const setReferenceInfo = (data) =>
     dispatch({ type: SET_REFERENCEINFO, payload: data });
 
+  const setCharts = (charts) => dispatch({ type: SET_CHARTS, payload: charts });
+
   return (
     <CuratorContext.Provider
       value={{
@@ -79,6 +83,7 @@ const CuratorState = (props) => {
         fileServerPath: state.fileServerPath,
         paperInfo: state.paperInfo,
         referenceInfo: state.referenceInfo,
+        charts: state.charts,
         metadata: state,
         setCuratorInfo: setCuratorInfo,
         setFileServerPath: setFileServerPath,
