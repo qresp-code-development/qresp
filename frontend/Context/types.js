@@ -21,6 +21,7 @@ export const HIDE_TREE_SELECTOR = "HIDE_TREE_SELECTOR";
 export const SET_FILETREE_CHECKED = "SET_CHECKED";
 export const SET_MULTIPLE = "SET_MULTIPLE";
 export const SET_SAVE_BUTTON_ACTION = "SAVE_BUTTON_ACTION";
+export const SET_CHILDREN = "SET_CHILDREN";
 
 // Curator Actions
 export const SET_ALL = "SET_ALL";
