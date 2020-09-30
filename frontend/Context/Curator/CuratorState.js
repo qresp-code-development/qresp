@@ -36,6 +36,8 @@ const CuratorState = (props) => {
       title: "",
       publication: "",
       year: null,
+      url: "",
+      abstract: "",
     },
   };
 
