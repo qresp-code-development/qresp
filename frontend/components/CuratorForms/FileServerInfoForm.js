@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import { useContext } from "react";
 import { Grid } from "@material-ui/core";
 
@@ -19,7 +21,7 @@ import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import LoadingContext from "../../Context/Loading/loadingContext";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
-const FileServerInfoForm = () => {
+const FileServerInfoForm = ({ editor }) => {
   const schema = Yup.object({
     connectionType: Yup.string().required("Required"),
     dataServer: Yup.string()
@@ -32,8 +34,13 @@ const FileServerInfoForm = () => {
     defaultValues: { connectionType: "http" },
   });
 
+  const saveMethod = (server) => {
+    setFileServerPath(server);
+    editor(false);
+  };
+
   const onSubmit = (values) => {
-    setSaveMethod(setFileServerPath);
+    setSaveMethod(saveMethod);
     showLoader();
     getList(values.dataServer, values.connectionType, true)
       .then((el) => {
@@ -122,6 +129,10 @@ const FileServerInfoForm = () => {
       </form>
     </Drawer>
   );
+};
+
+FileServerInfoForm.propTypes = {
+  editor: PropTypes.func.isRequired,
 };
 
 export default FileServerInfoForm;
