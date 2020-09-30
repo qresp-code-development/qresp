@@ -20,10 +20,14 @@ import { yupResolver } from "@hookform/resolvers";
 import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 
 const PaperInfoForm = ({ editor }) => {
   const { paperInfo, setPaperInfo, setReferenceAuthors } = useContext(
     CuratorContext
+  );
+  const { setSaveMethod, openSelector, HideSelector } = useContext(
+    SourceTreeContext
   );
 
   const schema = Yup.object({
@@ -42,7 +46,7 @@ const PaperInfoForm = ({ editor }) => {
     notebookFile: Yup.string(),
   });
 
-  const { register, handleSubmit, errors, watch, control } = useForm({
+  const { register, handleSubmit, errors, watch, control, setValue } = useForm({
     resolver: yupResolver(schema),
     defaultValues: paperInfo,
   });
@@ -56,6 +60,11 @@ const PaperInfoForm = ({ editor }) => {
     setPaperInfo(values);
     setReferenceAuthors(namesUtil.set(values.PIs));
     editor(false);
+  };
+
+  const onOpenFileSelector = () => {
+    setSaveMethod((val) => setValue("notebookFile", val));
+    openSelector();
   };
 
   const pId = {
@@ -182,7 +191,7 @@ const PaperInfoForm = ({ editor }) => {
               helperText="Enter name of a notebook file, thid file may serve as a table of contents and may contain links to all datasets, charts, scripts, tools and documentation. Use the file picker button to fill this field. "
               label="Main Notebook File"
               action={
-                <IconButton size="small">
+                <IconButton size="small" onClick={onOpenFileSelector}>
                   <DescriptionOutlined color="primary" />
                 </IconButton>
               }
