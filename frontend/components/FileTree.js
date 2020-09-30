@@ -9,6 +9,7 @@ import {
   Typography,
   Box,
   Grid,
+  LinearProgress,
 } from "@material-ui/core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +33,8 @@ import CheckboxTree from "react-checkbox-tree";
 
 import { RegularStyledButton } from "../components/button";
 
+import { getList } from "../Utils/Scraper";
+
 import SourceTreeContext from "../Context/SourceTree/SourceTreeContext";
 
 const FileTree = () => {
@@ -44,13 +47,15 @@ const FileTree = () => {
     title,
     multiple,
     save,
+    setChildren,
   } = useContext(SourceTreeContext);
 
   const [expanded, setExpanded] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setExpanded([]);
-    setChecked([]);
+    // setExpanded([]);
+    // setChecked([]);
   }, [tree]);
 
   const theme = useTheme();
@@ -110,6 +115,7 @@ const FileTree = () => {
           ) : null}
         </Grid>
       </DialogTitle>
+      {loading && <LinearProgress color="primary" />}
       <DialogContent dividers>
         <CheckboxTree
           nodes={tree}
@@ -122,7 +128,19 @@ const FileTree = () => {
             }
             setChecked(newChecked);
           }}
-          onExpand={(expanded) => setExpanded(expanded)}
+          onExpand={(expanded, target) => {
+            if (target.expanded && target.children.length == 0) {
+              setLoading(true);
+              getList(target.value, "http", false)
+                .then((res) => {
+                  if (target.expanded) {
+                    setChildren(target.value, res.files);
+                  }
+                })
+                .finally(() => setLoading(false));
+            }
+            setExpanded(expanded);
+          }}
           iconsClass="fa5"
           icons={{
             check: (
