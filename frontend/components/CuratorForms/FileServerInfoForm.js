@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Grid } from "@material-ui/core";
 
 import Drawer from "../drawer";
@@ -9,7 +9,7 @@ import { SubmitAndReset } from "../Form/Util";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
 
-import { getStructure } from "../../Utils/Scraper";
+import { getList } from "../../Utils/Scraper";
 
 import * as Yup from "yup";
 
@@ -35,7 +35,7 @@ const FileServerInfoForm = () => {
   const onSubmit = (values) => {
     setSaveMethod(setFileServerPath);
     showLoader();
-    getStructure(values.dataServer, values.connectionType, true)
+    getList(values.dataServer, values.connectionType, true)
       .then((el) => {
         setSelectedHttp(el.details);
         setTree(el.files);
