@@ -19,32 +19,6 @@ import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import LoadingContext from "../../Context/Loading/loadingContext";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
-// const FormField = ({ httpServers, fieldName }) => {
-//   if (values.connectionType == "http") {
-//     return (
-// <SelectInputField
-//   id="connectionType"
-//   placeholder="Select a server from a list  or enter one"
-//   helperText="Select URL of remote server where paper content is organized and located. e.g. https://notebook.rcc.uchicago.edu/files/"
-//   name={fieldName}
-//   label="File Server"
-//   options={httpServers}
-//   freeSolo={true}
-// />
-//     );
-//   } else {
-//     return (
-//       <TextInputField
-//         id="connectionType"
-//         placeholder="Enter zenodo record URL"
-//         name={fieldName}
-//         helperText="eg. https://zenodo.org/record/3981451"
-//         label="Zenodo"
-//       />
-//     );
-//   }
-// };
-
 const FileServerInfoForm = () => {
   const schema = Yup.object({
     connectionType: Yup.string().required("Required"),
@@ -55,7 +29,7 @@ const FileServerInfoForm = () => {
 
   const { register, handleSubmit, errors, watch, control } = useForm({
     resolver: yupResolver(schema),
-    defaultValues:{connectionType:'http'}
+    defaultValues: { connectionType: "http" },
   });
 
   const onSubmit = (values) => {
