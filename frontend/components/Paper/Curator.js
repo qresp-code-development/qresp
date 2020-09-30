@@ -25,7 +25,7 @@ const CuratorInfo = ({ curator, editor, defaultOpen }) => {
           }
         />
         <LabelValue label="Email Address" value={emailId} />
-        <LabelValue label="Affiliation" value={affiliation} />
+        {affiliation && <LabelValue label="Affiliation" value={affiliation} />}
       </Box>
     </Drawer>
   );
