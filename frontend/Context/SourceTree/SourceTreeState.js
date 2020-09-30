@@ -1,7 +1,10 @@
-import { useReducer } from "react";
+import { useReducer, useEffect, useContext } from "react";
 
 import SourceTreeContext from "./SourceTreeContext";
 import SourceTreeReducer from "./SourceTreeReducer";
+
+import CuratorContext from "../Curator/curatorContext";
+import { getList } from "../../Utils/Scraper";
 
 import {
   SET_TREE,
@@ -10,6 +13,7 @@ import {
   SET_FILETREE_CHECKED,
   SET_MULTIPLE,
   SET_SAVE_BUTTON_ACTION,
+  SET_CHILDREN,
 } from "../types";
 
 const SourceTreeState = (props) => {
@@ -23,6 +27,17 @@ const SourceTreeState = (props) => {
   };
 
   const [state, dispatch] = useReducer(SourceTreeReducer, initialState);
+
+  const { fileServerPath } = useContext(CuratorContext);
+
+  useEffect(() => {
+    if (fileServerPath != "")
+      getList(
+        fileServerPath,
+        fileServerPath.includes("zenodo") ? "zenodo" : "http",
+        false
+      ).then((res) => setTree(res.files));
+  }, [fileServerPath]);
 
   const setTree = (value) => {
     dispatch({ type: SET_TREE, payload: value });
@@ -48,6 +63,13 @@ const SourceTreeState = (props) => {
     dispatch({ type: SET_SAVE_BUTTON_ACTION, payload: value });
   };
 
+  const setChildren = (parent, children) => {
+    dispatch({
+      type: SET_CHILDREN,
+      payload: { parent: parent, children: children },
+    });
+  };
+
   return (
     <SourceTreeContext.Provider
       value={{
@@ -63,6 +85,7 @@ const SourceTreeState = (props) => {
         setChecked,
         setMultiple,
         setSaveMethod,
+        setChildren,
       }}
     >
       {props.children}

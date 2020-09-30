@@ -1,3 +1,5 @@
+import { findAndSetChildren } from "../../Utils/Scraper";
+
 import {
   SET_TREE,
   SHOW_TREE_SELECTOR,
@@ -5,6 +7,7 @@ import {
   SET_FILETREE_CHECKED,
   SET_MULTIPLE,
   SET_SAVE_BUTTON_ACTION,
+  SET_CHILDREN,
 } from "../types";
 
 export default (state, action) => {
@@ -21,6 +24,16 @@ export default (state, action) => {
       return { ...state, multiple: action.payload };
     case SET_SAVE_BUTTON_ACTION:
       return { ...state, save: action.payload };
+    case SET_CHILDREN:
+      const newTree = findAndSetChildren(
+        JSON.parse(JSON.stringify(state.tree)),
+        action.payload.parent,
+        action.payload.children
+      );
+      return {
+        ...state,
+        tree: newTree,
+      };
     default:
       return state;
   }
