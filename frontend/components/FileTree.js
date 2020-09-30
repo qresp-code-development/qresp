@@ -39,6 +39,7 @@ import SourceTreeContext from "../Context/SourceTree/SourceTreeContext";
 
 const FileTree = () => {
   const {
+    selectorOpen,
     tree,
     showSelector,
     closeSelector,
@@ -54,9 +55,13 @@ const FileTree = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // setExpanded([]);
-    // setChecked([]);
-  }, [tree]);
+    if (!selectorOpen) {
+      setExpanded([]);
+      setChecked([]);
+    }
+  }, [selectorOpen]);
+
+  useEffect(() => {}, [tree]);
 
   const theme = useTheme();
 
@@ -79,7 +84,11 @@ const FileTree = () => {
                 <RegularStyledButton
                   fullWidth
                   onClick={() => {
-                    save(checked[0]);
+                    if (checked.length == 1) {
+                      save(checked[0]);
+                    } else {
+                      save(checked.join(", "));
+                    }
                     closeSelector();
                   }}
                   disabled={checked.length == 0}
