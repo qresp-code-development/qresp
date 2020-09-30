@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useEffect, useContext } from "react";
 import PropTypes from "prop-types";
 
 import { Grid, Tooltip, Typography, IconButton } from "@material-ui/core";
@@ -18,10 +18,12 @@ import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import AlertContext from "../../Context/Alert/alertContext";
+import LoadingContext from "../../Context/Loading/loadingContext";
 
 const ReferenceInfoForm = ({ editor }) => {
   const { referenceInfo, setReferenceInfo } = useContext(CuratorContext);
   const { setAlert } = useContext(AlertContext);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const schema = Yup.object({
     kind: Yup.string().required("Required"),
@@ -47,7 +49,7 @@ const ReferenceInfoForm = ({ editor }) => {
       .min(1, "Minimum volume number is 1")
       .required("Required"),
     year: Yup.number()
-      .min(1750, "Cannot be less than 1750")
+      .min(1750, "Cannot be less than 1700")
       .required("Required"),
     url: Yup.string().url("Please enter a valid url"),
   });
@@ -57,26 +59,35 @@ const ReferenceInfoForm = ({ editor }) => {
     ...referenceUtil.get(referenceInfo.publication),
   };
 
-  const { register, handleSubmit, errors, control, getValues } = useForm({
+  const {
+    register,
+    handleSubmit,
+    errors,
+    control,
+    getValues,
+    setValue,
+    formState,
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       ...defaults,
     },
   });
 
-  const { fields, append, remove, insert } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "authors",
   });
 
   const fetchFromDOI = () => {
+    showLoader();
     const currentDoi = getValues("doi");
-    Yup.reach(schema, "doi")
-      .validate(doi)
+    schema
+      .validateAt("doi", currentDoi)
       .then(() =>
         doiUtil
           .get(currentDoi)
-          .then((res) => console.log(res))
+          .then((res) => doiUtil.set(res, setValue))
           .catch((err) => {
             console.error(err);
             setAlert(
@@ -87,14 +98,23 @@ const ReferenceInfoForm = ({ editor }) => {
           })
       )
       .catch((err) => {
+        console.error(err);
         setAlert("Error", "Please enter a valid doi", null);
-      });
+      })
+      .finally(() => hideLoader());
   };
 
   const onSubmit = (values) => {
-    // setPaperInfo(values);
-    // editor(false);
-    console.log(values);
+    setReferenceInfo({
+      authors: namesUtil.set(values.authors),
+      publication: referenceUtil.set(values),
+      doi: values.doi,
+      kind: values.kind,
+      title: values.title,
+      year: values.year,
+      url: values.url,
+      abstract: values.abstract,
+    });
   };
 
   const nameid = {
@@ -112,6 +132,12 @@ const ReferenceInfoForm = ({ editor }) => {
     { label: "Journal", value: "journal" },
     { label: "Dissertation", value: "dissertation" },
   ];
+
+  useEffect(() => {
+    const newNames = namesUtil.get(referenceInfo.authors);
+    if (!("author" in formState.dirtyFields || "author" in formState.touched))
+      setValue("authors", newNames);
+  }, [referenceInfo.authors]);
 
   return (
     <Drawer heading="Add Reference to your paper" defaultOpen={true}>
@@ -205,7 +231,7 @@ const ReferenceInfoForm = ({ editor }) => {
                     id={`authors${index}`}
                     register={register}
                     errors={errors.authors && errors.authors[index]}
-                    defaults={defaults.authors[index]}
+                    defaults={el}
                     remove={
                       <Tooltip
                         title={
@@ -338,10 +364,6 @@ const ReferenceInfoForm = ({ editor }) => {
       </form>
     </Drawer>
   );
-};
-
-ReferenceInfoForm.propTypes = {
-  editor: PropTypes.func.isRequired,
 };
 
 export default ReferenceInfoForm;
