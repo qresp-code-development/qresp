@@ -73,6 +73,7 @@ const SourceTreeState = (props) => {
   return (
     <SourceTreeContext.Provider
       value={{
+        selectorOpen: state.open,
         tree: state.tree,
         showSelector: state.open,
         checked: state.checked,
