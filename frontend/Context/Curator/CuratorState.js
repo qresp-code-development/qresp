@@ -12,6 +12,12 @@ import {
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
   SET_CHARTS,
+  ADD_CHART,
+  EDIT_CHART,
+  DELETE_CHART,
+  OPEN_CHART_FORM,
+  CLOSE_CHART_FORM,
+  SET_CHART_DEF,
 } from "../types";
 
 const CuratorState = (props) => {
@@ -41,6 +47,7 @@ const CuratorState = (props) => {
       abstract: "",
     },
     charts: [],
+    chartsHelper: { def: {}, open: false },
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -75,6 +82,17 @@ const CuratorState = (props) => {
 
   const setCharts = (charts) => dispatch({ type: SET_CHARTS, payload: charts });
 
+  const addChart = (chart) => dispatch({ type: ADD_CHART, payload: chart });
+
+  const editChart = (chart) => dispatch({ type: EDIT_CHART, payload: chart });
+
+  const deleteChart = (id) => dispatch({ type: DELETE_CHART, payload: id });
+
+  const openChartForm = () => dispatch({ type: OPEN_CHART_FORM });
+  const closeChartForm = () => dispatch({ type: CLOSE_CHART_FORM });
+  const setChartDefault = (def) =>
+    dispatch({ type: SET_CHART_DEF, payload: def });
+
   return (
     <CuratorContext.Provider
       value={{
@@ -84,12 +102,20 @@ const CuratorState = (props) => {
         paperInfo: state.paperInfo,
         referenceInfo: state.referenceInfo,
         charts: state.charts,
+        chartsHelper: state.chartsHelper,
         metadata: state,
-        setCuratorInfo: setCuratorInfo,
-        setFileServerPath: setFileServerPath,
-        setPaperInfo: setPaperInfo,
-        setReferenceAuthors: setReferenceAuthors,
-        setReferenceInfo: setReferenceInfo,
+        setCuratorInfo,
+        setFileServerPath,
+        setPaperInfo,
+        setReferenceAuthors,
+        setReferenceInfo,
+        setCharts,
+        addChart,
+        editChart,
+        deleteChart,
+        openChartForm,
+        closeChartForm,
+        setChartDefault,
       }}
     >
       {props.children}
