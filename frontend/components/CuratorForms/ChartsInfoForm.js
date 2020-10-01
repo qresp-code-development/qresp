@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, Fragment } from "react";
 
 import {
   Grid,
@@ -18,7 +18,6 @@ import {
 import { TextInputField } from "../Form/InputFields";
 import TextInput from "../Form/TextInput";
 import { FormInputLabel } from "../Form/Util";
-import Drawer from "../drawer";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
@@ -29,7 +28,19 @@ import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import { RegularStyledButton } from "../button";
 
 const ChartsInfoForm = () => {
-  const { charts, setCharts } = useContext(CuratorContext);
+  const {
+    charts,
+    chartsHelper,
+    addChart,
+    editChart,
+    deleteChart,
+    openChartForm,
+    closeChartForm,
+    setChartDefault,
+  } = useContext(CuratorContext);
+
+  const { def, open } = chartsHelper;
+
   const { setSaveMethod, openSelector, setMultiple } = useContext(
     SourceTreeContext
   );
@@ -40,7 +51,7 @@ const ChartsInfoForm = () => {
     files: Yup.string(),
     imageFile: Yup.string().required("Required"),
     notebookFile: Yup.string(),
-    keywords: Yup.string().required("Required"),
+    properties: Yup.string().required("Required"),
     extraFields: Yup.array().of(
       Yup.object().shape({
         label: Yup.string().required("Required"),
@@ -59,8 +70,20 @@ const ChartsInfoForm = () => {
   });
 
   const onSubmit = (values) => {
-    console.log(values);
-    // setCharts(values);
+    values.properties = values.properties.split(",").map((el) => el.trim());
+    values.files = values.files.split(",").map((el) => el.trim());
+    if (def && def.index < charts.length) {
+      editChart({ ...def, ...values });
+    } else {
+      values["id"] = `c${charts.length}`;
+      values["index"] = charts.length;
+      values["editor"] = {
+        section: "CHART",
+        index: charts.length,
+      };
+      addChart(values);
+    }
+    closeChartForm();
   };
 
   const onOpenFileSelector = (type) => {
@@ -81,10 +104,8 @@ const ChartsInfoForm = () => {
     openSelector();
   };
 
-  const [open, setOpen] = useState(false);
-
   return (
-    <Drawer heading="Add info about your paper" defaultOpen={true}>
+    <Fragment>
       <Tooltip
         title={<Typography variant="subtitle2">Add a new chart</Typography>}
         arrow
@@ -92,16 +113,21 @@ const ChartsInfoForm = () => {
         <RegularStyledButton
           fullWidth
           endIcon={<AddCircleOutline />}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setChartDefault(null);
+            openChartForm();
+          }}
         >
           Add a Chart
         </RegularStyledButton>
       </Tooltip>
       <Dialog
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => closeChartForm()}
         maxWidth="md"
+        transitionDuration={150}
         fullWidth
+        disableEscapeKeyDown
       >
         <DialogTitle>
           <Grid container direction="row" spacing={1} alignItems="center">
@@ -111,7 +137,7 @@ const ChartsInfoForm = () => {
             <Grid item xs={1}>
               <RegularStyledButton
                 onClick={() => {
-                  setOpen(false);
+                  closeChartForm();
                 }}
                 fullWidth
               >
@@ -132,6 +158,7 @@ const ChartsInfoForm = () => {
                   label="Caption"
                   error={errors.caption}
                   inputRef={register}
+                  defaultValue={def && def.caption}
                   required
                 />
               </Grid>
@@ -144,6 +171,7 @@ const ChartsInfoForm = () => {
                   label="Number"
                   error={errors.number}
                   inputRef={register}
+                  defaultValue={(def && def.number) || charts.length}
                   required
                 />
               </Grid>
@@ -164,6 +192,7 @@ const ChartsInfoForm = () => {
                       <DescriptionOutlined color="primary" />
                     </IconButton>
                   }
+                  defaultValue={def && def.files && def.files.join(", ")}
                 />
               </Grid>
               <Grid item>
@@ -183,6 +212,7 @@ const ChartsInfoForm = () => {
                       <DescriptionOutlined color="primary" />
                     </IconButton>
                   }
+                  defaultValue={def && def.imageFile}
                   required
                 />
               </Grid>
@@ -203,17 +233,21 @@ const ChartsInfoForm = () => {
                     </IconButton>
                   }
                   inputRef={register}
+                  defaultValue={def && def.notebookFile}
                 />
               </Grid>
               <Grid item>
                 <TextInputField
-                  id="chartKeywords"
-                  placeholder="Enter keywords"
-                  name="keywords"
-                  helperText="Enter keyword(s) for the content displayed in the chart. e.g. potential energy surface, band gap."
+                  id="chartproperties"
+                  placeholder="Enter properties"
+                  name="properties"
+                  helperText="Enter keyword(s) for the content displayed in the chart. e.g. potential energy surface, band gap. (Comma separated values)"
                   label="Keywords"
-                  error={errors.keywords}
+                  error={errors.properties}
                   inputRef={register}
+                  defaultValue={
+                    def && def.properties && def.properties.join(", ")
+                  }
                   required
                 />
               </Grid>
@@ -270,6 +304,9 @@ const ChartsInfoForm = () => {
                           errors.extraFields && errors.extraFields[index].label
                         }
                         inputRef={register}
+                        defaultValue={
+                          def && def.extraFields && def.extraFields[index].label
+                        }
                       />
                     </Grid>
                     <Grid item xs={11} sm={6}>
@@ -284,6 +321,9 @@ const ChartsInfoForm = () => {
                           errors.extraFields && errors.extraFields[index].value
                         }
                         inputRef={register}
+                        defaultValue={
+                          def && def.extraFields && def.extraFields[index].value
+                        }
                       />
                     </Grid>
                     <Grid item xs={1}>
@@ -313,14 +353,17 @@ const ChartsInfoForm = () => {
               </Grid>
               <Grid item>
                 <RegularStyledButton fullWidth type="submit">
-                  Save
+                  {chartsHelper.default &&
+                  chartsHelper.default.id < charts.length
+                    ? "Update"
+                    : "Save"}
                 </RegularStyledButton>
               </Grid>
             </Grid>
           </form>
         </DialogContent>
       </Dialog>
-    </Drawer>
+    </Fragment>
   );
 };
 
