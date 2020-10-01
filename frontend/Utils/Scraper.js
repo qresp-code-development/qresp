@@ -1,9 +1,11 @@
 import axios from "axios";
 
-const node = (label, value, folder) => {
+const node = (label, value, folder, fsp = null) => {
+  value = value.endsWith("/") ? value.slice(0, value.length - 1) : value;
+  value = !fsp ? value : value.replace(fsp, "");
   const node = {
     label: label,
-    value: value.endsWith("/") ? value.slice(0, value.length - 1) : value,
+    value: value,
   };
   if (folder) {
     node["children"] = [];
@@ -11,7 +13,7 @@ const node = (label, value, folder) => {
   return node;
 };
 
-const getList = async (url, type, service) => {
+const getList = async (url, type, service, fsp = null) => {
   const server = window.location.href.slice(
     0,
     window.location.href.lastIndexOf("/")
@@ -29,7 +31,7 @@ const getList = async (url, type, service) => {
     );
 
     const files = response.data.files.map((el) =>
-      node(el.title, el.key, el.folder)
+      node(el.title, el.key, el.folder, fsp)
     );
 
     const details = response.data.services;
