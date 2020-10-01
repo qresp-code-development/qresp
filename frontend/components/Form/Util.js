@@ -1,6 +1,9 @@
+import { useContext } from "react";
 import PropTypes from "prop-types";
 import { Grid, Typography, Box, InputLabel } from "@material-ui/core";
 import { RegularStyledButton } from "../button";
+
+import CuratorContext from "../../Context/Curator/curatorContext";
 
 const FormInputLabel = ({ label, required, forId }) => {
   return (
@@ -56,4 +59,41 @@ SubmitAndReset.propTypes = {
   reset: PropTypes.bool,
 };
 
-export { SubmitAndReset, FormInputLabel };
+const EditAndRemove = ({ rowdata }) => {
+  const { section, index } = rowdata;
+  const { charts, setChartDefault, deleteChart, openChartForm } = useContext(
+    CuratorContext
+  );
+
+  const methods = { edit: null, delete: null };
+
+  switch (section) {
+    case "CHART":
+      methods.edit = () => {
+        openChartForm();
+        setChartDefault(charts.find((el) => el.index == index));
+      };
+      methods.delete = () => deleteChart(index);
+  }
+
+  return (
+    <Grid container spacing={1} direction="column">
+      <Grid item>
+        <RegularStyledButton onClick={methods.edit} fullWidth>
+          Edit
+        </RegularStyledButton>
+      </Grid>
+      <Grid item>
+        <RegularStyledButton onClick={methods.delete} fullWidth>
+          Remove
+        </RegularStyledButton>
+      </Grid>
+    </Grid>
+  );
+};
+
+EditAndRemove.propTypes = {
+  rowdata: PropTypes.object.isRequired,
+};
+
+export { SubmitAndReset, FormInputLabel, EditAndRemove };
