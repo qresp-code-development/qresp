@@ -4,6 +4,7 @@ import { Grid, Typography, Box, InputLabel } from "@material-ui/core";
 import { RegularStyledButton } from "../button";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const FormInputLabel = ({ label, required, forId }) => {
   return (
@@ -60,20 +61,19 @@ SubmitAndReset.propTypes = {
 };
 
 const EditAndRemove = ({ rowdata }) => {
-  const { section, index } = rowdata;
-  const { charts, setChartDefault, deleteChart, openChartForm } = useContext(
-    CuratorContext
-  );
+  const { id } = rowdata;
+  const { charts, deleteChart } = useContext(CuratorContext);
+  const { setDefaultChart, openChartForm } = useContext(CuratorHelperContext);
 
   const methods = { edit: null, delete: null };
 
-  switch (section) {
-    case "CHART":
+  switch (id.charAt(0)) {
+    case "c":
       methods.edit = () => {
         openChartForm();
-        setChartDefault(charts.find((el) => el.index == index));
+        setDefaultChart(charts.find((el) => el.id == id));
       };
-      methods.delete = () => deleteChart(index);
+      methods.delete = () => deleteChart(id);
   }
 
   return (
