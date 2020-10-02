@@ -40,7 +40,7 @@ const DetailsView = ({ rowdata }) => {
   );
 };
 
-const ToolsInfo = ({ tools }) => {
+const ToolsInfo = ({ tools, inDrawer, editColumn }) => {
   const columns = [
     {
       label: "Kind",
@@ -66,6 +66,7 @@ const ToolsInfo = ({ tools }) => {
           return data.facilityName;
         },
       },
+      ...editColumn,
     },
   ];
 
@@ -76,17 +77,24 @@ const ToolsInfo = ({ tools }) => {
     };
   });
 
-  const views = { kind: KindView, details: DetailsView };
-
-  return (
+  return inDrawer ? (
     <Drawer heading="Tools">
       <RecordTable rows={rows} columns={columns} />
     </Drawer>
+  ) : (
+    <RecordTable rows={rows} columns={columns} />
   );
+};
+
+ToolsInfo.defaultProps = {
+  inDrawer: true,
+  editColumn: [],
 };
 
 ToolsInfo.propTypes = {
   tools: PropTypes.array.isRequired,
+  inDrawer: PropTypes.bool,
+  editColumn: PropTypes.array,
 };
 
 export default ToolsInfo;
