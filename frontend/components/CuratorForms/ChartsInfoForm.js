@@ -18,6 +18,7 @@ import {
 import { TextInputField } from "../Form/InputFields";
 import TextInput from "../Form/TextInput";
 import { FormInputLabel } from "../Form/Util";
+import { RegularStyledButton } from "../button";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
@@ -25,19 +26,17 @@ import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
-import { RegularStyledButton } from "../button";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const ChartsInfoForm = () => {
+  const { charts, addChart, editChart } = useContext(CuratorContext);
+
   const {
-    charts,
     chartsHelper,
-    addChart,
-    editChart,
-    deleteChart,
     openChartForm,
     closeChartForm,
-    setChartDefault,
-  } = useContext(CuratorContext);
+    setDefaultChart,
+  } = useContext(CuratorHelperContext);
 
   const { def, open } = chartsHelper;
 
@@ -72,15 +71,10 @@ const ChartsInfoForm = () => {
   const onSubmit = (values) => {
     values.properties = values.properties.split(",").map((el) => el.trim());
     values.files = values.files.split(",").map((el) => el.trim());
-    if (def && def.index < charts.length) {
+    if (def && charts.find((el) => el.id == def.id)) {
       editChart({ ...def, ...values });
     } else {
       values["id"] = `c${charts.length}`;
-      values["index"] = charts.length;
-      values["editor"] = {
-        section: "CHART",
-        index: charts.length,
-      };
       addChart(values);
     }
     closeChartForm();
@@ -114,7 +108,7 @@ const ChartsInfoForm = () => {
           fullWidth
           endIcon={<AddCircleOutline />}
           onClick={() => {
-            setChartDefault(null);
+            setDefaultChart(null);
             openChartForm();
           }}
         >
