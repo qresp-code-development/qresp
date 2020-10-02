@@ -1,6 +1,7 @@
 import { Container, Box } from "@material-ui/core";
 
 import CuratorState from "../Context/Curator/CuratorState";
+import CuratorHelperState from "../Context/CuratorHelpers/curatorHelperState";
 import SourceTreeState from "../Context/SourceTree/SourceTreeState";
 
 import SEO from "../components/seo";
@@ -18,20 +19,22 @@ const curator = () => {
 
   return (
     <CuratorState>
-      <SourceTreeState>
-        <SEO title={"Qresp | Curator"} description={curatorDescription} />
-        <FileTree />
-        <Container>
-          <Box mt={4} mb={4}>
-            <TopActions />
-          </Box>
-          <CuratorElement />
-          <FileServerElement />
-          <PaperInfoElement />
-          <ReferenceInfoElement />
-          <ChartsInfoElement />
-        </Container>
-      </SourceTreeState>
+      <CuratorHelperState>
+        <SourceTreeState>
+          <SEO title={"Qresp | Curator"} description={curatorDescription} />
+          <FileTree />
+          <Container>
+            <Box mt={4} mb={4}>
+              <TopActions />
+            </Box>
+            <CuratorElement />
+            <FileServerElement />
+            <PaperInfoElement />
+            <ReferenceInfoElement />
+            <ChartsInfoElement />
+          </Container>
+        </SourceTreeState>
+      </CuratorHelperState>
     </CuratorState>
   );
 };
