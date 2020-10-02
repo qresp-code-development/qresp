@@ -119,7 +119,6 @@ class Dtree():
         tree = html.fromstring(page.content)
         for xtag in tree.xpath('//table//tr/td[2]/a'):
             file, fileLink = xtag.text_content().strip(), xtag.attrib['href']
-            print(file, fileLink)
             if 'Parent Directory' not in file:
                 dataFile = DirectoryTree()
                 dataFile.title = fileLink
