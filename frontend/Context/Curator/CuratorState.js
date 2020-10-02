@@ -15,9 +15,10 @@ import {
   ADD_CHART,
   EDIT_CHART,
   DELETE_CHART,
-  OPEN_CHART_FORM,
-  CLOSE_CHART_FORM,
-  SET_CHART_DEF,
+  SET_TOOLS,
+  ADD_TOOL,
+  EDIT_TOOL,
+  DELETE_TOOL,
 } from "../types";
 
 const CuratorState = (props) => {
@@ -47,6 +48,7 @@ const CuratorState = (props) => {
       abstract: "",
     },
     charts: [],
+    tools: [],
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -94,7 +96,7 @@ const CuratorState = (props) => {
         paperInfo: state.paperInfo,
         referenceInfo: state.referenceInfo,
         charts: state.charts,
-        chartsHelper: state.chartsHelper,
+        tools: state.tools,
         metadata: state,
         setCuratorInfo,
         setFileServerPath,
