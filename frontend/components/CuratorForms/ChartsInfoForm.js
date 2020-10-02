@@ -31,12 +31,9 @@ import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperCont
 const ChartsInfoForm = () => {
   const { charts, addChart, editChart } = useContext(CuratorContext);
 
-  const {
-    chartsHelper,
-    openChartForm,
-    closeChartForm,
-    setDefaultChart,
-  } = useContext(CuratorHelperContext);
+  const { chartsHelper, openForm, closeForm, setDefault } = useContext(
+    CuratorHelperContext
+  );
 
   const { def, open } = chartsHelper;
 
@@ -77,22 +74,19 @@ const ChartsInfoForm = () => {
       values["id"] = `c${charts.length}`;
       addChart(values);
     }
-    closeChartForm();
+    closeForm("chart");
   };
 
   const onOpenFileSelector = (type) => {
     if (type == "imageFile") {
       setMultiple(false);
       setSaveMethod((val) => setValue("imageFile", val));
-      openSelector();
     } else if (type == "notebookFile") {
       setMultiple(false);
       setSaveMethod((val) => setValue("notebookFile", val));
-      openSelector();
     } else {
       setMultiple(true);
       setSaveMethod((val) => setValue("files", val));
-      openSelector();
     }
 
     openSelector();
@@ -108,8 +102,8 @@ const ChartsInfoForm = () => {
           fullWidth
           endIcon={<AddCircleOutline />}
           onClick={() => {
-            setDefaultChart(null);
-            openChartForm();
+            setDefault("chart", null);
+            openForm("chart");
           }}
         >
           Add a Chart
@@ -117,7 +111,7 @@ const ChartsInfoForm = () => {
       </Tooltip>
       <Dialog
         open={open}
-        onClose={() => closeChartForm()}
+        onClose={() => closeForm("chart")}
         maxWidth="md"
         transitionDuration={150}
         fullWidth
@@ -131,7 +125,7 @@ const ChartsInfoForm = () => {
             <Grid item xs={1}>
               <RegularStyledButton
                 onClick={() => {
-                  closeChartForm();
+                  closeForm("chart");
                 }}
                 fullWidth
               >
@@ -347,8 +341,7 @@ const ChartsInfoForm = () => {
               </Grid>
               <Grid item>
                 <RegularStyledButton fullWidth type="submit">
-                  {chartsHelper.default &&
-                  chartsHelper.default.id < charts.length
+                  {def && charts.find((el) => el.id == def.id) != undefined
                     ? "Update"
                     : "Save"}
                 </RegularStyledButton>

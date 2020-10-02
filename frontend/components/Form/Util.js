@@ -62,19 +62,29 @@ SubmitAndReset.propTypes = {
 
 const EditAndRemove = ({ rowdata }) => {
   const { id } = rowdata;
-  const { charts, deleteChart } = useContext(CuratorContext);
-  const { setDefaultChart, openChartForm } = useContext(CuratorHelperContext);
+  const { charts, deleteChart, tools, deleteTool } = useContext(CuratorContext);
+  const { setDefault, openForm } = useContext(CuratorHelperContext);
 
   const methods = { edit: null, delete: null };
-
+  var type = "";
   switch (id.charAt(0)) {
     case "c":
-      methods.edit = () => {
-        openChartForm();
-        setDefaultChart(charts.find((el) => el.id == id));
-      };
+      type = "chart";
       methods.delete = () => deleteChart(id);
+      break;
+    case "t":
+      type = "tool";
+      methods.delete = () => deleteTool(id);
+      break;
   }
+
+  methods.edit = () => {
+    openForm(type);
+    setDefault(
+      type,
+      charts.find((el) => el.id == id)
+    );
+  };
 
   return (
     <Grid container spacing={1} direction="column">
