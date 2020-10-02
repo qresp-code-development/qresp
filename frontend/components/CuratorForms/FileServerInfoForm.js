@@ -42,7 +42,8 @@ const FileServerInfoForm = ({ editor }) => {
   const onSubmit = (values) => {
     setSaveMethod(saveMethod);
     showLoader();
-    getList(values.dataServer, values.connectionType, true)
+    setFileServerPath("");
+    getList(values.dataServer, values.connectionType, true, null)
       .then((el) => {
         setSelectedHttp(el.details);
         setTree(el.files);
