@@ -36,6 +36,14 @@ export const SET_CHARTS = "SET_CHARTS";
 export const ADD_CHART = "ADD_CHART";
 export const EDIT_CHART = "EDIT_CHART";
 export const DELETE_CHART = "DELETE_CHART";
-export const OPEN_CHART_FORM = "OPEN_CHART_FORM";
-export const CLOSE_CHART_FORM = "CLOSE_CHART_FORM";
-export const SET_CHART_DEF = "SET_CHART_DEF";
+
+// Tools Actions
+export const SET_TOOLS = "SET_TOOLS";
+export const ADD_TOOL = "ADD_TOOL";
+export const EDIT_TOOL = "EDIT_TOOL";
+export const DELETE_TOOL = "DELETE_TOOL";
+
+//Curator Helpers
+export const OPEN_FORM = "OPEN_FORM";
+export const CLOSE_FORM = "CLOSE_FORM";
+export const SET_DEF = "SET_DEF";
