@@ -35,7 +35,8 @@ const SourceTreeState = (props) => {
       getList(
         fileServerPath,
         fileServerPath.includes("zenodo") ? "zenodo" : "http",
-        false
+        false,
+        !fileServerPath ? null : fileServerPath
       ).then((res) => setTree(res.files));
   }, [fileServerPath]);
 

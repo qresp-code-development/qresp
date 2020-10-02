@@ -36,6 +36,7 @@ import { RegularStyledButton } from "../components/button";
 import { getList } from "../Utils/Scraper";
 
 import SourceTreeContext from "../Context/SourceTree/SourceTreeContext";
+import CuratorContext from "../Context/Curator/curatorContext";
 
 const FileTree = () => {
   const {
@@ -50,6 +51,8 @@ const FileTree = () => {
     save,
     setChildren,
   } = useContext(SourceTreeContext);
+
+  const { fileServerPath } = useContext(CuratorContext);
 
   const [expanded, setExpanded] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -140,7 +143,12 @@ const FileTree = () => {
           onExpand={(expanded, target) => {
             if (target.expanded && target.children.length == 0) {
               setLoading(true);
-              getList(target.value, "http", false)
+              getList(
+                `${fileServerPath}${target.value}`,
+                "http",
+                false,
+                !fileServerPath ? null : fileServerPath
+              )
                 .then((res) => {
                   if (target.expanded) {
                     setChildren(target.value, res.files);

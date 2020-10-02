@@ -30,4 +30,12 @@ export const SET_FILESERVERPATH = "SET_FILESERVERPATH";
 export const SET_PAPERINFO = "SET_PAPERINFO";
 export const SET_REFERENCE_AUTHORS = "SET_REFERENCE_AUTHORS";
 export const SET_REFERENCEINFO = "SET_REFERENCEINFO";
+
+// Chart Actions
 export const SET_CHARTS = "SET_CHARTS";
+export const ADD_CHART = "ADD_CHART";
+export const EDIT_CHART = "EDIT_CHART";
+export const DELETE_CHART = "DELETE_CHART";
+export const OPEN_CHART_FORM = "OPEN_CHART_FORM";
+export const CLOSE_CHART_FORM = "CLOSE_CHART_FORM";
+export const SET_CHART_DEF = "SET_CHART_DEF";

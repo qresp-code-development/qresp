@@ -1,6 +1,10 @@
+import { useContext } from "react";
 import PropTypes from "prop-types";
 import { Grid, Typography, Box, InputLabel } from "@material-ui/core";
 import { RegularStyledButton } from "../button";
+
+import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const FormInputLabel = ({ label, required, forId }) => {
   return (
@@ -56,4 +60,40 @@ SubmitAndReset.propTypes = {
   reset: PropTypes.bool,
 };
 
-export { SubmitAndReset, FormInputLabel };
+const EditAndRemove = ({ rowdata }) => {
+  const { id } = rowdata;
+  const { charts, deleteChart } = useContext(CuratorContext);
+  const { setDefaultChart, openChartForm } = useContext(CuratorHelperContext);
+
+  const methods = { edit: null, delete: null };
+
+  switch (id.charAt(0)) {
+    case "c":
+      methods.edit = () => {
+        openChartForm();
+        setDefaultChart(charts.find((el) => el.id == id));
+      };
+      methods.delete = () => deleteChart(id);
+  }
+
+  return (
+    <Grid container spacing={1} direction="column">
+      <Grid item>
+        <RegularStyledButton onClick={methods.edit} fullWidth>
+          Edit
+        </RegularStyledButton>
+      </Grid>
+      <Grid item>
+        <RegularStyledButton onClick={methods.delete} fullWidth>
+          Remove
+        </RegularStyledButton>
+      </Grid>
+    </Grid>
+  );
+};
+
+EditAndRemove.propTypes = {
+  rowdata: PropTypes.object.isRequired,
+};
+
+export { SubmitAndReset, FormInputLabel, EditAndRemove };

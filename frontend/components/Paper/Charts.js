@@ -73,6 +73,9 @@ const ChartInfo = ({
   external,
   showWorkflows,
   server,
+  showSlider,
+  inDrawer,
+  editColumn,
 }) => {
   // Light Box Controls
   const { openLightbox } = useLightbox();
@@ -105,7 +108,9 @@ const ChartInfo = ({
     hideLoader();
   };
 
-  const workflowData = formatData(charts, tools, external, datasets, scripts);
+  const workflowData = showSlider
+    ? formatData(charts, tools, external, datasets, scripts)
+    : null;
 
   const FigureView = ({ rowdata }) => {
     const datatreeLink =
@@ -128,49 +133,51 @@ const ChartInfo = ({
             ></img>
           </Button>
         </StyledTooltip>
-        <Slider>
-          <a
-            href={datatreeLink}
-            rel="noopener noreferrer"
-            alt="View the data tree"
-            target="_blank"
-          >
-            <img src="/images/datatree.png" className="imgButton" />
-          </a>
-          {showWorkflows ? (
+        {showSlider && (
+          <Slider>
             <a
-              onClick={(e) =>
-                handleClick(e, rowdata.id, router.query.id, rowdata)
-              }
-              href="showChartWorkflow"
-            >
-              <img src="/images/workflow-icon.png" className="imgButton" />
-            </a>
-          ) : null}
-          <a
-            href={rowdata.downloadPath}
-            rel="noopener noreferrer"
-            alt="Download data associated to the paper Using Globus"
-            target="_blank"
-          >
-            <img src="/images/download-icon.png" className="imgButton" />
-          </a>
-          {rowdata.notebookFile ? (
-            <a
-              href={
-                "https://nbviewer.jupyter.org/url/" +
-                rowdata.server +
-                "/" +
-                rowdata.notebookFile
-              }
+              href={datatreeLink}
               rel="noopener noreferrer"
-              alt="View Default Notebook File"
+              alt="View the data tree"
               target="_blank"
             >
-              <img src="/images/jupyter-icon.png" className="imgButton" />
+              <img src="/images/datatree.png" className="imgButton" />
             </a>
-          ) : null}
-        </Slider>
+            {showWorkflows ? (
+              <a
+                onClick={(e) =>
+                  handleClick(e, rowdata.id, router.query.id, rowdata)
+                }
+                href="showChartWorkflow"
+              >
+                <img src="/images/workflow-icon.png" className="imgButton" />
+              </a>
+            ) : null}
+            <a
+              href={rowdata.downloadPath}
+              rel="noopener noreferrer"
+              alt="Download data associated to the paper Using Globus"
+              target="_blank"
+            >
+              <img src="/images/download-icon.png" className="imgButton" />
+            </a>
+            {rowdata.notebookFile ? (
+              <a
+                href={
+                  "https://nbviewer.jupyter.org/url/" +
+                  rowdata.server +
+                  "/" +
+                  rowdata.notebookFile
+                }
+                rel="noopener noreferrer"
+                alt="View Default Notebook File"
+                target="_blank"
+              >
+                <img src="/images/jupyter-icon.png" className="imgButton" />
+              </a>
+            ) : null}
+          </Slider>
+        )}
         <style jsx>{`
           .imgButton {
             margin: auto;
@@ -216,6 +223,7 @@ const ChartInfo = ({
         value: null,
       },
     },
+    ...editColumn,
   ];
 
   const Gallery = [];
@@ -235,6 +243,7 @@ const ChartInfo = ({
     row["index"] = index;
     row["server"] = fileserverpath;
     row["downloadPath"] = downloadPath;
+
     Gallery.push({
       src: row["server"] + "/" + row["imageFile"],
       caption: row["caption"],
@@ -255,9 +264,13 @@ const ChartInfo = ({
   return (
     <Fragment>
       <SRLWrapper images={Gallery} options={options} />
-      <Drawer heading="Charts">
+      {inDrawer ? (
+        <Drawer heading="Charts">
+          <RecordTable rows={rows} columns={columns} />
+        </Drawer>
+      ) : (
         <RecordTable rows={rows} columns={columns} />
-      </Drawer>
+      )}
       {showWorkflows ? (
         <ChartWorkflow
           showChartWorkflow={showChartWorkflow}
@@ -272,18 +285,24 @@ const ChartInfo = ({
 
 ChartInfo.defaultProps = {
   showWorkflows: true,
+  showSlider: true,
+  inDrawer: true,
+  editColumn: [],
 };
 
 ChartInfo.propTypes = {
   charts: PropTypes.array.isRequired,
   fileserverpath: PropTypes.string.isRequired,
-  downloadPath: PropTypes.string.isRequired,
-  tools: PropTypes.array.isRequired,
-  scripts: PropTypes.array.isRequired,
-  datasets: PropTypes.array.isRequired,
-  external: PropTypes.array.isRequired,
+  showSlider: PropTypes.bool,
+  downloadPath: PropTypes.string,
+  tools: PropTypes.array,
+  scripts: PropTypes.array,
+  datasets: PropTypes.array,
+  external: PropTypes.array,
+  server: PropTypes.string,
   showWorkflows: PropTypes.bool,
-  server: PropTypes.string.isRequired,
+  inDrawer: PropTypes.bool,
+  editColumn: PropTypes.array,
 };
 
 export default ChartInfo;
