@@ -248,7 +248,7 @@ const ChartInfo = ({
       src: row["server"] + "/" + row["imageFile"],
       caption: row["caption"],
     });
-    const ret = {
+    return {
       figure: row,
       props: {
         server: fileserverpath,
@@ -259,12 +259,6 @@ const ChartInfo = ({
         files: row["files"],
       },
     };
-
-    if (editColumn.length > 0) {
-      ret["editor"] = row.editor;
-    }
-
-    return ret;
   });
 
   return (
