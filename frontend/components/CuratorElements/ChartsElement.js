@@ -25,8 +25,8 @@ const ChartsInfoElement = () => {
             inDrawer={false}
             editColumn={[
               {
-                label: "Edit/Delete",
-                name: "editor",
+                label: "Edit/Remove",
+                name: "figure",
                 view: EditAndRemove,
                 options: {
                   align: "center",
