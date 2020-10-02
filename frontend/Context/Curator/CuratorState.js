@@ -47,7 +47,6 @@ const CuratorState = (props) => {
       abstract: "",
     },
     charts: [],
-    chartsHelper: { def: {}, open: false },
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -83,15 +82,8 @@ const CuratorState = (props) => {
   const setCharts = (charts) => dispatch({ type: SET_CHARTS, payload: charts });
 
   const addChart = (chart) => dispatch({ type: ADD_CHART, payload: chart });
-
   const editChart = (chart) => dispatch({ type: EDIT_CHART, payload: chart });
-
   const deleteChart = (id) => dispatch({ type: DELETE_CHART, payload: id });
-
-  const openChartForm = () => dispatch({ type: OPEN_CHART_FORM });
-  const closeChartForm = () => dispatch({ type: CLOSE_CHART_FORM });
-  const setChartDefault = (def) =>
-    dispatch({ type: SET_CHART_DEF, payload: def });
 
   return (
     <CuratorContext.Provider
@@ -113,9 +105,6 @@ const CuratorState = (props) => {
         addChart,
         editChart,
         deleteChart,
-        openChartForm,
-        closeChartForm,
-        setChartDefault,
       }}
     >
       {props.children}
