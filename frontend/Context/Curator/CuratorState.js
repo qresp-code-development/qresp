@@ -11,14 +11,10 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
-  SET_CHARTS,
-  ADD_CHART,
-  EDIT_CHART,
-  DELETE_CHART,
-  SET_TOOLS,
-  ADD_TOOL,
-  EDIT_TOOL,
-  DELETE_TOOL,
+  SET,
+  ADD,
+  EDIT,
+  DELETE,
 } from "../types";
 
 const CuratorState = (props) => {
@@ -81,11 +77,16 @@ const CuratorState = (props) => {
   const setReferenceInfo = (data) =>
     dispatch({ type: SET_REFERENCEINFO, payload: data });
 
-  const setCharts = (charts) => dispatch({ type: SET_CHARTS, payload: charts });
+  const set = (charts) => dispatch({ type: SET, payload: charts });
 
-  const addChart = (chart) => dispatch({ type: ADD_CHART, payload: chart });
-  const editChart = (chart) => dispatch({ type: EDIT_CHART, payload: chart });
-  const deleteChart = (id) => dispatch({ type: DELETE_CHART, payload: id });
+  const add = (type, value) =>
+    dispatch({ type: ADD, payload: { type: type + "s", value } });
+
+  const edit = (type, value) =>
+    dispatch({ type: EDIT, payload: { type: type + "s", value } });
+
+  const del = (type, id) =>
+    dispatch({ type: DELETE, payload: { type: type + "s", id } });
 
   return (
     <CuratorContext.Provider
@@ -103,10 +104,10 @@ const CuratorState = (props) => {
         setPaperInfo,
         setReferenceAuthors,
         setReferenceInfo,
-        setCharts,
-        addChart,
-        editChart,
-        deleteChart,
+        set,
+        add,
+        edit,
+        del,
       }}
     >
       {props.children}

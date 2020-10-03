@@ -32,16 +32,10 @@ export const SET_REFERENCE_AUTHORS = "SET_REFERENCE_AUTHORS";
 export const SET_REFERENCEINFO = "SET_REFERENCEINFO";
 
 // Chart Actions
-export const SET_CHARTS = "SET_CHARTS";
-export const ADD_CHART = "ADD_CHART";
-export const EDIT_CHART = "EDIT_CHART";
-export const DELETE_CHART = "DELETE_CHART";
-
-// Tools Actions
-export const SET_TOOLS = "SET_TOOLS";
-export const ADD_TOOL = "ADD_TOOL";
-export const EDIT_TOOL = "EDIT_TOOL";
-export const DELETE_TOOL = "DELETE_TOOL";
+export const SET = "SET";
+export const ADD = "ADD";
+export const EDIT = "EDIT";
+export const DELETE = "DELETE";
 
 //Curator Helpers
 export const OPEN_FORM = "OPEN_FORM";
