@@ -29,7 +29,7 @@ import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const ChartsInfoForm = () => {
-  const { charts, addChart, editChart } = useContext(CuratorContext);
+  const { charts, add, edit } = useContext(CuratorContext);
 
   const { chartsHelper, openForm, closeForm, setDefault } = useContext(
     CuratorHelperContext
@@ -69,10 +69,10 @@ const ChartsInfoForm = () => {
     values.properties = values.properties.split(",").map((el) => el.trim());
     values.files = values.files.split(",").map((el) => el.trim());
     if (def && charts.find((el) => el.id == def.id)) {
-      editChart({ ...def, ...values });
+      edit("chart", { ...def, ...values });
     } else {
       values["id"] = `c${charts.length}`;
-      addChart(values);
+      add("chart", values);
     }
     closeForm("chart");
   };
