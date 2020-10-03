@@ -66,8 +66,8 @@ const ToolsInfo = ({ tools, inDrawer, editColumn }) => {
           return data.facilityName;
         },
       },
-      ...editColumn,
     },
+    ...editColumn,
   ];
 
   const rows = tools.map((row) => {
