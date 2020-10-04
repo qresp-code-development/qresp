@@ -45,6 +45,7 @@ const CuratorState = (props) => {
     },
     charts: [],
     tools: [],
+    datasets: [],
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -98,6 +99,7 @@ const CuratorState = (props) => {
         referenceInfo: state.referenceInfo,
         charts: state.charts,
         tools: state.tools,
+        datasets: state.datasets,
         metadata: state,
         setCuratorInfo,
         setFileServerPath,
