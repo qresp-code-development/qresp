@@ -10,7 +10,6 @@ const FadeTransition = ({ children, ...rest }) => (
         <div>{children}</div>
         <style jsx>{`
           div {
-            margin: 8px 0px;
             transition: 0.035s;
             opacity: ${state === "entered" ? 1 : 0};
             display: ${state === "exited" ? "none" : "block"};
