@@ -62,7 +62,8 @@ const ToolsInfo = ({ tools, inDrawer, editColumn }) => {
         sort: true,
         searchable: true,
         value: (data) => {
-          if (data.packageName.length > 0) return data.packageName;
+          if (data.packageName && data.packageName.length > 0)
+            return data.packageName;
           return data.facilityName;
         },
       },
