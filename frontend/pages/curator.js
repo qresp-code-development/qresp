@@ -12,6 +12,7 @@ import PaperInfoElement from "../components/CuratorElements/PaperInfoElement";
 import ReferenceInfoElement from "../components/CuratorElements/ReferenceElement";
 import ChartsInfoElement from "../components/CuratorElements/ChartsElement";
 import ToolsInfoElement from "../components/CuratorElements/ToolsElement";
+import DatasetsInfoElement from "../components/CuratorElements/DatasetsElement";
 import FileTree from "../components/FileTree";
 
 const curator = () => {
@@ -34,6 +35,7 @@ const curator = () => {
             <ReferenceInfoElement />
             <ChartsInfoElement />
             <ToolsInfoElement />
+            <DatasetsInfoElement />
           </Container>
         </SourceTreeState>
       </CuratorHelperState>
