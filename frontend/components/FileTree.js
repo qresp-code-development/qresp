@@ -59,7 +59,7 @@ const FileTree = () => {
 
   useEffect(() => {
     if (!selectorOpen) {
-      setExpanded([]);
+      setChecked([]);
     }
   }, [selectorOpen]);
 
