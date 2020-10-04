@@ -51,7 +51,7 @@ const FilesView = ({ rowdata }) => {
   );
 };
 
-const DatasetInfo = ({ datasets, fileserverpath }) => {
+const DatasetInfo = ({ datasets, fileserverpath, editColumn, inDrawer }) => {
   const columns = [
     {
       label: "Description",
@@ -75,6 +75,7 @@ const DatasetInfo = ({ datasets, fileserverpath }) => {
         value: null,
       },
     },
+    ...editColumn,
   ];
 
   const rows = datasets.map((row) => {
@@ -87,17 +88,25 @@ const DatasetInfo = ({ datasets, fileserverpath }) => {
 
   const views = { description: DescriptionView, files: FilesView };
 
-  return (
+  return inDrawer ? (
     <Drawer heading="Datasets">
-      {" "}
       <RecordTable rows={rows} columns={columns} />
     </Drawer>
+  ) : (
+    <RecordTable rows={rows} columns={columns} />
   );
+};
+
+DatasetInfo.defaultProps = {
+  inDrawer: true,
+  editColumn: [],
 };
 
 DatasetInfo.propTypes = {
   datasets: PropTypes.array.isRequired,
   fileserverpath: PropTypes.string.isRequired,
+  editColumn: PropTypes.array,
+  inDrawer: PropTypes.bool,
 };
 
 export default DatasetInfo;

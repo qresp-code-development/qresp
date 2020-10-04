@@ -14,6 +14,7 @@ import {
   SET_MULTIPLE,
   SET_SAVE_BUTTON_ACTION,
   SET_CHILDREN,
+  SET_TITLE,
 } from "../types";
 
 const SourceTreeState = (props) => {
@@ -71,6 +72,8 @@ const SourceTreeState = (props) => {
     });
   };
 
+  const setTitle = (title) => dispatch({ type: SET_TITLE, payload: title });
+
   return (
     <SourceTreeContext.Provider
       value={{
@@ -88,6 +91,7 @@ const SourceTreeState = (props) => {
         setMultiple,
         setSaveMethod,
         setChildren,
+        setTitle,
       }}
     >
       {props.children}
