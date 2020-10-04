@@ -15,7 +15,11 @@ import { ExpandMore, Edit } from "@material-ui/icons";
 
 const StyledAccordion = withStyles({
   root: {
-    borderRadius: "5px",
+    borderRadius: "0.5em",
+    margin: "8px 0 !important",
+    "&::before": {
+      backgroundColor: "rgba(0,0,0,0.03)",
+    },
   },
 })(Accordion);
 

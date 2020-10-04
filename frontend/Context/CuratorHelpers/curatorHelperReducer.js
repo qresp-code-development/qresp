@@ -1,15 +1,18 @@
-import { OPEN_CHART_FORM, CLOSE_CHART_FORM, SET_CHART_DEF } from "../types";
+import { OPEN_FORM, CLOSE_FORM, SET_DEF } from "../types";
 
 export default (state, action) => {
   switch (action.type) {
-    case OPEN_CHART_FORM:
-      return { ...state, chartsHelper: { ...state.chartsHelper, open: true } };
-    case CLOSE_CHART_FORM:
-      return { ...state, chartsHelper: { ...state.chartsHelper, open: false } };
-    case SET_CHART_DEF:
+    case OPEN_FORM:
+      return { ...state, open: { ...state.open, [action.payload]: true } };
+    case CLOSE_FORM:
       return {
         ...state,
-        chartsHelper: { ...state.chartsHelper, def: action.payload },
+        open: { ...state.open, [action.payload]: false },
+      };
+    case SET_DEF:
+      return {
+        ...state,
+        def: { ...state.def, [action.payload.type]: action.payload.value },
       };
     default:
       return state;

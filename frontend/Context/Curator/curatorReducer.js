@@ -5,10 +5,10 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
-  SET_CHARTS,
-  ADD_CHART,
-  EDIT_CHART,
-  DELETE_CHART,
+  SET,
+  ADD,
+  EDIT,
+  DELETE,
 } from "../types";
 
 export default (state, action) => {
@@ -31,22 +31,43 @@ export default (state, action) => {
       };
     case SET_REFERENCEINFO:
       return { ...state, referenceInfo: action.payload };
-    case SET_CHARTS:
-      return { ...state, charts: [...action.payload] };
-    case ADD_CHART:
-      return { ...state, charts: [...state.charts, action.payload] };
-    case DELETE_CHART:
+    case SET:
+      return { ...state, [action.payload.type]: [...action.payload.value] };
+    case ADD:
       return {
         ...state,
-        charts: state.charts
-          .filter((el) => el.id != action.payload)
-          .map((el, i) => ({ ...el, id: `c${i}` })),
+        [action.payload.type]: [
+          ...state[action.payload.type],
+          action.payload.value,
+        ],
       };
-    case EDIT_CHART:
+    case DELETE:
+      var prefix;
+      switch (action.payload.type) {
+        case "charts":
+          prefix = "c";
+          break;
+        case "tools":
+          prefix = "t";
+          break;
+        case "scripts":
+          prefix = "s";
+          break;
+        case "datasets":
+          prefix = "d";
+          break;
+      }
       return {
         ...state,
-        charts: state.charts.map((el) =>
-          el.index == action.payload.index ? action.payload : el
+        [action.payload.type]: state[action.payload.type]
+          .filter((el) => el.id != action.payload.id)
+          .map((el, i) => ({ ...el, id: `${prefix}${i}` })),
+      };
+    case EDIT:
+      return {
+        ...state,
+        [action.payload.type]: state[action.payload.type].map((el) =>
+          el.id == action.payload.value.id ? action.payload.value : el
         ),
       };
     default:

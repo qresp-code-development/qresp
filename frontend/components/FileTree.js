@@ -59,12 +59,9 @@ const FileTree = () => {
 
   useEffect(() => {
     if (!selectorOpen) {
-      setExpanded([]);
       setChecked([]);
     }
   }, [selectorOpen]);
-
-  useEffect(() => {}, [tree]);
 
   const theme = useTheme();
 

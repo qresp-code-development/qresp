@@ -10,7 +10,7 @@ const getComparator = (order, orderBy, columns) => {
   // Get function to get value from data object
   var sortVal;
   columns.forEach((col) => {
-    if (col.name == orderBy) {
+    if (col.name == orderBy && col.options.sort) {
       sortVal = col.options.value;
     }
   });
