@@ -51,7 +51,7 @@ const FilesView = ({ rowdata }) => {
   );
 };
 
-const ScriptsInfo = ({ scripts, fileserverpath }) => {
+const ScriptsInfo = ({ scripts, fileserverpath, inDrawer, editColumn }) => {
   const columns = [
     {
       label: "Description",
@@ -75,6 +75,7 @@ const ScriptsInfo = ({ scripts, fileserverpath }) => {
         value: null,
       },
     },
+    ...editColumn,
   ];
 
   const rows = scripts.map((row) => {
@@ -86,16 +87,25 @@ const ScriptsInfo = ({ scripts, fileserverpath }) => {
     };
   });
 
-  return (
+  return inDrawer ? (
     <Drawer heading="Scripts">
       <RecordTable rows={rows} columns={columns} />
     </Drawer>
+  ) : (
+    <RecordTable rows={rows} columns={columns} />
   );
+};
+
+ScriptsInfo.defaultProps = {
+  inDrawer: true,
+  editColumn: [],
 };
 
 ScriptsInfo.propTypes = {
   scripts: PropTypes.array.isRequired,
   fileserverpath: PropTypes.string.isRequired,
+  inDrawer: PropTypes.bool,
+  editColumn: PropTypes.array,
 };
 
 export default ScriptsInfo;
