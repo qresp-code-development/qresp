@@ -62,7 +62,7 @@ SubmitAndReset.propTypes = {
 
 const EditAndRemove = ({ rowdata }) => {
   const { id } = rowdata;
-  const { charts, tools, datasets, del } = useContext(CuratorContext);
+  const { charts, tools, datasets, scripts, del } = useContext(CuratorContext);
   const { setDefault, openForm } = useContext(CuratorHelperContext);
 
   const methods = { edit: null, delete: null };
@@ -80,6 +80,10 @@ const EditAndRemove = ({ rowdata }) => {
     case "d":
       type = "dataset";
       typelist = datasets;
+      break;
+    case "s":
+      type = "script";
+      typelist = scripts;
       break;
   }
 
