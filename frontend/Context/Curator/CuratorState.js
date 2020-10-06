@@ -15,10 +15,8 @@ import {
   ADD,
   EDIT,
   DELETE,
-  ADD_NODE,
   ADD_EDGE,
   DELETE_EDGE,
-  DELETE_NODE,
   SET_NODES,
   SET_EDGES,
 } from "../types";
@@ -110,9 +108,7 @@ const CuratorState = (props) => {
 
   const setNodes = (nodes) => dispatch({ type: SET_NODES, payload: nodes });
   const setEdges = (edges) => dispatch({ type: SET_EDGES, payload: edges });
-  const addNode = (id) => dispatch({ type: ADD_NODE, payload: id });
   const addEdge = (edge) => dispatch({ type: ADD_EDGE, payload: edge });
-  const deleteNode = (id) => dispatch({ type: DELETE_NODE, payload: id });
   const deleteEdge = (edge) => dispatch({ type: DELETE_EDGE, payload: edge });
 
   return (
@@ -141,8 +137,6 @@ const CuratorState = (props) => {
         del,
         setNodes,
         setEdges,
-        addNode,
-        deleteNode,
         addEdge,
         deleteEdge,
       }}
