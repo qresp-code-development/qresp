@@ -22,6 +22,8 @@ import SimpleReactLightbox from "simple-react-lightbox";
 
 import axios from "axios";
 
+import CuratorHelperState from "../../Context/CuratorHelpers/curatorHelperState";
+
 const PaperDetails = ({ data, error, preview, query }) => {
   const {
     title,
@@ -122,16 +124,18 @@ const PaperDetails = ({ data, error, preview, query }) => {
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
           <ScriptsInfo scripts={scripts} fileserverpath={fileServerPath} />
-          {showWorkflows ? (
-            <Workflow
-              workflow={workflows}
-              charts={charts}
-              datasets={datasets}
-              tools={tools}
-              scripts={scripts}
-              external={heads}
-            />
-          ) : null}
+          <CuratorHelperState>
+            {showWorkflows ? (
+              <Workflow
+                workflow={workflows}
+                charts={charts}
+                datasets={datasets}
+                tools={tools}
+                scripts={scripts}
+                external={heads}
+              />
+            ) : null}
+          </CuratorHelperState>
           {documentation ? (
             <Documentation documentation={documentation} />
           ) : null}

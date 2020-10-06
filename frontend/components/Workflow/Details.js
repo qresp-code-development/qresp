@@ -63,7 +63,9 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
       );
       break;
     case "TOOL":
-      details.URLs = details.URLs.filter((el) => (el.length > 0 ? el : null));
+      details.URLs = details.URLS
+        ? details.URLs.filter((el) => (el.length > 0 ? el : null))
+        : [];
       URLs = (
         <Fragment>
           <LabelValue
@@ -108,7 +110,9 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
     case "EXTERNAL":
     case "SCRIPT":
     case "DATASET":
-      details.URLs = details.URLs.filter((el) => (el.length > 0 ? el : null));
+      details.URLs = details.URLs
+        ? details.URLs.filter((el) => (el.length > 0 ? el : null))
+        : [];
       URLs = (
         <Fragment>
           <LabelValue
@@ -127,28 +131,30 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
           />
         </Fragment>
       );
-      files = details.files.map((file, index) => {
-        file = file.trim();
-        if (file[0] === ".") {
-          file = file.slice(1);
-        }
-        return (
-          <a
-            href={
-              file[0] === "/"
-                ? details.server + file
-                : details.server + "/" + file
+      files = details.files
+        ? details.files.map((file, index) => {
+            file = file.trim();
+            if (file[0] === ".") {
+              file = file.slice(1);
             }
-            key={index}
-            style={{ color: "#007bff" }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {index != 0 ? ", " : null}
-            {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
-          </a>
-        );
-      });
+            return (
+              <a
+                href={
+                  file[0] === "/"
+                    ? details.server + file
+                    : details.server + "/" + file
+                }
+                key={index}
+                style={{ color: "#007bff" }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {index != 0 ? ", " : null}
+                {file.length > 1 ? file.slice(file.lastIndexOf("/") + 1) : null}
+              </a>
+            );
+          })
+        : [];
 
       content = (
         <Fragment>

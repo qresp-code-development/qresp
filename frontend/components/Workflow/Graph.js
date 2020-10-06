@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Fragment } from "react";
+import { useEffect, useState, useRef, Fragment, useContext } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -10,63 +10,80 @@ import createNode from "./Nodes";
 import createEdge from "./Edges";
 import DetailsDialog from "./Details";
 
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
+
 // Global Edge Setting
 // Enlarge Edge of the node being hovered
 const changeChosenEdgeMiddleArrowScale = (values, id, selected, hovering) => {
-  if (hovering) values.middleArrowScale = 1.25;
+  if (hovering || selected) {
+    values.width = 3;
+    values.shadowColor = "#9ea7aa";
+    values.blurRadius = 5;
+  }
 };
 
 // Global Node Setting
 // Enlarge the node being hovered
 const changeChosenNodeSize = (values, id, selected, hovering) => {
-  if (hovering) values.size = 30;
+  if (hovering || selected) {
+    values.size = 25;
+    values.shadowColor = "#000";
+  }
 };
 
 // Network Settings
-const options = {
-  height: "700px",
-  nodes: {
-    chosen: {
-      label: false,
-      node: changeChosenNodeSize,
+const getOptions = (manipulate = {}) => {
+  return {
+    height: "700px",
+    nodes: {
+      chosen: {
+        label: false,
+        node: changeChosenNodeSize,
+      },
     },
-  },
-  edges: {
-    arrows: {
-      middle: true,
+    edges: {
+      arrows: {
+        middle: true,
+      },
+      chosen: {
+        label: false,
+        edge: changeChosenEdgeMiddleArrowScale,
+      },
     },
-    chosen: {
-      label: false,
-      edge: changeChosenEdgeMiddleArrowScale,
+    physics: {
+      minVelocity: 0.75,
     },
-  },
-  physics: {
-    minVelocity: 0.75,
-  },
-  interaction: {
-    hover: true,
-    dragNodes: true,
-    dragView: true,
-    tooltipDelay: 500,
-    navigationButtons: true,
-    zoomView: false,
-  },
-  layout: {
-    improvedLayout: true,
-  },
+    interaction: {
+      hover: true,
+      dragNodes: true,
+      dragView: true,
+      tooltipDelay: 500,
+      navigationButtons: true,
+      zoomView: false,
+    },
+    layout: {
+      improvedLayout: true,
+      randomSeed: 1516362197, // Time at which the domain qresp.org was registered,
+    },
+    ...manipulate,
+  };
 };
 
-const Graph = ({ workflow, data }) => {
+const Graph = ({ workflow, data, manipulate }) => {
   const [details, setDetails] = useState({});
   const [showDetails, setShowDetails] = useState(false);
+  const {
+    workflowHelper: { fit, showLabels, onClick },
+  } = useContext(CuratorHelperContext);
 
   // A reference to the div rendered by this component
   const domNode = useRef(null);
 
   // A reference to the vis network instance
   const network = useRef(null);
-
-  const workflowNodes = workflow.nodes.map((id) => createNode(id, data));
+  const workflowNodes = workflow.nodes.map((id) =>
+    createNode(id, data, showLabels)
+  );
   const workflowEdges = workflow.edges.map((pair) => createEdge(pair));
 
   const showDetailsDialog = (params) => {
@@ -86,11 +103,11 @@ const Graph = ({ workflow, data }) => {
       edges: new DataSet(workflowEdges),
     };
 
-    const wflow = new Network(domNode.current, data, options);
+    const wflow = new Network(domNode.current, data, getOptions(manipulate));
     network.current = wflow;
 
-    // To Show the Details Dialog Component on click on a node
-    wflow.on("click", showDetailsDialog);
+    // To Show the Details Dialog Component on click on a node only if not editing
+    if (onClick) wflow.on("click", showDetailsDialog);
 
     // Change mouse pointer to a small hand
     wflow.on("hoverNode", function (params) {
@@ -102,8 +119,12 @@ const Graph = ({ workflow, data }) => {
     });
 
     // Fitting the workflow, to the canvas
-    wflow.fit();
-  }, [workflow]);
+    // wflow.fit();
+  }, [workflow, showLabels, onClick]);
+
+  useEffect(() => {
+    if (fit) network.current.fit();
+  }, [fit]);
 
   return (
     <Fragment>
@@ -117,9 +138,14 @@ const Graph = ({ workflow, data }) => {
   );
 };
 
+Graph.defaultProps = {
+  manipulate: {},
+};
+
 Graph.propTypes = {
   workflow: PropTypes.object,
   data: PropTypes.object,
+  manipulate: PropTypes.object,
 };
 
 export default Graph;

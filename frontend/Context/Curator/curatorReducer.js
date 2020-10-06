@@ -9,6 +9,12 @@ import {
   ADD,
   EDIT,
   DELETE,
+  ADD_NODE,
+  ADD_EDGE,
+  DELETE_EDGE,
+  DELETE_NODE,
+  SET_NODES,
+  SET_EDGES,
 } from "../types";
 
 export default (state, action) => {
@@ -41,34 +47,60 @@ export default (state, action) => {
           action.payload.value,
         ],
       };
+
     case DELETE:
-      var prefix;
-      switch (action.payload.type) {
-        case "charts":
-          prefix = "c";
-          break;
-        case "tools":
-          prefix = "t";
-          break;
-        case "scripts":
-          prefix = "s";
-          break;
-        case "datasets":
-          prefix = "d";
-          break;
-      }
+      const prefix = action.payload.type.charAt(0);
+
+      const newEdges = state.workflow.edges.filter(
+        (edge) => edge.to != action.payload.id && edge.from != action.payload.id
+      );
+
       return {
         ...state,
         [action.payload.type]: state[action.payload.type]
           .filter((el) => el.id != action.payload.id)
-          .map((el, i) => ({ ...el, id: `${prefix}${i}` })),
+          .map((el, i) => ({
+            ...el,
+            id: `${prefix}${i}`,
+          })),
+        workflow: { ...state.workflow, edges: newEdges },
       };
+
     case EDIT:
       return {
         ...state,
         [action.payload.type]: state[action.payload.type].map((el) =>
           el.id == action.payload.value.id ? action.payload.value : el
         ),
+      };
+
+    case SET_NODES:
+      return {
+        ...state,
+        workflow: { ...state.workflow, nodes: [...action.payload] },
+      };
+    case SET_EDGES:
+      return {
+        ...state,
+        workflow: { ...state.workflow, edges: [...action.payload] },
+      };
+    case ADD_EDGE:
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          edges: [...state.workflow.edges, action.payload],
+        },
+      };
+    case DELETE_EDGE:
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          edges: state.workflow.edges.filter(
+            (edge) => edge.id != action.payload
+          ),
+        },
       };
     default:
       return state;

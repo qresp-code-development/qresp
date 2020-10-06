@@ -32,13 +32,25 @@ export const SET_PAPERINFO = "SET_PAPERINFO";
 export const SET_REFERENCE_AUTHORS = "SET_REFERENCE_AUTHORS";
 export const SET_REFERENCEINFO = "SET_REFERENCEINFO";
 
-// Chart Actions
+// Curator Multi Type Actions
 export const SET = "SET";
 export const ADD = "ADD";
 export const EDIT = "EDIT";
 export const DELETE = "DELETE";
 
+// Curator Workflow Actions
+export const SET_NODES = "SET_NODES";
+export const SET_EDGES = "SET_EDGES";
+export const ADD_NODE = "ADD_NODE";
+export const ADD_EDGE = "ADD_EDGE";
+export const DELETE_NODE = "DELETE_NODE";
+export const DELETE_EDGE = "DELETE_EDGE";
+
 //Curator Helpers
 export const OPEN_FORM = "OPEN_FORM";
 export const CLOSE_FORM = "CLOSE_FORM";
 export const SET_DEF = "SET_DEF";
+export const SET_WORKFLOW_OPEN = "SET_WORKFLOW_OPEN";
+export const SET_WORKFLOW_CLICK = "SET_WORKFLOW_CLICK";
+export const SET_WORKFLOW_FIT = "SET_WORKFLOW_FIT";
+export const SET_WORKFLOW_SHOWLABELS = "SET_WORKFLOW_SHOWLABELS";
