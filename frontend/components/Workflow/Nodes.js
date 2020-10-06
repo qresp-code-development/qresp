@@ -51,7 +51,7 @@ const hoverTooltip = (type, id, nodeData) => {
       text-align:justify;
       word-break:break-all;">
         <strong>${displayType + " " + displayId}:</strong> ${
-        nodeData.readme
+        nodeData && nodeData.readme
       }</p>`;
   }
 };
