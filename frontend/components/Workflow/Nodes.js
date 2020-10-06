@@ -6,7 +6,9 @@ const hoverTooltip = (type, id, nodeData) => {
   const displayType = type.charAt(0) + type.slice(1).toLowerCase();
   switch (type) {
     case "CHART":
-      return `
+      return (
+        nodeData &&
+        `
         <p style="
           max-width:400px;
           white-space:normal;
@@ -26,10 +28,13 @@ const hoverTooltip = (type, id, nodeData) => {
           <strong>${
             displayType + " " + displayId
           }:</strong> ${nodeData.caption.slice(0, maxCaptionLength)}${
-        nodeData.caption.length > maxCaptionLength ? "..." : ""
-      }</p>
-      `;
+          nodeData.caption.length > maxCaptionLength ? "..." : ""
+        }</p>
+      `
+      );
     case "TOOL":
+      if (!nodeData) return "";
+
       if (nodeData.kind == "software") {
         return `<p>
         <strong>Tool ${displayId}:</strong> Software<br>
@@ -45,18 +50,21 @@ const hoverTooltip = (type, id, nodeData) => {
       </p>`;
 
     default:
-      return `<p style="
+      return (
+        nodeData &&
+        `<p style="
       max-width:400px;
       white-space:normal;
       text-align:justify;
       word-break:break-all;">
         <strong>${displayType + " " + displayId}:</strong> ${
-        nodeData && nodeData.readme
-      }</p>`;
+          nodeData.readme
+        }</p>`
+      );
   }
 };
 
-const createNode = (id, data) => {
+const createNode = (id, data, showLabels = false) => {
   const type = id.charAt(0);
   const nodeData = data[type][id];
   const node = {
@@ -72,6 +80,7 @@ const createNode = (id, data) => {
         color: "black",
       },
     },
+    label: showLabels ? id : "",
   };
 
   return node;
