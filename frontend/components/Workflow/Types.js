@@ -9,22 +9,22 @@ const IdTypeMap = {
 const NodeType = {
   CHART: {
     shape: "square",
-    size: 23,
+    size: 20,
     color: "orange",
   },
   SCRIPT: {
     shape: "triangle",
-    size: 23,
+    size: 20,
     color: "green",
   },
   DATASET: {
     shape: "dot",
-    size: 23,
+    size: 20,
     color: "gray",
   },
   TOOL: {
     shape: "diamond",
-    size: 23,
+    size: 20,
     color: "blue",
   },
   EXTERNAL: {
