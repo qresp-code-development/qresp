@@ -24,6 +24,10 @@ div.vis-network div.vis-navigation div.vis-button {
   background-position: 0 !important;
 }
 
+div.vis-network div.vis-navigation div.vis-button:hover {
+  box-shadow: 0px 0px 5px 1px #800000 !important;
+}
+
 .vis-up {
   background-image: url("/images/arrow_circle.svg") !important;
   background-size: cover !important;
@@ -56,8 +60,76 @@ div.vis-network div.vis-navigation div.vis-button {
   background-image: url("/images/fit.svg") !important;
 }
 
-div.vis-network div.vis-navigation div.vis-button:hover {
+div.vis-network div.vis-edit-mode div.vis-label {
+  padding: 0.15em !important;
+  font-size: small !important;
+  text-transform: uppercase !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif !important;
+}
+
+div.vis-network div.vis-edit-mode div.vis-button {
+  height: max-content !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border-radius: 0.25em !important;
+  border: 1px solid black !important;
+}
+
+div.vis-network div.vis-edit-mode div.vis-button:hover {
   box-shadow: 0px 0px 5px 1px #800000 !important;
+}
+
+div.vis-network div.vis-manipulation div.vis-button {
+  height: max-content !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border-radius: 0.25em !important;
+  border: 1px solid black !important;
+}
+
+div.vis-network div.vis-manipulation div.vis-button:hover {
+  box-shadow: 0px 0px 5px 1px #800000 !important;
+}
+
+.vis-back {
+  background-image: url("/images/back.svg") !important;
+  background-position: left center !important;
+}
+
+.vis-edit {
+  background-image: url("/images/edit.svg") !important;
+  background-position: left center !important;
+}
+
+.vis-add {
+  background-image: url("/images/add.svg") !important;
+  background-position: left center !important;
+}
+
+.vis-delete {
+  background-image: url("/images/delete.svg") !important;
+  background-position: left center !important;
+}
+
+.vis-connect {
+  background-image: url("/images/edge.svg") !important;
+  background-position: left center !important;
+}
+
+div.vis-network div.vis-close {
+  margin: auto !important;
+  background-image: url("/images/close.svg") !important;
+  background-position: center center !important;
+  border-radius: 0.25em !important;
+}
+
+div.vis-network div.vis-close:hover {
+  box-shadow: 0px 0px 5px 1px #800000 !important;
+}
+
+.vis-separator-line {
+  display: none !important;
 }
 
 .fade-enter {
