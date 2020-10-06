@@ -56,7 +56,7 @@ const options = {
   },
 };
 
-const Graph = ({ workflow, data }) => {
+const Graph = ({ workflow, data, manipulate }) => {
   const [details, setDetails] = useState({});
   const [showDetails, setShowDetails] = useState(false);
 
@@ -65,7 +65,6 @@ const Graph = ({ workflow, data }) => {
 
   // A reference to the vis network instance
   const network = useRef(null);
-
   const workflowNodes = workflow.nodes.map((id) => createNode(id, data));
   const workflowEdges = workflow.edges.map((pair) => createEdge(pair));
 
@@ -78,7 +77,6 @@ const Graph = ({ workflow, data }) => {
       setShowDetails(true);
     }
   };
-
   useEffect(() => {
     // create a network
     const data = {
@@ -86,7 +84,10 @@ const Graph = ({ workflow, data }) => {
       edges: new DataSet(workflowEdges),
     };
 
-    const wflow = new Network(domNode.current, data, options);
+    const wflow = new Network(domNode.current, data, {
+      ...options,
+      ...manipulate,
+    });
     network.current = wflow;
 
     // To Show the Details Dialog Component on click on a node
@@ -117,9 +118,14 @@ const Graph = ({ workflow, data }) => {
   );
 };
 
+Graph.defaultProps = {
+  manipulate: {},
+};
+
 Graph.propTypes = {
   workflow: PropTypes.object,
   data: PropTypes.object,
+  manipulate: PropTypes.object,
 };
 
 export default Graph;
