@@ -28,6 +28,17 @@ div.vis-network div.vis-navigation div.vis-button:hover {
   box-shadow: 0px 0px 5px 1px #800000 !important;
 }
 
+div.vis-navigation div.vis-button:hover:before {
+  color: black !important;
+  padding: 3px !important;
+  position: relative !important;
+  width: 50px !important;
+  left: -10px !important;
+  top: -110px !important;
+  z-index: 1000 !important;
+  text-align: center !important;
+}
+
 .vis-up {
   background-image: url("/images/arrow_circle.svg") !important;
   background-size: cover !important;
@@ -56,13 +67,18 @@ div.vis-network div.vis-navigation div.vis-button:hover {
   background-image: url("/images/zoom_out.svg") !important;
 }
 
+.vis-zoomExtends:hover:before {
+  display: block !important;
+  content: "Bring all nodes into view";
+}
+
 .vis-zoomExtends {
   background-image: url("/images/fit.svg") !important;
 }
 
-div.vis-network div.vis-edit-mode div.vis-label {
+div.vis-label {
   padding: 0.15em !important;
-  font-size: small !important;
+  font-size: 1.15em !important;
   text-transform: uppercase !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif !important;
