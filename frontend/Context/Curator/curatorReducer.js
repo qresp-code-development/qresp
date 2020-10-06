@@ -47,15 +47,25 @@ export default (state, action) => {
           action.payload.value,
         ],
       };
+
     case DELETE:
       const prefix = action.payload.type.charAt(0);
+
+      const newEdges = state.workflow.edges.filter(
+        (edge) => edge.to != action.payload.id && edge.from != action.payload.id
+      );
 
       return {
         ...state,
         [action.payload.type]: state[action.payload.type]
           .filter((el) => el.id != action.payload.id)
-          .map((el, i) => ({ ...el, id: `${prefix}${i}` })),
+          .map((el, i) => ({
+            ...el,
+            id: `${prefix}${i}`,
+          })),
+        workflow: { ...state.workflow, edges: newEdges },
       };
+
     case EDIT:
       return {
         ...state,
@@ -74,32 +84,12 @@ export default (state, action) => {
         ...state,
         workflow: { ...state.workflow, edges: [...action.payload] },
       };
-    case ADD_NODE:
-      return {
-        ...state,
-        workflow: {
-          ...state.workflow,
-          nodes: [...state.workflow.nodes, ...action.payload],
-        },
-      };
     case ADD_EDGE:
       return {
         ...state,
         workflow: {
           ...state.workflow,
-          edges: [...state.workflow.edges, ...action.payload],
-        },
-      };
-    case DELETE_NODE:
-      return {
-        ...state,
-        workflow: {
-          ...state.workflow,
-          nodes: state.workflow.nodes.filter((node) => node != action.payload),
-          // Deleting a node also deletes any edges associated to it
-          edges: state.workflow.edges.filter(
-            (edge) => edge[0] != action.payload && edge[1] != action.payload
-          ),
+          edges: [...state.workflow.edges, action.payload],
         },
       };
     case DELETE_EDGE:
@@ -108,8 +98,7 @@ export default (state, action) => {
         workflow: {
           ...state.workflow,
           edges: state.workflow.edges.filter(
-            (edge) =>
-              edge[0] != action.payload[0] && edge[1] != action.payload[1]
+            (edge) => edge.id != action.payload
           ),
         },
       };
