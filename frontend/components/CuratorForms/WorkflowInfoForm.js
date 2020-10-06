@@ -1,4 +1,4 @@
-import { useState, useContext, Fragment } from "react";
+import { useEffect, useContext, Fragment } from "react";
 
 import {
   Box,
@@ -22,9 +22,13 @@ import Graph from "../Workflow/Graph";
 import Legend from "../Workflow/Legend";
 import { formatData } from "../Workflow/util";
 
+import AlertContext from "../../Context/Alert/alertContext";
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const WorkflowInfoForm = () => {
+  const { setAlert } = useContext(AlertContext);
+
   const {
     charts,
     tools,
@@ -32,39 +36,66 @@ const WorkflowInfoForm = () => {
     datasets,
     heads,
     workflow,
-    setNodes,
-    setEdges,
-    addNode,
-    deleteNode,
     addEdge,
     deleteEdge,
     add,
     del,
+    setEdges,
   } = useContext(CuratorContext);
+
+  const {
+    workflowHelper: { open, fit, showLabels },
+    setExternalNodeFormOpen,
+    setShowLabels,
+    setWorkflowFit,
+    setWorkflowOnClick,
+  } = useContext(CuratorHelperContext);
 
   const theme = useTheme();
   const direction = useMediaQuery(theme.breakpoints.down("sm"))
     ? "row"
     : "column";
 
-  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setWorkflowOnClick(false);
+    return () => {
+      setWorkflowOnClick(true);
+    };
+  }, []);
 
   const manipulate = {
     manipulation: {
       enabled: true,
       initiallyActive: true,
       addNode: false,
-      addEdge: true,
+      addEdge: (data, callback) => {
+        addEdge(data);
+        callback(null);
+      },
       deleteNode: (data, callback) => {
-        const { nodes } = data;
+        const { nodes, edges } = data;
         if (nodes && nodes.length > 0) {
           if (nodes[0].charAt(0) == "h") {
+            setEdges(workflow.edges.filter((edge) => !edges.includes(edge.id)));
             del("head", nodes[0]);
+            // edges.forEach((edge) => {
+            //   deleteEdge(edge);
+            // });
+          } else {
+            setAlert(
+              "Error",
+              "Cannot remove other than external nodes (remove the node from the corresponding section above)",
+              null
+            );
           }
         }
         callback(null);
       },
-      deleteEdge: true,
+      deleteEdge: (data, callback) => {
+        deleteEdge(data.edges[0]);
+        callback(null);
+      },
+      editEdge: false,
     },
   };
 
@@ -75,17 +106,18 @@ const WorkflowInfoForm = () => {
   const onSubmit = (values) => {
     values["id"] = `h${heads.length}`;
     add("head", values);
-    setOpen(false);
+    setExternalNodeFormOpen(false);
   };
-
-  const [state, setState] = useState({ reArrange: false, showLabels: false });
 
   return (
     <Fragment>
-      <Drawer heading="Workflow" defaultOpen={true}>
+      <Drawer heading="Build your workflow" defaultOpen={true}>
         <Grid container direction="row" spacing={1}>
           <Grid item xs={12} sm={4}>
-            <RegularStyledButton onClick={() => setOpen(true)} fullWidth>
+            <RegularStyledButton
+              onClick={() => setExternalNodeFormOpen(true)}
+              fullWidth
+            >
               Add an External Node
             </RegularStyledButton>
           </Grid>
@@ -93,27 +125,26 @@ const WorkflowInfoForm = () => {
             <RegularStyledButton
               fullWidth
               onClick={() => {
-                setState({ ...state, reArrange: true });
-                setTimeout(setState({ ...state, reArrange: false }), 100);
+                setWorkflowFit(!fit);
               }}
             >
-              Re Arrange
+              Rearrange
             </RegularStyledButton>{" "}
           </Grid>
           <Grid item xs={12} sm={4}>
-            <RegularStyledButton fullWidth>Show Labels</RegularStyledButton>{" "}
+            <RegularStyledButton
+              fullWidth
+              onClick={() => setShowLabels(!showLabels)}
+            >
+              {showLabels ? "Hide" : "Show"} Labels
+            </RegularStyledButton>{" "}
           </Grid>
         </Grid>
 
         <Box mt={1}>
           <Grid container direction="row">
             <Grid item xs={12} md={10}>
-              <Graph
-                workflow={workflow}
-                data={data}
-                manipulate={manipulate}
-                fitNow={state.fitNow}
-              />
+              <Graph workflow={workflow} data={data} manipulate={manipulate} />
             </Grid>
             <Grid item xs={12} md={2}>
               <Legend direction={direction} />
@@ -121,12 +152,15 @@ const WorkflowInfoForm = () => {
           </Grid>
         </Box>
         <Box my={1}>
-          <RegularStyledButton onClick={() => setOpen(false)} fullWidth>
+          <RegularStyledButton
+            onClick={() => setExternalNodeFormOpen(false)}
+            fullWidth
+          >
             Save
           </RegularStyledButton>
         </Box>
       </Drawer>
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setExternalNodeFormOpen(false)}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle>
             <Typography variant="h6" component="div">
@@ -163,7 +197,10 @@ const WorkflowInfoForm = () => {
             <RegularStyledButton type="submit" fullWidth>
               Save
             </RegularStyledButton>
-            <RegularStyledButton onClick={() => setOpen(false)} fullWidth>
+            <RegularStyledButton
+              onClick={() => setExternalNodeFormOpen(false)}
+              fullWidth
+            >
               Close
             </RegularStyledButton>
           </DialogActions>
