@@ -63,7 +63,6 @@ const DatasetsInfoForm = () => {
   });
 
   const onSubmit = (values) => {
-    console.log(values);
     values.files = values.files.split(",").map((el) => el.trim());
     values.URLs = values.URLs.split(",").map((el) => el.trim());
     if (def && datasets.find((el) => el.id == def.id)) {
