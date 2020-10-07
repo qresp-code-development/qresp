@@ -11,6 +11,7 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
+  SET_DOCUMENTATION,
   SET,
   ADD,
   EDIT,
@@ -47,6 +48,7 @@ const CuratorState = (props) => {
       url: "",
       abstract: "",
     },
+    documentation: "",
     charts: [],
     tools: [],
     datasets: [],
@@ -95,7 +97,11 @@ const CuratorState = (props) => {
   const setReferenceInfo = (data) =>
     dispatch({ type: SET_REFERENCEINFO, payload: data });
 
-  const set = (charts) => dispatch({ type: SET, payload: charts });
+  const setDocumentation = (data) =>
+    dispatch({ type: SET_DOCUMENTATION, payload: data });
+
+  const set = (type, value) =>
+    dispatch({ type: SET, payload: { type: type + "s", value } });
 
   const add = (type, value) =>
     dispatch({ type: ADD, payload: { type: type + "s", value } });
@@ -119,6 +125,7 @@ const CuratorState = (props) => {
         fileServerPath: state.fileServerPath,
         paperInfo: state.paperInfo,
         referenceInfo: state.referenceInfo,
+        documentation: state.documentation,
         charts: state.charts,
         tools: state.tools,
         datasets: state.datasets,
@@ -131,6 +138,7 @@ const CuratorState = (props) => {
         setPaperInfo,
         setReferenceAuthors,
         setReferenceInfo,
+        setDocumentation,
         set,
         add,
         edit,

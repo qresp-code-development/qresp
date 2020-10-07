@@ -9,12 +9,11 @@ import {
   ADD,
   EDIT,
   DELETE,
-  ADD_NODE,
   ADD_EDGE,
   DELETE_EDGE,
-  DELETE_NODE,
   SET_NODES,
   SET_EDGES,
+  SET_DOCUMENTATION,
 } from "../types";
 
 export default (state, action) => {
@@ -37,6 +36,8 @@ export default (state, action) => {
       };
     case SET_REFERENCEINFO:
       return { ...state, referenceInfo: action.payload };
+    case SET_DOCUMENTATION:
+      return { ...state, documentation: action.payload };
     case SET:
       return { ...state, [action.payload.type]: [...action.payload.value] };
     case ADD:
