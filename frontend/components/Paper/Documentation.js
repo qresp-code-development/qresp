@@ -4,9 +4,9 @@ import Drawer from "../drawer";
 
 import { Typography, Box } from "@material-ui/core";
 
-const Documentation = ({ documentation }) => {
+const Documentation = ({ documentation, editor, defaultOpen }) => {
   return (
-    <Drawer heading="Documentation">
+    <Drawer heading="Documentation" editor={editor} defaultOpen={defaultOpen}>
       <Box my={1}>
         <Typography variant="h6" component="div" color="secondary">
           <Box fontWeight="bold">Readme</Box>
@@ -19,6 +19,8 @@ const Documentation = ({ documentation }) => {
 
 Documentation.propTypes = {
   documentation: PropTypes.string.isRequired,
+  editor: PropTypes.func,
+  defaultOpen: PropTypes.bool,
 };
 
 export default Documentation;
