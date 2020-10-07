@@ -64,7 +64,7 @@ const hoverTooltip = (type, id, nodeData) => {
   }
 };
 
-const createNode = (id, data, showLabels = false) => {
+const createNode = (id, data, showLabels = false, position = {}) => {
   const type = id.charAt(0);
   const nodeData = data[type][id];
   const node = {
@@ -74,13 +74,14 @@ const createNode = (id, data, showLabels = false) => {
     // info: val.details,
     font: {
       multi: true,
-      size: 25,
+      size: 20,
       color: "black",
       bold: {
         color: "black",
       },
     },
     label: showLabels ? id : "",
+    ...position,
   };
 
   return node;

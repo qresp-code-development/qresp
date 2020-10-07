@@ -27,7 +27,7 @@ import CuratorContext from "../../Context/Curator/curatorContext";
 import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
 const WorkflowInfoForm = () => {
-  const { setAlert } = useContext(AlertContext);
+  const { setAlert, unsetAlert } = useContext(AlertContext);
 
   const {
     charts,
@@ -58,8 +58,10 @@ const WorkflowInfoForm = () => {
 
   useEffect(() => {
     setWorkflowOnClick(false);
+    setShowLabels(true);
     return () => {
       setWorkflowOnClick(true);
+      setShowLabels(false);
     };
   }, []);
 
@@ -69,7 +71,20 @@ const WorkflowInfoForm = () => {
       initiallyActive: true,
       addNode: false,
       addEdge: (data, callback) => {
-        addEdge(data);
+        if (data.to == data.from) {
+          setAlert(
+            "Self Edge Alert",
+            "You are adding a self edge, if you want to proceed click Go Ahead",
+            <RegularStyledButton
+              onClick={() => {
+                unsetAlert();
+                addEdge(data);
+              }}
+            >
+              Go Ahead
+            </RegularStyledButton>
+          );
+        } else addEdge(data);
         callback(null);
       },
       deleteNode: (data, callback) => {
@@ -78,9 +93,6 @@ const WorkflowInfoForm = () => {
           if (nodes[0].charAt(0) == "h") {
             setEdges(workflow.edges.filter((edge) => !edges.includes(edge.id)));
             del("head", nodes[0]);
-            // edges.forEach((edge) => {
-            //   deleteEdge(edge);
-            // });
           } else {
             setAlert(
               "Error",
@@ -96,6 +108,11 @@ const WorkflowInfoForm = () => {
         callback(null);
       },
       editEdge: false,
+      controlNodeStyle: {
+        size: 8,
+        color: "black",
+        chosen: false,
+      },
     },
   };
 
@@ -107,6 +124,7 @@ const WorkflowInfoForm = () => {
     values["id"] = `h${heads.length}`;
     add("head", values);
     setExternalNodeFormOpen(false);
+    setWorkflowFit(!fit);
   };
 
   return (

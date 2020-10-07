@@ -72,6 +72,9 @@ const getOptions = (manipulate = {}) => {
 const Graph = ({ workflow, data, manipulate }) => {
   const [details, setDetails] = useState({});
   const [showDetails, setShowDetails] = useState(false);
+
+  const [positions, setPositions] = useState(null);
+
   const {
     workflowHelper: { fit, showLabels, onClick },
   } = useContext(CuratorHelperContext);
@@ -82,8 +85,14 @@ const Graph = ({ workflow, data, manipulate }) => {
   // A reference to the vis network instance
   const network = useRef(null);
   const workflowNodes = workflow.nodes.map((id) =>
-    createNode(id, data, showLabels)
+    createNode(
+      id,
+      data,
+      showLabels,
+      positions && positions[id] ? positions[id] : {}
+    )
   );
+
   const workflowEdges = workflow.edges.map((pair) => createEdge(pair));
 
   const showDetailsDialog = (params) => {
@@ -109,6 +118,13 @@ const Graph = ({ workflow, data, manipulate }) => {
     // To Show the Details Dialog Component on click on a node only if not editing
     if (onClick) wflow.on("click", showDetailsDialog);
 
+    wflow.on("dragEnd", (params) => {
+      setPositions({
+        ...positions,
+        [params.nodes[0]]: wflow.getPosition(params.nodes[0]),
+      });
+    });
+
     // Change mouse pointer to a small hand
     wflow.on("hoverNode", function (params) {
       wflow.canvas.body.container.style.cursor = "pointer";
@@ -120,10 +136,30 @@ const Graph = ({ workflow, data, manipulate }) => {
 
     // Fitting the workflow, to the canvas
     // wflow.fit();
+
+    if (
+      positions == null ||
+      Object.keys(positions).length != workflowNodes.length
+    ) {
+      const pos = {};
+      workflowNodes.forEach(
+        (node) => (pos[node.id] = wflow.getPosition(node.id))
+      );
+      setPositions(pos);
+    }
   }, [workflow, showLabels, onClick]);
 
   useEffect(() => {
-    if (fit) network.current.fit();
+    network.current.fit();
+    const pos = {};
+    workflowNodes.forEach(
+      (node) =>
+        (pos[node.id] =
+          positions && positions[node.id]
+            ? positions[node.id]
+            : network.current.getPosition(node.id))
+    );
+    setPositions(pos);
   }, [fit]);
 
   return (
