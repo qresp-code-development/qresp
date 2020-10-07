@@ -14,6 +14,7 @@ import ChartsInfoElement from "../components/CuratorElements/ChartsElement";
 import ToolsInfoElement from "../components/CuratorElements/ToolsElement";
 import DatasetsInfoElement from "../components/CuratorElements/DatasetsElement";
 import ScriptsInfoElement from "../components/CuratorElements/ScriptsElement";
+import DocumentationInfoElement from "../components/CuratorElements/DocumentationElement";
 import WorkflowInfoElement from "../components/CuratorElements/WorkflowElement";
 import FileTree from "../components/FileTree";
 
@@ -39,6 +40,7 @@ const curator = () => {
             <ToolsInfoElement />
             <DatasetsInfoElement />
             <ScriptsInfoElement />
+            <DocumentationInfoElement />
             <WorkflowInfoElement />
           </Container>
         </SourceTreeState>
