@@ -2,6 +2,10 @@ const capitalizeFirstLetter = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
 
+const getServer = () => {
+  return window.location.protocol + "//" + window.location.hostname + "/";
+};
+
 const namesUtil = {
   get: (names) => {
     if (names.length == 0) {
@@ -54,4 +58,4 @@ const referenceUtil = {
   },
 };
 
-export { capitalizeFirstLetter, namesUtil, referenceUtil };
+export { capitalizeFirstLetter, getServer, namesUtil, referenceUtil };
