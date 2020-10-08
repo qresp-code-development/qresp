@@ -11,17 +11,23 @@ const FileServerElement = () => {
 
   const [editing, setEditing] = useState(true);
 
-    useEffect(() => {
-      if (paperInfo.tags.length > 0 ) {
-        setEditing(false);
-      }
-    }, [paperInfo]);
+  useEffect(() => {
+    if (paperInfo.tags.length > 0) {
+      setEditing(false);
+    } else setEditing(true);
+  }, [paperInfo]);
 
   return (
     <SwitchFade
       editing={editing}
-      form={<PaperInfoForm editor={setEditing}/>}
-      display={<PaperInfo paperInfo={paperInfo} editor={setEditing} defaultOpen={true}/>}
+      form={<PaperInfoForm editor={setEditing} />}
+      display={
+        <PaperInfo
+          paperInfo={paperInfo}
+          editor={setEditing}
+          defaultOpen={true}
+        />
+      }
     />
   );
 };

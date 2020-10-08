@@ -20,9 +20,9 @@ const CuratorElement = () => {
       curatorInfo.firstName !== "" &&
       curatorInfo.lastName !== "" &&
       curatorInfo.emailIdName !== ""
-    ) {
+    )
       setEditing(false);
-    }
+    else setEditing(true);
   }, [curatorInfo]);
 
   return (

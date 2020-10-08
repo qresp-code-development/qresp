@@ -14,7 +14,7 @@ const CuratorElement = () => {
   useEffect(() => {
     if (documentation !== "") {
       setEditing(false);
-    }
+    } else setEditing(true);
   }, [documentation]);
 
   return (
