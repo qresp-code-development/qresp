@@ -82,6 +82,8 @@ const CuratorState = (props) => {
 
   const setAll = (data) => dispatch({ type: SET_ALL, payload: data });
 
+  const resetAll = () => dispatch({ type: SET_ALL, payload: initialState });
+
   const setCuratorInfo = (info) =>
     dispatch({ type: SET_CURATORINFO, payload: info });
 
@@ -133,6 +135,8 @@ const CuratorState = (props) => {
         workflow: state.workflow,
         heads: state.heads,
         metadata: state,
+        setAll,
+        resetAll,
         setCuratorInfo,
         setFileServerPath,
         setPaperInfo,
