@@ -92,7 +92,7 @@ const PaperDetails = ({ paper, error, preview, query }) => {
   }, []);
 
   const showWorkflows =
-    workflows.edges.length > 0 && Object.keys(workflows.nodes).length > 0;
+    workflows.edges.length > 0 && workflows.nodes.length > 0;
 
   return (
     <Fragment>
@@ -156,23 +156,25 @@ export async function getServerSideProps(ctx) {
 
   var error = false;
   var paper;
-
+  var preview = false;
   try {
-    if (!query.id.startsWith("PREVIEW"))
-      paper = await axios
-        .get(`${query.server}/api/paper/${query.id}`)
-        .then((res) => res.data);
-    else
+    if (query.id.startsWith("PREVIEW")) {
       paper = await axios
         .get(`${query.server}/api/preview/${query.id}`)
         .then((res) => res.data);
+      preview = true;
+    } else {
+      paper = await axios
+        .get(`${query.server}/api/paper/${query.id}`)
+        .then((res) => res.data);
+    }
   } catch (e) {
     console.error(e);
     error = true;
   }
 
   return {
-    props: { paper, error, query },
+    props: { paper, error, query, preview },
   };
 }
 
