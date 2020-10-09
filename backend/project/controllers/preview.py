@@ -14,6 +14,13 @@ class Preview:
         self.dir_prefix = getcwd() + '/papers/previews/'
         self.id_prefix = 'PREVIEW_'
 
+    def generateId(self):
+        id = uuid4().hex
+        while("{}{}.json".format(self.id_prefix, id) in listdir(self.dir_prefix)):
+            id = uuid4().hex
+
+        return "{}{}".format(self.id_prefix, id)
+
     def getMetadata(self, id):
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'r') as f:
@@ -26,11 +33,7 @@ class Preview:
             return 500
 
     def generateLink(self, paper):
-        id = uuid4().hex
-
-        while("{}.json".format(id) in listdir(self.dir_prefix)):
-            id = uuid4().hex
-
+        id = self.generateId()
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'w') as f:
                 json.dump(paper, f, ensure_ascii=False)
