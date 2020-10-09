@@ -14,7 +14,11 @@ import { GetApp, Visibility } from "@material-ui/icons";
 
 import Ajv from "ajv";
 import schema from "../../Context/schema";
+import axios from "axios";
 
+import { useRouter } from "next/router";
+
+import { getServer } from "../../Utils/utils";
 import StyledTooltip from "../tooltip";
 import { RegularStyledButton } from "../button";
 
@@ -27,6 +31,8 @@ const TopActions = () => {
   const [mdata, setMdata] = useState("");
   const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
 
+  const router = useRouter();
+
   const onClicks = {
     resume: () => {
       setResumeDialogOpen(true);
@@ -34,7 +40,22 @@ const TopActions = () => {
     download: (metadata) => {
       return metadata;
     },
-    preview: () => {},
+    preview: () => {
+      console.log(getServer());
+      axios
+        .post(getServer() + "api/preview", metadata)
+        .then((res) => res.data)
+        .then((res) => console.log(res))
+        // .then(res=>router.push(`/paperdetails/${res}`))
+        .catch((err) => {
+          console.error(err);
+          setAlert(
+            "Error",
+            "There was an error generating your preview, please talk to the administrators if the issue persists",
+            null
+          );
+        });
+    },
   };
 
   const buttons = {
@@ -68,7 +89,11 @@ const TopActions = () => {
     ),
     preview: (fullWidth = false) => (
       <StyledTooltip title="Preview the curated paper">
-        <RegularStyledButton fullWidth={fullWidth} endIcon={<Visibility />}>
+        <RegularStyledButton
+          fullWidth={fullWidth}
+          endIcon={<Visibility />}
+          onClick={onClicks.preview}
+        >
           Preview
         </RegularStyledButton>
       </StyledTooltip>
