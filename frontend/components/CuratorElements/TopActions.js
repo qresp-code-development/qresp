@@ -18,6 +18,7 @@ import axios from "axios";
 
 import { useRouter } from "next/router";
 
+import { convertStateToSchema, convertSchemaToState } from "../../Utils/model";
 import { getServer } from "../../Utils/utils";
 import StyledTooltip from "../tooltip";
 import { RegularStyledButton } from "../button";
@@ -40,13 +41,18 @@ const TopActions = () => {
     download: (metadata) => {
       return metadata;
     },
-    preview: () => {
-      console.log(getServer());
+    preview: (e) => {
+      e.preventDefault();
       axios
-        .post(getServer() + "api/preview", metadata)
+        .post(getServer() + "/api/preview", convertStateToSchema(metadata))
         .then((res) => res.data)
-        .then((res) => console.log(res))
-        // .then(res=>router.push(`/paperdetails/${res}`))
+        // .then((res) => console.log(res))
+        .then((res) =>
+          router.push("/paperdetails/[id]", {
+            pathname: `/paperdetails/${res}`,
+            query: { server: getServer() },
+          })
+        )
         .catch((err) => {
           console.error(err);
           setAlert(
