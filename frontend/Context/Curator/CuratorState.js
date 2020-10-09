@@ -33,10 +33,11 @@ const CuratorState = (props) => {
     },
     fileServerPath: "",
     paperInfo: {
-      PIs: [{ firstName: "", middleName: "", lastName: "" }],
-      collections: "",
-      tags: "",
+      PIs: "",
+      collections: [],
+      tags: [],
       notebookFile: "",
+      notebookPath: "",
     },
     referenceInfo: {
       kind: "",
