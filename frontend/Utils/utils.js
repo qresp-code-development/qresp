@@ -3,7 +3,9 @@ const capitalizeFirstLetter = (text) => {
 };
 
 const getServer = () => {
-  return window.location.protocol + "//" + window.location.hostname + "/";
+  var url = window.location.protocol + "//" + window.location.hostname;
+  if (window.location.port == "") return url + "/";
+  return url + `:${window.location.port}`;
 };
 
 const namesUtil = {
