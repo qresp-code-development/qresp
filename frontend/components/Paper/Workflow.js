@@ -22,7 +22,7 @@ const Workflow = ({ workflow, charts, tools, scripts, datasets, external }) => {
       <Box mt={1}>
         <Grid container direction="row">
           <Grid item xs={12} md={10}>
-            <Graph workflow={formatWorkflow(workflow)} data={data} />
+            <Graph workflow={workflow} data={data} />
           </Grid>
           <Grid item xs={12} md={2}>
             <Legend direction={direction} />
