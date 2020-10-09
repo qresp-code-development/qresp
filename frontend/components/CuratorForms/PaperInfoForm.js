@@ -23,9 +23,12 @@ import CuratorContext from "../../Context/Curator/curatorContext";
 import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 
 const PaperInfoForm = ({ editor }) => {
-  const { paperInfo, setPaperInfo, setReferenceAuthors } = useContext(
-    CuratorContext
-  );
+  const {
+    paperInfo,
+    setPaperInfo,
+    setReferenceAuthors,
+    fileServerPath,
+  } = useContext(CuratorContext);
   const { setSaveMethod, openSelector, HideSelector } = useContext(
     SourceTreeContext
   );
@@ -46,9 +49,14 @@ const PaperInfoForm = ({ editor }) => {
     notebookFile: Yup.string(),
   });
 
+  const formattedNames = namesUtil.get(paperInfo.PIs);
   const { register, handleSubmit, errors, watch, control, setValue } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: paperInfo,
+    defaultValues: {
+      ...paperInfo,
+      PIs: formattedNames,
+      tags: paperInfo.tags.join(", "),
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -57,8 +65,13 @@ const PaperInfoForm = ({ editor }) => {
   });
 
   const onSubmit = (values) => {
+    values.collections = values.collections.split(",").map((el) => el.trim());
+    values.tags = values.tags.split(",").map((el) => el.trim());
+    values.PIs = namesUtil.set(values.PIs);
+    if (values.notebookFile.length > 0)
+      values["notebookPath"] = fileServerPath + values.notebookFile;
     setPaperInfo(values);
-    setReferenceAuthors(namesUtil.set(values.PIs));
+    setReferenceAuthors(values.PIs);
     editor(false);
   };
 
@@ -126,7 +139,7 @@ const PaperInfoForm = ({ editor }) => {
                     id={`pi${index}`}
                     register={register}
                     errors={errors.pis && errors.pis[index]}
-                    defaults={paperInfo.PIs[index]}
+                    defaults={formattedNames[index]}
                     remove={
                       <Tooltip
                         title={
