@@ -14,7 +14,7 @@ const FileServerElement = () => {
   useEffect(() => {
     if (fileServerPath != "") {
       setEditing(false);
-    }
+    } else setEditing(true);
   }, [fileServerPath]);
 
   return (

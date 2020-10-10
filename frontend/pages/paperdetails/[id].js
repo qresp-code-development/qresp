@@ -24,7 +24,7 @@ import axios from "axios";
 
 import CuratorHelperState from "../../Context/CuratorHelpers/curatorHelperState";
 
-const PaperDetails = ({ data, error, preview, query }) => {
+const PaperDetails = ({ paper, error, preview, query }) => {
   const {
     title,
     authors,
@@ -52,9 +52,9 @@ const PaperDetails = ({ data, error, preview, query }) => {
     affiliation,
     heads,
     license,
-  } = data.paperdetail;
+  } = paper;
 
-  const workflows = data.workflowdetail;
+  const workflows = paper.workflows;
   const curator = { firstName, middleName, lastName, emailId, affiliation };
 
   const referenceData = {
@@ -82,7 +82,7 @@ const PaperDetails = ({ data, error, preview, query }) => {
   };
 
   useEffect(() => {
-    if (error || (data && data.error)) {
+    if (error || (paper && paper.error)) {
       setAlert(
         "Error Getting Paper Data !",
         "There was error trying to get paper details. Please try again ! If problems persist please contact the administrator.",
@@ -92,7 +92,7 @@ const PaperDetails = ({ data, error, preview, query }) => {
   }, []);
 
   const showWorkflows =
-    workflows.edges.length > 0 && Object.keys(workflows.nodes).length > 0;
+    workflows.edges.length > 0 && workflows.nodes.length > 0;
 
   return (
     <Fragment>
@@ -109,17 +109,19 @@ const PaperDetails = ({ data, error, preview, query }) => {
         <Box mb={7} mt={1}>
           <ReferenceInfo referenceData={referenceData} />
           <SimpleReactLightbox>
-            <ChartInfo
-              charts={charts}
-              fileserverpath={fileServerPath}
-              downloadPath={downloadPath}
-              datasets={datasets}
-              tools={tools}
-              scripts={scripts}
-              external={heads}
-              showWorkflows={showWorkflows}
-              server={query.server}
-            />
+            <CuratorHelperState>
+              <ChartInfo
+                charts={charts}
+                fileserverpath={fileServerPath}
+                downloadPath={downloadPath}
+                datasets={datasets}
+                tools={tools}
+                scripts={scripts}
+                external={heads}
+                showWorkflows={showWorkflows}
+                server={query.server}
+              />
+            </CuratorHelperState>
           </SimpleReactLightbox>
           <DatasetInfo datasets={datasets} fileserverpath={fileServerPath} />
           <ToolsInfo tools={tools} />
@@ -153,25 +155,26 @@ export async function getServerSideProps(ctx) {
   const { query } = ctx;
 
   var error = false;
-  const data = { paperdetail: {}, workflowdetail: {} };
-
+  var paper;
+  var preview = false;
   try {
-    const paperdetails = await axios
-      .get(`${query.server}/api/paper/${query.id}`)
-      .then((res) => res.data);
-    data.paperdetail = paperdetails;
-
-    const workflowdetails = await axios
-      .get(`${query.server}/api/workflow/${query.id}`)
-      .then((res) => res.data);
-    data.workflowdetail = workflowdetails;
+    if (query.id.startsWith("PREVIEW")) {
+      paper = await axios
+        .get(`${query.server}/api/preview/${query.id}`)
+        .then((res) => res.data);
+      preview = true;
+    } else {
+      paper = await axios
+        .get(`${query.server}/api/paper/${query.id}`)
+        .then((res) => res.data);
+    }
   } catch (e) {
     console.error(e);
     error = true;
   }
 
   return {
-    props: { data, error, query },
+    props: { paper, error, query, preview },
   };
 }
 

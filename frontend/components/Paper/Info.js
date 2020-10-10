@@ -8,10 +8,6 @@ import { Box } from "@material-ui/core";
 const PaperInfo = ({ paperInfo, editor, defaultOpen }) => {
   const { PIs, collections, tags, notebookFile } = paperInfo;
 
-  const PINames = PIs.map(
-    (pi) => `${pi.firstName} ${pi.middleName} ${pi.lastName}`
-  );
-
   return (
     <Drawer
       heading="Paper Information"
@@ -19,10 +15,7 @@ const PaperInfo = ({ paperInfo, editor, defaultOpen }) => {
       defaultOpen={defaultOpen}
     >
       <Box my={1}>
-        <LabelValue
-          label="Principal Investigators: "
-          value={PINames.join(", ")}
-        />
+        <LabelValue label="Principal Investigators: " value={PIs} />
         <LabelValue label="Collections" value={collections} />
         <LabelValue label="Tags" value={tags} />
         {notebookFile && (

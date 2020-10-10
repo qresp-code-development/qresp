@@ -14,7 +14,7 @@ const ReferenceInfoElement = () => {
   useEffect(() => {
     if (referenceInfo.title) {
       setEditing(false);
-    }
+    } else setEditing(true);
   }, [referenceInfo]);
 
   return (

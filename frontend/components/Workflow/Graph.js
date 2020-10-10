@@ -118,12 +118,13 @@ const Graph = ({ workflow, data, manipulate }) => {
     // To Show the Details Dialog Component on click on a node only if not editing
     if (onClick) wflow.on("click", showDetailsDialog);
 
-    wflow.on("dragEnd", (params) => {
-      setPositions({
-        ...positions,
-        [params.nodes[0]]: wflow.getPosition(params.nodes[0]),
+    if (manipulate != {})
+      wflow.on("dragEnd", (params) => {
+        setPositions({
+          ...positions,
+          [params.nodes[0]]: wflow.getPosition(params.nodes[0]),
+        });
       });
-    });
 
     // Change mouse pointer to a small hand
     wflow.on("hoverNode", function (params) {

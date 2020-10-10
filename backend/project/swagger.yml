@@ -215,3 +215,41 @@ paths:
           description: Contents returned
         500:
           description: Failure
+  /preview/{id}:
+    get:
+      operationId: "project.api.getPreview"
+      tags:
+        - "Get metadata for the preview"
+      summary: "Get the metadata for preview from the id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Metadata paper ID
+      responses:
+        200:
+          description: Metadata successfully returned
+        400:
+          description: Incorrect paper id, paper with this id does not exist in the database
+        500:
+          description: Internal server error
+  /preview:
+    post:
+      operationId: "project.api.generatePreview"
+      tags:
+        - "Generate metadata link"
+      summary: "Add data for previewing the metadata under curation"
+      parameters:
+        - in: body
+          name: paper
+          description: The metadata for which the preview is to be generated
+          schema:
+            type: object
+      responses:
+        200:
+          description: Metadata successfully added and returned
+        400:
+          description: Incorrect paper object
+        500:
+          description: Internal server error

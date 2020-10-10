@@ -1,5 +1,6 @@
 from project.paperdao import *
 from project.util import Dtree
+from project.controllers.preview import Preview
 # edit swagger.yml file for method changes
 
 
@@ -165,3 +166,38 @@ def dircontents(req):
         return msg, 500
 
     return {"files": files, "services": services}, 200
+
+
+def generatePreview(paper):
+    """
+    Generate a preview of the metadata
+    Handler for POST: /api/preview 
+
+    :return : ID for the metadata to be previewed
+    """
+    result = Preview().generateLink(paper)
+    if result == 400:
+        return "Validation Error, incorrect paper supplied", 400
+
+    if result == 500:
+        return "Internal Server Error", 500
+
+    return result, 200
+
+
+def getPreview(id):
+    """
+    View the preview of the metadata
+    Handler for GET: /api/preview/{id}
+
+    :return: Metadata object using the id provided for the metadata
+    """
+    result = Preview().getMetadata(id)
+
+    if result == 400:
+        return "Preview does not exist, incorrect id", 400
+
+    if result == 500:
+        return "Internal Server Error", 500
+
+    return result, 200

@@ -33,10 +33,11 @@ const CuratorState = (props) => {
     },
     fileServerPath: "",
     paperInfo: {
-      PIs: [{ firstName: "", middleName: "", lastName: "" }],
-      collections: "",
-      tags: "",
+      PIs: "",
+      collections: [],
+      tags: [],
       notebookFile: "",
+      notebookPath: "",
     },
     referenceInfo: {
       kind: "",
@@ -81,6 +82,8 @@ const CuratorState = (props) => {
   }, [state.charts, state.scripts, state.datasets, state.tools, state.heads]);
 
   const setAll = (data) => dispatch({ type: SET_ALL, payload: data });
+
+  const resetAll = () => dispatch({ type: SET_ALL, payload: initialState });
 
   const setCuratorInfo = (info) =>
     dispatch({ type: SET_CURATORINFO, payload: info });
@@ -133,6 +136,8 @@ const CuratorState = (props) => {
         workflow: state.workflow,
         heads: state.heads,
         metadata: state,
+        setAll,
+        resetAll,
         setCuratorInfo,
         setFileServerPath,
         setPaperInfo,
