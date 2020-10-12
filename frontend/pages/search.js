@@ -111,7 +111,7 @@ const search = ({ initialdata, error, selectedservers }) => {
       <Container>
         <Box display="flex" flexDirection="column" m={2}>
           <Box display="flex" alignItems="center" justifyContent="center" p={2}>
-            <Typography variant="h3">
+            <Typography variant="h4">
               <Box fontWeight="bold">{`${rows.length}  Records Available`}</Box>
             </Typography>
           </Box>
