@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 
-import { SmallStyledButton } from "./button";
+import { RegularStyledButton } from "./button";
 
 import {
   Dialog,
@@ -44,7 +44,7 @@ const AlertDialog = () => {
         <ContentText id="alert-dialog-description">{msg}</ContentText>
       </DialogContent>
       <DialogActions>
-        <SmallStyledButton onClick={handleClose}>Dismiss</SmallStyledButton>
+        <RegularStyledButton onClick={handleClose}>Dismiss</RegularStyledButton>
         {buttons ? buttons : null}
       </DialogActions>
     </Dialog>
