@@ -16,6 +16,7 @@ import DatasetsInfoElement from "../components/CuratorElements/DatasetsElement";
 import ScriptsInfoElement from "../components/CuratorElements/ScriptsElement";
 import DocumentationInfoElement from "../components/CuratorElements/DocumentationElement";
 import WorkflowInfoElement from "../components/CuratorElements/WorkflowElement";
+import LicenseInfoElement from "../components/CuratorElements/LicenseElement";
 import FileTree from "../components/FileTree";
 
 const curator = () => {
@@ -42,6 +43,7 @@ const curator = () => {
             <ScriptsInfoElement />
             <DocumentationInfoElement />
             <WorkflowInfoElement />
+            <LicenseInfoElement />
           </Container>
         </SourceTreeState>
       </CuratorHelperState>
