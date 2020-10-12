@@ -32,6 +32,7 @@ export const SET_PAPERINFO = "SET_PAPERINFO";
 export const SET_REFERENCE_AUTHORS = "SET_REFERENCE_AUTHORS";
 export const SET_REFERENCEINFO = "SET_REFERENCEINFO";
 export const SET_DOCUMENTATION = "SET_DOCUMENTATION";
+export const SET_LICENSE = "SET_LICENSE";
 
 // Curator Multi Type Actions
 export const SET = "SET";

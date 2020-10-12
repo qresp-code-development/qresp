@@ -12,6 +12,7 @@ import {
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
   SET_DOCUMENTATION,
+  SET_LICENSE,
   SET,
   ADD,
   EDIT,
@@ -56,6 +57,7 @@ const CuratorState = (props) => {
     scripts: [],
     heads: [],
     workflow: { nodes: [], edges: [] },
+    license: "",
   };
 
   const [state, dispatch] = useReducer(CuratorReducer, initialState);
@@ -103,6 +105,9 @@ const CuratorState = (props) => {
   const setDocumentation = (data) =>
     dispatch({ type: SET_DOCUMENTATION, payload: data });
 
+  const setLicense = (license) =>
+    dispatch({ type: SET_LICENSE, payload: license });
+
   const set = (type, value) =>
     dispatch({ type: SET, payload: { type: type + "s", value } });
 
@@ -135,6 +140,7 @@ const CuratorState = (props) => {
         scripts: state.scripts,
         workflow: state.workflow,
         heads: state.heads,
+        license: state.license,
         metadata: state,
         setAll,
         resetAll,
@@ -152,6 +158,7 @@ const CuratorState = (props) => {
         setEdges,
         addEdge,
         deleteEdge,
+        setLicense,
       }}
     >
       {props.children}
