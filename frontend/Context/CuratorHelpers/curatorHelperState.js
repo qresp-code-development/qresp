@@ -61,6 +61,7 @@ const CuratorHelperState = (props) => {
         datasetsHelper: { open: state.open.dataset, def: state.def.dataset },
         scriptsHelper: { open: state.open.script, def: state.def.script },
         workflowHelper: state.workflow,
+        editing: state.editing,
         openForm,
         closeForm,
         setDefault,
