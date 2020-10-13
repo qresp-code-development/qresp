@@ -6,6 +6,7 @@ import {
   SET_WORKFLOW_FIT,
   SET_WORKFLOW_OPEN,
   SET_WORKFLOW_SHOWLABELS,
+  SET_EDITING,
 } from "../types";
 
 export default (state, action) => {
@@ -41,6 +42,14 @@ export default (state, action) => {
       return {
         ...state,
         workflow: { ...state.workflow, showLabels: action.payload },
+      };
+    case SET_EDITING:
+      return {
+        ...state,
+        editing: {
+          ...state.editing,
+          [action.payload.type]: action.payload.value,
+        },
       };
     default:
       return state;
