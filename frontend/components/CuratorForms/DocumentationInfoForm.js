@@ -26,7 +26,7 @@ const DocumentationInfoForm = ({ editor }) => {
 
   const onSubmit = (values) => {
     setDocumentation(values.documentation);
-    editor(false);
+    editor();
   };
 
   return (

@@ -2,8 +2,8 @@ import React, { useReducer, useEffect } from "react";
 import ServerContext from "./serverContext";
 import serverReducer from "./serverReducer";
 
-import servers from "./qresp_servers";
-import httpServers from "./http_servers";
+import servers from "../../data/qresp_servers";
+import httpServers from "../../data/http_servers";
 
 import { SET_SELECTED, SET_SELECTED_HTTP } from "../types";
 

@@ -13,7 +13,7 @@ const ToolsInfoElement = () => {
   const { tools } = useContext(CuratorContext);
 
   return (
-    <Drawer heading="Add tools from your paper" defaultOpen={true}>
+    <Drawer heading="Add Tools from your paper" defaultOpen={true}>
       <ToolsInfoForm />
       {tools.length > 0 ? (
         <ToolsInfo

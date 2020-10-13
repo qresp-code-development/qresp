@@ -72,7 +72,7 @@ const PaperInfoForm = ({ editor }) => {
       values["notebookPath"] = fileServerPath + values.notebookFile;
     setPaperInfo(values);
     setReferenceAuthors(values.PIs);
-    editor(false);
+    editor();
   };
 
   const onOpenFileSelector = () => {
@@ -138,7 +138,7 @@ const PaperInfoForm = ({ editor }) => {
                     key={index}
                     id={`pi${index}`}
                     register={register}
-                    errors={errors.pis && errors.pis[index]}
+                    errors={errors.PIs && errors.PIs[index]}
                     defaults={formattedNames[index]}
                     remove={
                       <Tooltip

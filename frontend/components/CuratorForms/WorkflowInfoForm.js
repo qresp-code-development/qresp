@@ -21,6 +21,7 @@ import { TextInputField } from "../Form/InputFields";
 import Graph from "../Workflow/Graph";
 import Legend from "../Workflow/Legend";
 import { formatData } from "../Workflow/util";
+import { isGraph } from "../../Utils/graph";
 
 import AlertContext from "../../Context/Alert/alertContext";
 import CuratorContext from "../../Context/Curator/curatorContext";
@@ -127,6 +128,21 @@ const WorkflowInfoForm = () => {
     setWorkflowFit(!fit);
   };
 
+  const onSave = () => {
+    if (!isGraph.connected(workflow))
+      setAlert(
+        "Warning: Disconnected Nodes",
+        "There are some disconnected nodes in the graph, please click save here if you want to still save the workflow",
+        <RegularStyledButton onClick={unsetAlert}>Save</RegularStyledButton>
+      );
+    else if (isGraph.cyclic(workflow))
+      setAlert(
+        "Warning: Cycles Detected",
+        "Cycles detected in the workflow, please click save here if you want to still save the workflow",
+        <RegularStyledButton onClick={unsetAlert}>Save</RegularStyledButton>
+      );
+  };
+
   return (
     <Fragment>
       <Drawer heading="Build your workflow" defaultOpen={true}>
@@ -170,10 +186,7 @@ const WorkflowInfoForm = () => {
           </Grid>
         </Box>
         <Box my={1}>
-          <RegularStyledButton
-            onClick={() => setExternalNodeFormOpen(false)}
-            fullWidth
-          >
+          <RegularStyledButton onClick={onSave} fullWidth>
             Save
           </RegularStyledButton>
         </Box>

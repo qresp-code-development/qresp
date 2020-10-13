@@ -11,7 +11,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import AlertContext from "../Context/Alert/alertContext";
 
-import servers from "../Context/Servers/qresp_servers";
+import servers from "../data/qresp_servers";
 
 const explorer = ({ error }) => {
   const { setAlert, unsetAlert } = useContext(AlertContext);

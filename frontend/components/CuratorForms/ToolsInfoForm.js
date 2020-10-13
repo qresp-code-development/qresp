@@ -223,7 +223,7 @@ const ToolsInfoForm = () => {
     name: "extraFields",
   });
 
-  const kindWatcher = watch("kind");
+  const kindWatcher = watch("kind", def == null ? "software" : def.kind);
 
   const onSubmit = (values) => {
     if (values.kind == "software")

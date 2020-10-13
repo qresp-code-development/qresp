@@ -15,6 +15,9 @@ class Preview:
         self.id_prefix = 'PREVIEW_'
 
     def generateId(self):
+        '''
+        Generate a new id for the preivew  of the paper
+        '''
         id = uuid4().hex
         while("{}{}.json".format(self.id_prefix, id) in listdir(self.dir_prefix)):
             id = uuid4().hex
@@ -22,6 +25,19 @@ class Preview:
         return "{}{}".format(self.id_prefix, id)
 
     def getMetadata(self, id):
+        '''
+        Return the preview metadata for the id given
+
+        Parameters
+        -----------
+        id: string
+            The id associated to the metadata
+
+        Return
+        ------
+        dict, if no error
+        html error code, if error
+        '''
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'r') as f:
                 return json.load(f)
@@ -33,6 +49,19 @@ class Preview:
             return 500
 
     def generateLink(self, paper):
+        '''
+        Generate a new link for the preview of the given metadata 
+
+        Parameters
+        -----------
+        paper: dict
+               The metadata for which the preview is to be generated
+
+        Return
+        ------
+        string, if no error: New id for the preview paper
+        html error code, if error
+        '''
         id = self.generateId()
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'w') as f:

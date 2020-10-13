@@ -5,6 +5,7 @@ import {
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
   SET_REFERENCEINFO,
+  SET_LICENSE,
   SET,
   ADD,
   EDIT,
@@ -38,6 +39,8 @@ export default (state, action) => {
       return { ...state, referenceInfo: action.payload };
     case SET_DOCUMENTATION:
       return { ...state, documentation: action.payload };
+    case SET_LICENSE:
+      return { ...state, license: action.payload };
     case SET:
       return { ...state, [action.payload.type]: [...action.payload.value] };
     case ADD:

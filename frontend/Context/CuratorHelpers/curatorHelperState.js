@@ -10,6 +10,7 @@ import {
   SET_WORKFLOW_FIT,
   SET_WORKFLOW_OPEN,
   SET_WORKFLOW_SHOWLABELS,
+  SET_EDITING,
 } from "../types";
 
 const CuratorHelperState = (props) => {
@@ -23,6 +24,14 @@ const CuratorHelperState = (props) => {
     def: { chart: null, tool: null, dataset: null, script: null },
     // To manage workflows
     workflow: { open: false, fit: false, showLabels: false, onClick: true },
+    editing: {
+      curatorInfo: false,
+      fileServerPathInfo: false,
+      paperInfo: false,
+      referenceInfo: false,
+      documentationInfo: false,
+      licenseInfo: false,
+    },
   };
 
   const [state, dispatch] = useReducer(curatorHelperReducer, initialState);
@@ -41,6 +50,9 @@ const CuratorHelperState = (props) => {
   const setWorkflowOnClick = (value) =>
     dispatch({ type: SET_WORKFLOW_CLICK, payload: value });
 
+  const setEditing = (type, value) =>
+    dispatch({ type: SET_EDITING, payload: { type, value } });
+
   return (
     <CuratorHelperContext.Provider
       value={{
@@ -49,6 +61,7 @@ const CuratorHelperState = (props) => {
         datasetsHelper: { open: state.open.dataset, def: state.def.dataset },
         scriptsHelper: { open: state.open.script, def: state.def.script },
         workflowHelper: state.workflow,
+        editing: state.editing,
         openForm,
         closeForm,
         setDefault,
@@ -56,6 +69,7 @@ const CuratorHelperState = (props) => {
         setShowLabels,
         setWorkflowFit,
         setWorkflowOnClick,
+        setEditing,
       }}
     >
       {props.children}

@@ -4,27 +4,31 @@ import DocumentationInfoForm from "../CuratorForms/DocumentationInfoForm";
 import Documentation from "../Paper/Documentation";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 import SwitchFade from "../switchFade";
 
 const CuratorElement = () => {
   const { documentation } = useContext(CuratorContext);
-
-  const [editing, setEditing] = useState(documentation == "");
+  const { editing, setEditing } = useContext(CuratorHelperContext);
 
   useEffect(() => {
     if (documentation !== "") {
-      setEditing(false);
-    } else setEditing(true);
+      setEditing("documentationInfo", false);
+    } else setEditing("documentationInfo", true);
   }, [documentation]);
 
   return (
     <SwitchFade
-      editing={editing}
-      form={<DocumentationInfoForm editor={setEditing} />}
+      editing={editing.documentationInfo}
+      form={
+        <DocumentationInfoForm
+          editor={() => setEditing("documentationInfo", false)}
+        />
+      }
       display={
         <Documentation
           documentation={documentation}
-          editor={setEditing}
+          editor={() => setEditing("documentationInfo", true)}
           defaultOpen={true}
         />
       }

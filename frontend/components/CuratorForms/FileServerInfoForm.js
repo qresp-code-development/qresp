@@ -36,7 +36,7 @@ const FileServerInfoForm = ({ editor }) => {
 
   const saveMethod = (server) => {
     setFileServerPath(server);
-    editor(false);
+    editor();
   };
 
   const onSubmit = (values) => {

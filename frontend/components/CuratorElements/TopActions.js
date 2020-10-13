@@ -12,8 +12,8 @@ import {
 
 import { GetApp, Visibility } from "@material-ui/icons";
 
-import Ajv from "ajv";
-import schema from "../../Context/schema";
+// import Ajv from "ajv";
+// import schema from "../../Context/schema";
 import axios from "axios";
 
 import { useRouter } from "next/router";
