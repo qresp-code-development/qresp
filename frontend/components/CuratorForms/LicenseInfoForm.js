@@ -17,7 +17,7 @@ import licenses from "../../data/licenses";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
 const LicenseInfoForm = ({ editor }) => {
-  const { license, setLicense } = useContext(CuratorContext);
+  const { setLicense } = useContext(CuratorContext);
 
   const schema = Yup.object({
     license: Yup.string().required("Required"),
@@ -28,7 +28,6 @@ const LicenseInfoForm = ({ editor }) => {
   });
 
   const onSubmit = (values) => {
-    console.log(values);
     setLicense(values.license);
     editor(false);
   };

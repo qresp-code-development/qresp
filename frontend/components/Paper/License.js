@@ -31,7 +31,7 @@ const LicenseInfo = ({ type, editor, defaultOpen }) => {
           >
             {licenses[type].infographics.map((image) => {
               return (
-                <Grid item>
+                <Grid item key={image}>
                   <img src={"/images/" + image} />
                 </Grid>
               );
