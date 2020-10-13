@@ -36,7 +36,7 @@ const CuratorInfoForm = ({ editor }) => {
 
   const onSubmit = (values) => {
     setCuratorInfo(values);
-    editor(false);
+    editor("curatorInfo", false);
   };
 
   return (

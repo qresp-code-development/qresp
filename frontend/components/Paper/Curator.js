@@ -10,7 +10,7 @@ const CuratorInfo = ({ curator, editor, defaultOpen }) => {
   return (
     <Drawer
       heading="Curator Information"
-      editor={editor}
+      editor={() => editor("curatorInfo", true)}
       defaultOpen={defaultOpen}
     >
       <Box my={1}>

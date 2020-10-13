@@ -4,16 +4,12 @@ import CuratorInfoForm from "../CuratorForms/CuratorInfoForm";
 import CuratorInfo from "../Paper/Curator";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 import SwitchFade from "../switchFade";
 
 const CuratorElement = () => {
   const { curatorInfo } = useContext(CuratorContext);
-
-  const [editing, setEditing] = useState(
-    curatorInfo.firstName == "" ||
-      curatorInfo.lastName == "" ||
-      curatorInfo.emailIdName == ""
-  );
+  const { editing, setEditing } = useContext(CuratorHelperContext);
 
   useEffect(() => {
     if (
@@ -21,13 +17,13 @@ const CuratorElement = () => {
       curatorInfo.lastName !== "" &&
       curatorInfo.emailIdName !== ""
     )
-      setEditing(false);
-    else setEditing(true);
+      setEditing("curatorInfo", false);
+    else setEditing("curatorInfo", true);
   }, [curatorInfo]);
 
   return (
     <SwitchFade
-      editing={editing}
+      editing={editing.curatorInfo}
       form={<CuratorInfoForm editor={setEditing} />}
       display={
         <CuratorInfo
