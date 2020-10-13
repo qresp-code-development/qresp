@@ -253,3 +253,22 @@ paths:
           description: Incorrect paper object
         500:
           description: Internal server error
+  /publish:
+    post:
+      operationId: "project.api.publish"
+      tags:
+        - "Generate Publish Link"
+      summary: "Send an email to the curator with the link to publish the paper"
+      parameters:
+        - in: body
+          name: paper
+          description: The paper to be published
+          schema:
+            type: object
+      responses:
+        200:
+          description: Successfully generated the verify link
+        400:
+          description: Incorrect paper object
+        500:
+          description: Internal server error
