@@ -24,11 +24,11 @@ const CuratorElement = () => {
   return (
     <SwitchFade
       editing={editing.curatorInfo}
-      form={<CuratorInfoForm editor={setEditing} />}
+      form={<CuratorInfoForm editor={() => setEditing("curatorInfo", false)} />}
       display={
         <CuratorInfo
           curator={curatorInfo}
-          editor={setEditing}
+          editor={() => setEditing("curatorInfo", true)}
           defaultOpen={true}
         />
       }

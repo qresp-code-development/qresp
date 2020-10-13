@@ -7,39 +7,41 @@ import licenses from "../../data/licenses";
 
 const LicenseInfo = ({ type, editor, defaultOpen }) => {
   return (
-    <Drawer heading="License" editor={editor} defaultOpen={defaultOpen}>
-      <Grid container direction="row" alignItems="center">
-        <Grid item xs={12} md={7}>
-          <Typography color="secondary">
-            The work presented here is licensed under a {"  "}
-            <a
-              href={licenses[type].link}
-              target="_blank"
-              rel="noreferrer noopener"
+    type && (
+      <Drawer heading="License" editor={editor} defaultOpen={defaultOpen}>
+        <Grid container direction="row" alignItems="center">
+          <Grid item xs={12} md={7}>
+            <Typography color="secondary">
+              The work presented here is licensed under a {"  "}
+              <a
+                href={licenses[type].link}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {licenses[type].title}
+              </a>
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <Grid
+              container
+              direction="row"
+              alignItems="center"
+              justify="center"
+              spacing={2}
             >
-              {licenses[type].title}
-            </a>
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={5}>
-          <Grid
-            container
-            direction="row"
-            alignItems="center"
-            justify="center"
-            spacing={2}
-          >
-            {licenses[type].infographics.map((image) => {
-              return (
-                <Grid item key={image}>
-                  <img src={"/images/" + image} />
-                </Grid>
-              );
-            })}
+              {licenses[type].infographics.map((image) => {
+                return (
+                  <Grid item key={image}>
+                    <img src={"/images/" + image} />
+                  </Grid>
+                );
+              })}
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
-    </Drawer>
+      </Drawer>
+    )
   );
 };
 

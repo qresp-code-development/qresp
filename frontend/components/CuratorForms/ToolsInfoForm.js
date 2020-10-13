@@ -216,6 +216,7 @@ const ToolsInfoForm = () => {
     setValue,
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: { kind: def == null ? "software" : def.kind },
   });
 
   const { fields, append, remove } = useFieldArray({

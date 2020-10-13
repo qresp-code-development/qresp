@@ -4,25 +4,30 @@ import LicenseInfoForm from "../CuratorForms/LicenseInfoForm";
 import LicenseInfo from "../Paper/License";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 import SwitchFade from "../switchFade";
 
 const LicenseInfoElement = () => {
   const { license } = useContext(CuratorContext);
 
-  const [editing, setEditing] = useState(license === "");
+  const { editing, setEditing } = useContext(CuratorHelperContext);
 
   useEffect(() => {
     if (license != "") {
-      setEditing(false);
-    } else setEditing(true);
+      setEditing("licenseInfo", false);
+    } else setEditing("licenseInfo", true);
   }, [license]);
 
   return (
     <SwitchFade
-      editing={editing}
-      form={<LicenseInfoForm editor={setEditing} />}
+      editing={editing.licenseInfo}
+      form={<LicenseInfoForm editor={() => setEditing("licenseInfo", false)} />}
       display={
-        <LicenseInfo type={license} editor={setEditing} defaultOpen={true} />
+        <LicenseInfo
+          type={license}
+          editor={() => setEditing("licenseInfo", true)}
+          defaultOpen={true}
+        />
       }
     />
   );

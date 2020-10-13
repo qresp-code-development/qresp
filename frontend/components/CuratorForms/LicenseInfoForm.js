@@ -29,7 +29,7 @@ const LicenseInfoForm = ({ editor }) => {
 
   const onSubmit = (values) => {
     setLicense(values.license);
-    editor(false);
+    editor();
   };
 
   const options = Object.keys(licenses).map((license) => {

@@ -20,11 +20,15 @@ const FileServerElement = () => {
   return (
     <SwitchFade
       editing={editing.fileServerPathInfo}
-      form={<FileServerInfoForm editor={setEditing} />}
+      form={
+        <FileServerInfoForm
+          editor={() => setEditing("fileServerPathInfo", false)}
+        />
+      }
       display={
         <FileServerInfo
           fileserverpath={fileServerPath}
-          editor={setEditing}
+          editor={() => setEditing("fileServerPathInfo", true)}
           defaultOpen={true}
         />
       }

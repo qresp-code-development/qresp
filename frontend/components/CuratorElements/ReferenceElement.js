@@ -4,27 +4,30 @@ import ReferenceInfoForm from "../CuratorForms/ReferenceInfoForm";
 import ReferenceC from "../Paper/ReferenceC";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
+
 import SwitchFade from "../switchFade";
 
 const ReferenceInfoElement = () => {
   const { referenceInfo } = useContext(CuratorContext);
-
-  const [editing, setEditing] = useState(true);
+  const { editing, setEditing } = useContext(CuratorHelperContext);
 
   useEffect(() => {
     if (referenceInfo.title) {
-      setEditing(false);
-    } else setEditing(true);
+      setEditing("referenceInfo", false);
+    } else setEditing("referenceInfo", true);
   }, [referenceInfo]);
 
   return (
     <SwitchFade
-      editing={editing}
-      form={<ReferenceInfoForm editor={setEditing} />}
+      editing={editing.referenceInfo}
+      form={
+        <ReferenceInfoForm editor={() => setEditing("referenceInfo", false)} />
+      }
       display={
         <ReferenceC
           referenceInfo={referenceInfo}
-          editor={setEditing}
+          editor={() => setEditing("referenceInfo", true)}
           defaultOpen={true}
         />
       }

@@ -115,6 +115,7 @@ const ReferenceInfoForm = ({ editor }) => {
       url: values.url,
       abstract: values.abstract,
     });
+    editor();
   };
 
   const nameid = {
