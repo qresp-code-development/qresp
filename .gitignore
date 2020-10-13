@@ -11,8 +11,10 @@ web/qresp.egg-info/
 .cache/
 web/project/config_test.ini 
 web/project/tests/__pycache__/
-previews/
 
+Ignore Temp Files
+PREVIEW_*
+PUBLISH_*
 
 # VsCode
 .vscode/
