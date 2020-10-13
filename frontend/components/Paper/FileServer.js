@@ -10,7 +10,7 @@ const FileServerInfo = ({ fileserverpath, defaultOpen, editor }) => {
     <Drawer
       heading="File Server Information"
       defaultOpen={defaultOpen}
-      editor={editor}
+      editor={() => editor("fileServerPathInfo", true)}
     >
       <Box my={1}>
         <LabelValue label="File Server Path" value={fileserverpath} />

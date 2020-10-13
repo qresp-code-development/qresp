@@ -4,22 +4,22 @@ import FileServerInfoForm from "../CuratorForms/FileServerInfoForm";
 import FileServerInfo from "../Paper/FileServer";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
+import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 import SwitchFade from "../switchFade";
 
 const FileServerElement = () => {
   const { fileServerPath } = useContext(CuratorContext);
-
-  const [editing, setEditing] = useState(fileServerPath === "");
+  const { editing, setEditing } = useContext(CuratorHelperContext);
 
   useEffect(() => {
     if (fileServerPath != "") {
-      setEditing(false);
-    } else setEditing(true);
+      setEditing("fileServerPathInfo", false);
+    } else setEditing("fileServerPathInfo", true);
   }, [fileServerPath]);
 
   return (
     <SwitchFade
-      editing={editing}
+      editing={editing.fileServerPathInfo}
       form={<FileServerInfoForm editor={setEditing} />}
       display={
         <FileServerInfo
