@@ -55,7 +55,7 @@ const Drawer = (props) => {
                 placement="right"
                 arrow
               >
-                <IconButton onClick={() => editor(true)}>
+                <IconButton onClick={editor}>
                   <Edit color="primary" />
                 </IconButton>
               </Tooltip>
