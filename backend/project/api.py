@@ -1,6 +1,11 @@
+from connexion import request
+
 from project.paperdao import *
 from project.util import Dtree
+
 from project.controllers.preview import Preview
+from project.controllers.publish import Publish
+
 # edit swagger.yml file for method changes
 
 
@@ -201,3 +206,23 @@ def getPreview(id):
         return "Internal Server Error", 500
 
     return result, 200
+
+
+def publish(paper):
+    """
+    View the preview of the metadata
+    Handler for POST: /api/publish
+
+    :return: Metadata object using the id provided for the metadata
+    """
+    print(paper)
+
+    result = Publish().publish(paper, request.url_root)
+
+    if result == 400:
+        return "Preview does not exist, incorrect id", 400
+
+    if result == 500:
+        return "Internal Server Error", 500
+
+    return 200
