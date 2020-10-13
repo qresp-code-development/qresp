@@ -109,12 +109,16 @@ const explorer = ({ error }) => {
             onChange={handleChange}
           />
           <Box display="flex" flexDirection="row" justifyContent="center" m={4}>
-            <StyledButton onClick={searchSelected} disabled={error}>
-              Search Selected
-            </StyledButton>
-            <StyledButton onClick={searchAll} disabled={error}>
-              Search All
-            </StyledButton>
+            <Box m={1}>
+              <StyledButton onClick={searchSelected} disabled={error}>
+                Search Selected
+              </StyledButton>
+            </Box>
+            <Box m={1}>
+              <StyledButton onClick={searchAll} disabled={error}>
+                Search All
+              </StyledButton>
+            </Box>
           </Box>
           <Box display="flex" alignItems="center" justifyContent="center" m={4}>
             <Typography variant="h5" align="center">
