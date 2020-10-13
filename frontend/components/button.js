@@ -7,7 +7,6 @@ const StyledButton = withStyles({
   root: {
     backgroundColor: "#800000",
     fontSize: "18px",
-    margin: "8px",
     color: "#FFF",
     "&:hover": {
       backgroundColor: "#B30000",
