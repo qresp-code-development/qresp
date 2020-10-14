@@ -71,6 +71,7 @@ const PaperDetails = ({ paper, error, preview, query }) => {
     notebookFile,
     notebookPath,
     abstract,
+    fileServerPath,
   };
 
   const { setAlert, unsetAlert } = useContext(AlertContext);
@@ -92,7 +93,7 @@ const PaperDetails = ({ paper, error, preview, query }) => {
   }, []);
 
   const showWorkflows =
-    workflows.edges.length > 0 && workflows.nodes.length > 0;
+    workflows && workflows.edges.length > 0 && workflows.nodes.length > 0;
 
   return (
     <Fragment>
@@ -171,6 +172,7 @@ export async function getServerSideProps(ctx) {
   } catch (e) {
     console.error(e);
     error = true;
+    paper = null;
   }
 
   return {
