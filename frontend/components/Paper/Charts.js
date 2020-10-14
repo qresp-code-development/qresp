@@ -165,7 +165,7 @@ const ChartInfo = ({
               <a
                 href={
                   "https://nbviewer.jupyter.org/url/" +
-                  rowdata.server +
+                  rowdata.server.replace(/(^\w+:|^)\/\//, "") +
                   "/" +
                   rowdata.notebookFile
                 }
