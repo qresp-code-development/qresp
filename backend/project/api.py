@@ -1,4 +1,4 @@
-from connexion import request
+from connexion import request, jsonifier
 
 from project.paperdao import *
 from project.util import Dtree
@@ -210,17 +210,30 @@ def getPreview(id):
 
 def publish(paper):
     """
-    View the preview of the metadata
+    Validate the paper json and send an email to the user with the link to publish
     Handler for POST: /api/publish
 
     :return: Metadata object using the id provided for the metadata
     """
     result = Publish().publish(paper, request.url_root)
 
-    if result == 400:
-        return "Preview does not exist, incorrect id", 400
+    if isinstance(result, int):
+        return 200
+    else:
+        return result['msg'], result['code']
 
-    if result == 500:
-        return "Internal Server Error", 500
 
-    return 200
+def verify(id):
+    """
+    Add the paper specified by the ID provided from the wait list to the database
+    Handler for GET: /api/verify
+
+    :return: Object containing ID for the paper added in it  
+     Otherwise error, 
+    """
+    result = Publish().verify(id)
+
+    if isinstance(result, str):
+        return {"id": result, "error": ""}, 200
+
+    return {"id": '', "error": result['msg']}, result['code']
