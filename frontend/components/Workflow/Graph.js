@@ -50,9 +50,7 @@ const getOptions = (manipulate = {}) => {
         edge: changeChosenEdgeMiddleArrowScale,
       },
     },
-    physics: {
-      minVelocity: 0.75,
-    },
+    physics: false,
     interaction: {
       hover: true,
       dragNodes: true,
@@ -120,11 +118,22 @@ const Graph = ({ workflow, data, manipulate }) => {
 
     if (manipulate != {})
       wflow.on("dragEnd", (params) => {
-        setPositions({
-          ...positions,
-          [params.nodes[0]]: wflow.getPosition(params.nodes[0]),
-        });
+        if (params.nodes.length > 0)
+          setPositions({
+            ...positions,
+            [params.nodes[0]]: wflow.getPosition(params.nodes[0]),
+          });
       });
+
+    // Set positions after simulation
+    wflow.on("stabilized", function (params) {
+      const pos = {};
+      workflowNodes.forEach(
+        (node) => (pos[node.id] = network.current.getPosition(node.id))
+      );
+      setPositions(pos);
+      wflow.fit();
+    });
 
     // Change mouse pointer to a small hand
     wflow.on("hoverNode", function (params) {
@@ -134,9 +143,6 @@ const Graph = ({ workflow, data, manipulate }) => {
     wflow.on("blurNode", function (params) {
       wflow.canvas.body.container.style.cursor = "default";
     });
-
-    // Fitting the workflow, to the canvas
-    // wflow.fit();
 
     if (
       positions == null ||
@@ -151,16 +157,7 @@ const Graph = ({ workflow, data, manipulate }) => {
   }, [workflow, showLabels, onClick]);
 
   useEffect(() => {
-    network.current.fit();
-    const pos = {};
-    workflowNodes.forEach(
-      (node) =>
-        (pos[node.id] =
-          positions && positions[node.id]
-            ? positions[node.id]
-            : network.current.getPosition(node.id))
-    );
-    setPositions(pos);
+    network.current.stabilize();
   }, [fit]);
 
   return (
