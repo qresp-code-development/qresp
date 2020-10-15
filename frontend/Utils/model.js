@@ -40,6 +40,7 @@ const convertStatetoReqSchema = (state, servers) => {
   };
 
   const reference = { ...referenceUtil.get(state.referenceInfo.publication) };
+  reference.journal = { fullName: reference.journal };
   reference["DOI"] = state.referenceInfo.doi;
   reference["URLs"] = state.referenceInfo.url;
   reference["publishedAbstract"] = state.referenceInfo.abstract;
