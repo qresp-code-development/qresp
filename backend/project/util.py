@@ -31,22 +31,25 @@ class InvalidUsage(Exception):
         rv['message'] = self.message
         return rv
 
+
 class Servers():
     """ Class providing information about servers for federated search.
     """
+
     def __init__(self):
         self.__headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
-        self.__urlString = Config.get_setting('GLOBAL','QRESP_SERVER_URL')
-        self.__schemaString = Config.get_setting('GLOBAL','SCHEMA_URL')
-        self.__httpUrlString = Config.get_setting('GLOBAL','HTTP_SERVER_URL')
+        self.__urlString = Config.get_setting('GLOBAL', 'QRESP_SERVER_URL')
+        self.__schemaString = Config.get_setting('GLOBAL', 'SCHEMA_URL')
+        self.__httpUrlString = Config.get_setting('GLOBAL', 'HTTP_SERVER_URL')
 
     def getServersList(self):
         """
         Fetches list of servers
         :return object data: Json object of data from server
         """
-        url = requests.get(self.__urlString, headers=self.__headers, verify = False)
+        url = requests.get(
+            self.__urlString, headers=self.__headers, verify=False)
         data = json.loads(url.text)
         return data
 
@@ -55,12 +58,12 @@ class Servers():
         Fetches list of http servers
         :return object data: Json object of http data
         """
-        url = requests.get(self.__httpUrlString, headers=self.__headers, verify=False)
+        url = requests.get(self.__httpUrlString,
+                           headers=self.__headers, verify=False)
         data = json.loads(url.text)
         return data
 
-
-    def validateSchema(self,coll_data):
+    def validateSchema(self, coll_data):
         """
         Validates schema
         :param string coll_data:
@@ -68,7 +71,8 @@ class Servers():
         """
         exceptions = []
         try:
-            url = requests.get(self.__schemaString, headers=self.__headers, verify = False)
+            url = requests.get(self.__schemaString,
+                               headers=self.__headers, verify=False)
             schema_coll_data = json.loads(url.text)
             a = Draft4Validator(schema_coll_data)
             for error in sorted(a.iter_errors(coll_data), key=str):
@@ -82,14 +86,16 @@ class Servers():
                         message = error.message
                         if "is not of type" or "is too short" in message:
                             message = "Missing values"
-                        exp = str(message) + " in " + str(error.absolute_path[0]) + " "+ str(error.absolute_path[1])
+                        exp = str(
+                            message) + " in " + str(error.absolute_path[0]) + " " + str(error.absolute_path[1])
                         exceptions.append(exp)
                     except IndexError:
                         try:
                             message = error.message
                             if "is not of type" or "is too short" in message:
                                 message = "Missing values"
-                            exp = str(message) + " in " + str(error.absolute_path[0])
+                            exp = str(message) + " in " + \
+                                str(error.absolute_path[0])
                             exceptions.append(exp)
                         except IndexError:
                             exceptions.append(str(error.message))
@@ -97,11 +103,13 @@ class Servers():
             exceptions.append("Could not fetch schema")
         return exceptions
 
+
 class Dtree():
     """
     Class to build server tree
     """
-    def __init__(self,path):
+
+    def __init__(self, path):
         self.__listObjects = []
         self.__path = path.strip()
         self.__paperObjects = []
@@ -139,7 +147,8 @@ class Dtree():
         Fetches project from zenodo to build tree for curation
         :return: list listObjects: returns tree objects with file and folder content
         """
-        page = requests.get(self.__path, headers=self.__headers, verify=False)  # open iframe src url
+        page = requests.get(self.__path, headers=self.__headers,
+                            verify=False)  # open iframe src url
         tree = html.fromstring(page.content)
         tag = '//div[@id="files"]/div[2]/table/tbody/tr/td/a'
         attrArray = self.__path.split("#")
@@ -148,14 +157,15 @@ class Dtree():
         for xtag in tree.xpath(tag):
             file = xtag.text_content().strip()
             if ".zip" in file:
-                page = requests.get(self.__path+self.__previewUrlForZenodo+file, headers=self.__headers, verify=False)  # open iframe src url
+                page = requests.get(self.__path+self.__previewUrlForZenodo+file,
+                                    headers=self.__headers, verify=False)  # open iframe src url
                 tree = html.fromstring(page.content)
                 tag = '//ul[@id="' + attrid + '"]/li/span[1]'
                 for xtag in tree.xpath(tag):
                     file = xtag.text_content().strip()
                     dataFile = DirectoryTree()
                     dataFile.title = file
-                    dataFile.key = self.__path +"files/"+ file
+                    dataFile.key = self.__path + "files/" + file
                     dataFile.id = file
                     dataFile.parent = attrid
                     self.__listObjects.append(dataFile.__dict__)
@@ -180,7 +190,7 @@ class Dtree():
         :return: objects with paths for notebook and download
         """
         try:
-            r = urlopen(str(self.__path +"/"+configFile))
+            r = urlopen(str(self.__path + "/"+configFile))
             for line in r:
                 line = str(line)
                 if line and "=" in line:
@@ -201,13 +211,15 @@ class Dtree():
             print("Config file not found", e)
         return self.__serviceObjects
 
+
 class FetchDOI():
     """ Fetches information using DOI
     """
-    def __init__(self,doi):
+
+    def __init__(self, doi):
         self.__doi = doi
 
-    def find_word(self,text, search):
+    def find_word(self, text, search):
         """Util Function to find exact match in words.
         :return: Information of the References - Dictionary
         """
@@ -225,7 +237,8 @@ class FetchDOI():
             headers = {
                 'Accept': 'application/rdf+xml;q=0.5, application/vnd.citationstyles.csl+json;q=1.0',
             }
-            res = requests.get('https://doi.org/' + str(self.__doi), headers=headers)
+            res = requests.get('https://doi.org/' +
+                               str(self.__doi), headers=headers)
             res.encoding = 'utf-8'
             response = json.loads(res.text)
             kind = "Journal"
@@ -278,11 +291,11 @@ class FetchDOI():
                         personList.append(person)
             referenceJSON = {}
             referenceJSON["authors"] = personList
-            referenceJSON["journal"] = {"fullName":journalFull}
+            referenceJSON["journal"] = {"fullName": journalFull}
             referenceJSON["URLs"] = url
             referenceJSON["publishedAbstract"] = publishedAbstract
             referenceJSON["year"] = year
-            referenceJSON["page"]= page
+            referenceJSON["page"] = page
             referenceJSON["volume"] = volume
             referenceJSON["title"] = title
             referenceJSON["DOI"] = self.__doi
@@ -291,10 +304,12 @@ class FetchDOI():
             raise IOError
         return referenceJSON
 
+
 class WorkflowCreator(object):
     """Class to create stand alone final workflow for the metadata(JSON) format.
     """
-    def __init__(self,fileServerPath=None):
+
+    def __init__(self, fileServerPath=None):
         self.desc = {}
         self.desc["charts"] = []
         self.desc["datasets"] = []
@@ -306,7 +321,8 @@ class WorkflowCreator(object):
         self.fileServerPath = fileServerPath
 
     def addChart(self, chart):
-        image = '<img src="' + self.fileServerPath + "/" + chart.get("imageFile","") + '" width="250px;" height="250px;"/>'
+        image = '<img src="' + self.fileServerPath + "/" + \
+            chart.get("imageFile", "") + '" width="250px;" height="250px;"/>'
         caption = "<b> Image: </b>" + image
         chart_tooltip = {}
         chart_tooltip['id'] = chart.get("id")
@@ -344,30 +360,32 @@ class WorkflowCreator(object):
     def addHead(self, head):
         caption = None
         if head.get("readme") or head.get("URLs"):
-            caption = "<b> Description: </b>" + head.get("readme", "") + "<br/> <b> URLs: </b>" + head.get("URLs", "")
+            caption = "<b> Description: </b>" + \
+                head.get("readme", "") + "<br/> <b> URLs: </b>" + \
+                head.get("URLs", "")
         else:
             caption = ""
         head_tooltip = {}
         head_tooltip['id'] = head.get("id")
         head_tooltip['caption'] = caption
-        head_tooltip['readme'] = head.get("readme","")
-        head_tooltip['URLs'] = head.get("URLs","")
+        head_tooltip['readme'] = head.get("readme", "")
+        head_tooltip['URLs'] = head.get("URLs", "")
         self.desc["heads"].append(head_tooltip)
 
     def addEdge(self, edge):
         self.desc["edges"].append(edge)
 
 
-
 class GenerateId():
     """
     Generates Ids to charts, datasets,scripts,heads
     """
-    def __init__(self,type):
+
+    def __init__(self, type):
         self.index = 0
         self.type = type
 
-    def addId(self,item):
+    def addId(self, item):
         item['id'] = self.type[0] + str(self.index)
         self.index = self.index + 1
         return item
@@ -377,23 +395,24 @@ class ConvertField():
     """
     Util method to convert fields to List and list to String
     """
-    def convertToList(fieldsList = [], formsList = [], data = None):
+    def convertToList(fieldsList=[], formsList=[], data=None):
         if fieldsList and formsList:
             for forms in formsList:
-                 for form in data.get(forms,[]):
-                     for field in fieldsList:
-                         if isinstance(form.get(field),str):
-                            form[field] = [x.strip() for x in form[field].split(",")]
+                for form in data.get(forms, []):
+                    for field in fieldsList:
+                        if isinstance(form.get(field), str):
+                            form[field] = [x.strip()
+                                           for x in form[field].split(",")]
         else:
             if isinstance(data, str):
                 data = [x.strip() for x in data.split(",")]
         return data
 
-    def convertToString(fieldsList = [], formsList = [], data = None):
+    def convertToString(fieldsList=[], formsList=[], data=None):
         for forms in formsList:
-             for form in data.get(forms,[]):
-                 for field in fieldsList:
-                     if isinstance(form.get(field),list):
+            for form in data.get(forms, []):
+                for field in fieldsList:
+                    if isinstance(form.get(field), list):
                         form[field] = ", ".join(form.get(field))
         return data
 
@@ -402,40 +421,45 @@ class SendDescriptor():
     """
     Sends descriptor
     """
-    def __init__(self,servername):
+
+    def __init__(self, servername):
         self.__servername = servername
 
-    def sendDescriptorToServer(self,data):
+    def sendDescriptorToServer(self, data):
         """
         Sends email to server
         :return: response: sends descriptor to server
         """
         url = self.__servername + "/getDescriptor"
         payload = {'metadata': data, 'servername': self.__servername}
-        headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
-        response = requests.post(url, data=json.dumps(payload), headers=headers, verify=False)
+        headers = {'Application': 'qresp', 'Accept': 'application/json',
+                   'Content-Type': 'application/json'}
+        response = requests.post(url, data=json.dumps(
+            payload), headers=headers, verify=False)
         return response
+
 
 class FetchDataFromAPI():
     """
     Fetches data for search,paper details and chart details for explorer
     """
-    def __init__(self,servernames=None,localServer=None):
+
+    def __init__(self, servernames=None, localServer=None):
         serverList = []
         global LOCALHOST
-        if servernames and isinstance(servernames,str):
+        if servernames and isinstance(servernames, str):
             serverList = servernames.split(",")
         else:
             serverslist = Servers()
             serverList = [qrespserver['qresp_server_url'] for qrespserver in
-                               serverslist.getServersList()]
+                          serverslist.getServersList()]
         if localServer:
             serverList.append(localServer)
         elif LOCALHOST:
             serverList.append(LOCALHOST)
         self.__servernames = set(serverList)
 
-    def fetchOutput(self,apiname):
+    def fetchOutput(self, apiname):
         """
         Fetches output to server
         :return: object: sends descriptor to server
@@ -445,16 +469,19 @@ class FetchDataFromAPI():
         for snames in self.__servernames:
             try:
                 url = snames + apiname
-                headers = {'Application': 'qresp', 'Accept': 'application/json', 'Content-Type': 'application/json'}
-                response = requests.get(url,headers=headers, verify=False)
+                headers = {'Application': 'qresp', 'Accept': 'application/json',
+                           'Content-Type': 'application/json'}
+                response = requests.get(url, headers=headers, verify=False)
                 if response.status_code == 200 and response.content:
                     if "paper" in apiname or "workflow" in apiname:
                         outDict = response.json()
                         return outDict
                     elif "search" in apiname:
-                        outDict.update({eachsearchObj['_Search__title']:eachsearchObj for eachsearchObj in response.json()})
+                        outDict.update(
+                            {eachsearchObj['_Search__title']: eachsearchObj for eachsearchObj in response.json()})
                     else:
-                        outDict.update({eachsearchObj:eachsearchObj for eachsearchObj in response.json()})
+                        outDict.update(
+                            {eachsearchObj: eachsearchObj for eachsearchObj in response.json()})
             except Exception as e:
                 print(e)
         return list(outDict.values())
@@ -466,17 +493,18 @@ class dotdict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
+
 class GoogleAuth():
     """
     Authorization for google.
     """
-    def __init__(self,clientid = None,redirecturi = None,scope = None):
+
+    def __init__(self, clientid=None, redirecturi=None, scope=None):
         self.clientid = clientid
         self.redirecturi = redirecturi
         self.scope = scope
 
-
-    def getGoogleAuth(self,state=None,token=None):
+    def getGoogleAuth(self, state=None, token=None):
         if token:
             return OAuth2Session(self.clientid, token=token)
         if state:
@@ -484,20 +512,22 @@ class GoogleAuth():
                 self.clientid,
                 state=state,
                 redirect_uri=self.redirecturi)
-        oauth = OAuth2Session(self.clientid,redirect_uri=self.redirecturi,scope=self.scope.split(","))
+        oauth = OAuth2Session(
+            self.clientid, redirect_uri=self.redirecturi, scope=self.scope.split(","))
         return oauth
 
+
 class SetLocalHost:
-    def __init__(self,localhost):
+    def __init__(self, localhost):
         global LOCALHOST
         LOCALHOST = localhost
-
 
 
 class WorkflowObject:
     """
     Class defining HTML workflow objects for Paper workflow
     """
+
     def _getLinks(self, urls, properties=None):
         """
         Builds links for url and properties
@@ -511,10 +541,12 @@ class WorkflowObject:
                 for url in urls:
                     links = links + ", " + url
                 if links:
-                    links = "<p><b>Properties: </b>" + links.strip(",") + "</p>"
+                    links = "<p><b>Properties: </b>" + \
+                        links.strip(",") + "</p>"
             else:
                 for url in urls:
-                    links = links + "<p><a href=" + url + " title=" + url + " target='_blank'>" + url + "</a></p>"
+                    links = links + "<p><a href=" + url + " title=" + \
+                        url + " target='_blank'>" + url + "</a></p>"
                 if links:
                     links = links.strip()
                     links = links.strip(",")
@@ -533,7 +565,9 @@ class WorkflowObject:
             for file in files:
                 filename = file.rsplit('/', 1)[-1]
                 if filename:
-                    filelinks = filelinks + "<a href=" + fileserverpath + "/" + file + " title='Click to view " + filename + "' target='_blank'>" + filename + "</a>" + ", "
+                    filelinks = filelinks + "<a href=" + fileserverpath + "/" + file + \
+                        " title='Click to view " + filename + \
+                        "' target='_blank'>" + filename + "</a>" + ", "
         if filelinks:
             filelinks = filelinks.strip()
             filelinks = filelinks.strip(",")
@@ -586,11 +620,14 @@ class WorkflowObject:
         for hashkey, value in node.extraFields.items():
             if hashkey:
                 for extrafieldkey, extrafieldval in hashkey.items():
-                    extraFieldValues = extraFieldValues + "<p><b>" + extrafieldkey + ": </b><br>" + ", " + extrafieldval + "</p>"
+                    extraFieldValues = extraFieldValues + "<p><b>" + \
+                        extrafieldkey + ": </b><br>" + ", " + extrafieldval + "</p>"
         return extraFieldValues
+
 
 class Search(object):
     """ Class collecting Search details"""
+
     def __init__(self):
         self.id = ""
         self.title = ""
@@ -771,6 +808,7 @@ class PaperDetails(object):
     documentation = ""
     license = ""
 
+
 class WorkflowInfo:
     """
     Class collecting info for workflow
@@ -779,6 +817,7 @@ class WorkflowInfo:
     edges = []
     nodes = {}
     workflowType = ""
+
 
 class WorkflowNodeInfo:
     """
@@ -790,6 +829,7 @@ class WorkflowNodeInfo:
     fileServerPath = ""
     nodelabel = ""
     hasNotebookFile = False
+
 
 class DirectoryTree:
     """
