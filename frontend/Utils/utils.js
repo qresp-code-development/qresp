@@ -4,7 +4,7 @@ const capitalizeFirstLetter = (text) => {
 
 const getServer = () => {
   var url = window.location.protocol + "//" + window.location.hostname;
-  if (window.location.port == "") return url + "/";
+  if (window.location.port == "") return url;
   return url + `:${window.location.port}`;
 };
 
