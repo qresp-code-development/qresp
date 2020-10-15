@@ -1,4 +1,4 @@
-import { namesUtil, referenceUtil } from "./utils";
+import { getServer, namesUtil, referenceUtil } from "./utils";
 
 const convertStateToViewSchema = (state, serverInformation) => {
   const schema = {
@@ -34,14 +34,14 @@ const convertStatetoReqSchema = (state, servers) => {
     notebookFile: state.paperInfo.notebookFile,
     notebookPath: state.paperInfo.notebookPath,
     fileServerPath: state.fileServerPath,
-    gitPath: servers.gitPath ? "Y" : "",
-    downloadPath: servers.downloadPath,
+    gitPath: servers && servers.gitPath ? "Y" : "",
+    downloadPath: servers && servers.downloadPath ? servers.downloadPath : "",
     insertedBy: { ...state.curatorInfo },
   };
 
   const reference = { ...referenceUtil.get(state.referenceInfo.publication) };
   reference["DOI"] = state.referenceInfo.doi;
-  reference["URLs"] = state.referenceInfo.url.split(",").map((el) => el.trim());
+  reference["URLs"] = state.referenceInfo.url;
   reference["publishedAbstract"] = state.referenceInfo.abstract;
   reference["kind"] = state.referenceInfo.kind;
   reference["title"] = state.referenceInfo.title;
@@ -53,8 +53,15 @@ const convertStatetoReqSchema = (state, servers) => {
     tags: state.paperInfo.tags,
     license: state.license,
     documentation: { readme: state.documentation },
-    workflow: state.workflow,
-    charts: state.charts,
+    workflow: {
+      ...state.workflow,
+      edges: state.workflow.edges.map((edge) => [edge.from, edge.to]),
+    },
+    charts: state.charts.map((chart) => {
+      chart.number = chart.number.toString();
+      return chart;
+    }),
+    schema: getServer() + "/schema_v1.2.json",
     scripts: state.scripts,
     tools: state.tools,
     datasets: state.datasets,
