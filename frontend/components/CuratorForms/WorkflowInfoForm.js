@@ -50,6 +50,8 @@ const WorkflowInfoForm = () => {
     setShowLabels,
     setWorkflowFit,
     setWorkflowOnClick,
+    setEditing,
+    editing,
   } = useContext(CuratorHelperContext);
 
   const theme = useTheme();
@@ -65,6 +67,10 @@ const WorkflowInfoForm = () => {
       setShowLabels(false);
     };
   }, []);
+
+  useEffect(() => {
+    setEditing("workflowInfo", true);
+  }, [workflow]);
 
   const manipulate = {
     manipulation: {
@@ -123,24 +129,38 @@ const WorkflowInfoForm = () => {
 
   const onSubmit = (values) => {
     values["id"] = `h${heads.length}`;
+    values.URLs = values.URLs.split(",").map((el) => el.trim());
     add("head", values);
     setExternalNodeFormOpen(false);
     setWorkflowFit(!fit);
   };
 
+  const onSaveInDialog = () => {
+    unsetAlert();
+    setEditing("workflowInfo", false);
+  };
+
   const onSave = () => {
-    if (!isGraph.connected(workflow))
-      setAlert(
-        "Warning: Disconnected Nodes",
-        "There are some disconnected nodes in the graph, please click save here if you want to still save the workflow",
-        <RegularStyledButton onClick={unsetAlert}>Save</RegularStyledButton>
-      );
-    else if (isGraph.cyclic(workflow))
-      setAlert(
-        "Warning: Cycles Detected",
-        "Cycles detected in the workflow, please click save here if you want to still save the workflow",
-        <RegularStyledButton onClick={unsetAlert}>Save</RegularStyledButton>
-      );
+    if (editing.workflowInfo)
+      if (!isGraph.connected(workflow))
+        setAlert(
+          "Warning: Disconnected Nodes",
+          "There are some disconnected nodes in the graph, please click save here if you want to still save the workflow",
+          <RegularStyledButton onClick={onSaveInDialog}>
+            Save
+          </RegularStyledButton>
+        );
+      else if (isGraph.cyclic(workflow))
+        setAlert(
+          "Warning: Cycles Detected",
+          "Cycles detected in the workflow, please click save here if you want to still save the workflow",
+          <RegularStyledButton onClick={onSaveInDialog}>
+            Save
+          </RegularStyledButton>
+        );
+      else {
+        setEditing("workflowInfo", false);
+      }
   };
 
   return (
