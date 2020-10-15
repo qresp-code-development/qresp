@@ -769,6 +769,7 @@ class PaperDetails(object):
     year = 0
     timeStamp = ""
     documentation = ""
+    license = ""
 
 class WorkflowInfo:
     """
