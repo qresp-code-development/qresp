@@ -12,6 +12,9 @@ web/qresp.egg-info/
 web/project/config_test.ini 
 web/project/tests/__pycache__/
 
+Ignore Temp Files
+PREVIEW_*
+PUBLISH_*
 
 # VsCode
 .vscode/
@@ -19,15 +22,10 @@ web/project/tests/__pycache__/
 # Python
 __pycache__
 
-# Dev
-run_flask.sh
+# Pytest
+.pytest_cache
 
-
-=======
-# Python
-__pycache__
-
-# Dev Envs
-.vscode/
-run_flask.sh
-TexSamples/
+# Certificate Files
+*.certs
+*.crt
+*.key

@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  db:
+    image: "mongo:3.6.18-xenial"
+    env_file:
+      - ~/Repositories/MongoDB/.env
+    volumes:
+      - ~/Repositories/MongoDB/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ~/Repositories/MongoDB/QrespData:/data/db
+    ports:
+      - "27017:27017"
+    networks: 
+      - backend
+
+  backend:
+    depends_on:
+      - db
+    restart: always
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - PYTHONUNBUFFERED=TRUE
+    volumes:
+      - /usr/src/app/backend/project/static
+      - ./backend:/home/flask/app/web/
+    environment: 
+      - FLASK_APP=run.py 
+      - FLASK_ENV=development
+    networks: 
+      - backend
+      - frontend
+    command: flask run --host 0.0.0.0
+
+  frontend:
+    restart: always
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/usr/src/app
+    networks: 
+      - frontend
+    command: yarn dev
+  
+  nginx:
+    depends_on: 
+      - backend
+      - frontend
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - "443:443"
+    networks: 
+      - frontend
+      - backend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+      
