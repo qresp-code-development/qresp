@@ -215,7 +215,7 @@ def publish(paper):
 
     :return: Metadata object using the id provided for the metadata
     """
-    result = Publish().publish(paper, request.url_root)
+    result = Publish().publish(paper, request.host_url[:-1])
 
     if isinstance(result, int):
         return 200
