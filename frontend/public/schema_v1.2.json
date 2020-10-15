@@ -493,9 +493,27 @@
         },
         "journal": {
           "$id": "#/properties/reference/properties/journal",
-          "type": "string",
+          "type": "object",
           "title": "The Journal Schema",
-          "default": null
+          "default": null,
+          "properties": {
+            "abbrevName": {
+              "$id": "#/properties/reference/properties/journal/properties/abbrevName",
+              "type": ["string", "null"],
+              "title": "The Abbrevname Schema",
+              "default": "",
+              "examples": ["JACS Comm."],
+              "pattern": "^(.*)$"
+            },
+            "fullName": {
+              "$id": "#/properties/reference/properties/journal/properties/fullName",
+              "type": ["string", "null"],
+              "title": "The Fullname Schema",
+              "default": "",
+              "examples": ["Journal of the American Chemical Society"],
+              "pattern": "^(.*)$"
+            }
+          }
         },
         "kind": {
           "$id": "#/properties/reference/properties/kind",
