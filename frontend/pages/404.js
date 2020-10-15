@@ -2,10 +2,16 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { InternalStyledButton } from "../components/button";
 import { Box, Typography, Container } from "@material-ui/core";
+import SEO from "../components/seo";
 
 export default () => {
   return (
     <Fragment>
+      <SEO
+        title="Qresp | Page Not Found"
+        description="The page you're looking for does not exist"
+        authors="Qresp Team"
+      />
       <Box
         display="flex"
         flexGrow={1}
@@ -27,8 +33,12 @@ export default () => {
             us!
           </Typography>
           <Box display="flex" flexDirection="row" m={4} justifyContent="center">
-            <InternalStyledButton text="Go to Explorer" url="/explorer" />
-            <InternalStyledButton text="Go to Curator" url="/curator" />
+            <Box m={1}>
+              <InternalStyledButton text="Go to Explorer" url="/explorer" />
+            </Box>
+            <Box m={1}>
+              <InternalStyledButton text="Go to Curator" url="/curator" />
+            </Box>
           </Box>
         </Container>
       </Box>
