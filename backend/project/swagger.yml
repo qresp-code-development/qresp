@@ -272,3 +272,22 @@ paths:
           description: Incorrect paper object
         500:
           description: Internal server error
+  /verify/{id}:
+    get:
+      operationId: "project.api.verify"
+      tags:
+        - "Verify the user and publish"
+      summary: "Publish the paper on the instance after successful verification"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Temporary ppublish id provided by the server
+      responses:
+        200:
+          description: Paper successfully published
+        400:
+          description: Incorrect tmp publish paper id, no paper waiting to be published with this id
+        500:
+          description: Internal server error
