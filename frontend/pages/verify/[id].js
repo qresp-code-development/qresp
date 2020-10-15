@@ -2,11 +2,12 @@ import { Fragment } from "react";
 import { Typography, Box, Container } from "@material-ui/core";
 
 import Link from "next/link";
+import axios from "axios";
 
 import SEO from "../../components/seo";
 import StyledButton from "../../components/button";
 
-const Verify = ({ id, error }) => {
+const Verify = ({ id, server, error }) => {
   return (
     <Fragment>
       <SEO
@@ -21,23 +22,29 @@ const Verify = ({ id, error }) => {
         justifyContent="center"
       >
         <Container>
-          {!error ? (
+          {error.length == 0 ? (
             <Fragment>
               <Typography variant="h2" gutterBottom>
                 Success ! <br /> Your paper has been added to the qresp database
                 on this instance.
               </Typography>
-              <Link href={`/paperdetails/${encodeURIComponent(id)}`} passHref>
+              <Link
+                href={`/paperdetails/${encodeURIComponent(
+                  id
+                )}?server=${server}`}
+                passHref
+              >
                 <StyledButton>Go to Paper</StyledButton>
               </Link>
             </Fragment>
           ) : (
             <Fragment>
               <Typography variant="h2">Error !</Typography>
-              <Typography variant="h4">
+              <Typography variant="h4" gutterBottom>
                 Your paper could not be published, please contact the
-                administrators
+                administrators.
               </Typography>
+              <Typography variant="caption">Error Message: {error}</Typography>
             </Fragment>
           )}
         </Container>
@@ -47,9 +54,16 @@ const Verify = ({ id, error }) => {
 };
 
 export async function getServerSideProps({ query }) {
-  var error = false;
+  console.log(`${query.server}/api/verify/${query.id}`);
+  const data = await axios
+    .get(`${query.server}/api/verify/${query.id}`)
+    .then((res) => res.data)
+    .catch((err) => {
+      return err.response.data;
+    });
+
   return {
-    props: { id: query.id, error: error },
+    props: { id: data.id, error: data.error, server: query.server },
   };
 }
 
