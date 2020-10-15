@@ -64,30 +64,37 @@ class Publish:
         200, if no errors
         html error code, if error
         '''
+        curatorDetails = paper['info']['insertedBy']
+
+        name = "{} {} {}".format(curatorDetails['firstName'],
+                                 curatorDetails['middleName'],
+                                 curatorDetails['lastName'])
+        name = name.replace("  ", " ")
+
         id = self.generateId()
 
         subject = 'Qresp Publish Verification'
-
+        verifyLinkUrl = "{}verify/{}".format(server, id)
         html = '''
         <html>
             <body>
                 <p>
-                    Hi {0},<br>
+                    Hello {0},<br>
                     Thank you, for publishing on Qresp. Here is the link to publish the paper below.<br>
                     Click on the link below or paste it in the browser <br>
                     <br>
-                    <a href={1}/api/verify/{2}>{1}/api/verify/{2}</a><br><br>
+                    <a href={1}>{1}</a><br><br>
                     Have a great day !<br>
                     The Qresp Team
                 </p>
             </body>
         </html>
-        '''.format(paper['firstName'], server, id)
+        '''.format(name, verifyLinkUrl)
 
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'w') as f:
                 json.dump(paper, f, ensure_ascii=False)
-                mailClient.send(subject, "", html, paper['emailId'])
+                mailClient.send(subject, "", html, curatorDetails['emailId'])
                 return 200
         except Exception as e:
             print(e, file=stderr)
