@@ -14,6 +14,7 @@ import CuratorContext from "../../Context/Curator/curatorContext";
 import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 import ServerContext from "../../Context/Servers/serverContext";
 import AlertContext from "../../Context/Alert/alertContext";
+import LoadingContext from "../../Context/Loading/loadingContext";
 
 const variableTotext = {
   curatorInfo: "Curator Information",
@@ -90,6 +91,7 @@ const Publish = () => {
   const { editing } = useContext(CuratorHelperContext);
   const { selectedHttp } = useContext(ServerContext);
   const { setAlert } = useContext(AlertContext);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const onClick = () => {
     const paper = convertStatetoReqSchema(metadata, selectedHttp);
@@ -107,6 +109,7 @@ const Publish = () => {
       return;
     }
 
+    showLoader();
     axios
       .post(getServer() + "/api/publish", paper)
       .then(() =>
@@ -128,10 +131,19 @@ const Publish = () => {
         console.error(err);
         setAlert(
           "Error !",
-          "We're very sorry but there was an error publishing the paper!, Please try again",
+          <p>
+            We're very sorry but there was an error publishing the paper!,
+            Please try again
+            <br />
+            {err.response &&
+              err.response.data &&
+              err.response.data.msg &&
+              `Error Message:${err.response.data.msg}`}
+          </p>,
           null
         );
-      });
+      })
+      .finally(() => hideLoader());
   };
 
   return (
