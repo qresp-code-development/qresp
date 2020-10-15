@@ -9,9 +9,4 @@ export default [
     isActive: "Yes",
     qresp_maintainer_emails: [""],
   },
-  {
-    qresp_server_url: "http://nginx:9000",
-    isActive: "Yes",
-    qresp_maintainer_emails: [""],
-  },
 ];
