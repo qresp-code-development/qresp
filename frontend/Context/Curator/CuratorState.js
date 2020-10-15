@@ -30,7 +30,7 @@ const CuratorState = (props) => {
       middleName: "",
       lastName: "",
       emailId: "",
-      affaliation: "",
+      affiliation: "",
     },
     fileServerPath: "",
     paperInfo: {

@@ -22,19 +22,19 @@ class Mail:
                 The configuration object for the instance
         '''
 
-        self.fromEmail = config.get('GLOBAL', 'FROM_ADDR')
-        self.pwd = config.get('SECRETS', 'MAIL_PWD')
-        self.port = config.get('GLOBAL', 'SMTP_PORT')
-        self.server = config.get('GLOBAL', 'SMTP_SERVER')
+        self.fromEmail = config.get_setting('GLOBAL', 'FROM_ADDR')
+        self.pwd = config.get_setting('SECRETS', 'MAIL_PWD')
+        self.port = config.get_setting('GLOBAL', 'SMTP_PORT')
+        self.server = config.get_setting('GLOBAL', 'SMTP_SERVER')
 
         context = ssl.create_default_context()
-
         try:
             self.client = smtplib.SMTP(self.server, self.port)
             self.client.ehlo()
             self.client.starttls(context=context)
             self.client.login(self.fromEmail, self.pwd)
         except Exception as e:
+            print('Error Connecting to Mail Server', file=stderr)
             print(e, file=stderr)
 
     def send(self, subject, text, html, to):

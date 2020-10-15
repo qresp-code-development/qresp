@@ -52,7 +52,7 @@ const Header = () => {
         external={true}
       />
       <InternalStyledButton text="Contact" url="/contact" />
-      <InternalStyledButton text="LogIn" url="/login" />
+      {/* <InternalStyledButton text="LogIn" url="/login" /> */}
     </Fragment>
   );
 

@@ -6,7 +6,7 @@ import { Container, Box, Typography } from "@material-ui/core";
 
 import SEO from "../../components/seo";
 import AlertContext from "../../Context/Alert/alertContext";
-import { SmallStyledButton } from "../../components/button";
+import { RegularStyledButton } from "../../components/button";
 import ReferenceInfo from "../../components/Paper/Reference";
 import ChartInfo from "../../components/Paper/Charts";
 import DatasetInfo from "../../components/Paper/Datasets";
@@ -71,6 +71,7 @@ const PaperDetails = ({ paper, error, preview, query }) => {
     notebookFile,
     notebookPath,
     abstract,
+    fileServerPath,
   };
 
   const { setAlert, unsetAlert } = useContext(AlertContext);
@@ -86,15 +87,15 @@ const PaperDetails = ({ paper, error, preview, query }) => {
       setAlert(
         "Error Getting Paper Data !",
         "There was error trying to get paper details. Please try again ! If problems persist please contact the administrator.",
-        <SmallStyledButton onClick={refresh}>Retry</SmallStyledButton>
+        <RegularStyledButton onClick={refresh}>Retry</RegularStyledButton>
       );
     }
   }, []);
 
   const showWorkflows =
-    workflows.edges.length > 0 && workflows.nodes.length > 0;
+    workflows && workflows.edges.length > 0 && workflows.nodes.length > 0;
 
-  return (
+  return !error ? (
     <Fragment>
       <SEO title={"Qresp | " + title} description={abstract} author={authors} />
       <Container>
@@ -147,6 +148,28 @@ const PaperDetails = ({ paper, error, preview, query }) => {
         </Box>
       </Container>
     </Fragment>
+  ) : (
+    <Fragment>
+      <SEO
+        title={"Qresp | Error"}
+        description="Error in getting the paper details"
+        author="Qresp Team"
+      />
+      <Box
+        display="flex"
+        flexGrow={1}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Container>
+          <Typography variant="h2">Error !</Typography>
+          <Typography variant="h4" gutterBottom>
+            The paper details could not be retrieved :(
+          </Typography>
+          <RegularStyledButton onClick={refresh}>Retry</RegularStyledButton>
+        </Container>
+      </Box>
+    </Fragment>
   );
 };
 
@@ -171,6 +194,7 @@ export async function getServerSideProps(ctx) {
   } catch (e) {
     console.error(e);
     error = true;
+    paper = {};
   }
 
   return {

@@ -53,7 +53,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile.dev
     ports:
-      - "9000:9000"
+      - "443:443"
     networks: 
       - frontend
       - backend

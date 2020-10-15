@@ -1,13 +1,15 @@
 from mongoengine import *
 
+
 class Person(DynamicEmbeddedDocument):
     """ Class mapping creators,PIs,authors of paper to mongo database
     """
-    firstName = StringField(max_length=50, required= True)
+    firstName = StringField(max_length=50, required=True)
     middleName = StringField(max_length=50)
-    lastName = StringField(max_length=50, required= True)
+    lastName = StringField(max_length=50, required=True)
     emailId = StringField(max_length=100)
-    affiliation =StringField(max_length=100)
+    affiliation = StringField(max_length=100)
+
 
 class Info(DynamicEmbeddedDocument):
     """ Class mapping Info section of paper to mongo database
@@ -24,24 +26,27 @@ class Info(DynamicEmbeddedDocument):
     doi = StringField()
     meta = {'strict': False}
 
+
 class ExtraFields(DynamicEmbeddedDocument):
     """ Extra fields
     """
     extrakey = StringField()
     extravalue = StringField()
 
+
 class Charts(DynamicEmbeddedDocument):
     """ Class mapping Charts section of paper to mongo database
     """
     caption = StringField()
-    id = StringField(required= True)
-    imageFile = StringField(required= True)
+    id = StringField(required=True)
+    imageFile = StringField(required=True)
     files = ListField()
     number = StringField()
-    properties = ListField(required= True)
+    properties = ListField(required=True)
     extraFields = ListField()
     saveas = StringField()
     meta = {'strict': False}
+
 
 class Tools(DynamicEmbeddedDocument):
     """ Class mapping Tools section of paper to mongo database
@@ -60,6 +65,7 @@ class Tools(DynamicEmbeddedDocument):
     saveas = StringField()
     meta = {'strict': False}
 
+
 class Datasets(DynamicEmbeddedDocument):
     """ Class mapping Datasets section of paper to mongo database
     """
@@ -71,6 +77,7 @@ class Datasets(DynamicEmbeddedDocument):
     saveas = StringField()
     meta = {'strict': False}
 
+
 class Scripts(DynamicEmbeddedDocument):
     """ Class mapping Datasets section of paper to mongo database
     """
@@ -81,6 +88,7 @@ class Scripts(DynamicEmbeddedDocument):
     extraFields = ListField()
     saveas = StringField()
     meta = {'strict': False}
+
 
 class Journal(DynamicEmbeddedDocument):
     """ Class mapping Journal section of reference to mongo database
@@ -102,16 +110,18 @@ class Reference(DynamicEmbeddedDocument):
     volume = StringField()
     year = DecimalField()
     meta = {'strict': False,
-            'indexes':[
-                {'title','unique'},
+            'indexes': [
+                {'title', 'unique'},
                 'publishedAbstract'
             ]}
+
 
 class Documentation(DynamicEmbeddedDocument):
     """ Class mapping Datasets section of paper to mongo database
     """
     readme = StringField()
     meta = {'strict': False}
+
 
 class Heads(DynamicEmbeddedDocument):
     """ Class mapping Heads section of paper to mongo database
@@ -140,7 +150,8 @@ class FilterQuerySet(QuerySet):
         :param field: field to filter on in database
         :return: list of field values
         """
-        unique_values = {str(v).lower(): v for v in self.distinct(field=field)}.values()
+        unique_values = {
+            str(v).lower(): v for v in self.distinct(field=field)}.values()
         return unique_values
 
     def get_unique_names(self, field):
@@ -151,6 +162,7 @@ class FilterQuerySet(QuerySet):
         unique_values = {str(v.firstName.lower()) + " " + str(v.lastName.lower()): v.firstName + " " + v.lastName for v
                          in self.distinct(field=field)}.values()
         return unique_values
+
 
 class Paper(Document):
     """ Class to filter query on mongo database
@@ -166,10 +178,11 @@ class Paper(Document):
     heads = ListField(EmbeddedDocumentField(Heads))
     workflow = EmbeddedDocumentField(Workflow)
     documentation = EmbeddedDocumentField(Documentation)
-    collections = ListField(required= True)
-    schema = StringField(required= True)
-    tags = ListField(required= True)
+    collections = ListField(required=True)
+    schema = StringField(required=True)
+    tags = ListField(required=True)
     versions = ListField()
+    license = StringField(required=True)
     meta = {'strict': False,
             'queryset_class': FilterQuerySet
             }

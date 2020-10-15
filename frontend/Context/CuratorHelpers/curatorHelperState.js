@@ -31,6 +31,7 @@ const CuratorHelperState = (props) => {
       referenceInfo: false,
       documentationInfo: false,
       licenseInfo: false,
+      workflowInfo: false,
     },
   };
 

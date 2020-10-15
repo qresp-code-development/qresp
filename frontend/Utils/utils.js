@@ -4,7 +4,7 @@ const capitalizeFirstLetter = (text) => {
 
 const getServer = () => {
   var url = window.location.protocol + "//" + window.location.hostname;
-  if (window.location.port == "") return url + "/";
+  if (window.location.port == "") return url;
   return url + `:${window.location.port}`;
 };
 
@@ -52,10 +52,13 @@ const referenceUtil = {
     if (!text) return values;
     const split1 = text.split(",");
     const split2 = split1[0].split(" ");
-    values.journal = split2.slice(0, split2.length - 1).join(" ");
-    values.year = split2[split2.length - 1];
-    values.page = split1[2];
-    values.volume = split1[1];
+    values.journal = split2
+      .slice(0, split2.length - 1)
+      .join(" ")
+      .trim();
+    values.year = parseInt(split2[split2.length - 1].trim());
+    values.page = split1[2].trim();
+    values.volume = split1[1].trim();
     return values;
   },
 };

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 
 import { RegularStyledButton } from "./button";
 
@@ -6,22 +6,22 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
+  Typography,
 } from "@material-ui/core";
 
 import { withStyles } from "@material-ui/core/styles";
 
 import AlertContext from "../Context/Alert/alertContext";
 
-const ContentText = withStyles({
+const Content = withStyles({
   root: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     margin: "2px",
   },
-})(DialogContentText);
+})(DialogContent);
 
 const AlertDialog = () => {
   const { open, title, msg, buttons, unsetAlert } = useContext(AlertContext);
@@ -40,9 +40,9 @@ const AlertDialog = () => {
         <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
       ) : null}
 
-      <DialogContent dividers>
-        <ContentText id="alert-dialog-description">{msg}</ContentText>
-      </DialogContent>
+      <Content dividers>
+        <Typography component="div">{msg}</Typography>
+      </Content>
       <DialogActions>
         <RegularStyledButton onClick={handleClose}>Dismiss</RegularStyledButton>
         {buttons ? buttons : null}

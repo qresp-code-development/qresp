@@ -18,7 +18,8 @@ import axios from "axios";
 
 import { useRouter } from "next/router";
 
-import { convertStateToSchema, convertSchemaToState } from "../../Utils/model";
+import { convertStateToViewSchema } from "../../Utils/model";
+
 import { getServer } from "../../Utils/utils";
 import StyledTooltip from "../tooltip";
 import { RegularStyledButton } from "../button";
@@ -44,7 +45,7 @@ const TopActions = () => {
     preview: (e) => {
       e.preventDefault();
       axios
-        .post(getServer() + "/api/preview", convertStateToSchema(metadata))
+        .post(getServer() + "/api/preview", convertStateToViewSchema(metadata))
         .then((res) => res.data)
         // .then((res) => console.log(res))
         .then((res) =>

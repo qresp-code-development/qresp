@@ -46,8 +46,12 @@ export default function Home() {
               justifyContent="center"
               p={1}
             >
-              <InternalStyledButton text="Explorer" url="/explorer" />
-              <InternalStyledButton text="Curator" url="/curator" />
+              <Box m={1}>
+                <InternalStyledButton text="Explorer" url="/explorer" />
+              </Box>
+              <Box m={1}>
+                <InternalStyledButton text="Curator" url="/curator" />
+              </Box>
             </Box>
           </Container>
         </Box>

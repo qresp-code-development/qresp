@@ -2,7 +2,7 @@ import axios from "axios";
 import { namesUtil } from "./utils";
 
 const doiUtil = {
-  url: (doi) => `http://dx.doi.org/${doi}`,
+  url: (doi) => `https://dx.doi.org/${doi}`,
   headers: { Accept: "application/json; style=json" },
   get: (doi) =>
     axios

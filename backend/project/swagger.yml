@@ -253,3 +253,41 @@ paths:
           description: Incorrect paper object
         500:
           description: Internal server error
+  /publish:
+    post:
+      operationId: "project.api.publish"
+      tags:
+        - "Generate Publish Link"
+      summary: "Send an email to the curator with the link to publish the paper"
+      parameters:
+        - in: body
+          name: paper
+          description: The paper to be published
+          schema:
+            type: object
+      responses:
+        200:
+          description: Successfully generated the verify link
+        400:
+          description: Incorrect paper object
+        500:
+          description: Internal server error
+  /verify/{id}:
+    get:
+      operationId: "project.api.verify"
+      tags:
+        - "Verify the user and publish"
+      summary: "Publish the paper on the instance after successful verification"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Temporary ppublish id provided by the server
+      responses:
+        200:
+          description: Paper successfully published
+        400:
+          description: Incorrect tmp publish paper id, no paper waiting to be published with this id
+        500:
+          description: Internal server error

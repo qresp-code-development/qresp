@@ -22,11 +22,12 @@ const ReferenceInfo = ({ referenceData }) => {
     notebookFile,
     notebookPath,
     abstract,
+    fileServerPath,
   } = referenceData;
 
   const notebook = notebookFile
     ? "https://nbviewer.jupyter.org/url/" +
-      notebookPath.replace("https://", "") +
+      fileServerPath.replace(/(^\w+:|^)\/\//, "") +
       "/" +
       notebookFile
     : false;
