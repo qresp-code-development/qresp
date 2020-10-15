@@ -4,10 +4,11 @@ from project.models import *
 from project.util import WorkflowInfo, WorkflowNodeInfo, Search, PaperDetails, dotdict, WorkflowObject
 
 
-class PaperDAO(MongoDBConnection,WorkflowObject):
+class PaperDAO(MongoDBConnection, WorkflowObject):
     """
     Class providing data access objects
     """
+
     def __init__(self):
         self.hasvisited = []
         self.workflowinfo = WorkflowInfo()
@@ -25,7 +26,8 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         """ fetches all publications from paper
         :return list: List of publications
         """
-        paperPublicationlist = Paper.objects.get_unique_values('reference.journal.fullName')
+        paperPublicationlist = Paper.objects.get_unique_values(
+            'reference.journal.fullName')
         return paperPublicationlist
 
     def getAuthorList(self):
@@ -62,7 +64,8 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 Q(reference__title=searchRegWord) | Q(reference__publishedAbstract=searchRegWord) |
                 Q(tags__in=[searchRegWord]) | Q(collections__in=[searchRegWord]) | Q(reference__authors__firstName__in=[searchRegWord]) |
                 Q(reference__authors__lastName__in=[searchRegWord]))
-            allFilteredSearchObjects = self.__filtersearchedPaper(filteredPaper)
+            allFilteredSearchObjects = self.__filtersearchedPaper(
+                filteredPaper)
         else:
             searchquery = Q()
             if paperTitle and paperTitle.strip():
@@ -75,7 +78,7 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 searchRegWord = re.compile(regSearch, re.IGNORECASE)
                 searchdoiquery = Q(reference__DOI=searchRegWord)
                 searchquery = searchquery & searchdoiquery
-            if tags and len(tags)>0:
+            if tags and len(tags) > 0:
                 newtagList = []
                 for item in tags:
                     regSearch = '.*' + item + '.*'
@@ -99,9 +102,12 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                         regSearch = '.*' + item + '.*'
                         searchRegWord = re.compile(regSearch, re.IGNORECASE)
                         newnamelist.append(searchRegWord)
-                searchlastauthorquery = Q(reference__authors__lastName__in=newnamelist)
-                searchfirstauthorquery = Q(reference__authors__firstName__in=newnamelist)
-                searchquery = searchquery & (searchlastauthorquery | searchfirstauthorquery)
+                searchlastauthorquery = Q(
+                    reference__authors__lastName__in=newnamelist)
+                searchfirstauthorquery = Q(
+                    reference__authors__firstName__in=newnamelist)
+                searchquery = searchquery & (
+                    searchlastauthorquery | searchfirstauthorquery)
             if publicationList and len(publicationList) > 0:
                 newpubList = []
                 for item in publicationList:
@@ -112,9 +118,11 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 searchquery = searchquery & searchpubquery
             if not searchquery.empty:
                 filteredPaper = Paper.objects.filter(searchquery)
-                allFilteredSearchObjects = self.__filtersearchedPaper(filteredPaper)
+                allFilteredSearchObjects = self.__filtersearchedPaper(
+                    filteredPaper)
             else:
-                allFilteredSearchObjects = self.__filtersearchedPaper(Paper.objects())
+                allFilteredSearchObjects = self.__filtersearchedPaper(
+                    Paper.objects())
         return allFilteredSearchObjects
 
     def getAllSearchObjects(self):
@@ -124,7 +132,7 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         allSearchobjects = self.__filtersearchedPaper(Paper.objects())
         return allSearchobjects
 
-    def insertIntoPapers(self,paperdata):
+    def insertIntoPapers(self, paperdata):
         """ Inserts into collection"""
         listoftitles = [paper.reference.title for paper in Paper.objects()]
         if paperdata['reference']['title'] in listoftitles:
@@ -133,11 +141,10 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         paper.save()
         return str(paper.id)
 
-    def insertDOI(self,id,doi):
+    def insertDOI(self, id, doi):
         """ Inserts into collection"""
         paper = Paper.objects(id=id).update(info__doi=doi)
         return paper
-
 
     def __filtersearchedPaper(self, filteredPaper):
         """ Produces search results after filter
@@ -150,9 +157,11 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
             search.title = paper.reference.title
             search.tags = paper.tags
             search.collections = paper.collections
-            search.authors = [authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
+            search.authors = [authors.firstName + " " +
+                              authors.lastName for authors in paper.reference.authors]
             search.authors = ", ".join(search.authors)
-            search.publication = paper.reference.journal.fullName + " " + paper.reference.volume + ", " + paper.reference.page
+            search.publication = paper.reference.journal.fullName + \
+                " " + paper.reference.volume + ", " + paper.reference.page
             search.abstract = paper.reference.publishedAbstract
             search.doi = paper.reference.DOI
             search.serverPath = paper.info.serverPath
@@ -177,22 +186,27 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         paperDetails.title = paper.reference.title
         paperDetails.tags = paper.tags
         paperDetails.collections = paper.collections
+        paperDetails.license = paper.license
         if paper.reference.authors and paper.reference.authors[0].firstName:
-            paperDetails.authors = [authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
+            paperDetails.authors = [
+                authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
             paperDetails.authors = ", ".join(paperDetails.authors)
         if paper.PIs and paper.PIs[0].firstName:
-            paperDetails.PIs = [pi.firstName + " " + pi.lastName for pi in paper.PIs]
+            paperDetails.PIs = [pi.firstName + " " +
+                                pi.lastName for pi in paper.PIs]
             paperDetails.PIs = ", ".join(paperDetails.PIs)
-        paperDetails.publication = paper.reference.journal.fullName + " " + paper.reference.volume + ", " + paper.reference.page
+        paperDetails.publication = paper.reference.journal.fullName + \
+            " " + paper.reference.volume + ", " + paper.reference.page
         paperDetails.abstract = paper.reference.publishedAbstract
         paperDetails.doi = paper.reference.DOI
-        paperDetails.serverPath = getattr(paper.info,'serverPath','')
-        paperDetails.folderAbsolutePath = getattr(paper.info,'folderAbsolutePath','')
-        paperDetails.fileServerPath = getattr(paper.info,'fileServerPath','')
-        paperDetails.downloadPath = getattr(paper.info,'downloadPath','')
-        paperDetails.notebookPath = getattr(paper.info,'notebookPath','')
-        paperDetails.notebookFile = getattr(paper.info,'notebookFile','')
-        paperDetails.ProjectName = getattr(paper.info,'ProjectName','')
+        paperDetails.serverPath = getattr(paper.info, 'serverPath', '')
+        paperDetails.folderAbsolutePath = getattr(
+            paper.info, 'folderAbsolutePath', '')
+        paperDetails.fileServerPath = getattr(paper.info, 'fileServerPath', '')
+        paperDetails.downloadPath = getattr(paper.info, 'downloadPath', '')
+        paperDetails.notebookPath = getattr(paper.info, 'notebookPath', '')
+        paperDetails.notebookFile = getattr(paper.info, 'notebookFile', '')
+        paperDetails.ProjectName = getattr(paper.info, 'ProjectName', '')
         paperDetails.year = int(paper.reference.year)
         paperDetails.charts = paper.charts
         paperDetails.datasets = paper.datasets
@@ -200,14 +214,16 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
         paperDetails.tools = paper.tools
         paperDetails.workflows = paper.workflow
         paperDetails.heads = paper.heads
-        paperDetails.cite = getattr(paper.info,'doi','')
+        paperDetails.cite = getattr(paper.info, 'doi', '')
         paperDetails.timeStamp = paper.info.timeStamp
         paperDetails.firstName = paper.info.insertedBy.firstName
-        paperDetails.middleName = getattr(paper.info.insertedBy,'middleName','')
+        paperDetails.middleName = getattr(
+            paper.info.insertedBy, 'middleName', '')
         paperDetails.lastName = paper.info.insertedBy.lastName
-        paperDetails.emailId = getattr(paper.info.insertedBy,'emailId','')
-        paperDetails.affiliation = getattr(paper.info.insertedBy,'affiliation','')
-        paperDetails.documentation = getattr(paper.documentation,'readme','')
+        paperDetails.emailId = getattr(paper.info.insertedBy, 'emailId', '')
+        paperDetails.affiliation = getattr(
+            paper.info.insertedBy, 'affiliation', '')
+        paperDetails.documentation = getattr(paper.documentation, 'readme', '')
         return paperDetails.__dict__
 
     def getWorkflowDetails(self, paperid):
@@ -226,7 +242,6 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
             return self.workflowinfo.__dict__
         except Exception as e:
             print(e)
-
 
     def getWorkflowForChartDetails(self, paperid, chartid):
         """ Build workflow details based on paper
@@ -281,10 +296,12 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 for head in paper.heads:
                     if node in str(head.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = "<p><b>External " + head.id + "</b>: <i>" + head.readme + "</i></p>"
+                        workflownodeinfo.toolTip = "<p><b>External " + \
+                            head.id + "</b>: <i>" + head.readme + "</i></p>"
                         details = []
                         details.append("Head " + node)
-                        details.append("<p><i>" + head.readme + "</i></p>" + self._getLinks(head.URLs))
+                        details.append("<p><i>" + head.readme +
+                                       "</i></p>" + self._getLinks(head.URLs))
                         workflownodeinfo.details = details
                         workflownodeinfo.hasNotebookFile = False
                         if head.saveas:
@@ -296,12 +313,14 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 for tool in paper.tools:
                     if node in str(tool.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForTools(tool)
+                        workflownodeinfo.toolTip = self._getTooltipForTools(
+                            tool)
                         details = []
                         details.append("Tool " + node)
                         toollinks = self._getLinks(tool.URLs)
                         tooldetails = self._getTooltipForTools(tool)
-                        toolfiles = self._getFiles(tool.files, paper.info.fileServerPath)
+                        toolfiles = self._getFiles(
+                            tool.files, paper.info.fileServerPath)
                         workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
                         details.append(workflowtools)
                         workflownodeinfo.details = details
@@ -316,15 +335,18 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 for dataset in paper.datasets:
                     if node in str(dataset.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(dataset, node)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            dataset, node)
                         details = []
                         extradatasetfields = ""
                         details.append("Dataset " + node)
                         datasetlinks = self._getLinks(dataset.URLs)
                         datasetdetails = self._getTooltipForNode(dataset, node)
-                        datasetfiles = self._getFiles(dataset.files, paper.info.fileServerPath)
+                        datasetfiles = self._getFiles(
+                            dataset.files, paper.info.fileServerPath)
                         # extradatasetfields = self.__getExtraFields(dataset)
-                        workflowdatasets = datasetdetails + datasetlinks + datasetfiles + extradatasetfields
+                        workflowdatasets = datasetdetails + \
+                            datasetlinks + datasetfiles + extradatasetfields
                         details.append(workflowdatasets)
                         workflownodeinfo.details = details
                         if dataset.saveas:
@@ -338,13 +360,15 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 for script in paper.scripts:
                     if node in str(script.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(script, node)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            script, node)
                         details = []
                         extrascriptfields = ""
                         details.append("Script " + node)
                         scriptlinks = self._getLinks(script.URLs)
                         scriptdetails = self._getTooltipForNode(script, node)
-                        scriptfiles = self._getFiles(script.files, paper.info.fileServerPath)
+                        scriptfiles = self._getFiles(
+                            script.files, paper.info.fileServerPath)
                         workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
                         details.append(workflowscripts)
                         workflownodeinfo.details = details
@@ -359,13 +383,16 @@ class PaperDAO(MongoDBConnection,WorkflowObject):
                 for chart in paper.charts:
                     if node in str(chart.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(chart, node, paper.info.fileServerPath)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            chart, node, paper.info.fileServerPath)
                         details = []
                         extrachartfields = ""
                         details.append("Chart " + node)
                         chartlinks = self._getLinks(chart.properties, "charts")
-                        chartdetails = self._getTooltipForNode(chart, node, paper.info.fileServerPath)
-                        chartfiles = self._getFiles(chart.files, paper.info.fileServerPath)
+                        chartdetails = self._getTooltipForNode(
+                            chart, node, paper.info.fileServerPath)
+                        chartfiles = self._getFiles(
+                            chart.files, paper.info.fileServerPath)
                         # extrachartfields = self.__getExtraFields(chart)
                         workflowcharts = chartdetails + chartlinks + chartfiles + extrachartfields
                         details.append(workflowcharts)
@@ -385,7 +412,8 @@ class ObjectsForPreview(WorkflowObject):
     """
     Generates Paper details and Workflow details objects
     """
-    def __init__(self,form=None):
+
+    def __init__(self, form=None):
         self.data = form
         self.workflowinfo = WorkflowInfo()
         self.workflowinfo.nodes = {}
@@ -396,18 +424,23 @@ class ObjectsForPreview(WorkflowObject):
         paperDetails = PaperDetails()
         paper = self.data
         serverpathList = paper.info.fileServerPath.data.rsplit("/", 2)
-        paperDetails.id = serverpathList[len(serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
+        paperDetails.id = serverpathList[len(
+            serverpathList)-2] + "_" + serverpathList[len(serverpathList)-1]
         paperDetails.title = paper.reference.title.data
         paperDetails.tags = [form.data for form in paper.tags.entries]
-        paperDetails.collections = [form.data for form in paper.collections.entries]
+        paperDetails.collections = [
+            form.data for form in paper.collections.entries]
         if paper.reference.authors.data and paper.reference.authors.entries[0].data.get("firstName"):
-            paperDetails.authors = [authors.data.get("firstName","") + " " + authors.data.get("lastName","") for authors in paper.reference.authors.entries]
+            paperDetails.authors = [authors.data.get("firstName", "") + " " + authors.data.get(
+                "lastName", "") for authors in paper.reference.authors.entries]
             paperDetails.authors = ", ".join(paperDetails.authors)
         if paper.PIs.data:
-            paperDetails.PIs = [pi.data.get("firstName","") + " " + pi.data.get("lastName","") for pi in paper.PIs.entries]
+            paperDetails.PIs = [pi.data.get(
+                "firstName", "") + " " + pi.data.get("lastName", "") for pi in paper.PIs.entries]
             paperDetails.PIs = ", ".join(paperDetails.PIs)
         if paper.reference.journal.fullName.data:
-            paperDetails.publication = paper.reference.journal.fullName.data + " " + paper.reference.volume.data + ", " + paper.reference.page.data
+            paperDetails.publication = paper.reference.journal.fullName.data + \
+                " " + paper.reference.volume.data + ", " + paper.reference.page.data
         paperDetails.abstract = paper.reference.publishedAbstract.data
         paperDetails.doi = paper.reference.DOI.data
         paperDetails.fileServerPath = paper.info.fileServerPath.data
@@ -517,10 +550,12 @@ class ObjectsForPreview(WorkflowObject):
                     head = dotdict(head.data)
                     if node in str(head.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = "<p><b>External " + head.id + "</b>: <i>" + head.readme + "</i></p>"
+                        workflownodeinfo.toolTip = "<p><b>External " + \
+                            head.id + "</b>: <i>" + head.readme + "</i></p>"
                         details = []
                         details.append("Head " + node)
-                        details.append("<p><i>" + head.readme + "</i></p>" + self._getLinks(head.URLs))
+                        details.append("<p><i>" + head.readme +
+                                       "</i></p>" + self._getLinks(head.URLs))
                         workflownodeinfo.details = details
                         workflownodeinfo.hasNotebookFile = False
                         if head.saveas:
@@ -533,12 +568,14 @@ class ObjectsForPreview(WorkflowObject):
                     tool = dotdict(tool.data)
                     if node in str(tool.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForTools(tool)
+                        workflownodeinfo.toolTip = self._getTooltipForTools(
+                            tool)
                         details = []
                         details.append("Tool " + node)
                         toollinks = self._getLinks(tool.URLs)
                         tooldetails = self._getTooltipForTools(tool)
-                        toolfiles = self._getFiles(tool.files, paper.info.fileServerPath.data)
+                        toolfiles = self._getFiles(
+                            tool.files, paper.info.fileServerPath.data)
                         workflowtools = tooldetails + toollinks + toolfiles + "</i></p>"
                         details.append(workflowtools)
                         workflownodeinfo.details = details
@@ -554,15 +591,18 @@ class ObjectsForPreview(WorkflowObject):
                     dataset = dotdict(dataset.data)
                     if node in str(dataset.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(dataset, node)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            dataset, node)
                         details = []
                         extradatasetfields = ""
                         details.append("Dataset " + node)
                         datasetlinks = self._getLinks(dataset.URLs)
                         datasetdetails = self._getTooltipForNode(dataset, node)
-                        datasetfiles = self._getFiles(dataset.files, paper.info.fileServerPath.data)
+                        datasetfiles = self._getFiles(
+                            dataset.files, paper.info.fileServerPath.data)
                         # extradatasetfields = self.__getExtraFields(dataset)
-                        workflowdatasets = datasetdetails + datasetlinks + datasetfiles + extradatasetfields
+                        workflowdatasets = datasetdetails + \
+                            datasetlinks + datasetfiles + extradatasetfields
                         details.append(workflowdatasets)
                         workflownodeinfo.details = details
                         if dataset.saveas:
@@ -577,13 +617,15 @@ class ObjectsForPreview(WorkflowObject):
                     script = dotdict(script.data)
                     if node in str(script.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(script, node)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            script, node)
                         details = []
                         extrascriptfields = ""
                         details.append("Script " + node)
                         scriptlinks = self._getLinks(script.URLs)
                         scriptdetails = self._getTooltipForNode(script, node)
-                        scriptfiles = self._getFiles(script.files, paper.info.fileServerPath.data)
+                        scriptfiles = self._getFiles(
+                            script.files, paper.info.fileServerPath.data)
                         workflowscripts = scriptdetails + scriptlinks + scriptfiles + extrascriptfields
                         details.append(workflowscripts)
                         workflownodeinfo.details = details
@@ -599,13 +641,16 @@ class ObjectsForPreview(WorkflowObject):
                     chart = dotdict(chart.data)
                     if node in str(chart.id):
                         workflownodeinfo = WorkflowNodeInfo()
-                        workflownodeinfo.toolTip = self._getTooltipForNode(chart, node, paper.info.fileServerPath.data)
+                        workflownodeinfo.toolTip = self._getTooltipForNode(
+                            chart, node, paper.info.fileServerPath.data)
                         details = []
                         extrachartfields = ""
                         details.append("Chart " + node)
                         chartlinks = self._getLinks(chart.properties, "charts")
-                        chartdetails = self._getTooltipForNode(chart, node, paper.info.fileServerPath.data)
-                        chartfiles = self._getFiles(chart.files, paper.info.fileServerPath.data)
+                        chartdetails = self._getTooltipForNode(
+                            chart, node, paper.info.fileServerPath.data)
+                        chartfiles = self._getFiles(
+                            chart.files, paper.info.fileServerPath.data)
                         # extrachartfields = self.__getExtraFields(chart)
                         workflowcharts = chartdetails + chartlinks + chartfiles + extrachartfields
                         details.append(workflowcharts)
@@ -616,7 +661,7 @@ class ObjectsForPreview(WorkflowObject):
                             workflownodeinfo.nodelabel = node
                         workflownodeinfo.hasNotebookFile = False
                         self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-                        self.workflowinfo.workflowType = chart.number + " of " + paper.reference.title.data
+                        self.workflowinfo.workflowType = chart.number + \
+                            " of " + paper.reference.title.data
         except Exception as e:
             print(e)
-
