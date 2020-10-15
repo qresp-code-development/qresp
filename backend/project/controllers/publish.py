@@ -4,6 +4,8 @@ import json
 from uuid import uuid4
 
 from project.utils.mail import mailClient
+from project.utils.validate import Validate
+from project.paperdao import PaperDAO
 
 
 class Publish:
@@ -42,17 +44,21 @@ class Publish:
         '''
         try:
             with open("{}{}.json".format(self.dir_prefix, id), 'r') as f:
-                return json.load(f)
+                paper = json.load(f)
+                id = PaperDAO().insertIntoPapers(paper)
+                if not id:
+                    return {"msg": "Paper Already Exists in the database (Same title or doi)", "code": 400}
+                return id
         except FileNotFoundError as e:
             print(e, file=stderr)
-            return 400
+            return {"msg": "Incorrect verify link, this paper is not present in the wait queue", "code": 400}
         except Exception as e:
             print(e, file=stderr)
-            return 500
+            return {"msg": "Internal Server Error", "code": 500}
 
     def publish(self, paper, server):
         '''
-        Generate a new link to verify the identity of the user and then publish 
+        Generate a new link to verify the identity of the user and then publish
 
         Parameters
         -----------
@@ -62,8 +68,19 @@ class Publish:
         Return
         ------
         200, if no errors
-        html error code, if error
+        msg and html error code, if error
         '''
+
+        try:
+            with open(getcwd()+"/project/schema.json") as f:
+                schema = json.load(f)
+                errors = Validate.validatepaper(paper, schema)
+                if errors != True:
+                    return {'msg': errors, 'code': 400}
+        except FileNotFoundError as e:
+            print(e, file=stderr)
+            return {'msg': 'Schema not found, Internal Server Error', 'code': 500}
+
         curatorDetails = paper['info']['insertedBy']
 
         name = "{} {} {}".format(curatorDetails['firstName'],
@@ -74,7 +91,7 @@ class Publish:
         id = self.generateId()
 
         subject = 'Qresp Publish Verification'
-        verifyLinkUrl = "{}verify/{}".format(server, id)
+        verifyLinkUrl = "{0}verify/{1}?server={0}".format(server, id)
         html = '''
         <html>
             <body>
@@ -98,4 +115,4 @@ class Publish:
                 return 200
         except Exception as e:
             print(e, file=stderr)
-            return 500
+            return {"msg": "Internal Server Error", "code": 500}
