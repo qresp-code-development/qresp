@@ -11,14 +11,14 @@ services:
       - ./backend:/home/flask/app/web/
     networks:
       - backend
-    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :8080 project:app
+    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :5000 project:app
 
   gui:
     restart: always
     build: ./frontend
     networks:
       - frontend
-    command: yarn start
+    command: pm2-runtime start yarn --name "QrespFrontend" --interpreter sh -- start
 
   nginx:
     restart: always
