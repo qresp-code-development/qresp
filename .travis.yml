@@ -1,15 +1,15 @@
 language: python
 matrix:
-    include:
-        - os: linux
-          python: 3.5
-          env: TOXENV=py35
-        - os: linux
-          python: 3.6
-          env: TOXENV=py36
-        - os: linux
-          python: 3.7
-          env: TOXENV=py37
+  include:
+    - os: linux
+      python: 3.5
+      env: TOXENV=py35
+    - os: linux
+      python: 3.6
+      env: TOXENV=py36
+    - os: linux
+      python: 3.7
+      env: TOXENV=py37
 
 before_install: |
   if [ "$TRAVIS_OS_NAME" == "osx" ]; then
@@ -36,7 +36,7 @@ before_install: |
   fi
 
 install:
-  - cd web
+  - cd backend
   - pip install -r requirements.txt
   - python setup.py install
 # command to run tests
