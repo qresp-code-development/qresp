@@ -23,21 +23,21 @@ const Footer = () => {
       >
         <a href="http://miccom-center.org/" target="_blank" rel="noopener">
           <img
-            src="/images/MICCoMLogo.png"
+            src="/images/MICCoMLogo.webp"
             height="48px"
             alt="Miccom Logo"
           ></img>
         </a>
         <a href="https://www.anl.gov/" target="_blank" rel="noopener">
           <img
-            src="/images/ArgonneLogo.png"
+            src="/images/ArgonneLogo.webp"
             height="48px"
             alt="Argonne National Lab Logo"
           ></img>
         </a>
         <a href="https://www.uchicago.edu/" target="_blank" rel="noopener">
           <img
-            src="/images/UchicagoLogo.png"
+            src="/images/UchicagoLogo.webp"
             height="48px"
             alt="University of Chicago Logo"
           ></img>

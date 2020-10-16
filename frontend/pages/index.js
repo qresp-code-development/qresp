@@ -24,11 +24,11 @@ export default function Home() {
           }}
         >
           <img
-            src="/images/qresp-poster.png"
+            src="/images/qrespPoster.webp"
             width="100%"
             className="blur"
           ></img>
-          <img src="/images/qresp-poster.png" className="poster"></img>
+          <img src="/images/qrespPoster.webp" className="poster"></img>
         </div>
         <Box display="flex" m={3} alignItems="center" justifyContent="center">
           <Container>
