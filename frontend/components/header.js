@@ -51,7 +51,11 @@ const Header = () => {
         url="https://qresp.org"
         external={true}
       />
-      <InternalStyledButton text="Contact" url="/contact" />
+      <ExternalStyledButton
+        text="Contact"
+        url="mailto:datadev@lists.uchicago.edu?subject=Qresp"
+        external={true}
+      />
       {/* <InternalStyledButton text="LogIn" url="/login" /> */}
     </Fragment>
   );
