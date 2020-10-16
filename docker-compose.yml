@@ -1,27 +1,39 @@
-version: '2'
+version: "2"
 
 services:
-  web:
+  backend:
     restart: always
-    build: ./web
-    expose:
-      - "8080"
+    build: ./backend
     environment:
       - PYTHONUNBUFFERED=TRUE
     volumes:
-      - /usr/src/app/web/project/static
-      - ./web/:/usr/src/app/web
-      - ./papercollection:/home/flask/app/web/papers
+      - /usr/src/app/backend/project/static
+      - ./backend:/home/flask/app/web/
+    networks:
+      - backend
     command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :8080 project:app
+
+  gui:
+    restart: always
+    build: ./frontend
+    networks:
+      - frontend
+    command: yarn start
 
   nginx:
     restart: always
     build: ./nginx
     ports:
       - "443:443"
-    volumes:
-      - /www/static
-    volumes_from:
-      - web
     depends_on:
-      - web
+      - backend
+      - gui
+    networks:
+      - backend
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
