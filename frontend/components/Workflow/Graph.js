@@ -50,7 +50,9 @@ const getOptions = (manipulate = {}) => {
         edge: changeChosenEdgeMiddleArrowScale,
       },
     },
-    physics: false,
+    physics: {
+      minVelocity: 0.5,
+    },
     interaction: {
       hover: true,
       dragNodes: true,

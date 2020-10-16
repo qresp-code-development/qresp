@@ -121,6 +121,7 @@ const WorkflowInfoForm = () => {
         chosen: false,
       },
     },
+    physics: false,
   };
 
   const data = formatData(charts, tools, heads, datasets, scripts);
