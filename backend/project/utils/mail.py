@@ -26,16 +26,28 @@ class Mail:
         self.pwd = config.get_setting('SECRETS', 'MAIL_PWD')
         self.port = config.get_setting('GLOBAL', 'SMTP_PORT')
         self.server = config.get_setting('GLOBAL', 'SMTP_SERVER')
+        self.context = ssl.create_default_context()
 
-        context = ssl.create_default_context()
+    def connect(self):
+        '''
+        Connect to the server
+        Needs to be called before send email
+        '''
+
         try:
             self.client = smtplib.SMTP(self.server, self.port)
             self.client.ehlo()
-            self.client.starttls(context=context)
+            self.client.starttls(context=self.context)
             self.client.login(self.fromEmail, self.pwd)
         except Exception as e:
             print('Error Connecting to Mail Server', file=stderr)
             print(e, file=stderr)
+
+    def disconnect(self):
+        '''
+        Disconnect SMTP 
+        '''
+        self.client.quit()
 
     def send(self, subject, text, html, to):
         '''
@@ -63,7 +75,11 @@ class Mail:
         message.attach(MIMEText(text, 'plain'))
         message.attach(MIMEText(html, 'html'))
 
+        # Creating a session for each time is unnecessary and hit the performance.
+        # But for now, with low usage it's okay. # FUTURE
+        self.connect()
         self.client.sendmail(self.fromEmail, to, message.as_string())
+        self.disconnect()
 
 
 mailClient = Mail(Config)
