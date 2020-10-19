@@ -12,14 +12,11 @@ The current list of developers, in alphabetical order:
 - Marco Govoni (Argonne National Laboratory and University of Chicago)
 - Sushant Bansal (University of Chicago)
 
-Former Developers
-
-- Aditya Tanikanti (Ex. University of Chicago)
-
 # Former Developers
 
 The former list of developers, in alphabetical order:
 
+- Aditya Tanikanti (2017-2019)
 - Milson Munakami (2017-2018)
 
 # Contributors
