@@ -1,0 +1,173 @@
+{
+  "PIs": [
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "middleName": ""
+    },
+    {
+      "firstName": "Jane",
+      "lastName": "Gill",
+      "middleName": ""
+    }
+  ],
+  "charts": [
+    {
+      "caption": "c0",
+      "extraFields": [
+        {
+          "extrakey": "",
+          "extravalue": ""
+        }
+      ],
+      "files": [
+        "/charts/figure1/figure1.csv",
+        "/charts/figure1/figure1.ipynb",
+        "/charts/figure1/figure1.jpg"
+      ],
+      "id": "c0",
+      "imageFile": "/charts/figure1/figure1.jpg",
+      "notebookFile": "/charts/figure1/figure1.ipynb",
+      "number": "0",
+      "properties": ["band gap"]
+    }
+  ],
+  "collections": ["MICCOM"],
+  "datasets": [
+    {
+      "URLs": [""],
+      "extraFields": [
+        {
+          "extrakey": "",
+          "extravalue": ""
+        }
+      ],
+      "files": ["/datasets/datasetA.dat", "/datasets/datasetB.dat"],
+      "id": "d0",
+      "readme": "These are datasets"
+    }
+  ],
+  "documentation": {
+    "readme": "This is additional content"
+  },
+  "heads": [
+    {
+      "URLs": [""],
+      "id": "h0",
+      "readme": "External setup info"
+    }
+  ],
+  "info": {
+    "ProjectName": "paper",
+    "doi": null,
+    "downloadPath": "https://app.globus.org/file-manager?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path=",
+    "fileServerPath": "https://notebook.rcc.uchicago.edu/files/paper",
+    "gitPath": "Y",
+    "insertedBy": {
+      "affiliation": "Dept of Chem, UC",
+      "emailId": "john.doe@company.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "middleName": "H."
+    },
+    "isPublic": true,
+    "notebookFile": "/toc.ipynb",
+    "notebookPath": "https://notebook.rcc.uchicago.edu/files",
+    "timeStamp": "2019-09-20 12:32:56"
+  },
+  "reference": {
+    "DOI": "10.1021/jacs.6b00225",
+    "URLs": "http://dx.doi.org/10.1021/jacs.6b00225",
+    "authors": [
+      {
+        "firstName": "Alex",
+        "lastName": "Gaiduk",
+        "middleName": "P."
+      },
+      {
+        "firstName": "Marco",
+        "lastName": "Govoni",
+        "middleName": ""
+      }
+    ],
+    "journal": {
+      "abbrevName": "",
+      "fullName": "Journal of the American Chemical Society"
+    },
+    "kind": "journal",
+    "page": "6912-6915",
+    "publishedAbstract": "This is abstract",
+    "school": "",
+    "title": "Photoelectron Spectra of Aqueous Solutions from First Principles",
+    "volume": "138",
+    "year": 2016
+  },
+  "schema": "http://paperstack.uchicago.edu/v1_1.json",
+  "scripts": [
+    {
+      "URLs": [""],
+      "extraFields": [
+        {
+          "extrakey": "",
+          "extravalue": ""
+        }
+      ],
+      "files": ["/scripts/fileA.py", "/scripts/fileB.py"],
+      "id": "s0",
+      "readme": "These are scripts"
+    }
+  ],
+  "tags": ["DFT", "charge transfer"],
+  "tools": [
+    {
+      "URLs": [""],
+      "description": "This is a software",
+      "extraFields": [
+        {
+          "extrakey": "",
+          "extravalue": ""
+        }
+      ],
+      "facilityName": "",
+      "id": "t0",
+      "kind": "software",
+      "measurement": "",
+      "packageName": "West",
+      "patches": ["/tools/modded_qbox.diff"],
+      "programName": "wstat.x",
+      "version": "3.0.0"
+    },
+    {
+      "URLs": [""],
+      "description": "",
+      "extraFields": [
+        {
+          "extrakey": "",
+          "extravalue": ""
+        }
+      ],
+      "facilityName": "APS",
+      "id": "t1",
+      "kind": "experiment",
+      "measurement": "X-ray emission",
+      "packageName": "",
+      "patches": [""],
+      "programName": "",
+      "version": ""
+    }
+  ],
+  "version": 2,
+  "versions": [],
+  "workflow": {
+    "edges": [
+      ["h0", "t0"],
+      ["h0", "t1"],
+      ["t0", "s0"],
+      ["t1", "s0"],
+      ["s0", "d0"],
+      ["d0", "c0"]
+    ],
+    "nodes": ["t0", "c0", "d0", "t1", "h0", "s0"]
+  },
+  "license": "cc"
+}

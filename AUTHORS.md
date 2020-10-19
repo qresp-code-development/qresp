@@ -1,6 +1,6 @@
 This file lists the authors of the Qresp software as well as the known contributors.
 
-# Project Leads 
+# Project Leads
 
 - Marco Govoni (Argonne National Laboratory and University of Chicago)
 - Giulia Galli (University of Chicago and Argonne National Laboratory)
@@ -10,12 +10,13 @@ This file lists the authors of the Qresp software as well as the known contribut
 The current list of developers, in alphabetical order:
 
 - Marco Govoni (Argonne National Laboratory and University of Chicago)
-- Aditya Tanikanti (University of Chicago)
+- Sushant Bansal (University of Chicago)
 
 # Former Developers
 
 The former list of developers, in alphabetical order:
 
+- Aditya Tanikanti (2017-2019)
 - Milson Munakami (2017-2018)
 
 # Contributors

@@ -1,0 +1,293 @@
+swagger: "2.0"
+info:
+  description: This is the swagger file that provides the API to fetch data from Qresp server
+  version: "1.0"
+  title: Swagger REST Article
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/api"
+
+# Paths supported by the server application
+paths:
+  /search:
+    get:
+      operationId: "project.api.search"
+      tags:
+        - "Papers"
+      summary: "Fetches all papers"
+      description: "Read the list of papers"
+      parameters:
+        - in: query
+          name: searchWord
+          type: string
+          required: false
+          description: Filter paper results based on search word
+        - in: query
+          name: paperTitle
+          type: string
+          required: false
+          description: Filter paper results based on paper title
+        - in: query
+          name: doi
+          type: string
+          required: false
+          description: Filter paper results based on paper doi
+        - in: query
+          name: tags
+          type: string
+          required: false
+          description: Filter paper results based on paper tags
+        - in: query
+          name: collectionList
+          type: string
+          required: false
+          description: Filter paper results based on collection. Seperate by comma for multiple values
+        - in: query
+          name: authorsList
+          type: string
+          required: false
+          description: Filter paper results based on authors. Seperate by comma for multiple values
+        - in: query
+          name: publicationList
+          required: false
+          type: string
+          description: Filter paper results based on publication. Seperate by comma for multiple values
+      responses:
+        200:
+          description: "Successful read papers list operation"
+          schema:
+            type: "array"
+            items:
+              properties:
+                _Search__abstract:
+                  type: "string"
+                _Search__authors:
+                  type: "string"
+                _Search__collections:
+                  type: "array"
+                _Search__doi:
+                  type: "string"
+                _Search__downloadPath:
+                  type: "string"
+                _Search__fileServerPath:
+                  type: "string"
+                _Search__folderAbsolutePath:
+                  type: "string"
+                _Search__id":
+                  type: "string"
+                _Search__notebookFile:
+                  type: "string"
+                _Search__notebookPath:
+                  type: "string"
+                _Search__publication:
+                  type: "string"
+                _Search__serverPath:
+                  type: "string"
+                _Search__tags:
+                  type: "array"
+                _Search__title:
+                  type: "string"
+                _Search__year:
+                  type: "integer"
+  /collections:
+    get:
+      operationId: "project.api.collections"
+      tags:
+        - "Collections"
+      summary: "Fetches all collections"
+      description: "Fetches collections from all Papers"
+      responses:
+        200:
+          description: "Successful read collections list operation"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+  /authors:
+    get:
+      operationId: "project.api.authors"
+      tags:
+        - "Authors"
+      summary: "Fetches all authors"
+      description: "Fetches authors from papers"
+      responses:
+        200:
+          description: "Successful read authors list operation"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+  /publications:
+    get:
+      operationId: "project.api.publications"
+      tags:
+        - "Publications"
+      summary: "Fetches all publications"
+      description: "Fetches publications from all papers"
+      responses:
+        200:
+          description: "Successful read paper publications operation"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+  /paper/{id}:
+    get:
+      operationId: "project.api.paper"
+      tags:
+        - "Paper details"
+      summary: "Fetches details of paper given id"
+      description: "Fetches paper details given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: "Successful read paper details "
+  /workflow/{id}:
+    get:
+      operationId: "project.api.workflow"
+      tags:
+        - "Workflow details"
+      summary: "Fetches workflow of paper given id"
+      description: "Fetches workflow of paper given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: "Successful read workflow details of paper"
+  /paper/{id}/chart/{cid}:
+    get:
+      operationId: "project.api.chart"
+      tags:
+        - "Chart details"
+      summary: "Fetches chart of paper given id of paper and chart"
+      description: "Fetches chart of paper given id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: path
+          name: cid
+          type: string
+          required: true
+          description: Chart Id
+      responses:
+        200:
+          description: "Successful read workflow details of paper"
+  /dircont:
+    post:
+      operationId: "project.api.dircontents"
+      tags:
+        - "Data source contents"
+      summary: Returns a list of files and folders inside the directory
+      parameters:
+        - in: body
+          name: req
+          description: Contents to get of link.
+          schema:
+            type: object
+            required:
+              - link
+              - src
+              - service
+            properties:
+              link:
+                type: string
+              src:
+                type: string
+              service:
+                type: boolean
+      responses:
+        200:
+          description: Contents returned
+        500:
+          description: Failure
+  /preview/{id}:
+    get:
+      operationId: "project.api.getPreview"
+      tags:
+        - "Get metadata for the preview"
+      summary: "Get the metadata for preview from the id"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Metadata paper ID
+      responses:
+        200:
+          description: Metadata successfully returned
+        400:
+          description: Incorrect paper id, paper with this id does not exist in the database
+        500:
+          description: Internal server error
+  /preview:
+    post:
+      operationId: "project.api.generatePreview"
+      tags:
+        - "Generate metadata link"
+      summary: "Add data for previewing the metadata under curation"
+      parameters:
+        - in: body
+          name: paper
+          description: The metadata for which the preview is to be generated
+          schema:
+            type: object
+      responses:
+        200:
+          description: Metadata successfully added and returned
+        400:
+          description: Incorrect paper object
+        500:
+          description: Internal server error
+  /publish:
+    post:
+      operationId: "project.api.publish"
+      tags:
+        - "Generate Publish Link"
+      summary: "Send an email to the curator with the link to publish the paper"
+      parameters:
+        - in: body
+          name: paper
+          description: The paper to be published
+          schema:
+            type: object
+      responses:
+        200:
+          description: Successfully generated the verify link
+        400:
+          description: Incorrect paper object
+        500:
+          description: Internal server error
+  /verify/{id}:
+    get:
+      operationId: "project.api.verify"
+      tags:
+        - "Verify the user and publish"
+      summary: "Publish the paper on the instance after successful verification"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Temporary ppublish id provided by the server
+      responses:
+        200:
+          description: Paper successfully published
+        400:
+          description: Incorrect tmp publish paper id, no paper waiting to be published with this id
+        500:
+          description: Internal server error
