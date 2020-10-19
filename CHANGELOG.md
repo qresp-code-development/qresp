@@ -1,21 +1,31 @@
-Change Log
-==========
+# Change Log
 
-v1.2.2 (2020/09/25)
--------------------
+## v2.0.0 (2020/09/25)
+
+Major Update
+
+- Added new frontend service, using NextJS(React)
+    - Improved UI using Material UI
+    - Updated outdated packages
+    - Reduced external dependencies
+    - Fixed search by tags 
+    - And added various small quality oif life improvements for users
+
+- Added new API routes, to publish and verify humans
+- Updated schema from v1.1 to v1.2, added new License field. 
+
+## v1.2.2 (2020/09/25)
 
 - Fixed bug impacting workflow hover info cards.
 - Updated File server parser to make compatible with new file server.
 
-v1.2.1 (2020/05/26)
--------------------
+## v1.2.1 (2020/05/26)
 
 - Fixed bug causing edit workflow functionality to break.
 - Fixed bugs breaking DOI minting.
 - Fixed python's package version incompatibilities causing build to break.
 
-v1.2.0 (2019/09/20)
--------------------
+## v1.2.0 (2019/09/20)
 
 - Updated Curator UI
 - Added Preview Functionality
@@ -26,8 +36,7 @@ v1.2.0 (2019/09/20)
 - Removed ssh connection and added Zenodo & HTTP connection
 - New unit tests
 
-v1.1.0 (2019/01/25)
--------------------
+## v1.1.0 (2019/01/25)
 
 - Fixed bugs related to port number
 - Fixed bugs related to DOI minting and search functionality
@@ -36,7 +45,6 @@ v1.1.0 (2019/01/25)
 - Added unit test cases
 - Added CI(Travis)
 
-v1.0.0 (2018/12/18)
--------------------
+## v1.0.0 (2018/12/18)
 
 - Initial Qresp release
