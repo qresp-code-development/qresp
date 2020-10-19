@@ -9,7 +9,7 @@ Major Update
     - Updated outdated packages
     - Reduced external dependencies
     - Fixed search by tags 
-    - And added various small quality oif life improvements for users
+    - And added various small quality of life improvements for users
 
 - Added new API routes, to publish and verify humans
 - Updated schema from v1.1 to v1.2, added new License field. 
