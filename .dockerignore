@@ -1,0 +1,6 @@
+__pycache__
+.pytest_cache
+.vscode
+.next
+flask_session
+node_modules
