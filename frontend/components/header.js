@@ -16,6 +16,9 @@ import StyledButton, {
   InternalStyledButton,
   ExternalStyledButton,
 } from "./button";
+
+import Picture from "./picture";
+
 import Link from "next/link";
 
 const Header = () => {
@@ -74,11 +77,11 @@ const Header = () => {
             <Box display="flex" alignItems="center" flexGrow={1}>
               <Link href="/">
                 <Button>
-                  <img
-                    src="/images/Qresp-logo.png"
+                  <Picture
+                    imgSrc="/images/qrespLogo"
+                    imgAlt="Qresp Logo"
                     height="64px"
-                    alt="Qresp Logo"
-                  ></img>
+                  />
                 </Button>
               </Link>
             </Box>
