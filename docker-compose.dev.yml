@@ -35,6 +35,8 @@ services:
 
   gui:
     restart: always
+    depends_on: 
+      - db
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
