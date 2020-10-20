@@ -91,7 +91,7 @@ class Publish:
         id = self.generateId()
 
         subject = 'Qresp Publish Verification'
-        verifyLinkUrl = "{0}verify/{1}?server={0}".format(server, id)
+        verifyLinkUrl = "{0}/verify/{1}?server={0}".format(server, id)
         html = '''
         <html>
             <body>
