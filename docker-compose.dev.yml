@@ -33,7 +33,7 @@ services:
       - frontend
     command: flask run --host 0.0.0.0
 
-  frontend:
+  gui:
     restart: always
     build:
       context: ./frontend
@@ -47,13 +47,14 @@ services:
   nginx:
     depends_on: 
       - backend
-      - frontend
+      - gui
     restart: always
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
     ports:
       - "443:443"
+      - "80:80"
     networks: 
       - frontend
       - backend
