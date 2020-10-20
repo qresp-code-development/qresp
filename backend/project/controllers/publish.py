@@ -91,6 +91,11 @@ class Publish:
         id = self.generateId()
 
         subject = 'Qresp Publish Verification'
+
+        if server.startswith('http://'):
+            server = server.replace('http://', 'https://', 1)
+
+        server = server.replace('http://', 'https://')
         verifyLinkUrl = "{0}/verify/{1}?server={0}".format(server, id)
         html = '''
         <html>
