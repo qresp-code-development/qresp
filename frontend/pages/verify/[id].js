@@ -54,13 +54,36 @@ const Verify = ({ id, server, error }) => {
 };
 
 export async function getServerSideProps({ query }) {
-  console.log(`${query.server}/api/verify/${query.id}`);
-  const data = await axios
-    .get(`${query.server}/api/verify/${query.id}`)
-    .then((res) => res.data)
-    .catch((err) => {
-      return err.response.data;
-    });
+  var data = { id: "", error: "" };
+
+  if (!("server" in query) || !query.server)
+    return {
+      props: {
+        id: data.id,
+        error: "Bad Request, Missing query parameter: server",
+        server: "",
+      },
+    };
+
+  try {
+    const response = await axios
+      .get(`${query.server}/api/verify/${query.id}`)
+      .then((res) => res.data);
+    data = response;
+  } catch (error) {
+    console.error(
+      ">>>>>>>>>>> START >>>>>>>>>>>\n",
+      error,
+      "\n<<<<<<<<<<< END <<<<<<<<<<<\n"
+    );
+    if (error.response) {
+      if (error.response.data != undefined) {
+        data = error.response.data;
+      }
+    } else {
+      data.error = error.message;
+    }
+  }
 
   return {
     props: { id: data.id, error: data.error, server: query.server },
