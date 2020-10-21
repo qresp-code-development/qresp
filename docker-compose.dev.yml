@@ -30,7 +30,6 @@ services:
       - FLASK_ENV=development
     networks: 
       - backend
-      - frontend
     command: flask run --host 0.0.0.0
 
   gui:
