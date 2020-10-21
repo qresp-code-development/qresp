@@ -103,7 +103,7 @@ const WorkflowInfoForm = () => {
           } else {
             setAlert(
               "Error",
-              "Only external (red dots) nodes can be removed from here. Remove other nodes from their corresponding section above",
+              "Only external (red dots) nodes can be removed from here. In order to remove other nodes, please use the corresponding sections above.",
               null
             );
           }
