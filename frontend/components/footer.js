@@ -1,4 +1,5 @@
 import { Box, Typography } from "@material-ui/core";
+import Picture from "./picture";
 
 const Footer = () => {
   const style = {
@@ -22,25 +23,25 @@ const Footer = () => {
         p={4}
       >
         <a href="http://miccom-center.org/" target="_blank" rel="noopener">
-          <img
-            src="/images/MICCoMLogo.webp"
+          <Picture
+            imgSrc="/images/MICCoMLogo"
+            imgAlt="Miccom Logo"
             height="48px"
-            alt="Miccom Logo"
-          ></img>
+          />
         </a>
         <a href="https://www.anl.gov/" target="_blank" rel="noopener">
-          <img
-            src="/images/ArgonneLogo.webp"
+          <Picture
+            imgSrc="/images/ArgonneLogo"
+            imgAlt="Miccom Logo"
             height="48px"
-            alt="Argonne National Lab Logo"
-          ></img>
+          />
         </a>
         <a href="https://www.uchicago.edu/" target="_blank" rel="noopener">
-          <img
-            src="/images/UchicagoLogo.webp"
+          <Picture
+            imgSrc="/images/UchicagoLogo"
+            imgAlt="Miccom Logo"
             height="48px"
-            alt="University of Chicago Logo"
-          ></img>
+          />
         </a>
       </Box>
       <Box

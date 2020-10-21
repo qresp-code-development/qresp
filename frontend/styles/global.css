@@ -17,6 +17,21 @@ a {
   text-decoration: none;
 }
 
+.poster {
+  object-fit: scale-down;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  min-height: 48vmin;
+  max-width: 125vmin;
+}
+
+.blur {
+  overflow: hidden;
+  height: 48vmin;
+  filter: blur(10px);
+}
+
 /* Navigation Button CSS for Workflow */
 
 div.vis-network div.vis-navigation div.vis-button {

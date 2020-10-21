@@ -44,8 +44,10 @@ const validate = (editing, metadata) => {
   if (incomplete.length > 0) {
     errors.push(
       <Fragment>
-        The following required sections are not saved, please complete them (if
-        not already) and save them:
+        <strong>
+          The following required sections are not saved, please complete them
+          (if not already) and save them:
+        </strong>
         <ul>
           {incomplete.map((el, i) => (
             <li key={i}>{variableTotext[el]}</li>
@@ -63,10 +65,10 @@ const validate = (editing, metadata) => {
       str += "You ";
     }
     str +=
-      "need atleast one item in each of the sections below to publish on Qresp";
+      "need atleast one item in each of the sections below to publish on Qresp:";
     errors.push(
       <Fragment>
-        {str}
+        <strong>{str}</strong>
         <ul>
           {charts.length == 0 && <li>Charts</li>}
           {datasets.length == 0 && <li>Datasets</li>}

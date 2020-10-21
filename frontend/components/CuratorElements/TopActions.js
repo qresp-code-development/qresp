@@ -69,7 +69,7 @@ const TopActions = () => {
     resume: (fullWidth = false) => (
       <StyledTooltip title="Continue with an existing metadata file (json)">
         <RegularStyledButton fullWidth={fullWidth} onClick={onClicks.resume}>
-          Resume
+          Upload Metadata
         </RegularStyledButton>
       </StyledTooltip>
     ),
@@ -90,7 +90,7 @@ const TopActions = () => {
           )}`}
           download="metadata.json"
         >
-          Download
+          Download Metadata
         </RegularStyledButton>
       </StyledTooltip>
     ),
