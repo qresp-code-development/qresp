@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { InternalStyledButton } from "../components/button";
 import SEO from "../components/seo";
+import Picture from "../components/picture";
 import { Box, Typography, Container } from "@material-ui/core";
 
 export default function Home() {
@@ -23,12 +24,17 @@ export default function Home() {
             maxHeight: "48vh",
           }}
         >
-          <img
-            src="/images/qrespPoster.webp"
+          <Picture
+            imgSrc="/images/qrespPoster"
+            imgAlt="Qresp Banner Blurred Background"
             width="100%"
             className="blur"
-          ></img>
-          <img src="/images/qrespPoster.webp" className="poster"></img>
+          />
+          <Picture
+            imgSrc="/images/qrespPoster"
+            imgAlt="Qresp Banner"
+            className="poster"
+          />
         </div>
         <Box display="flex" m={3} alignItems="center" justifyContent="center">
           <Container>
@@ -56,24 +62,6 @@ export default function Home() {
           </Container>
         </Box>
       </Box>
-      <style jsx>
-        {`
-          .poster {
-            object-fit: scale-down;
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%);
-            min-height: 48vmin;
-            max-width: 125vmin;
-          }
-
-          .blur {
-            overflow: hidden;
-            height: 48vmin;
-            filter: blur(10px);
-          }
-        `}
-      </style>
     </Fragment>
   );
 }

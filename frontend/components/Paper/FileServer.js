@@ -13,7 +13,11 @@ const FileServerInfo = ({ fileserverpath, defaultOpen, editor }) => {
       editor={editor}
     >
       <Box my={1}>
-        <LabelValue label="File Server Path" value={fileserverpath} />
+        <LabelValue
+          label="File Server Path"
+          value={fileserverpath}
+          link={fileserverpath}
+        />
       </Box>
     </Drawer>
   );

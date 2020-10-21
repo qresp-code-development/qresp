@@ -30,11 +30,14 @@ services:
       - FLASK_ENV=development
     networks: 
       - backend
-      - frontend
     command: flask run --host 0.0.0.0
 
-  frontend:
+  gui:
     restart: always
+    depends_on: 
+      - db
+    environment: 
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -47,13 +50,14 @@ services:
   nginx:
     depends_on: 
       - backend
-      - frontend
+      - gui
     restart: always
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
     ports:
       - "443:443"
+      - "80:80"
     networks: 
       - frontend
       - backend

@@ -14,5 +14,3 @@ COPY . .
 
 # Build the production build 
 RUN yarn build
-
-EXPOSE 3000
