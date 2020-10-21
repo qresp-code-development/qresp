@@ -37,6 +37,8 @@ services:
     restart: always
     depends_on: 
       - db
+    environment: 
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
