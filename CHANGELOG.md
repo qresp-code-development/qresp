@@ -1,18 +1,29 @@
 # Change Log
 
+## v2.0.1 (2020/10/21)
+
+Patch Update
+
+- Added Abbreviations for CC Licenses
+- Added workaround for webp images on Safari (iOS + MacOS)
+- Updated error messages to make them more clear
+- Requests get upgraded from http to https by default
+- Other minor styling and stability improvements
+
 ## v2.0.0 (2020/10/19)
 
 Major Update
 
 - Added new frontend service, using NextJS(React)
-    - Improved UI using Material UI
-    - Updated outdated packages
-    - Reduced external dependencies
-    - Fixed search by tags 
-    - And added various small quality of life improvements for users
+
+  - Improved UI using Material UI
+  - Updated outdated packages
+  - Reduced external dependencies
+  - Fixed search by tags
+  - And added various small quality of life improvements for users
 
 - Added new API routes, to publish and verify humans
-- Updated schema from v1.1 to v1.2, added new License field. 
+- Updated schema from v1.1 to v1.2, added new License field.
 
 ## v1.2.2 (2020/09/25)
 
