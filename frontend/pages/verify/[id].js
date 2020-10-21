@@ -8,6 +8,7 @@ import SEO from "../../components/seo";
 import StyledButton from "../../components/button";
 
 const Verify = ({ id, server, error }) => {
+  console.log(server)
   return (
     <Fragment>
       <SEO
@@ -26,7 +27,7 @@ const Verify = ({ id, server, error }) => {
             <Fragment>
               <Typography variant="h2" gutterBottom>
                 Success ! <br /> Your paper has been added to the qresp database
-                on this instance.
+                on {new URL(server).host}.
               </Typography>
               <Link
                 href={`/paperdetails/${encodeURIComponent(
