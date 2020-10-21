@@ -6,7 +6,7 @@ Patch Update
 
 - Added Abbreviations for CC Licenses
 - Added workaround for webp images on Safari (iOS + MacOS)
-- Updated error messages to make them more clear
+- Clarified error messages
 - Requests get upgraded from http to https by default
 - Other minor styling and stability improvements
 
