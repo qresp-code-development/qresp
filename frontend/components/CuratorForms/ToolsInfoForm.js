@@ -2,26 +2,19 @@ import { useEffect, useContext, Fragment } from "react";
 
 import {
   Grid,
-  Tooltip,
-  Typography,
   IconButton,
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
-import {
-  AddCircleOutline,
-  RemoveCircleOutline,
-  DescriptionOutlined,
-} from "@material-ui/icons";
+import { AddCircleOutline, DescriptionOutlined } from "@material-ui/icons";
 
 import { TextInputField, RadioInputField } from "../Form/InputFields";
-import TextInput from "../Form/TextInput";
-import { FormInputLabel } from "../Form/Util";
+import ExtraFieldInput from "../Form/ExtraFieldInput";
 import { RegularStyledButton } from "../button";
 import StyledTooltip from "../tooltip";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
 import * as Yup from "yup";
 
@@ -218,18 +211,14 @@ const ToolsInfoForm = () => {
     resolver: yupResolver(schema),
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "extraFields",
-  });
-
   const kindWatcher = watch("kind", def == null ? "software" : def.kind);
 
   const onSubmit = (values) => {
+    const extraFields = values.extraFields ? values.extraFields : [];
     if (values.kind == "software")
       values.patches = values.patches.split(",").map((el) => el.trim());
     if (def && tools.find((el) => el.id == def.id)) {
-      edit("tool", { ...def, ...values });
+      edit("tool", { ...def, ...values, extraFields: extraFields });
     } else {
       values["id"] = `t${tools.length}`;
       add("tool", values);
@@ -354,104 +343,12 @@ const ToolsInfoForm = () => {
                 />
               </Grid>
               <Grid item>
-                <Grid
-                  container
-                  justify="flex-start"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <Grid item>
-                    <FormInputLabel label="Extra Fields" forId="pis" />
-                  </Grid>
-                  <Grid item>
-                    <Tooltip
-                      title={
-                        <Typography variant="subtitle2">
-                          Add a new custom field
-                        </Typography>
-                      }
-                      placement="right"
-                      arrow
-                    >
-                      <IconButton
-                        onClick={() =>
-                          append({
-                            label: "",
-                            value: "",
-                          })
-                        }
-                        style={{ padding: 0 }}
-                      >
-                        <AddCircleOutline color="primary" />
-                      </IconButton>
-                    </Tooltip>
-                  </Grid>
-                </Grid>
-                {fields.map((field, index) => (
-                  <Grid
-                    container
-                    spacing={4}
-                    key={field.id}
-                    alignItems="center"
-                  >
-                    <Grid item xs={12} sm={5}>
-                      <TextInput
-                        InputLabelProps={{ shrink: true }}
-                        id={`customLabel${index}`}
-                        placeholder="Enter custom label"
-                        name={`extraFields[${index}].label`}
-                        label="Field Label"
-                        helperText="Enter a custom label for a field"
-                        error={
-                          errors.extraFields && errors.extraFields[index].label
-                        }
-                        inputRef={register}
-                        defaultValue={
-                          def && def.extraFields && def.extraFields[index].label
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={11} sm={6}>
-                      <TextInput
-                        InputLabelProps={{ shrink: true }}
-                        id={`customValue${index}`}
-                        placeholder="Enter value"
-                        name={`extraFields[${index}].value`}
-                        label="Field value"
-                        helperText="Enter a value for the custom field label"
-                        error={
-                          errors.extraFields && errors.extraFields[index].value
-                        }
-                        inputRef={register}
-                        defaultValue={
-                          def && def.extraFields && def.extraFields[index].value
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={1}>
-                      <Tooltip
-                        title={
-                          <Typography variant="subtitle2">
-                            Remove the custom field
-                          </Typography>
-                        }
-                        placement="top"
-                        arrow
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            if (fields.length > 0) {
-                              remove(index);
-                            }
-                          }}
-                        >
-                          <RemoveCircleOutline color="primary" />
-                        </IconButton>
-                      </Tooltip>
-                    </Grid>
-                  </Grid>
-                ))}
+                <ExtraFieldInput
+                  control={control}
+                  register={register}
+                  errors={errors && errors.extraFields}
+                  defaults={def && def.extraFields}
+                />
               </Grid>
               <Grid item>
                 <RegularStyledButton fullWidth type="submit">
