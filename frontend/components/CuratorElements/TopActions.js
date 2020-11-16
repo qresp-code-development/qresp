@@ -26,6 +26,26 @@ import CuratorContext from "../../Context/Curator/curatorContext";
 import AlertContext from "../../Context/Alert/alertContext";
 import ServerContext from "../../Context/Servers/serverContext";
 
+const preview = (metadata, setAlert, router) => {
+  axios
+    .post(getServer() + "/api/preview", convertStateToViewSchema(metadata))
+    .then((res) => res.data)
+    .then((res) =>
+      router.push("/paperdetails/[id]", {
+        pathname: `/paperdetails/${res}`,
+        query: { server: getServer() },
+      })
+    )
+    .catch((err) => {
+      console.error(err);
+      setAlert(
+        "Error",
+        "There was an error generating your preview, please talk to the administrators if the issue persists",
+        null
+      );
+    });
+};
+
 const TopActions = () => {
   const { metadata, setAll, resetAll } = useContext(CuratorContext);
   const { setAlert } = useContext(AlertContext);
@@ -44,24 +64,7 @@ const TopActions = () => {
     },
     preview: (e) => {
       e.preventDefault();
-      axios
-        .post(getServer() + "/api/preview", convertStateToViewSchema(metadata))
-        .then((res) => res.data)
-        // .then((res) => console.log(res))
-        .then((res) =>
-          router.push("/paperdetails/[id]", {
-            pathname: `/paperdetails/${res}`,
-            query: { server: getServer() },
-          })
-        )
-        .catch((err) => {
-          console.error(err);
-          setAlert(
-            "Error",
-            "There was an error generating your preview, please talk to the administrators if the issue persists",
-            null
-          );
-        });
+      preview(metadata, setAlert, router);
     },
   };
 
@@ -215,4 +218,5 @@ const TopActions = () => {
   );
 };
 
+export { preview };
 export default TopActions;

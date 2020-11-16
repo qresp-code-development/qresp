@@ -1,11 +1,11 @@
 import { useContext, Fragment } from "react";
-
+import { useRouter } from "next/router";
 import axios from "axios";
-import { Box } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 
 import Ajv from "ajv";
 
-import StyledButton from "../button";
+import StyledButton, { RegularStyledButton } from "../button";
 import { convertStatetoReqSchema } from "../../Utils/model";
 import { getServer } from "../../Utils/utils";
 
@@ -15,6 +15,8 @@ import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperCont
 import ServerContext from "../../Context/Servers/serverContext";
 import AlertContext from "../../Context/Alert/alertContext";
 import LoadingContext from "../../Context/Loading/loadingContext";
+
+import { preview } from "./TopActions";
 
 const variableTotext = {
   curatorInfo: "Curator Information",
@@ -87,13 +89,51 @@ const validate = (editing, metadata) => {
   return { valid: true, errors: errors };
 };
 
+const makePublishRequest = (paper, setAlert, showLoader, hideLoader) => {
+  showLoader();
+  axios
+    .post(getServer() + "/api/publish", paper)
+    .then(() =>
+      setAlert(
+        "Success",
+        <p style={{ textAlign: "justify" }}>
+          We've sent you an email with a link to publish the paper. Check the
+          email you provided, just click the link in there to publish the paper.
+          <br /> If you have any questions or issues, please feel free to write
+          to us.
+          <br />
+          <br /> Thank You
+        </p>,
+        null
+      )
+    )
+    .catch((err) => {
+      console.error(err);
+      setAlert(
+        "Error !",
+        <p>
+          We're very sorry but there was an error publishing the paper!, Please
+          try again
+          <br />
+          {err.response &&
+            err.response.data &&
+            err.response.data.msg &&
+            `Error Message:${err.response.data.msg}`}
+        </p>,
+        null
+      );
+    })
+    .finally(() => hideLoader());
+};
+
 const Publish = () => {
   const { metadata } = useContext(CuratorContext);
 
   const { editing } = useContext(CuratorHelperContext);
   const { selectedHttp } = useContext(ServerContext);
-  const { setAlert } = useContext(AlertContext);
+  const { setAlert, unsetAlert } = useContext(AlertContext);
   const { showLoader, hideLoader } = useContext(LoadingContext);
+  const router = useRouter();
 
   const onClick = () => {
     const paper = convertStatetoReqSchema(metadata, selectedHttp);
@@ -111,41 +151,51 @@ const Publish = () => {
       return;
     }
 
-    showLoader();
-    axios
-      .post(getServer() + "/api/publish", paper)
-      .then(() =>
-        setAlert(
-          "Success",
-          <p style={{ textAlign: "justify" }}>
-            We've sent you an email with a link to publish the paper. Check the
-            email you provided, just click the link in there to publish the
-            paper.
-            <br /> If you have any questions or issues, please feel free to
-            write to us.
-            <br />
-            <br /> Thank You
-          </p>,
-          null
-        )
-      )
-      .catch((err) => {
-        console.error(err);
-        setAlert(
-          "Error !",
-          <p>
-            We're very sorry but there was an error publishing the paper!,
-            Please try again
-            <br />
-            {err.response &&
-              err.response.data &&
-              err.response.data.msg &&
-              `Error Message:${err.response.data.msg}`}
-          </p>,
-          null
-        );
-      })
-      .finally(() => hideLoader());
+    setAlert(
+      "Warning",
+      <Grid container direction="column" spacing={1}>
+        <Grid item>
+          Once published, you will not be able to alter the contents of the
+          published metadata. Please make sure the data you entered is correct.
+        </Grid>
+        <Grid item container direction="row" spacing={1}>
+          <Grid item sm={6}>
+            <RegularStyledButton
+              href={`data:text/json;charset=utf-8,${encodeURIComponent(
+                JSON.stringify(metadata, null, 2)
+              )}`}
+              download="metadata.json"
+              fullWidth
+            >
+              Download Metadata
+            </RegularStyledButton>
+          </Grid>
+          <Grid item sm={6}>
+            <RegularStyledButton
+              fullWidth
+              onClick={(e) => {
+                e.preventDefault();
+                unsetAlert();
+                preview(metadata, setAlert, router);
+              }}
+            >
+              Preview
+            </RegularStyledButton>
+          </Grid>
+        </Grid>
+        <Grid item>
+          <StyledButton
+            fullWidth
+            onClick={() =>
+              makePublishRequest(paper, setAlert, showLoader, hideLoader)
+            }
+          >
+            Publish
+          </StyledButton>
+        </Grid>
+      </Grid>,
+      null
+    );
   };
 
   return (
