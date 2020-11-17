@@ -1,5 +1,13 @@
 # Change Log
 
+## v2.0.2 (2020/11/16)
+
+Patch Update
+
+- Added new warnings/alerts when publishing on Qresp
+- Fixed minor bug in the schema definition
+- Other minor styling and stability improvements & bugfixes
+
 ## v2.0.1 (2020/10/21)
 
 Patch Update
