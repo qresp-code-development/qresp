@@ -16,8 +16,8 @@ const PaperInfo = ({ paperInfo, editor, defaultOpen }) => {
     >
       <Box my={1}>
         <LabelValue label="Principal Investigators: " value={PIs} />
-        <LabelValue label="Collections" value={collections} />
-        <LabelValue label="Tags" value={tags} />
+        <LabelValue label="Collections" value={collections.join(", ")} />
+        <LabelValue label="Tags" value={tags.join(", ")} />
         {notebookFile && (
           <LabelValue label="Main Notebook File" value={notebookFile} />
         )}

@@ -396,7 +396,7 @@
               "pattern": "^(.*)$"
             }
           },
-          "required": ["firstName", "lastName"]
+          "required": ["firstName", "lastName", "emailId"]
         },
         "notebookFile": {
           "$id": "#/properties/info/properties/notebookFile",

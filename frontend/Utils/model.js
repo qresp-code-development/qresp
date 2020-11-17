@@ -74,8 +74,49 @@ const convertStatetoReqSchema = (state, servers) => {
   return schema;
 };
 
+const convertReqSchematoState = (req) => {
+  const { journal, year, page, volume } = req.reference;
+  const publication = referenceUtil.set(journal, year, page, volume);
+
+  const state = {
+    curatorInfo: { ...req.info.insertedBy },
+    fileServerPath: req.info.fileServerPath,
+    paperInfo: {
+      PIs: namesUtil.set(req.PIs),
+      collections: req.collections,
+      tags: req.tags,
+      notebookFile: req.info.notebookFile,
+      notebookPath: req.info.notebookPath,
+    },
+    referenceInfo: {
+      kind: req.reference.kind,
+      doi: req.reference.DOI,
+      authors: namesUtil.set(req.reference.authors),
+      title: req.reference.title,
+      publication: publication,
+      year: year,
+      url: req.reference.URLs,
+      abstract: req.reference.publishedAbstract,
+    },
+    documentation: req.documentation.readme,
+    charts: req.charts,
+    tools: req.tools,
+    datasets: req.datasets,
+    scripts: req.scripts,
+    heads: req.heads,
+    workflow: {
+      ...req.workflow,
+      edges: req.workflow.edges.map((edge) => ({ from: edge[0], to: edge[1] })),
+    },
+    license: req.license || "",
+  };
+
+  return state;
+};
+
 export {
   convertViewSchemaToState,
   convertStateToViewSchema,
   convertStatetoReqSchema,
+  convertReqSchematoState,
 };

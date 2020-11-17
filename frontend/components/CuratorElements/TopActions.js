@@ -12,8 +12,6 @@ import {
 
 import { GetApp, Visibility } from "@material-ui/icons";
 
-// import Ajv from "ajv";
-// import schema from "../../Context/schema";
 import axios from "axios";
 
 import { useRouter } from "next/router";
@@ -26,10 +24,32 @@ import { RegularStyledButton } from "../button";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import AlertContext from "../../Context/Alert/alertContext";
+import ServerContext from "../../Context/Servers/serverContext";
+
+const preview = (metadata, setAlert, router) => {
+  axios
+    .post(getServer() + "/api/preview", convertStateToViewSchema(metadata))
+    .then((res) => res.data)
+    .then((res) =>
+      router.push("/paperdetails/[id]", {
+        pathname: `/paperdetails/${res}`,
+        query: { server: getServer() },
+      })
+    )
+    .catch((err) => {
+      console.error(err);
+      setAlert(
+        "Error",
+        "There was an error generating your preview, please talk to the administrators if the issue persists",
+        null
+      );
+    });
+};
 
 const TopActions = () => {
   const { metadata, setAll, resetAll } = useContext(CuratorContext);
   const { setAlert } = useContext(AlertContext);
+  const { setSelectedHttp, selectedHttp } = useContext(ServerContext);
   const [mdata, setMdata] = useState("");
   const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
 
@@ -40,28 +60,11 @@ const TopActions = () => {
       setResumeDialogOpen(true);
     },
     download: (metadata) => {
-      return metadata;
+      return { ...metadata, selectedHttp: selectedHttp };
     },
     preview: (e) => {
       e.preventDefault();
-      axios
-        .post(getServer() + "/api/preview", convertStateToViewSchema(metadata))
-        .then((res) => res.data)
-        // .then((res) => console.log(res))
-        .then((res) =>
-          router.push("/paperdetails/[id]", {
-            pathname: `/paperdetails/${res}`,
-            query: { server: getServer() },
-          })
-        )
-        .catch((err) => {
-          console.error(err);
-          setAlert(
-            "Error",
-            "There was an error generating your preview, please talk to the administrators if the issue persists",
-            null
-          );
-        });
+      preview(metadata, setAlert, router);
     },
   };
 
@@ -119,6 +122,8 @@ const TopActions = () => {
   const useMetadata = () => {
     try {
       const values = JSON.parse(mdata);
+      setSelectedHttp(values.selectedHttp);
+      delete values.selectedHttp;
       setAll(values);
       setResumeDialogOpen(false);
     } catch (e) {
@@ -213,4 +218,5 @@ const TopActions = () => {
   );
 };
 
+export { preview };
 export default TopActions;

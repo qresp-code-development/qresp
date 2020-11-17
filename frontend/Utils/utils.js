@@ -10,6 +10,7 @@ const getServer = () => {
 
 const namesUtil = {
   get: (names) => {
+    names = names.trim();
     if (names.length == 0) {
       return [{ firstName: "", middleName: "", lastName: "" }];
     }
@@ -35,7 +36,8 @@ const namesUtil = {
     const result = names.map((name) => {
       const n = [];
       Object.keys(name).forEach((key) => {
-        n.push(name[key].trim());
+        let tmp = name[key] || "";
+        n.push(tmp.trim());
       });
       return n.join(" ");
     });
