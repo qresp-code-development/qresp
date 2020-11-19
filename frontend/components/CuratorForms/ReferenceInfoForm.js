@@ -50,6 +50,7 @@ const ReferenceInfoForm = ({ editor }) => {
       .required("Required"),
     year: Yup.number()
       .min(1750, "Cannot be less than 1700")
+      .integer("Plese enter a valid year")
       .required("Required"),
     url: Yup.string().url("Please enter a valid url"),
   });
@@ -351,11 +352,10 @@ const ReferenceInfoForm = ({ editor }) => {
               placeholder="Enter url"
               name="url"
               helperText="Enter paper url"
-              label="URLs"
+              label="URL"
               inputRef={register}
               error={errors.url}
               defaultValue={referenceInfo.url}
-              required
             />
           </Grid>
           <Grid item>
