@@ -11,6 +11,7 @@ export const SHOW_LOADER = "SHOW_LOADER";
 export const HIDE_LOADER = "HIDE_LOADER";
 
 // Server Actions
+export const SET_SERVER_STATE = "SET_SERVER_STATE";
 export const SET_SELECTED = "SET_SELECTED";
 export const SET_SELECTED_HTTP = "SET_SELECTED_HTTP";
 
@@ -25,7 +26,7 @@ export const SET_CHILDREN = "SET_CHILDREN";
 export const SET_TITLE = "SET_TITLE";
 
 // Curator Actions
-export const SET_ALL = "SET_ALL";
+export const SET_CURATOR_STATE = "SET_CURATOR_STATE";
 export const SET_CURATORINFO = "SET_CURATORINFO";
 export const SET_FILESERVERPATH = "SET_FILESERVERPATH";
 export const SET_PAPERINFO = "SET_PAPERINFO";
