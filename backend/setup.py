@@ -2,8 +2,8 @@ from setuptools import setup,find_packages
 
 setup(
     name='qresp',
-    version='2.0.2',
-    url='http://qresp.org/',
+    version='2.0.3',
+    url='https://qresp.org/',
     entry_points = {
         'console_scripts': ['qresp=project.__main__:main'],
     },
