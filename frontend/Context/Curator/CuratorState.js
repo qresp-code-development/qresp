@@ -5,7 +5,7 @@ import CuratorContext from "./curatorContext";
 import WebStore from "../../Utils/Persist";
 
 import {
-  SET_ALL,
+  SET_CURATOR_STATE,
   SET_CURATORINFO,
   SET_FILESERVERPATH,
   SET_PAPERINFO,
@@ -83,9 +83,10 @@ const CuratorState = (props) => {
     ]);
   }, [state.charts, state.scripts, state.datasets, state.tools, state.heads]);
 
-  const setAll = (data) => dispatch({ type: SET_ALL, payload: data });
+  const setAll = (data) => dispatch({ type: SET_CURATOR_STATE, payload: data });
 
-  const resetAll = () => dispatch({ type: SET_ALL, payload: initialState });
+  const resetAll = () =>
+    dispatch({ type: SET_CURATOR_STATE, payload: initialState });
 
   const setCuratorInfo = (info) =>
     dispatch({ type: SET_CURATORINFO, payload: info });

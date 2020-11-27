@@ -5,7 +5,9 @@ import serverReducer from "./serverReducer";
 import servers from "../../data/qresp_servers";
 import httpServers from "../../data/http_servers";
 
-import { SET_SELECTED, SET_SELECTED_HTTP } from "../types";
+import { SET_SELECTED, SET_SELECTED_HTTP, SET_SERVER_STATE } from "../types";
+
+import WebStore from "../../Utils/Persist";
 
 const ServerState = (props) => {
   const initialState = {
@@ -16,6 +18,20 @@ const ServerState = (props) => {
   };
 
   const [state, dispatch] = useReducer(serverReducer, initialState);
+
+  useEffect(() => {
+    const data = WebStore.get("srvr");
+    if (data !== null) {
+      setServerState(data);
+    }
+  }, []);
+
+  useEffect(() => {
+    WebStore.set("srvr", state);
+  }, [state]);
+
+  const setServerState = (state) =>
+    dispatch({ type: SET_SERVER_STATE, payload: state });
 
   const setSelected = (selected) => {
     dispatch({ type: SET_SELECTED, payload: selected });
