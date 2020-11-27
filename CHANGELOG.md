@@ -1,5 +1,13 @@
 # Change Log
 
+## v2.0.3 (2020/11/27)
+
+Patch Update
+
+- Fixed missing download paths of papers after publishing on Qresp
+- Fixed social preview link image display
+- Other minor styling and stability improvements & bugfixes
+- Dropped support for Python 3.5, only 3.6 and above supported now
 ## v2.0.2 (2020/11/16)
 
 Patch Update
