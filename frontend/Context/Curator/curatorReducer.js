@@ -1,6 +1,6 @@
 import {
+  SET_CURATOR_STATE,
   SET_CURATORINFO,
-  SET_ALL,
   SET_FILESERVERPATH,
   SET_PAPERINFO,
   SET_REFERENCE_AUTHORS,
@@ -24,7 +24,7 @@ export default (state, action) => {
         ...state,
         curatorInfo: action.payload,
       };
-    case SET_ALL:
+    case SET_CURATOR_STATE:
       return action.payload;
     case SET_FILESERVERPATH:
       return { ...state, fileServerPath: action.payload };

@@ -6,7 +6,7 @@ import { Container, Typography, Box, Divider } from "@material-ui/core";
 
 import SEO from "../components/seo";
 
-import { SmallStyledButton } from "../components/button";
+import { RegularStyledButton } from "../components/button";
 import RecordTable from "../components/Table/Table";
 import AdvancedSearch from "../components/AdvancedSearch";
 import Summary from "../components/Paper/Summary";
@@ -96,7 +96,7 @@ const search = ({ initialdata, error, selectedservers }) => {
       setAlert(
         "Search Error !",
         error.msg,
-        <SmallStyledButton onClick={refresh}>Retry</SmallStyledButton>
+        <RegularStyledButton onClick={refresh}>Retry</RegularStyledButton>
       );
     }
   }, []);
@@ -145,9 +145,10 @@ export async function getServerSideProps(ctx) {
   };
 
   if (!query.servers || query.servers.length == 0) {
+    error.is = true;
     error["msg"] = "No servers selected to be searched";
     return {
-      props: { initialdata: data, error: true, servers: query.servers },
+      props: { initialdata: data, error: error, servers: null },
     };
   }
 

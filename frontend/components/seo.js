@@ -8,10 +8,7 @@ const SEO = (props) => {
       <title>{title}</title>
       <meta property="og:title" content={title} key="title" />
       <meta property="og:description" content={description} key="description" />
-      <meta
-        property="og:image"
-        content="https://github.com/anti-mony/qresp/raw/ReWrite/frontend/public/images/QrespLogoDark.png"
-      />
+      <meta property="og:image" content="/images/QrespLogoColor.png" />
       <meta property="og:type" content="website" key="type" />
       {author ? (
         <meta property="twitter:creator" content={author} key="twitterauthor" />
