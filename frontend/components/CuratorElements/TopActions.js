@@ -48,7 +48,7 @@ const preview = (metadata, setAlert, router) => {
 
 const TopActions = () => {
   const { metadata, setAll, resetAll } = useContext(CuratorContext);
-  const { setAlert } = useContext(AlertContext);
+  const { setAlert, unsetAlert } = useContext(AlertContext);
   const { setSelectedHttp, selectedHttp } = useContext(ServerContext);
   const [mdata, setMdata] = useState("");
   const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
@@ -58,6 +58,31 @@ const TopActions = () => {
   const onClicks = {
     resume: () => {
       setResumeDialogOpen(true);
+    },
+    scratch: () => {
+      setAlert(
+        "Warning",
+        "This is an irreversible operation, please download your work if you plan to use it in the future. Do you still wish to continue ?",
+        <Fragment>
+          <RegularStyledButton
+            endIcon={<GetApp />}
+            href={`data:text/json;charset=utf-8,${encodeURIComponent(
+              JSON.stringify(onClicks.download(metadata), null, 2)
+            )}`}
+            download="metadata.json"
+          >
+            Download Metadata
+          </RegularStyledButton>
+          <RegularStyledButton
+            onClick={() => {
+              resetAll();
+              unsetAlert();
+            }}
+          >
+            Yes, start from Scratch
+          </RegularStyledButton>
+        </Fragment>
+      );
     },
     download: (metadata) => {
       return { ...metadata, selectedHttp: selectedHttp };
@@ -78,7 +103,7 @@ const TopActions = () => {
     ),
     scratch: (fullWidth = false) => (
       <StyledTooltip title="Clear the session and start afresh">
-        <RegularStyledButton fullWidth={fullWidth} onClick={resetAll}>
+        <RegularStyledButton fullWidth={fullWidth} onClick={onClicks.scratch}>
           Start from Scratch
         </RegularStyledButton>
       </StyledTooltip>
