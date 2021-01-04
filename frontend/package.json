@@ -21,7 +21,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "ajv": "^6.12.6",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "component-emitter": "^1.3.0",
     "keycharm": "^0.2.0",
     "next": "9.4.4",
