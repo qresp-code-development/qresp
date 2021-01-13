@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.0.4 (2021/01/09)
+
+Patch Update
+
+- Fixed bug causing workflow graph to break on deleting nodes.
+- Added new warnings when using start from scratch button to avoid accidental deletion of work.
 ## v2.0.3 (2020/11/27)
 
 Patch Update
