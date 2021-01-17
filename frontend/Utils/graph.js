@@ -20,6 +20,27 @@ const createGraph = ({ nodes, edges }) => {
   return graph;
 };
 
+// Returns the number of record in the corresponding section
+const getNodeNumber = (id) => parseInt(id.substring(1));
+
+/*
+When a node is deleted, we rempa their ids to the lower number. 
+So we also have to rempa the edges, this is what reduce means in this context. 
+*/
+const reduceEdgeNodeId = (node_number_to_delete, prefix, edge) => {
+  if (edge.to.charAt(0) == prefix) {
+    if (getNodeNumber(edge.to) > node_number_to_delete) {
+      edge.to = prefix + (getNodeNumber(edge.to) - 1).toString();
+    }
+  }
+  if (edge.from.charAt(0) == prefix) {
+    if (getNodeNumber(edge.from) > node_number_to_delete) {
+      edge.from = prefix + (getNodeNumber(edge.from) - 1).toString();
+    }
+  }
+  return edge;
+};
+
 const isGraphCyclicUtil = (node, graph, visited, stack) => {
   if (!visited[node]) {
     visited[node] = true;
@@ -61,4 +82,4 @@ const isGraph = {
   },
 };
 
-export { isGraph };
+export { isGraph, getNodeNumber, reduceEdgeNodeId };

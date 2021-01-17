@@ -17,6 +17,8 @@ import {
   SET_DOCUMENTATION,
 } from "../types";
 
+import { getNodeNumber, reduceEdgeNodeId } from "../../Utils/graph";
+
 export default (state, action) => {
   switch (action.type) {
     case SET_CURATORINFO:
@@ -54,10 +56,19 @@ export default (state, action) => {
 
     case DELETE:
       const prefix = action.payload.type.charAt(0);
+      const node_number_to_delete = getNodeNumber(action.payload.id);
 
-      const newEdges = state.workflow.edges.filter(
-        (edge) => edge.to != action.payload.id && edge.from != action.payload.id
-      );
+      /*
+      1st filter removes the edges corresponding to the deleted node.
+      2nd filter fixes the node and id mapping, deleting a node causes the node with higher id having incorrect edges
+      */
+     
+      const newEdges = state.workflow.edges
+        .filter(
+          (edge) =>
+            edge.to != action.payload.id && edge.from != action.payload.id
+        )
+        .map((edge) => reduceEdgeNodeId(node_number_to_delete, prefix, edge));
 
       return {
         ...state,
