@@ -129,6 +129,7 @@ class Heads(DynamicEmbeddedDocument):
     readme = StringField()
     files = ListField()
     URLs = ListField()
+    id = StringField()
     saveas = StringField()
     meta = {'strict': False}
 
