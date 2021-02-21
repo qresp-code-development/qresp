@@ -57,8 +57,8 @@ SimpleLabelValue.propTypes = {
 };
 
 const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
-  if (typeof value === "array") {
-    value = value.join(",");
+  if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
+    value = value.join(", ");
   }
 
   return (

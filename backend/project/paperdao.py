@@ -157,8 +157,13 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
             search.title = paper.reference.title
             search.tags = paper.tags
             search.collections = paper.collections
-            search.authors = [authors.firstName + " " +
-                              authors.lastName for authors in paper.reference.authors]
+            search.authors = []
+
+            for author in paper.reference.authors:
+                if author.middleName is None:
+                    author.middleName = ""
+                search.authors.append("{} {} {}".format(author.firstName, author.middleName, author.lastName).replace("  "," "))
+
             search.authors = ", ".join(search.authors)
             search.publication = paper.reference.journal.fullName + \
                 " " + paper.reference.volume + ", " + paper.reference.page
@@ -187,10 +192,15 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         paperDetails.tags = paper.tags
         paperDetails.collections = paper.collections
         paperDetails.license = paper.license
+        paperDetails.authors = []     
+        
         if paper.reference.authors and paper.reference.authors[0].firstName:
-            paperDetails.authors = [
-                authors.firstName + " " + authors.lastName for authors in paper.reference.authors]
+            for author in paper.reference.authors:
+                if author.middleName is None:
+                    author.middleName = ""
+                paperDetails.authors.append("{} {} {}".format(author.firstName, author.middleName, author.lastName).replace("  "," "))
             paperDetails.authors = ", ".join(paperDetails.authors)
+        
         if paper.PIs and paper.PIs[0].firstName:
             paperDetails.PIs = [pi.firstName + " " +
                                 pi.lastName for pi in paper.PIs]
@@ -214,6 +224,7 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         paperDetails.tools = paper.tools
         paperDetails.workflows = paper.workflow
         paperDetails.heads = paper.heads
+        print(paperDetails.heads)
         paperDetails.cite = getattr(paper.info, 'doi', '')
         paperDetails.timeStamp = paper.info.timeStamp
         paperDetails.firstName = paper.info.insertedBy.firstName

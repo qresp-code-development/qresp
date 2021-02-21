@@ -78,7 +78,7 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           id="patches"
           placeholder="Select patch files using the picker"
           name="patches"
-          helperText="Enter the file name(s) containing the patches of puublicly available or versioned software, customized by the authors to generate some of the resources for the paper. Use the file picker to select files"
+          helperText="Enter the file name(s) containing the patches of publicly available or versioned software, customized by the authors to generate some of the resources for the paper. Use the file picker to select files"
           label="Patches"
           error={errors.patches}
           inputRef={register}
@@ -254,7 +254,7 @@ const ToolsInfoForm = () => {
       <Dialog
         open={open}
         onClose={() => {
-          setDefault("chart", null);
+          setDefault("tool", null);
           closeForm("tool");
         }}
         maxWidth="md"
@@ -270,7 +270,7 @@ const ToolsInfoForm = () => {
             <Grid item xs={1}>
               <RegularStyledButton
                 onClick={() => {
-                  setDefault("chart", null);
+                  setDefault("tool", null);
                   closeForm("tool");
                 }}
                 fullWidth
