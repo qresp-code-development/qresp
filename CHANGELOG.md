@@ -1,5 +1,12 @@
 # Change Log
 
+## v2.0.5 (2021/02/21)
+
+Patch Update
+
+- Fixed typos, missing commas in list of collections
+- Fixed missing middle names
+- Fixed critical bug causing crashes on clicking external nodes in the workflow graph.
 ## v2.0.4 (2021/01/09)
 
 Patch Update
