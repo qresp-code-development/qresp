@@ -1,4 +1,4 @@
-import { useContext, Fragment } from "react";
+import { useEffect, useContext, Fragment } from "react";
 
 import {
   Grid,
@@ -8,22 +8,43 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from "@material-ui/core";
-import { AddCircleOutline, DescriptionOutlined } from "@material-ui/icons";
+} from "@mui/material";
+import { AddCircleOutlined, DescriptionOutlined } from "@mui/icons-material";
 
 import { TextInputField } from "../Form/InputFields";
-import ExtraFieldInput from "../Form/ExtraFieldInput";
+import ExtraFieldInput, {
+  cleanExtraFields,
+  extraFieldsSchema,
+} from "../Form/ExtraFieldInput";
 import { RegularStyledButton } from "../button";
+import {
+  FormConnection,
+  confirmLabel,
+  useRowLink,
+} from "./ConnectionSection";
 
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { useInvalidFieldFocus } from "../../Utils/invalidField";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import SourceTreeContext from "../../Context/SourceTree/SourceTreeContext";
 import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
-const ScriptsInfoForm = () => {
+// Comma-separated text -> a clean list. Empty entries are dropped so a
+// trailing comma does not store a blank keyword or URL.
+const splitList = (value) =>
+  String(value || "")
+    .split(",")
+    .map((el) => el.trim())
+    .filter(Boolean);
+
+// `hideTrigger` hides this form's own "Add" button while keeping the
+// dialog it opens. The figure workspace mounts the form for the dialog
+// and supplies its own contextual trigger, so showing both would put two
+// ways to do one thing side by side.
+const ScriptsInfoForm = ({ hideTrigger = false }) => {
   const { scripts, add, edit } = useContext(CuratorContext);
 
   const { scriptsHelper, openForm, closeForm, setDefault } = useContext(
@@ -31,36 +52,85 @@ const ScriptsInfoForm = () => {
   );
 
   const { def, open } = scriptsHelper;
+  // What a NEW record from this form is for. Row-scoped when the form
+  // was opened from a resource row's LINK; see ConnectionSection.
+  const link = useRowLink("script", scriptsHelper.link);
 
   const { setSaveMethod, openSelector, setMultiple, setTitle } = useContext(
     SourceTreeContext
   );
 
   const schema = Yup.object({
-    files: Yup.string().required("Required"),
-    readme: Yup.string().required("Required"),
-    URLs: Yup.string(),
-    extraFields: Yup.array().of(
-      Yup.object().shape({
-        label: Yup.string().required("Required"),
-        value: Yup.string().required("Required"),
-      })
-    ),
+    // Optional, like everything needed to publish.
+    files: Yup.string(),
+    // Optional: a curator may publish without describing every resource.
+    readme: Yup.string(),
+    // Descriptive tags, in their own field. The input that used to sit here
+    // was labelled "Keywords" and wrote to URLs, so a curator's keywords were
+    // stored as links. URLs is no longer offered on any surface; an existing
+    // record keeps whatever it has (see onSubmit).
+    keywords: Yup.string(),
+    extraFields: extraFieldsSchema,
   });
 
-  const { register, handleSubmit, errors, control, setValue } = useForm({
-    resolver: yupResolver(schema),
+  // RHF v7 only knows values present in defaultValues or touched by the
+  // user; visually prefilled inputs are NOT registered otherwise. This
+  // form's useForm outlives the dialog, so it is re-seeded on every open.
+  const itemFormDefaults = (item) => ({
+    files: (item && item.files && item.files.join(", ")) || "",
+    readme: (item && item.readme) || "",
+    keywords:
+      (item &&
+        item.keywords &&
+        (Array.isArray(item.keywords)
+          ? item.keywords.join(", ")
+          : item.keywords)) ||
+      "",
+    extraFields: cleanExtraFields(item && item.extraFields),
   });
+
+  // Save with a required field empty sends the curator to the first one in
+  // FORM order, instead of silently refusing.
+  const { formRef, focusFirstInvalid } = useInvalidFieldFocus();
+
+
+  const { register, handleSubmit, formState: { errors }, control, setValue, reset } = useForm({
+    // focusFirstInvalid below is the ONLY thing that moves focus on a
+    // failed Save. react-hook-form focuses its own first errored field
+    // AFTER the invalid handler runs, which landed on whichever element
+    // it holds a ref for and scrolled it into view its own way, undoing
+    // the block: "center" placement.
+    shouldFocusError: false,
+    resolver: yupResolver(schema),
+    defaultValues: itemFormDefaults(def),
+  });
+
+  useEffect(() => {
+    if (open) reset(itemFormDefaults(def));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [def, open]);
 
   const onSubmit = (values) => {
-    values.files = values.files.split(",").map((el) => el.trim());
-    values.URLs = values.URLs.split(",").map((el) => el.trim());
-    const extraFields = values.extraFields ? values.extraFields : [];
+    values.files = String(values.files || "")
+      .split(",")
+      .map((el) => el.trim())
+      .filter(Boolean);
+    values.keywords = splitList(values.keywords);
+    const extraFields = cleanExtraFields(values.extraFields);
+    values.extraFields = extraFields;
     if (def && scripts.find((el) => el.id == def.id)) {
+      // `...def` first: a legacy URLs list on an existing record is carried
+      // through unchanged. It is never read as, or converted into, keywords.
       edit("script", { ...def, ...values, extraFields: extraFields });
     } else {
-      values["id"] = `s${scripts.length}`;
-      add("script", values);
+      if (link.rowScoped) {
+        // The record and its arrow, in one reducer change -- or neither,
+        // with the form left open to say why.
+        if (!link.createAndLink(values)) return;
+      } else {
+        values["id"] = `s${scripts.length}`;
+        add("script", values);
+      }
     }
     closeForm("script");
   };
@@ -76,13 +146,14 @@ const ScriptsInfoForm = () => {
 
   return (
     <Fragment>
+{hideTrigger ? null : (
       <Tooltip
         title={<Typography variant="subtitle2">Add a new script</Typography>}
         arrow
       >
         <RegularStyledButton
           fullWidth
-          endIcon={<AddCircleOutline />}
+          endIcon={<AddCircleOutlined />}
           onClick={() => {
             setDefault("script", null);
             openForm("script");
@@ -91,6 +162,7 @@ const ScriptsInfoForm = () => {
           Add a Script
         </RegularStyledButton>
       </Tooltip>
+      )}
       <Dialog
         open={open}
         onClose={() => closeForm("script")}
@@ -101,10 +173,10 @@ const ScriptsInfoForm = () => {
       >
         <DialogTitle>
           <Grid container direction="row" spacing={1} alignItems="center">
-            <Grid item xs={11}>
+            <Grid size="grow" sx={{ minWidth: 0 }}>
               {!updating ? "Add a new script" : "Update the script"}
             </Grid>
-            <Grid item xs={1}>
+            <Grid size="auto">
               <RegularStyledButton
                 onClick={() => {
                   closeForm("script");
@@ -117,9 +189,12 @@ const ScriptsInfoForm = () => {
           </Grid>
         </DialogTitle>
         <DialogContent dividers>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit(onSubmit, focusFirstInvalid)}
+          >
             <Grid container direction="column" spacing={1}>
-              <Grid item>
+              <Grid>
                 <TextInputField
                   id="scriptFiles"
                   placeholder="Enter files for the scripts"
@@ -127,17 +202,16 @@ const ScriptsInfoForm = () => {
                   helperText="Enter file name(s) to identify the script. Use the file picker (the file icon above). If you choose a folder, all contents of the folder will be considered a part of the script"
                   label="Files"
                   error={errors.files}
-                  inputRef={register}
+                  register={register}
                   action={
                     <IconButton size="small" onClick={openFileSelector}>
                       <DescriptionOutlined color="primary" />
                     </IconButton>
                   }
                   defaultValue={def && def.files && def.files.join(", ")}
-                  required
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextInputField
                   id="scriptDescription"
                   placeholder="Enter descriptions for script"
@@ -145,24 +219,25 @@ const ScriptsInfoForm = () => {
                   helperText="Enter a summary about the context of the script"
                   label="Description"
                   error={errors.readme}
-                  inputRef={register}
+                  register={register}
                   defaultValue={def && def.readme}
-                  required
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextInputField
-                  id="scriptUrls"
-                  placeholder="Enter URLs for the scripts"
-                  name="URLs"
-                  helperText="Enter link(s)/URLs of the script, if available. (Comma seperated)"
+                  id="scriptKeywords"
+                  placeholder="Enter keywords for the script"
+                  name="keywords"
+                  helperText="Enter keyword(s) describing the script, if useful. (Comma seperated)"
                   label="Keywords"
-                  error={errors.URLs}
-                  inputRef={register}
-                  defaultValue={def && def.URLs && def.URLs.join(", ")}
+                  error={errors.keywords}
+                  register={register}
+                  defaultValue={
+                    def && def.keywords && def.keywords.join(", ")
+                  }
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <ExtraFieldInput
                   control={control}
                   register={register}
@@ -170,9 +245,12 @@ const ScriptsInfoForm = () => {
                   defaults={def && def.extraFields}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
+                <FormConnection control={control} newType="script" link={link} />
+              </Grid>
+              <Grid>
                 <RegularStyledButton fullWidth type="submit">
-                  {updating ? "Update" : "Save"}
+                  {updating ? "Update" : confirmLabel(link.intent, "Save")}
                 </RegularStyledButton>
               </Grid>
             </Grid>

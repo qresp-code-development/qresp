@@ -1,0 +1,10 @@
+__pycache__
+.pytest_cache
+flask_session
+*.log
+.venv
+venv
+dist
+build
+*.egg-info
+.coverage

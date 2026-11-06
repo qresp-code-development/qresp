@@ -1,0 +1,73 @@
+version: "3.7"
+
+services:
+  backend:
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+    build: ./backend
+    depends_on:
+      - mongodb
+    environment:
+      - PYTHONUNBUFFERED=TRUE
+      - QRESP_MONGODB_HOST=mongodb
+      - QRESP_MONGODB_PORT=27017
+      - QRESP_MONGODB_DB_NAME=explorer
+      - QRESP_ENABLE_DEV_LOGIN=1
+      - QRESP_ADMIN_EMAILS=admin@example.com
+      - QRESP_PUBLISH_SKIP_EMAIL=1
+      # Origin for emailed links (account confirmation); never taken from
+      # request headers. Email sign-up is refused without it.
+      - QRESP_PUBLIC_URL=https://localhost:8444
+      - QRESP_FILESERVER_ROOTS=https://notebook.rcc.uchicago.edu/files
+      - QRESP_FILESERVER_INSECURE_TLS_HOSTS=notebook.rcc.uchicago.edu
+    env_file:
+      - .env.staging
+    volumes:
+      - /usr/src/app/backend/project/static
+      - ./backend:/home/flask/app/web/
+    networks:
+      - backend
+    # --loop asyncio and --http h11: bypass uvloop/httptools C extensions that
+    # segfault (exit 139) on this host's Linux 4.15 kernel.
+    command: python -m uvicorn project:connexionapp --host 0.0.0.0 --port 5000 --loop asyncio --http h11
+
+  mongodb:
+    image: mongo:4.4
+    restart: always
+    volumes:
+      - qresp_mongo_data:/data/db
+    networks:
+      - backend
+
+  gui:
+    restart: always
+    build: ./frontend
+    environment :
+      - QRESP_INTERNAL_API_URL=http://backend:5000
+    networks:
+      - frontend
+      - backend
+    command: pm2-runtime start yarn --name "QrespFrontend" --interpreter sh -- start
+
+  nginx:
+    restart: always
+    build: ./nginx
+    ports:
+      - "8081:80"
+      - "8444:443"
+    depends_on:
+      - backend
+      - gui
+    networks:
+      - backend
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+  qresp_mongo_data:

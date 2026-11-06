@@ -1,8 +1,8 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import { TextField, InputAdornment, IconButton, Box } from "@material-ui/core";
-import { Search, Close } from "@material-ui/icons";
+import { TextField, InputAdornment, IconButton, Box } from "@mui/material";
+import { Search, Close } from "@mui/icons-material";
 
 const TableSearchContext = createContext();
 
@@ -33,25 +33,28 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
   };
 
   const filterRows = () => {
-    const regex = new RegExp(query, "gi");
+    // Split into individual terms; all must match (any order, any field).
+    const terms = query.trim().split(/\s+/).filter(Boolean);
+    if (!terms.length) {
+      setFiltered(rows);
+      return;
+    }
+    // Escape special regex chars so a literal "C++" doesn't break the pattern.
+    const regexes = terms.map(
+      (t) => new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
+    );
     setFiltered(
       rows.filter((data) => {
-        var keep = false;
-        for (let index = 0; index < columns.length; index++) {
-          const col = columns[index];
-          if (col.options.searchable) {
-            if (col.options.searchValue) {
-              keep =
-                keep ||
-                col.options.searchValue(data[col.name]).toString().match(regex);
-            } else {
-              keep =
-                keep ||
-                col.options.value(data[col.name]).toString().match(regex);
-            }
-          }
+        // Combine all searchable fields into one string for this row.
+        let text = "";
+        for (const col of columns) {
+          if (!col.options.searchable) continue;
+          const val = col.options.searchValue
+            ? col.options.searchValue(data[col.name])
+            : col.options.value(data[col.name]);
+          text += " " + String(val ?? "");
         }
-        return keep;
+        return regexes.every((re) => re.test(text));
       })
     );
   };
@@ -70,33 +73,40 @@ const TableSearch = ({ rows, setFiltered, columns }) => {
   }, [query]);
 
   return (
-    <Box m={1} mt={2}>
+    <Box sx={{ my: 1 }}>
       <form noValidate onSubmit={onSubmit}>
         <TextField
           value={query}
           name="query"
           type="text"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search color="primary" />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                {" "}
-                <IconButton size="small" onClick={clearSearch}>
-                  <Close color="primary" />
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="primary" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  sx={{ visibility: query.length > 0 ? "visible" : "hidden" }}
+                >
+                  <IconButton size="small" onClick={clearSearch}>
+                    <Close sx={{ color: "text.secondary", fontSize: 18 }} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
-          placeholder="Search..."
-          // onKeyUp={onChange}
+          placeholder="Search by keywords — title, author, tags…"
           onChange={onChange}
           size="small"
           variant="outlined"
           fullWidth
+          inputProps={{ "aria-label": "Search records by keyword" }}
+          sx={{
+            "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "#fff", minHeight: 44 },
+          }}
         />
       </form>
     </Box>

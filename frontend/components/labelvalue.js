@@ -1,35 +1,34 @@
 import PropTypes from "prop-types";
 
-import { Typography, withStyles, Grid } from "@material-ui/core";
+import { Typography, Grid } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const BigTypography = withStyles({
-  body1: {
+// withStyles' per-variant class keys map onto the variant classes.
+const BigTypography = styled(Typography)({
+  "&.MuiTypography-body1": {
     fontSize: "1.15rem",
     color: "#777777",
     textAlign: "justify",
   },
-  body2: {
+  "&.MuiTypography-body2": {
     fontSize: "0.95rem",
     color: "#777777",
     textAlign: "justify",
   },
-})(Typography);
+});
 
-const SimpleLabelValue = ({ label, value, direction }) => {
+const SimpleLabelValue = ({ label, value, direction = "row" }) => {
   return (
     <div>
       <Grid
         container
-        direction={direction}
-        alignItems="center"
-        justify="flex-start"
-      >
-        <Grid item>
+        direction={direction} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
+        <Grid>
           <Typography variant="body2" color="secondary" component="span">
             <span>{label}:&nbsp;&nbsp;</span>
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid>
           <Typography variant="body2" color="secondary" component="div">
             {value}
           </Typography>
@@ -46,17 +45,20 @@ const SimpleLabelValue = ({ label, value, direction }) => {
   );
 };
 
-SimpleLabelValue.defaultProps = {
-  direction: "row",
-};
-
 SimpleLabelValue.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   direction: PropTypes.string,
 };
 
-const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
+const LabelValue = ({
+  label,
+  value,
+  link = null,
+  image = null,
+  textVariant = "body1",
+  direction = "row",
+}) => {
   if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
     value = value.join(", ");
   }
@@ -65,12 +67,9 @@ const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
     <div>
       <Grid
         container
-        direction={direction}
-        alignItems="center"
-        justify="flex-start"
-      >
+        direction={direction} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
         {label && (
-          <Grid item>
+          <Grid>
             <BigTypography variant="body1" color="secondary" component="div">
               <span>
                 {label}
@@ -80,7 +79,7 @@ const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
           </Grid>
         )}
         {value && (
-          <Grid item>
+          <Grid>
             <BigTypography
               variant={textVariant}
               color="secondary"
@@ -122,13 +121,6 @@ const LabelValue = ({ label, value, link, image, textVariant, direction }) => {
       </style>
     </div>
   );
-};
-
-LabelValue.defaultProps = {
-  link: null,
-  image: null,
-  textVariant: "body1",
-  direction: "row",
 };
 
 LabelValue.propTypes = {

@@ -1,3 +1,2 @@
-recursive-include project/templates *
-recursive-include project/static *
 include project/swagger.yml
+include project/data/*.json

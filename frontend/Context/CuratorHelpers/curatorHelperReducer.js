@@ -11,12 +11,26 @@ import {
 
 export default (state, action) => {
   switch (action.type) {
-    case OPEN_FORM:
-      return { ...state, open: { ...state.open, [action.payload]: true } };
+    // Opening a form and saying what the new record is FOR happen in one
+    // dispatch, so a form can never be open with a stale or missing intent
+    // left over from the last one. A bare string still opens a form with no
+    // intent, which is how editing an existing record arrives.
+    case OPEN_FORM: {
+      const { type, intent } =
+        typeof action.payload === "string"
+          ? { type: action.payload, intent: null }
+          : action.payload;
+      return {
+        ...state,
+        open: { ...state.open, [type]: true },
+        link: { ...state.link, [type]: intent || null },
+      };
+    }
     case CLOSE_FORM:
       return {
         ...state,
         open: { ...state.open, [action.payload]: false },
+        link: { ...state.link, [action.payload]: null },
       };
     case SET_DEF:
       return {
@@ -28,11 +42,19 @@ export default (state, action) => {
         ...state,
         workflow: { ...state.workflow, onClick: action.payload },
       };
-    case SET_WORKFLOW_OPEN:
+    // External data opens through the workflow's own dialog. Same rule: the
+    // intent arrives with the open, and leaves with the close.
+    case SET_WORKFLOW_OPEN: {
+      const { open, intent } =
+        typeof action.payload === "object" && action.payload !== null
+          ? action.payload
+          : { open: action.payload, intent: null };
       return {
         ...state,
-        workflow: { ...state.workflow, open: action.payload },
+        workflow: { ...state.workflow, open },
+        link: { ...state.link, head: open ? intent || null : null },
       };
+    }
     case SET_WORKFLOW_FIT:
       return {
         ...state,

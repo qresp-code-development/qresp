@@ -1,14 +1,22 @@
-- repo: git://github.com/pre-commit/pre-commit-hooks
-  rev: v2.2.3
-  hooks:
-  - id: check-yaml
-  - id: check-json
-  - id: check-xml
-  - id: check-ast
-  - id: check-merge-conflict
-  - id: flake8
-  - id: no-commit-to-branch
-    args: [--branch, master, --branch, develop]
-  - id: check-added-large-files
-    args: [--maxkb=200]
-  - id: trailing-whitespace
+# pre-commit hooks. Run `pre-commit install` once, then hooks run on commit.
+# Modernized: GitHub disabled the git:// protocol (Jan 2022), the top-level
+# `repos:` key is now required, and `flake8` moved out of pre-commit-hooks into
+# its own repository (pycqa/flake8).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: no-commit-to-branch
+        args: [--branch, master, --branch, develop]
+      - id: check-added-large-files
+        args: [--maxkb=200]
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.0
+    hooks:
+      - id: flake8

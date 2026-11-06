@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
-  description: This is the swagger file that provides the API to fetch data from Qresp server
-  version: "1.0"
-  title: Swagger REST Article
+  description: REST API of a Qresp server (explore, curate, publish, accounts)
+  version: "3.0.0"
+  title: Qresp API
 consumes:
   - "application/json"
 produces:
@@ -12,6 +12,24 @@ basePath: "/api"
 
 # Paths supported by the server application
 paths:
+  /healthz:
+    get:
+      operationId: "project.api.healthz"
+      tags:
+        - "Service"
+      summary: "Reports that the API process is serving requests"
+      responses:
+        200:
+          description: API process is available
+          schema:
+            type: object
+            required:
+              - status
+            properties:
+              status:
+                type: string
+                enum:
+                  - ok
   /search:
     get:
       operationId: "project.api.search"
@@ -78,6 +96,17 @@ paths:
                   type: "string"
                 _Search__id":
                   type: "string"
+                _Search__institution:
+                  type: "string"
+                  description: >-
+                    Optional, record-level, entered by the curator. The
+                    institution associated with this RECORD -- not an
+                    assertion that every listed author belongs to it, and
+                    never inferred from authors, collections, the server URL,
+                    an email domain or a DOI. Empty string on a record
+                    published before the field existed, and on one whose
+                    curator left it blank; both are valid and neither needs a
+                    migration.
                 _Search__notebookFile:
                   type: "string"
                 _Search__notebookPath:
@@ -140,7 +169,13 @@ paths:
       tags:
         - "Paper details"
       summary: "Fetches details of paper given id"
-      description: "Fetches paper details given id"
+      description: "Fetches paper details given id. Includes the optional
+        record-level `institution` field -- the institution associated with
+        this RECORD as typed by the curator, not an assertion that every
+        listed author belongs to it, and never inferred from authors,
+        collections, the server URL, an email domain or a DOI. It is an empty
+        string on a record published before the field existed and on one whose
+        curator left it blank; both are valid and neither needs a migration."
       parameters:
         - in: path
           name: id
@@ -150,6 +185,58 @@ paths:
       responses:
         200:
           description: "Successful read paper details "
+    put:
+      operationId: "project.api.update_paper"
+      tags:
+        - "Paper details"
+      summary: "Updates a record's metadata (record owner or admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: paper
+          description: Partial or full paper metadata; top-level fields are
+            merged into the stored record. Server-owned fields (id,
+            owner_email, version bookkeeping) are ignored if present.
+          required: true
+          schema:
+            type: object
+      responses:
+        200:
+          description: Record updated
+        400:
+          description: Payload failed model validation
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin can edit
+        404:
+          description: Paper with this id does not exist
+    delete:
+      operationId: "project.api.delete_paper"
+      tags:
+        - "Paper details"
+      summary: "Permanently deletes a record (record owner or admin only)"
+      description: "Cannot be undone. Use PUT /paper/{id}/active to hide a
+        record reversibly instead."
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: Record deleted
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may delete it
+        404:
+          description: Paper with this id does not exist
   /workflow/{id}:
     get:
       operationId: "project.api.workflow"
@@ -258,7 +345,7 @@ paths:
       operationId: "project.api.publish"
       tags:
         - "Generate Publish Link"
-      summary: "Send an email to the curator with the link to publish the paper"
+      summary: "Send an email to the curator with the link to publish the paper (authenticated users only; the session identity becomes the record owner)"
       parameters:
         - in: body
           name: paper
@@ -267,11 +354,1767 @@ paths:
             type: object
       responses:
         200:
-          description: Successfully generated the verify link
+          description: Published; returns the new record id
         400:
           description: Incorrect paper object
+        401:
+          description: Authentication is required to publish
         500:
           description: Internal server error
+  /paper/{id}/active:
+    put:
+      operationId: "project.api.set_paper_active"
+      tags:
+        - "Paper details"
+      summary: "Activate or deactivate (soft delete) a record (owner or admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: body
+          required: true
+          description: Set active=false to hide the record from public
+            discovery, active=true to restore it.
+          schema:
+            type: object
+            required:
+              - active
+            properties:
+              active:
+                type: boolean
+      responses:
+        200:
+          description: Record activation state updated
+        400:
+          description: active must be a boolean
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may change this
+        404:
+          description: Paper with this id does not exist
+  /paper/{id}/editors:
+    put:
+      operationId: "project.api.set_paper_editors"
+      tags:
+        - "Paper details"
+      summary: "Replaces the record's editor list (owner or admin only; editors are edit-only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: body
+          required: true
+          description: Full replacement editor list; emails are normalized
+            lowercase and deduplicated.
+          schema:
+            type: object
+            required:
+              - editor_emails
+            properties:
+              editor_emails:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: Editor list updated
+        400:
+          description: editor_emails missing or contains an invalid email
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may manage editors
+        404:
+          description: Paper with this id does not exist
+  /paper/{id}/visibility:
+    put:
+      operationId: "project.api.set_paper_visibility"
+      tags:
+        - "Paper details"
+      summary: "Make a record private or public (owner or admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: body
+          required: true
+          description: Set is_private=true to hide the record from public
+            discovery and restrict reading to the owner, editors, admins and
+            viewer_emails. viewer_emails / editor_emails, when given,
+            replace those lists (an email in both is an editor).
+          schema:
+            type: object
+            required:
+              - is_private
+            properties:
+              is_private:
+                type: boolean
+              viewer_emails:
+                type: array
+                items:
+                  type: string
+              editor_emails:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: Record visibility updated
+        400:
+          description: is_private must be a boolean, or an invalid viewer email
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may change this
+        404:
+          description: Paper with this id does not exist
+  /paper/{id}/viewers:
+    put:
+      operationId: "project.api.set_paper_viewers"
+      tags:
+        - "Paper details"
+      summary: "Replaces the list of accounts a private record is shared with (owner or admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: body
+          required: true
+          description: Full replacement viewer list; emails are normalized
+            lowercase and deduplicated. Viewers get read-only access.
+          schema:
+            type: object
+            required:
+              - viewer_emails
+            properties:
+              viewer_emails:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: Viewer list updated
+        400:
+          description: viewer_emails missing or contains an invalid email
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may manage sharing
+        404:
+          description: Paper with this id does not exist
+  /paper/{id}/raw:
+    get:
+      operationId: "project.api.raw_paper"
+      tags:
+        - "Paper details"
+      summary: "Returns the stored record document for editing (owner or admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: Stored record document returned
+        401:
+          description: Authentication required
+        403:
+          description: Only the record owner or an admin may load this
+        404:
+          description: Paper with this id does not exist
+  /account/papers:
+    get:
+      operationId: "project.api.account_papers"
+      tags:
+        - "Account"
+      summary: "Lists records owned by the current session user"
+      responses:
+        200:
+          description: Compact list of the user's records
+        401:
+          description: Authentication required
+  /account/drafts:
+    get:
+      operationId: "project.api.account_drafts"
+      tags:
+        - "Account"
+      summary: "Lists the current session user's curator drafts"
+      responses:
+        200:
+          description: Compact list of the user's drafts (no state payloads)
+        401:
+          description: Authentication required
+    post:
+      operationId: "project.api.create_account_draft"
+      tags:
+        - "Account"
+      summary: "Saves a new curator draft (state may be arbitrarily incomplete)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Draft payload; state is stored as-is, never
+            publish-validated.
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              state:
+                type: object
+      responses:
+        200:
+          description: Draft created; summary returned
+        400:
+          description: Invalid draft payload
+        401:
+          description: Authentication required
+  /account/drafts/{id}:
+    get:
+      operationId: "project.api.account_draft"
+      tags:
+        - "Account"
+      summary: "Returns one of the user's drafts including its full state"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Draft Id
+      responses:
+        200:
+          description: Draft returned
+        401:
+          description: Authentication required
+        404:
+          description: No such draft for this user
+    put:
+      operationId: "project.api.update_account_draft"
+      tags:
+        - "Account"
+      summary: "Updates one of the user's drafts (title and/or state)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Draft Id
+        - in: body
+          name: body
+          required: true
+          description: Fields to update; state is stored as-is.
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              state:
+                type: object
+      responses:
+        200:
+          description: Draft updated; summary returned
+        400:
+          description: Invalid draft payload
+        401:
+          description: Authentication required
+        404:
+          description: No such draft for this user
+    delete:
+      operationId: "project.api.delete_account_draft"
+      tags:
+        - "Account"
+      summary: "Deletes one of the user's drafts"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Draft Id
+      responses:
+        200:
+          description: Draft deleted
+        401:
+          description: Authentication required
+        404:
+          description: No such draft for this user
+  /account/favorites:
+    get:
+      operationId: "project.api.account_favorites"
+      tags:
+        - "Account"
+      summary: "Lists papers favorited by the current session user"
+      responses:
+        200:
+          description: List of favorited papers with basic metadata
+        401:
+          description: Authentication required
+    post:
+      operationId: "project.api.add_favorite"
+      tags:
+        - "Account"
+      summary: "Favorites a paper (idempotent)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - paper_id
+            properties:
+              paper_id:
+                type: string
+              server_url:
+                type: string
+              title:
+                type: string
+              authors:
+                type: string
+              year:
+                type: integer
+      responses:
+        200:
+          description: Paper favorited
+        400:
+          description: paper_id is required
+        401:
+          description: Authentication required
+  /account/favorites/{paper_id}:
+    delete:
+      operationId: "project.api.remove_favorite"
+      tags:
+        - "Account"
+      summary: "Removes a paper from favorites"
+      parameters:
+        - in: path
+          name: paper_id
+          type: string
+          required: true
+          description: Paper Id to unfavorite
+      responses:
+        200:
+          description: Paper unfavorited
+        401:
+          description: Authentication required
+  /admin/papers:
+    get:
+      operationId: "project.api.admin_papers"
+      tags:
+        - "Admin"
+      summary: "Lists ALL records — active, deactivated, ownerless — for admin management"
+      responses:
+        200:
+          description: Compact list of every stored record
+        401:
+          description: Authentication required
+        403:
+          description: Only an admin may list all records
+  /admin/ownerless-papers:
+    get:
+      operationId: "project.api.ownerless_papers"
+      tags:
+        - "Admin"
+      summary: "Lists legacy records without a verified owner (admin only)"
+      responses:
+        200:
+          description: Compact list of ownerless records
+        401:
+          description: Authentication required
+        403:
+          description: Only an admin may list ownerless records
+  /paper/{id}/owner:
+    put:
+      operationId: "project.api.assign_paper_owner"
+      tags:
+        - "Admin"
+      summary: "Assigns a verified owner to a record (admin only)"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: body
+          name: body
+          required: true
+          description: The owner to assign; set force=true to replace an
+            existing owner.
+          schema:
+            type: object
+            required:
+              - owner_email
+            properties:
+              owner_email:
+                type: string
+              force:
+                type: boolean
+      responses:
+        200:
+          description: Owner assigned
+        400:
+          description: Invalid email address
+        401:
+          description: Authentication required
+        403:
+          description: Only an admin may assign owners
+        404:
+          description: Paper with this id does not exist
+        409:
+          description: Record already has a different owner (use force)
+  /federation/servers:
+    get:
+      operationId: "project.federation.federation_servers"
+      tags:
+        - "Paper details"
+      summary: "The Qresp servers this deployment federates with"
+      description: "The single authoritative federation list: the same set
+        `?server=` is checked against, published so the Explorer offers
+        exactly the servers the backend will accept. Derived and read-only;
+        every origin is still re-checked (HTTPS, literal address, DNS) before
+        any request is made to it."
+      responses:
+        200:
+          description: >-
+            `servers` is a list of {qresp_server_url, isActive,
+            qresp_maintainer_emails}, in the shape the federated registry has
+            always used. `default_server` is an ADDITIVE field naming the
+            origin the Explorer opens on when the visitor has not chosen one:
+            always one of `servers`, or "" when this deployment federates with
+            nobody. It is set by QRESP_DEFAULT_EXPLORER_SERVER and is refused
+            (falling back to the first listed server) when that names an
+            origin outside the allowlist -- naming a server here can pick
+            among the federated ones, never add one.
+  /paper/{id}/related:
+    get:
+      operationId: "project.related.related_research"
+      tags:
+        - "Paper details"
+      summary: "Related Qresp records (strict-gated) and recommended external
+        papers (re-ranked, not gated) for a record (read-only; public active
+        records only)"
+      description: "Two lists, two DIFFERENT policies -- do not read one
+        contract onto the other. `internal` (Related Qresp Records) computes
+        this server's own corpus against Qresp's strict evidence gate; a
+        candidate that does not pass is never returned, and at most 3 are.
+        `external` (Recommended External Papers) asks Semantic Scholar for up
+        to 150 candidates once per cache miss and RE-RANKS every
+        deduplicated one by the same deterministic score -- the evidence gate
+        is still computed per candidate and carried as a diagnostic, but it
+        is never used to remove one. The best 25 by score (provider order as
+        the tie-break) are returned, all in this one response, so a
+        candidate with weak or zero Qresp evidence can still appear, usually
+        near the tail. Off unless QRESP_RELATED_RESEARCH_ENABLED is set, in
+        which case both lists come back empty with status `disabled`.
+        External results are cached separately from the Paper document and
+        never written into it; a provider timeout, 404, 429 or malformed
+        answer degrades the external section only. Nothing here modifies a
+        record."
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: query
+          name: server
+          type: string
+          required: false
+          description: >-
+            The Qresp server that holds the record, as on the detail page URL
+            (e.g. https://paperstack.example.org). Omitted, or naming this
+            server, the record and the corpus are read locally exactly as
+            before. Naming a server in the federated registry, both are read
+            from that server over HTTPS and scored against ITS corpus; the
+            record is never copied into this server's database. Any other
+            value is refused with 400 — no arbitrary URL is fetched, and there
+            is no fallback to the local database.
+      responses:
+        200:
+          description: >-
+            Two independent lists with SEPARATE caps AND separate policies,
+            neither ever padded. `internal` holds at most 3 Qresp records,
+            every one of which PASSED Qresp's evidence gate. `external` holds
+            at most 25 papers, RE-RANKED (not filtered) from up to 150
+            provider candidates by that same deterministic score — a
+            candidate that would have failed the evidence gate can still be
+            among them, typically near the end of the list; the gate's
+            verdict is not exposed on the result and must not be inferred
+            from a result's mere presence. The UI shows external results five
+            to a page over at most five pages, and paging is a slice of THIS
+            response — it triggers no further request to this endpoint and no
+            further request to Semantic Scholar. `external.pipeline` reports
+            where the candidates went (`raw_candidates`, `valid_candidates`,
+            `after_dedupe`, `scored_candidates`, `shown`), with
+            `0 <= shown <= 25 <= scored_candidates` and, under the current
+            policy, `scored_candidates == after_dedupe` always (nothing is
+            removed between de-duplication and the display cap).
+            `internal[].id` links to the Qresp detail page and
+            `internal[].server` names the Qresp server it lives on (empty for
+            this one); `external[].url` prefers an HTTPS DOI link.
+            `source_server` echoes the server both lists were computed from.
+            Every result carries grounded `reasons` (at most three) when Qresp
+            found nameable evidence; an external result with no evidence
+            carries none rather than an invented explanation. Each section
+            reports a `status`: `ok`, `disabled`, `unavailable`, and for the
+            external one also `unresolved` and `stale`, which is true when a
+            refresh failed and the last successful results are being served.
+        400:
+          description: The requested Qresp server is not one this server federates with
+        404:
+          description: No such record, or the record is not publicly available
+  /paper/{id}/related/feedback:
+    post:
+      operationId: "project.feedback.submit_feedback"
+      tags:
+        - "Paper details"
+      summary: "Records the signed-in reader's 1-5 rating of the Related
+        Research list for a record (authentication required; one rating per
+        account)"
+      description: "AUTHENTICATED ONLY. Ratings from readers without an
+        account are not collected: keyed on anything a reader can reset, one
+        opinion per reader is not true. Requires the signed
+        external.feedback_context that GET /paper/{id}/related issues after it
+        has resolved a public, active record and computed a NON-EMPTY external
+        list -- so a rating cannot be filed against a record that does not
+        exist, or a list that was empty. results_shown is taken from that
+        token, never from this body; page_at_submit and pages_viewed are
+        clamped to the page count the token attests, and pages_viewed is never
+        less than page_at_submit. Verification is a local signature check:
+        this endpoint makes no provider, peer or cache request. Stores the
+        rating, optional reason codes (offered only for a 1 or a 2), an
+        optional short comment, and those counts. The IP address, the
+        User-Agent, any other request header, the reader's email or account id
+        in readable form, the recommendation scores or Why-related reasons,
+        and the recommended papers' titles and DOIs are NOT stored, and no
+        third party is contacted. A second submission by the same account for
+        the same record and source UPDATES the first. The respondent is keyed
+        by an HMAC of the durable account identifier; that key is never
+        returned by any endpoint, and nothing is stored at all if the
+        deployment has no signing secret."
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: query
+          name: server
+          type: string
+          required: false
+          description: >-
+            The Qresp server that holds the record, as on the detail page URL.
+            Ratings are namespaced by server exactly as the recommendation
+            cache is, so the same id on two servers never pools its ratings.
+            A server outside the federated registry is refused with 400.
+        - in: body
+          name: body
+          required: true
+          description: The rating and its context. Counts only; nothing here
+            identifies the reader.
+          schema:
+            type: object
+            required:
+              - rating
+              - feedback_context
+            properties:
+              rating:
+                type: integer
+                minimum: 1
+                maximum: 5
+                description: 1 = Very dissatisfied, 3 = Neutral, 5 = Very satisfied
+              feedback_context:
+                type: string
+                description: >-
+                  The signed external.feedback_context from this record's GET
+                  /paper/{id}/related response. Binds the record, the server,
+                  the list, the real result count, the real page count and an
+                  expiry. Carries no user identifier and no recommendation
+                  detail.
+              source:
+                type: string
+                enum: [external, internal]
+                default: external
+              reasons:
+                type: array
+                description: Optional, and only meaningful for a rating of 1
+                  or 2. Any other value is refused rather than stored.
+                items:
+                  type: string
+                  enum:
+                    - too_many_unrelated
+                    - not_my_research_area
+                    - already_knew_these
+                    - need_more_variety
+                    - other
+              comment:
+                type: string
+                maxLength: 1000
+              page_at_submit:
+                type: integer
+                minimum: 1
+                description: Clamped to the page count the token attests.
+              pages_viewed:
+                type: integer
+                minimum: 1
+                description: Clamped the same way, and never below
+                  page_at_submit.
+      responses:
+        200:
+          description: The rating was stored (or updated). Echoes back only
+            this reader's own rating, reasons and comment.
+        400:
+          description: Rating out of range, unknown source or reason code,
+            comment too long, a Qresp server this deployment does not federate
+            with, or a feedback context that is missing, malformed, unsigned,
+            for another record/server/list, or describes no results
+        401:
+          description: Authentication required
+        403:
+          description: CSRF token missing or invalid, or the account cannot be
+            identified
+        410:
+          description: The feedback context has expired; reload the
+            recommendations to obtain a fresh one
+        503:
+          description: The rating could not be stored, or this server has no
+            signing secret configured
+    get:
+      operationId: "project.feedback.my_feedback"
+      tags:
+        - "Paper details"
+      summary: "Reads back the signed-in reader's OWN rating for a record
+        (authentication required)"
+      description: "Exactly one person's answer -- theirs -- so the rating
+        widget can show what they chose last time. Returns no other reader's
+        rating, no respondent key, no aggregate and nothing about the
+        recommendations themselves. A null rating means this reader has not
+        rated this list, which is an answer rather than a 404."
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+        - in: query
+          name: server
+          type: string
+          required: false
+          description: The Qresp server that holds the record
+        - in: query
+          name: source
+          type: string
+          required: false
+          enum: [external, internal]
+          default: external
+      responses:
+        200:
+          description: This reader's own rating, reasons and comment
+        400:
+          description: Unknown source, or a Qresp server this deployment does
+            not federate with
+        401:
+          description: Authentication required
+        403:
+          description: The account cannot be identified
+        503:
+          description: Feedback could not be read, or this server has no
+            signing secret configured
+  /related/feedback/summary:
+    get:
+      operationId: "project.feedback.feedback_summary"
+      tags:
+        - "Paper details"
+      summary: "Aggregate recommendation ratings (administrators only; counts
+        only, never comments or identifiers)"
+      description: "Response count, average rating, the 1-5 distribution, and
+        a tally of the reasons given with low ratings, over SIGNED-IN
+        respondents only. Deliberately returns no comment text, no respondent
+        key, no record id and no individual response: nothing here can be
+        joined back to a person. Rows written while anonymous rating was
+        allowed are excluded -- they were never one-per-reader, so averaging
+        them in would carry that defect into the new figure."
+      parameters:
+        - in: query
+          name: source
+          type: string
+          required: false
+          enum: [external, internal]
+          description: Restrict the counts to one of the two lists
+      responses:
+        200:
+          description: >-
+            `responses`, `average_rating` (null when nobody has answered --
+            never 0, which is not a rating a reader can give),
+            `rating_distribution`, `low_ratings`, `low_rating_reasons` and a
+            per-source breakdown
+        400:
+          description: Unknown source
+        401:
+          description: Authentication required
+        403:
+          description: Administrator access required
+        503:
+          description: Feedback could not be read
+  /paper/{id}/curator:
+    get:
+      operationId: "project.api.paper_curator"
+      tags:
+        - "Paper details"
+      summary: "Public profile of the account that owns the record"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: Profile (or null) returned
+        404:
+          description: Paper with this id does not exist
+  /paper/{id}/permissions:
+    get:
+      operationId: "project.api.paper_permissions"
+      tags:
+        - "Paper permissions"
+      summary: "Reports whether the current session may edit the record"
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Paper Id
+      responses:
+        200:
+          description: Permission decision returned
+        404:
+          description: Paper with this id does not exist
+  /auth/google:
+    get:
+      operationId: "project.auth.google_login"
+      tags:
+        - "Authentication"
+      summary: "Starts the Google OAuth identity flow (openid/email/profile only)"
+      parameters:
+        - in: query
+          name: next
+          type: string
+          required: false
+          description: Same-origin path to return to after sign-in
+      responses:
+        302:
+          description: Redirect to Google's consent screen
+        503:
+          description: Google login is not configured on this server
+  /auth/google/callback:
+    get:
+      operationId: "project.auth.google_callback"
+      tags:
+        - "Authentication"
+      summary: "Completes Google sign-in and stores the session user"
+      parameters:
+        - in: query
+          name: state
+          type: string
+          required: false
+        - in: query
+          name: code
+          type: string
+          required: false
+        - in: query
+          name: error
+          type: string
+          required: false
+      responses:
+        302:
+          description: Signed in; redirect back to the app
+        400:
+          description: Invalid state, missing code, or Google error
+        503:
+          description: Google login is not configured on this server
+  /import/doi:
+    post:
+      operationId: "project.manuscript.lookup_doi"
+      tags:
+        - "Import"
+      summary: "Proposes bibliographic metadata for a DOI (authenticated; proposals only)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "The DOI to look up (URL and doi: prefixes accepted)."
+          schema:
+            type: object
+            required:
+              - doi
+            properties:
+              doi:
+                type: string
+      responses:
+        200:
+          description: Proposed metadata returned (fields may be partial)
+        400:
+          description: Not a valid DOI
+        401:
+          description: Authentication required
+        404:
+          description: DOI not found in the registry
+        502:
+          description: DOI registry unreachable or erroring
+  /assist/keywords:
+    post:
+      operationId: "project.assist.suggest_keywords"
+      tags:
+        - "Assist"
+      summary: "Suggests Keywords from the record's OWN metadata (opt-in;
+        suggestions only, never applied)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Explicit consent plus an allowlist of the curator's own
+            metadata - the paper's bibliographic fields, and the descriptive
+            fields of datasets/charts/scripts/tools already accepted into the
+            record. No file content, no manuscript, no paths or URLs, no
+            unclassified files, no unaccepted folder candidates, and no
+            curator, owner, editor or account data is accepted here.
+          schema:
+            type: object
+            required:
+              - consent
+            properties:
+              consent:
+                type: boolean
+              kind: {type: string}
+              title: {type: string}
+              abstract: {type: string}
+              publication: {type: string}
+              doi: {type: string}
+              year: {type: string}
+              basenames:
+                type: array
+                description: File names only, never paths. Bounded server-side.
+                items: {type: string}
+              charts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    caption: {type: string}
+                    properties:
+                      type: array
+                      items: {type: string}
+              datasets:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    description: {type: string}
+                    keywords: {type: string}
+              scripts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    description: {type: string}
+                    keywords: {type: string}
+              tools:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    packageName: {type: string}
+                    description: {type: string}
+                    facility: {type: string}
+                    measurement: {type: string}
+      responses:
+        200:
+          description: Up to 8 keyword suggestions, each flagged as an
+            existing Qresp keyword or a new one
+        400:
+          description: Consent missing, or nothing to work from
+        401:
+          description: Authentication required
+        403:
+          description: CSRF token missing or invalid
+        429:
+          description: Daily per-user AI suggestion limit reached
+        502:
+          description: AI provider failed or answered unreadably
+        503:
+          description: AI keyword suggestions are not configured on this server
+  /curation/latex-captions:
+    post:
+      operationId: "project.latex.latex_captions"
+      tags:
+        - "Curation"
+      summary: "Figure captions from the paper's LaTeX source (upload or arXiv)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              arxiv:
+                type: string
+                maxLength: 300
+              filename:
+                type: string
+                maxLength: 300
+              content_b64:
+                type: string
+              charts:
+                type: array
+                maxItems: 500
+                items:
+                  type: object
+      responses:
+        200:
+          description: Figures found in the source and their matches
+        400:
+          description: The source could not be read
+        401:
+          description: Not authenticated
+  /curation/arxiv-record:
+    get:
+      operationId: "project.latex.arxiv_record"
+      tags:
+        - "Curation"
+      summary: "An arXiv paper's citation record, from DataCite or arXiv"
+      parameters:
+        - in: query
+          name: id
+          required: true
+          type: string
+          maxLength: 300
+      responses:
+        200:
+          description: CSL-JSON record
+        400:
+          description: Not an arXiv identifier
+        404:
+          description: No such paper
+  /curation/find-arxiv:
+    post:
+      operationId: "project.latex.find_arxiv"
+      tags:
+        - "Curation"
+      summary: "Find a paper's arXiv preprint by its exact title"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - title
+            properties:
+              title:
+                type: string
+                maxLength: 500
+      responses:
+        200:
+          description: Search result (found or not)
+        400:
+          description: Missing title
+        401:
+          description: Not authenticated
+  /curation/suggest-figure-keywords:
+    post:
+      operationId: "project.curation_ai.suggest_figure_keywords"
+      tags:
+        - "Curation"
+      summary: "Opt-in AI keywords for each figure and the paper"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - consent
+            properties:
+              consent:
+                type: boolean
+              paper:
+                type: object
+              figures:
+                type: array
+                maxItems: 200
+                items:
+                  type: object
+      responses:
+        200:
+          description: Suggestions (nothing is stored)
+        400:
+          description: No consent or nothing to suggest from
+        401:
+          description: Not authenticated
+        429:
+          description: Daily AI limit reached
+        503:
+          description: AI not configured
+  /curation/suggest-links:
+    post:
+      operationId: "project.curation_ai.suggest_links"
+      tags:
+        - "Curation"
+      summary: "Opt-in AI suggestions of which scripts/datasets produced which figures"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - consent
+            properties:
+              consent:
+                type: boolean
+              path:
+                type: string
+                maxLength: 1000
+              paper:
+                type: object
+              figures:
+                type: array
+                maxItems: 200
+                items:
+                  type: object
+              scripts:
+                type: array
+                maxItems: 100
+                items:
+                  type: object
+              datasets:
+                type: array
+                maxItems: 200
+                items:
+                  type: object
+              existing_links:
+                type: array
+                maxItems: 1000
+                items:
+                  type: object
+      responses:
+        200:
+          description: Suggested links with reasons (nothing is stored)
+        400:
+          description: No consent or not enough to link
+        401:
+          description: Not authenticated
+        429:
+          description: Daily AI limit reached
+        503:
+          description: AI not configured
+  /curation/ai-curate:
+    post:
+      operationId: "project.curation_ai.ai_curate"
+      tags:
+        - "Curation"
+      summary: "Opt-in AI proposal of figures, data, scripts and tools Qresp did not find"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - consent
+              - path
+            properties:
+              consent:
+                type: boolean
+              path:
+                type: string
+                maxLength: 1000
+              paper:
+                type: object
+              existing:
+                type: object
+              focus:
+                type: array
+                maxItems: 4
+                items:
+                  type: string
+                  enum: ["charts", "datasets", "scripts", "tools"]
+              review:
+                type: boolean
+      responses:
+        200:
+          description: Proposals with reasons (nothing is stored)
+        400:
+          description: No consent or invalid folder
+        401:
+          description: Not authenticated
+        429:
+          description: Daily AI limit reached
+        503:
+          description: AI not configured
+  /curation/suggest-descriptions:
+    post:
+      operationId: "project.curation_ai.suggest_descriptions"
+      tags:
+        - "Curation"
+      summary: "Opt-in AI descriptions for the record's datasets and scripts"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - consent
+              - path
+            properties:
+              consent:
+                type: boolean
+              path:
+                type: string
+                maxLength: 1000
+              paper:
+                type: object
+              figures:
+                type: array
+                maxItems: 200
+                items:
+                  type: object
+              datasets:
+                type: array
+                maxItems: 200
+                items:
+                  type: object
+              scripts:
+                type: array
+                maxItems: 100
+                items:
+                  type: object
+              existing_links:
+                type: array
+                maxItems: 1000
+                items:
+                  type: object
+      responses:
+        200:
+          description: Suggested descriptions (nothing is stored)
+        400:
+          description: No consent, nothing to describe or invalid folder
+        401:
+          description: Not authenticated
+        429:
+          description: Daily AI limit reached
+        503:
+          description: AI not configured
+  /curation/match-captions:
+    post:
+      operationId: "project.curation_ai.match_captions"
+      tags:
+        - "Curation"
+      summary: "Opt-in AI matching of LaTeX figures to record figures whose names differ"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - consent
+            properties:
+              consent:
+                type: boolean
+              figures:
+                type: array
+                maxItems: 500
+                items:
+                  type: object
+              charts:
+                type: array
+                maxItems: 500
+                items:
+                  type: object
+      responses:
+        200:
+          description: Matches with reasons; captions are the paper's own text
+        400:
+          description: No consent or nothing to match
+        401:
+          description: Not authenticated
+        429:
+          description: Daily AI limit reached
+        503:
+          description: AI not configured
+  /curation/locate-folder:
+    post:
+      operationId: "project.curation.locate_folder"
+      tags:
+        - "Curation"
+      summary: "Find a paper's file-server folder from its DOI"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - doi
+            properties:
+              doi:
+                type: string
+                maxLength: 300
+      responses:
+        200:
+          description: Lookup result (found or not)
+        400:
+          description: Invalid DOI
+        401:
+          description: Not authenticated
+  /curation/analyze-repo:
+    post:
+      operationId: "project.repoanalysis.analyze_repo"
+      tags:
+        - "Import"
+      summary: "Inventories and classifies a GitHub or GitLab repository into
+        reviewable curation candidates (read-only; nothing is saved or
+        published)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: The code record's repository link. Only github.com and
+            gitlab.com are read, at the default branch's latest commit.
+          schema:
+            type: object
+            required:
+              - url
+            properties:
+              url:
+                type: string
+                maxLength: 500
+      responses:
+        200:
+          description: Analysis result, in the analyze-folder candidate format
+        400:
+          description: Not a GitHub or GitLab repository link
+        401:
+          description: Not authenticated
+        404:
+          description: No such public repository
+        502:
+          description: The repository host could not be read
+        503:
+          description: The repository host is rate limiting this server
+  /curation/analyze-folder:
+    post:
+      operationId: "project.curation.analyze_folder"
+      tags:
+        - "Import"
+      summary: "Inventories and classifies a file-server folder into reviewable
+        curation candidates (read-only; nothing is saved or published)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: The already-saved file server folder to inspect. It must
+            resolve inside a file-server root configured on this server; no
+            other host, scheme, or parent path is fetchable.
+          schema:
+            type: object
+            required:
+              - path
+            properties:
+              path:
+                type: string
+              boundaries:
+                type: object
+                description: Optional record-boundary selection, keyed by the
+                  role directory it applies to. Each value is a list of
+                  relative folder paths that this analysis listed; a selected
+                  folder becomes exactly one candidate containing everything
+                  beneath it, replacing the default immediate children for
+                  that root only. Validated server-side.
+              chart_plan:
+                type: array
+                description: Optional per-IMAGE chart plan. A Chart record
+                  holds exactly one image, so its unit of choice is the image
+                  file, not a folder. Each entry gives one discovered image
+                  (see chart_image_groups in the response) a single role
+                  and applies only to the folder that image sits in; a folder
+                  no entry mentions keeps its default proposal. Omit the
+                  field entirely, or send an empty list, for the default
+                  behaviour. Validated server-side before any candidate is
+                  built.
+                items:
+                  # Deliberately not `required`/`enum` here. Every rejection
+                  # a curator can act on comes from validate_chart_plan, in
+                  # one place and in one voice, exactly as `boundaries` does
+                  # -- a raw JSON-schema violation is not a sentence anyone
+                  # can fix a folder from.
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      description: Relative POSIX path of an image this
+                        analysis discovered. URLs, absolute paths, `..`,
+                        backslashes and percent-encoding are refused, as is
+                        any path not listed in chart_image_groups.
+                    action:
+                      type: string
+                      description: >-
+                        One of `chart`, `supporting` or `ignore`.
+                        `chart` makes this image one Chart candidate of its
+                        own; `supporting` appends it to the target Chart's
+                        `files`; `ignore` creates nothing from it.
+                    target:
+                      type: string
+                      description: Required for `supporting`, and forbidden
+                        otherwise. Must be an image in the SAME chart folder
+                        whose own action is `chart`.
+      responses:
+        200:
+          description: >-
+            Deterministic candidates for curator review. Structure metadata
+            sits at the TOP level of the envelope — structure_mode,
+            structure_issues, normalized_roles (actual directory name ->
+            canonical role), boundary_trees, applied_boundaries,
+            chart_image_groups and applied_chart_plan — while the per-kind
+            candidate lists sit under `candidates`.
+            boundary_trees and applied_boundaries are always present; in
+            legacy mode every datasets/scripts role root appears, with an
+            empty `nodes` list when it has no selectable child folders.
+            chart_image_groups is always present too: one entry per folder
+            that holds chart images, as
+            {folder, role_root, images: [{path, reason, suggested_action}],
+            notebooks: [{path}]}, where suggested_action is advisory and is
+            "chart" only for the single image the deterministic rule would
+            have picked, "review" otherwise. applied_chart_plan echoes the
+            validated plan actually in force, sorted by path.
+        400:
+          description: Missing, malformed, or out-of-root folder path, or a
+            rejected boundary selection or chart plan
+        401:
+          description: Authentication required
+        403:
+          description: CSRF token missing or invalid
+        404:
+          description: The folder is empty
+        502:
+          description: The file server could not be read
+  /curation/describe-candidates:
+    post:
+      operationId: "project.curation.describe_candidates"
+      tags:
+        - "Import"
+      summary: "Suggests a description and keywords for ONE folder candidate
+        via the configured AI provider (opt-in; suggestions only)"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Explicit consent plus the allowlisted, bounded
+            description of EXACTLY ONE candidate (id, kind, name, relative
+            paths, file-kind inventory, and the structured evidence sources
+            the analysis extracted from inside that candidate's own
+            boundary). Batching produced partial and noticeably worse
+            answers, so zero or more than one item is rejected with 400
+            before the provider or the quota is touched. No raw dataset
+            values, image bytes, notebook code cells or outputs, function
+            bodies, credentials, or user data are accepted here. The former
+            free-text `context` key is IGNORED, because the browser used to
+            fill it with the curator's own draft readme/description, which
+            fed the answer back as its own input.
+          schema:
+            type: object
+            required:
+              - consent
+              - items
+            properties:
+              consent:
+                type: boolean
+              paper_context:
+                type: object
+                description: The paper's own title and abstract, sent as
+                  BACKGROUND for the research topic. The system prompt
+                  forbids using it as evidence for what an individual
+                  artifact does; both fields are clipped and redacted.
+                properties:
+                  title:
+                    type: string
+                  abstract:
+                    type: string
+              items:
+                type: array
+                minItems: 1
+                maxItems: 1
+                description: Exactly one candidate.
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    paths:
+                      type: array
+                      items:
+                        type: string
+                    inventory:
+                      type: object
+                      description: File kinds and counts for this candidate
+                        only — never the file list.
+                      properties:
+                        file_count:
+                          type: integer
+                        extensions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              extension:
+                                type: string
+                              count:
+                                type: integer
+                        sample_names:
+                          type: array
+                          items:
+                            type: string
+                    sources:
+                      type: array
+                      description: The candidate's `ai_sources`, echoed back
+                        from analyze-folder. Every entry is re-validated,
+                        re-redacted and re-bounded on the server, so a client
+                        cannot widen what travels. The enum below is a first
+                        gate only — the server additionally drops any type
+                        the candidate's own `kind` cannot carry (a Chart has
+                        no docstring; a Dataset has no function names), which
+                        a spec enum cannot express.
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - readme
+                              - docstring
+                              - python_symbols
+                              - comment_header
+                              - notebook_markdown
+                              - manifest
+                              - declarations
+                          path:
+                            type: string
+                          excerpt:
+                            type: string
+                          names:
+                            type: array
+                            items:
+                              type: string
+      responses:
+        200:
+          description: >-
+            Suggestions returned for the curator to review, OR a
+            deterministic abstention. When the candidate has no usable
+            source of a type its own record kind can carry, the server
+            answers with an empty `suggestions` object and the candidate id
+            in `no_suggestion`, WITHOUT reading the provider configuration,
+            touching the daily quota, or calling the provider — including on
+            a server where no API key is configured. Authentication, CSRF,
+            consent and the one-candidate rule still apply.
+        400:
+          description: Consent missing, or not exactly one candidate
+        401:
+          description: Authentication required
+        403:
+          description: CSRF token missing or invalid
+        429:
+          description: Daily per-user AI suggestion limit reached
+        502:
+          description: AI provider failed or answered unreadably
+        503:
+          description: AI descriptions are not configured on this server
+  /auth/microsoft:
+    get:
+      operationId: "project.auth.microsoft_login"
+      tags:
+        - "Authentication"
+      summary: "Starts Microsoft Entra (work/school) OIDC sign-in (identity-only scopes, PKCE)"
+      parameters:
+        - in: query
+          name: next
+          type: string
+          required: false
+          description: Same-origin path to return to after sign-in
+      responses:
+        302:
+          description: Redirect to the Microsoft account-selection screen
+        503:
+          description: Microsoft sign-in is not configured on this server
+  /auth/microsoft/callback:
+    get:
+      operationId: "project.auth.microsoft_callback"
+      tags:
+        - "Authentication"
+      summary: "Completes Microsoft Entra sign-in and stores the session user"
+      parameters:
+        - in: query
+          name: state
+          type: string
+          required: false
+        - in: query
+          name: code
+          type: string
+          required: false
+        - in: query
+          name: error
+          type: string
+          required: false
+      responses:
+        302:
+          description: Signed in; redirect back to the app
+        400:
+          description: Invalid state/nonce, missing code, or rejected identity token
+        503:
+          description: Microsoft sign-in is not configured on this server
+  /auth/github:
+    get:
+      operationId: "project.auth.github_login"
+      tags:
+        - "Authentication"
+      summary: "Starts GitHub OAuth sign-in (read:user + user:email scopes)"
+      parameters:
+        - in: query
+          name: next
+          type: string
+          required: false
+          description: Same-origin path to return to after sign-in
+      responses:
+        302:
+          description: Redirect to GitHub authorization page
+        503:
+          description: GitHub sign-in is not configured on this server
+  /auth/github/callback:
+    get:
+      operationId: "project.auth.github_callback"
+      tags:
+        - "Authentication"
+      summary: "Completes GitHub OAuth sign-in and stores the session user"
+      parameters:
+        - in: query
+          name: state
+          type: string
+          required: false
+        - in: query
+          name: code
+          type: string
+          required: false
+        - in: query
+          name: error
+          type: string
+          required: false
+      responses:
+        302:
+          description: Signed in; redirect back to the app
+        400:
+          description: Invalid state, missing code, or no verified email on the account
+        503:
+          description: GitHub sign-in is not configured on this server
+  /auth/register:
+    post:
+      operationId: "project.auth.local_register"
+      tags:
+        - "Authentication"
+      summary: "Create an email/password account and email a confirmation link"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: New account credentials
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              name:
+                type: string
+              affiliation:
+                type: string
+                maxLength: 300
+      responses:
+        200:
+          description: Account created (not signed in); confirmation link emailed
+        400:
+          description: Invalid email or password too short
+        409:
+          description: Email already registered and confirmed
+        503:
+          description: Email sign-up unavailable (no QRESP_PUBLIC_URL) or the email could not be sent
+  /auth/local-login:
+    post:
+      operationId: "project.auth.local_login"
+      tags:
+        - "Authentication"
+      summary: "Sign in with email and password"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Sign-in credentials
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Signed in
+        400:
+          description: Missing email or password
+        401:
+          description: Invalid email or password
+        403:
+          description: Email not confirmed yet; a new confirmation link is sent
+  /auth/verify-email:
+    post:
+      operationId: "project.auth.verify_email"
+      tags:
+        - "Authentication"
+      summary: "Confirm an email/password account and sign in"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Token from the emailed link and the account password
+          schema:
+            type: object
+            required:
+              - token
+              - password
+            properties:
+              token:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Email confirmed and signed in
+        400:
+          description: Link invalid or expired
+        401:
+          description: Incorrect password
+  /auth/me:
+    get:
+      operationId: "project.auth.me"
+      tags:
+        - "Authentication"
+      summary: "Returns the current session's authentication state"
+      responses:
+        200:
+          description: Authentication state returned
+  /auth/profile:
+    patch:
+      operationId: "project.auth.update_profile"
+      tags:
+        - "Authentication"
+      summary: "Update profile fields for the signed-in user"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                maxLength: 200
+              affiliation:
+                type: string
+                maxLength: 300
+              bio:
+                type: string
+                maxLength: 500
+              orcid_id:
+                type: string
+                maxLength: 40
+              google_scholar_url:
+                type: string
+                maxLength: 500
+              website_url:
+                type: string
+                maxLength: 500
+              avatar_b64:
+                type: string
+      responses:
+        200:
+          description: Profile updated
+        400:
+          description: Invalid request body
+        401:
+          description: Not authenticated
+  /auth/logout:
+    post:
+      operationId: "project.auth.logout"
+      tags:
+        - "Authentication"
+      summary: "Clears the authenticated user from the session"
+      responses:
+        200:
+          description: Logged out
+  /auth/dev-login:
+    post:
+      operationId: "project.auth.dev_login"
+      tags:
+        - "Authentication"
+      summary: "Development-only session login (off unless QRESP_ENABLE_DEV_LOGIN is set)"
+      parameters:
+        - in: body
+          name: credentials
+          description: Development user identity
+          schema:
+            type: object
+            required:
+              - email
+            properties:
+              email:
+                type: string
+              name:
+                type: string
+              is_admin:
+                type: boolean
+      responses:
+        200:
+          description: Logged in
+        400:
+          description: Invalid credentials payload
+        404:
+          description: Dev login is disabled
   /verify/{id}:
     get:
       operationId: "project.api.verify"

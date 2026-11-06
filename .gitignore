@@ -1,18 +1,13 @@
 venv/
 .idea/
-#web/papers/*
-#!web/papers/files_paper/data.json
-web/flask_session/
 flask_session/
-web/dist/
-web/project/__pycache__/
-web/build/
-web/qresp.egg-info/
+backend/dist/
+backend/build/
+*.egg-info/
 .cache/
-web/project/config_test.ini 
-web/project/tests/__pycache__/
+backend/project/config_test.ini
 
-Ignore Temp Files
+# Temp files
 PREVIEW_*
 PUBLISH_*
 
@@ -22,6 +17,9 @@ PUBLISH_*
 # Python
 __pycache__
 
+# Coverage data (every nose2 run rewrites it; was mistakenly tracked)
+.coverage
+
 # Pytest
 .pytest_cache
 
@@ -30,3 +28,24 @@ __pycache__
 *.crt
 *.key
 *.pem
+
+# Local implementation-planning notes (kept out of source control)
+docs/archive/implementation-prompts/
+docs/roadmap/ux-curation-explorer-implementation.md
+
+# Generated live external-evaluation runs. `raw-results.jsonl` for the full
+# public corpus is ~57 MB, well past the 200 kB pre-commit ceiling, and the
+# whole directory is a reproducible artifact of one sweep. Deliberately narrow:
+# it matches only `related-eval-external-*`, so earlier hand-rated
+# `related-eval-*` folders stay visible to git exactly as they are.
+related-eval-external-*/
+
+# Claude Code local config — developer-specific, not for source control
+CLAUDE.md
+.claude/settings.local.json
+
+# Secrets / local env overrides — never commit credentials
+.env
+.env.*
+# ...but the example template (no real secrets) should be committed
+!.env.*.example

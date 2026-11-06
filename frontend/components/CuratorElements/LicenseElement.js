@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import LicenseInfoForm from "../CuratorForms/LicenseInfoForm";
 import LicenseInfo from "../Paper/License";

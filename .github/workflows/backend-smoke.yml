@@ -1,0 +1,102 @@
+name: backend
+
+# Critical-path backend verification on every push.
+#
+# Uses the pinned lock file and mongomock (no real MongoDB needed).
+# Matrix: 3.11 = local dev baseline (lock provenance), 3.14 = Docker runtime.
+#
+# EXCLUDED from this run (kept in the full test suite, not run on every push):
+#   test_ai_review, test_assist_eval, test_related_eval   — eval benchmarks,
+#     slow by design (iterate over many labelled cases)
+#   test_related_research, test_related_cache,
+#   test_related_hardening                                — related-research
+#     subsystem; feature-level, not critical-path
+#   test_relatedness_quality, test_relatedness_neutrality,
+#   test_relatedness_provenance                          — algorithm detail
+#     tests; the core algorithm is covered by test_relatedness
+#   test_nginx_config                                     — infrastructure
+#   test_backfill_institution                             — one-time migration
+#   test_federation                                       — server-list feature
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  backend:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.14"]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('backend/requirements.lock.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+
+      - name: Dependency health check
+        run: python -m pip check
+
+      - name: Boot smoke — GET /api/healthz
+        run: python -c "import project; r = project.connexionapp.test_client().get('/api/healthz'); assert r.status_code == 200, r.status_code; print('boot OK:', r.status_code)"
+
+      - name: Critical path tests
+        run: |
+          python -m nose2 -v \
+            project.tests.test_account \
+            project.tests.test_admin_papers \
+            project.tests.test_api_endpoints \
+            project.tests.test_artifact_fields \
+            project.tests.test_assistant_scope \
+            project.tests.test_auth \
+            project.tests.test_autocurate \
+            project.tests.test_chart_image_options_route \
+            project.tests.test_chart_plan \
+            project.tests.test_curation \
+            project.tests.test_curation_ai \
+            project.tests.test_curation_evidence \
+            project.tests.test_deactivate \
+            project.tests.test_delete \
+            project.tests.test_dependencies \
+            project.tests.test_drafts \
+            project.tests.test_edit_flow \
+            project.tests.test_editors \
+            project.tests.test_feedback \
+            project.tests.test_folder_ai_and_images \
+            project.tests.test_google_auth \
+            project.tests.test_keyword_assist \
+            project.tests.test_latex \
+            project.tests.test_local_accounts \
+            project.tests.test_locate_folder \
+            project.tests.test_manuscript_import \
+            project.tests.test_microsoft \
+            project.tests.test_ownership_rules \
+            project.tests.test_paperDAO \
+            project.tests.test_permissions \
+            project.tests.test_private \
+            project.tests.test_paper_curator \
+            project.tests.test_publish_validation \
+            project.tests.test_relatedness \
+            project.tests.test_repoanalysis \
+            project.tests.test_update_paper \
+            project.tests.test_verify \
+            project.tests.test_workflow_graph

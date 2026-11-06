@@ -1,5 +1,6 @@
-from project import app
+from project import connexionapp
 
 if __name__ == "__main__":
-    # Flask Auto-Reload
-    app.run(host='0.0.0.0', port=80)
+    # Connexion 3 apps are ASGI: run() serves through uvicorn, including the
+    # validation/swagger-ui middleware (a bare Flask dev server would skip it).
+    connexionapp.run(host='0.0.0.0', port=80)

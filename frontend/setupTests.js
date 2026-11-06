@@ -1,4 +1,7 @@
-import Enzyme from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+// React Testing Library matchers (replaces the Enzyme adapter setup).
+import "@testing-library/jest-dom";
 
-Enzyme.configure({ adapter: new Adapter() });
+// "Close every section after a load" is a module-level mode; a test that
+// loads a draft must not leave the next test's sections closed.
+import { resetSectionCollapse } from "./Utils/sectionCollapse";
+afterEach(() => resetSectionCollapse());

@@ -1,5 +1,7 @@
 import warnings
 import unittest
+import mongoengine
+import mongomock
 from project.paperdao import PaperDAO, MongoDBConnection, Paper
 import os
 import json
@@ -18,10 +20,11 @@ class TestPaperDAO(unittest.TestCase):
         """
         Sets up database to test
         """
-        MongoDBConnection.getDB(hostname='mongomock://localhost', port=int('27017'),
-                                username=None, password=None,
-                                dbname='mongoenginetest', collection='paper',
-                                isssl='No')
+        # MongoEngine >=0.27 removed the "mongomock://" URI; connect an in-memory
+        # mongomock directly via mongo_client_class (modern API).
+        mongoengine.disconnect_all()
+        mongoengine.connect('mongoenginetest',
+                            mongo_client_class=mongomock.MongoClient)
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         with open(os.path.join(__location__, 'data.json')) as f:
@@ -31,10 +34,11 @@ class TestPaperDAO(unittest.TestCase):
 
     def tearDown(self):
         """
-        Sets up database to test
+        Tears down the test database
         """
         paper = Paper()
         paper.drop_collection()
+        mongoengine.disconnect_all()
 
     def test_getCollectionList(self):
         """
@@ -42,7 +46,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allcollectionlist = dao.getCollectionList()
-        self.assertEquals(1, len(list(allcollectionlist)))
+        self.assertEqual(1, len(list(allcollectionlist)))
 
     def test_getPublicationList(self):
         """
@@ -50,15 +54,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allpublicationlist = dao.getPublicationList()
-        self.assertEquals(1, len(list(allpublicationlist)))
-
-    # def test_getAuthorList(self):
-    #     """
-    #     Tests for authors
-    #     """
-    #     dao = PaperDAO()
-    #     allauthorslist = dao.getAuthorList()
-    #     self.assertEquals(0,len(list(allauthorslist)))
+        self.assertEqual(1, len(list(allpublicationlist)))
 
     def test_getAllPapers(self):
         """
@@ -66,7 +62,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allpapers = dao.getAllPapers()
-        self.assertEquals(1, len(list(allpapers)))
+        self.assertEqual(1, len(list(allpapers)))
 
     def test_getAllFilteredSearchObjects(self):
         """
@@ -74,7 +70,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects()
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForSearchWord(self):
         """
@@ -82,7 +78,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(searchWord='photo')
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForTitle(self):
         """
@@ -90,7 +86,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(paperTitle='photo')
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForDOI(self):
         """
@@ -99,7 +95,7 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(
             doi='10.1021/jacs.6b00225')
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForTags(self):
         """
@@ -107,7 +103,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(tags=['DFT'])
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForCollections(self):
         """
@@ -116,7 +112,7 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(
             collectionList=['MICCOM'])
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForAuthors(self):
         """
@@ -124,7 +120,7 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(authorsList=[])
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getFilteredPaperObjectsForPublication(self):
         """
@@ -133,7 +129,7 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(
             publicationList=['Journal of the American Chemical Society'])
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_getAllSearchObjects(self):
         """
@@ -141,19 +137,28 @@ class TestPaperDAO(unittest.TestCase):
         """
         dao = PaperDAO()
         allSearchObjects = dao.getAllSearchObjects()
-        self.assertEquals(1, len(list(allSearchObjects)))
+        self.assertEqual(1, len(list(allSearchObjects)))
 
     def test_insertIntoPapers(self):
         """
-        Insert Tests for all search Objects
+        A second record of an already-curated paper (same title, same DOI)
+        is a new record beside the first -- never refused, never a replacement.
         """
         dao = PaperDAO()
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         with open(os.path.join(__location__, 'data.json')) as f:
             paperdata = json.load(f)
+        before = dao.getAllFilteredSearchObjects(
+            paperTitle=paperdata['reference']['title'])
         paperid = dao.insertIntoPapers(paperdata)
-        self.assertIsNone(paperid)
+        self.assertIsNotNone(paperid)
+        after = dao.getAllFilteredSearchObjects(
+            paperTitle=paperdata['reference']['title'])
+        self.assertEqual(len(before) + 1, len(after))
+        self.assertIn(paperid, [p['_Search__id'] for p in after])
+        for p in before:
+            self.assertIn(p['_Search__id'], [q['_Search__id'] for q in after])
 
     def test_insertDOI(self):
         """
@@ -162,7 +167,7 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(tags=['DFT'])
         paper = dao.insertDOI(allSearchObjects[0]['_Search__id'], '123')
-        self.assertEquals(1, paper)
+        self.assertEqual(1, paper)
 
     def test_getPaperDetails(self):
         """
@@ -171,7 +176,7 @@ class TestPaperDAO(unittest.TestCase):
         dao = PaperDAO()
         allSearchObjects = dao.getAllFilteredSearchObjects(tags=['DFT'])
         paperDetails = dao.getPaperDetails(allSearchObjects[0]['_Search__id'])
-        self.assertEquals(
+        self.assertEqual(
             allSearchObjects[0]['_Search__id'], paperDetails['id'])
 
     def test_getWorkflowDetails(self):
@@ -182,8 +187,81 @@ class TestPaperDAO(unittest.TestCase):
         allSearchObjects = dao.getAllFilteredSearchObjects(tags=['DFT'])
         workflowdetails = dao.getWorkflowDetails(
             allSearchObjects[0]['_Search__id'])
-        self.assertEquals(
+        self.assertEqual(
             workflowdetails['paperTitle'], allSearchObjects[0]['_Search__title'])
+
+    def test_search_institution_is_empty_on_a_legacy_record(self):
+        """`data.json` predates the `institution` field. A record published
+        before it existed must still load and search without a migration --
+        it simply carries no institution badge."""
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        self.assertEqual("", allSearchObjects[0]["_Search__institution"])
+
+    def test_paper_details_institution_is_empty_on_a_legacy_record(self):
+        dao = PaperDAO()
+        allSearchObjects = dao.getAllFilteredSearchObjects()
+        paperDetails = dao.getPaperDetails(
+            allSearchObjects[0]['_Search__id'])
+        self.assertEqual("", paperDetails['institution'])
+
+    def test_institution_round_trips_through_search_and_details(self):
+        """A NEW record carrying an optional institution reports the exact
+        curator-entered value from both public read paths -- never
+        abbreviated, never inferred from anything else on the record."""
+        dao = PaperDAO()
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        with open(os.path.join(__location__, 'data.json')) as f:
+            paperdata = json.load(f)
+        paperdata['reference']['title'] = "A distinct title for institution"
+        paperdata['institution'] = "University of Chicago"
+        paperid = dao.insertIntoPapers(paperdata)
+        self.assertIsNotNone(paperid)
+
+        allSearchObjects = dao.getAllFilteredSearchObjects(
+            paperTitle='A distinct title for institution')
+        self.assertEqual(1, len(allSearchObjects))
+        self.assertEqual("University of Chicago",
+                         allSearchObjects[0]["_Search__institution"])
+
+        paperDetails = dao.getPaperDetails(
+            allSearchObjects[0]['_Search__id'])
+        self.assertEqual("University of Chicago", paperDetails['institution'])
+
+    def test_the_curator_affiliation_is_not_the_record_institution(self):
+        """Two fields, two levels, two meanings.
+
+        `info.insertedBy.affiliation` is where the PERSON doing the curating
+        works -- a `Person` attribute, shared with PIs and authors.
+        `institution` is a `Paper` attribute about the RECORD. A curator at
+        Duke can perfectly well curate a paper from UChicago, so neither may
+        ever be filled in from the other.
+        """
+        dao = PaperDAO()
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        with open(os.path.join(__location__, 'data.json')) as f:
+            paperdata = json.load(f)
+        paperdata['reference']['title'] = "Affiliation is not institution"
+        paperdata['info']['insertedBy']['affiliation'] = "Duke University"
+        # Deliberately NOT setting `institution`.
+        paperid = dao.insertIntoPapers(paperdata)
+        self.assertIsNotNone(paperid)
+
+        allSearchObjects = dao.getAllFilteredSearchObjects(
+            paperTitle='Affiliation is not institution')
+        self.assertEqual(1, len(allSearchObjects))
+        # A curator WITH an affiliation does not give the record one.
+        self.assertEqual("", allSearchObjects[0]["_Search__institution"])
+
+        details = dao.getPaperDetails(allSearchObjects[0]['_Search__id'])
+        self.assertEqual("", details['institution'])
+        # ...and the curator's own affiliation is untouched by any of this.
+        # `PaperDetails` flattens insertedBy, so it is a sibling key here --
+        # which is exactly why the two must not share a name or a value.
+        self.assertEqual("Duke University", details['affiliation'])
+        self.assertNotEqual(details['affiliation'], details['institution'])
 
     def test_getWorkflowForChartDetails(self):
         """
@@ -196,7 +274,7 @@ class TestPaperDAO(unittest.TestCase):
         chartid = paperDetails['charts'][0].id
         workflowchartdetails = dao.getWorkflowForChartDetails(
             paperDetails['id'], chartid)
-        self.assertEquals(
+        self.assertEqual(
             workflowchartdetails['paperTitle'], allSearchObjects[0]['_Search__title'])
 
 

@@ -3,21 +3,21 @@ import PropTypes from "prop-types";
 import Drawer from "../drawer";
 import LabelValue from "../labelvalue";
 
-import { Box } from "@material-ui/core";
+import { Box } from "@mui/material";
 
 const PaperInfo = ({ paperInfo, editor, defaultOpen }) => {
   const { PIs, collections, tags, notebookFile } = paperInfo;
 
   return (
     <Drawer
-      heading="Paper Information"
+      heading="Qresp Curation Information"
       editor={editor}
       defaultOpen={defaultOpen}
     >
-      <Box my={1}>
-        <LabelValue label="Principal Investigators: " value={PIs} />
+      <Box sx={{ my: 1 }}>
+        <LabelValue label="Principal Investigators" value={PIs} />
         <LabelValue label="Collections" value={collections.join(", ")} />
-        <LabelValue label="Tags" value={tags.join(", ")} />
+        <LabelValue label="Keywords" value={tags.join(", ")} />
         {notebookFile && (
           <LabelValue label="Main Notebook File" value={notebookFile} />
         )}

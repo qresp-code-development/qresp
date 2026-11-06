@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 
-import { Box } from "@material-ui/core";
-import { Pagination } from "@material-ui/lab";
+import { Box } from "@mui/material";
+import { Pagination } from "@mui/material";
 
 const TablePaginationActions = (props) => {
   const { count, page, rowsPerPage, onChangePage } = props;
@@ -11,7 +11,7 @@ const TablePaginationActions = (props) => {
   };
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box sx={{ display: "flex", alignItems: "center" }}>
       <Pagination
         page={page + 1}
         count={Math.ceil(count / rowsPerPage)}

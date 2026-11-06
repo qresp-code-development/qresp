@@ -1,0 +1,888 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "The Qresp JSON Schema",
+  "required": [
+    "PIs",
+    "charts",
+    "collections",
+    "info",
+    "reference",
+    "schema",
+    "tags",
+    "license"
+  ],
+  "properties": {
+    "PIs": {
+      "$id": "#/properties/PIs",
+      "type": ["array"],
+      "minItems": 1,
+      "title": "The Pis Schema",
+      "items": {
+        "$id": "#/properties/PIs/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "required": ["firstName", "lastName"],
+        "properties": {
+          "firstName": {
+            "$id": "#/properties/PIs/items/properties/firstName",
+            "type": ["string"],
+            "title": "The Firstname Schema",
+            "default": "",
+            "examples": ["John"],
+            "minLength": 1
+          },
+          "lastName": {
+            "$id": "#/properties/PIs/items/properties/lastName",
+            "type": ["string"],
+            "title": "The Lastname Schema",
+            "default": "",
+            "examples": ["Doe"],
+            "minLength": 1
+          },
+          "middleName": {
+            "$id": "#/properties/PIs/items/properties/middleName",
+            "type": ["string", "null"],
+            "title": "The Middlename Schema",
+            "default": null,
+            "examples": [null]
+          }
+        }
+      }
+    },
+    "charts": {
+      "$id": "#/properties/charts",
+      "type": ["array"],
+      "minItems": 1,
+      "title": "The Charts Schema",
+      "items": {
+        "$id": "#/properties/charts/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "required": ["caption", "id", "imageFile", "number", "properties"],
+        "properties": {
+          "caption": {
+            "$id": "#/properties/charts/items/properties/caption",
+            "type": ["string"],
+            "title": "The Caption Schema",
+            "default": "",
+            "examples": [
+              " Experimental PE spectrum of a 1 M solution of NaCl and molecular orbitals of a single water molecule corresponding to specific bands in the spectrum. The background due to secondary electrons has been subtracted following ref 11. The sharp peak at 12.6 eV arises from ionization of the 1b1 orbital of gas-phase water."
+            ],
+            "pattern": "^(.*)$"
+          },
+          "extraChartFields": {
+            "$id": "#/properties/charts/items/properties/extraChartFields",
+            "type": ["array", "null"],
+            "title": "The Extrachartfields Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/charts/items/properties/extraChartFields/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "properties": {
+                "extrakey": {
+                  "$id": "#/properties/charts/items/properties/extraChartFields/items/properties/extrakey",
+                  "type": ["string", "null"],
+                  "title": "The Extrakey Schema",
+                  "default": null,
+                  "examples": [null]
+                },
+                "extravalue": {
+                  "$id": "#/properties/charts/items/properties/extraChartFields/items/properties/extravalue",
+                  "type": ["string", "null"],
+                  "title": "The Extravalue Schema",
+                  "default": null,
+                  "examples": [null]
+                }
+              }
+            }
+          },
+          "files": {
+            "$id": "#/properties/charts/items/properties/files",
+            "type": ["array", "null"],
+            "title": "The Files Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/charts/items/properties/files/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["charts/figure1/winter_exp.txt"],
+              "pattern": "^(.*)$"
+            }
+          },
+          "id": {
+            "$id": "#/properties/charts/items/properties/id",
+            "type": ["string", "null"],
+            "title": "The Id Schema",
+            "default": "",
+            "examples": ["c0"],
+            "pattern": "^(.*)$"
+          },
+          "imageFile": {
+            "$id": "#/properties/charts/items/properties/imageFile",
+            "type": ["string"],
+            "title": "The Imagefile Schema",
+            "default": "",
+            "examples": ["charts/figure1/fig1.png"],
+            "pattern": "^(.*)$"
+          },
+          "notebookFile": {
+            "$id": "#/properties/charts/items/properties/notebookFile",
+            "type": ["string", "null"],
+            "title": "The Notebookfile Schema",
+            "default": "",
+            "examples": ["charts/figure1/plot.ipynb"],
+            "pattern": "^(.*)$"
+          },
+          "number": {
+            "$id": "#/properties/charts/items/properties/number",
+            "type": ["string"],
+            "title": "The Number Schema",
+            "default": "",
+            "examples": ["1"],
+            "pattern": "^(.*)$"
+          },
+          "properties": {
+            "$id": "#/properties/charts/items/properties/properties",
+            "type": ["array"],
+            "title": "The Properties Schema",
+            "items": {
+              "$id": "#/properties/charts/items/properties/properties/items",
+              "type": ["string"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": [
+                "electron binding energy",
+                "photo-electron spectrum"
+              ],
+              "pattern": "^(.*)$"
+            }
+          }
+        }
+      }
+    },
+    "collections": {
+      "$id": "#/properties/collections",
+      "type": ["array"],
+      "title": "The Collections Schema",
+      "items": {
+        "$id": "#/properties/collections/items",
+        "type": ["string"],
+        "title": "The Items Schema",
+        "default": "",
+        "examples": ["MICCoM"],
+        "pattern": "^(.*)$"
+      }
+    },
+    "datasets": {
+      "$id": "#/properties/datasets",
+      "type": ["array", "null"],
+      "minItems": 1,
+      "title": "The Datasets Schema",
+      "items": {
+        "$id": "#/properties/datasets/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "properties": {
+          "URLs": {
+            "$id": "#/properties/datasets/items/properties/URLs",
+            "type": ["array", "null"],
+            "title": "The Urls Schema",
+            "items": {
+              "$id": "#/properties/collections/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["www.example.com"],
+              "pattern": "^(.*)$"
+            }
+          },
+          "extraDatasetFields": {
+            "$id": "#/properties/datasets/items/properties/extraDatasetFields",
+            "type": ["array", "null"],
+            "title": "The Extradatasetfields Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/datasets/items/properties/extraDatasetFields/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "properties": {
+                "extrakey": {
+                  "$id": "#/properties/datasets/items/properties/extraDatasetFields/items/properties/extrakey",
+                  "type": ["string", "null"],
+                  "title": "The Extrakey Schema",
+                  "default": null,
+                  "examples": [null]
+                },
+                "extravalue": {
+                  "$id": "#/properties/datasets/items/properties/extraDatasetFields/items/properties/extravalue",
+                  "type": ["string", "null"],
+                  "title": "The Extravalue Schema",
+                  "default": null,
+                  "examples": [null]
+                }
+              }
+            }
+          },
+          "files": {
+            "$id": "#/properties/datasets/items/properties/files",
+            "type": ["array", "null"],
+            "title": "The Files Schema",
+            "items": {
+              "$id": "#/properties/datasets/items/properties/files/items",
+              "type": ["string"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["charts/figure1"],
+              "pattern": "^(.*)$"
+            }
+          },
+          "id": {
+            "$id": "#/properties/datasets/items/properties/id",
+            "type": ["string", "null"],
+            "title": "The Id Schema",
+            "default": "",
+            "examples": ["d0"],
+            "pattern": "^(.*)$"
+          },
+          "readme": {
+            "$id": "#/properties/datasets/items/properties/readme",
+            "type": ["string", "null"],
+            "title": "The Readme Schema",
+            "default": "",
+            "examples": [
+              "Processed experimental spectrum from Winters and Siedel and orbital image files -- processing of experimental data unknown"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "required": ["files", "id"]
+      }
+    },
+    "heads": {
+      "$id": "#/properties/heads",
+      "type": ["array", "null"],
+      "title": "The Heads Schema",
+      "default": null,
+      "items": {
+        "$id": "#/properties/heads/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "properties": {
+          "URLs": {
+            "$id": "#/properties/heads/items/properties/URLs",
+            "type": ["array", "null"],
+            "title": "The Urls Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/heads/items/properties/URLs/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": [""],
+              "pattern": "^(.*)$"
+            }
+          },
+          "id": {
+            "$id": "#/properties/heads/items/properties/id",
+            "type": ["string", "null"],
+            "title": "The Id Schema",
+            "default": "",
+            "examples": ["h0"],
+            "pattern": "^(.*)$"
+          },
+          "readme": {
+            "$id": "#/properties/heads/items/properties/readme",
+            "type": ["string", "null"],
+            "title": "The Readme Schema",
+            "default": "",
+            "examples": ["Experimental setup info"],
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    },
+    "info": {
+      "$id": "#/properties/info",
+      "type": "object",
+      "title": "The Info Schema",
+      "required": ["ProjectName", "insertedBy"],
+      "properties": {
+        "ProjectName": {
+          "$id": "#/properties/info/properties/ProjectName",
+          "type": ["string"],
+          "title": "The Projectname Schema",
+          "default": "",
+          "examples": ["jacs.6b00225"],
+          "pattern": "^(.*)$"
+        },
+        "doi": {
+          "$id": "#/properties/info/properties/doi",
+          "type": ["string", "null"],
+          "title": "The Doi Schema",
+          "default": null,
+          "examples": [null]
+        },
+        "downloadPath": {
+          "$id": "#/properties/info/properties/downloadPath",
+          "type": ["string", "null"],
+          "title": "The Downloadpath Schema",
+          "default": "",
+          "examples": [
+            "https://www.globus.org/app/transfer?origin_id=72277ed4-1ad3-11e7-bbe1-22000b9a448b&origin_path=jacs.6b00225"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "fileServerPath": {
+          "$id": "#/properties/info/properties/fileServerPath",
+          "type": ["string", "null"],
+          "title": "The Fileserverpath Schema",
+          "default": "",
+          "examples": ["http://notebook.rcc.uchicago.edu/files/jacs.6b00225"],
+          "pattern": "^(.*)$"
+        },
+        "gitPath": {
+          "$id": "#/properties/info/properties/gitPath",
+          "type": ["string", "null"],
+          "title": "The Gitpath Schema",
+          "default": null,
+          "examples": [null]
+        },
+        "insertedBy": {
+          "$id": "#/properties/info/properties/insertedBy",
+          "type": "object",
+          "title": "The Insertedby Schema",
+          "properties": {
+            "affiliation": {
+              "$id": "#/properties/info/properties/insertedBy/properties/affiliation",
+              "type": ["string", "null"],
+              "title": "The Affiliation Schema",
+              "default": "",
+              "examples": [""],
+              "pattern": "^(.*)$"
+            },
+            "emailId": {
+              "$id": "#/properties/info/properties/insertedBy/properties/emailId",
+              "type": ["string", "null"],
+              "title": "The Emailid Schema",
+              "default": "",
+              "examples": [""],
+              "pattern": "^(.*)$"
+            },
+            "firstName": {
+              "$id": "#/properties/info/properties/insertedBy/properties/firstName",
+              "type": ["string"],
+              "title": "The Firstname Schema",
+              "default": "",
+              "examples": ["Jonathan"],
+              "pattern": "^(.*)$"
+            },
+            "lastName": {
+              "$id": "#/properties/info/properties/insertedBy/properties/lastName",
+              "type": ["string"],
+              "title": "The Lastname Schema",
+              "default": "",
+              "examples": ["Skone"],
+              "pattern": "^(.*)$"
+            },
+            "middleName": {
+              "$id": "#/properties/info/properties/insertedBy/properties/middleName",
+              "type": ["string", "null"],
+              "title": "The Middlename Schema",
+              "default": "",
+              "examples": ["H."],
+              "pattern": "^(.*)$"
+            }
+          },
+          "required": ["firstName", "lastName", "emailId"]
+        },
+        "notebookFile": {
+          "$id": "#/properties/info/properties/notebookFile",
+          "type": ["string", "null"],
+          "title": "The Notebookfile Schema",
+          "default": "",
+          "examples": ["Main.ipynb"],
+          "pattern": "^(.*)$"
+        },
+        "notebookPath": {
+          "$id": "#/properties/info/properties/notebookPath",
+          "type": ["string", "null"],
+          "title": "The Notebookpath Schema",
+          "default": "",
+          "examples": [
+            "http://notebook.rcc.uchicago.edu/notebooks/jacs.6b00225"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "timeStamp": {
+          "$id": "#/properties/info/properties/timeStamp",
+          "type": ["string", "null"],
+          "title": "The Timestamp Schema",
+          "default": "",
+          "examples": ["2018-12-11 11:46:51"],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "reference": {
+      "$id": "#/properties/reference",
+      "type": "object",
+      "title": "The Reference Schema",
+      "required": [
+        "DOI",
+        "authors",
+        "kind",
+        "publishedAbstract",
+        "title",
+        "year"
+      ],
+      "properties": {
+        "DOI": {
+          "$id": "#/properties/reference/properties/DOI",
+          "type": ["string"],
+          "title": "The Doi Schema",
+          "default": "",
+          "examples": ["10.1021/jacs.6b00225"],
+          "pattern": "^(.*)$"
+        },
+        "URLs": {
+          "$id": "#/properties/reference/properties/URLs",
+          "type": ["string", "null"],
+          "title": "The Urls Schema",
+          "default": "",
+          "examples": ["www.doi.org/123456"],
+          "pattern": "^(.*)$"
+        },
+        "authors": {
+          "$id": "#/properties/reference/properties/authors",
+          "type": ["array", "null"],
+          "title": "The Authors Schema",
+          "items": {
+            "$id": "#/properties/reference/properties/authors/items",
+            "type": "object",
+            "title": "The Items Schema",
+            "required": ["firstName", "lastName"],
+            "properties": {
+              "firstName": {
+                "$id": "#/properties/reference/properties/authors/items/properties/firstName",
+                "type": ["string", "null"],
+                "title": "The Firstname Schema",
+                "default": "",
+                "examples": ["John"],
+                "pattern": "^(.*)$"
+              },
+              "lastName": {
+                "$id": "#/properties/reference/properties/authors/items/properties/lastName",
+                "type": ["string", "null"],
+                "title": "The Lastname Schema",
+                "default": "",
+                "examples": ["Doe"],
+                "pattern": "^(.*)$"
+              },
+              "middleName": {
+                "$id": "#/properties/reference/properties/authors/items/properties/middleName",
+                "type": ["string", "null"],
+                "title": "The Middlename Schema",
+                "default": null,
+                "examples": [null]
+              }
+            }
+          }
+        },
+        "journal": {
+          "$id": "#/properties/reference/properties/journal",
+          "type": "object",
+          "title": "The Journal Schema",
+          "default": null,
+          "properties": {
+            "abbrevName": {
+              "$id": "#/properties/reference/properties/journal/properties/abbrevName",
+              "type": ["string", "null"],
+              "title": "The Abbrevname Schema",
+              "default": "",
+              "examples": ["JACS Comm."],
+              "pattern": "^(.*)$"
+            },
+            "fullName": {
+              "$id": "#/properties/reference/properties/journal/properties/fullName",
+              "type": ["string", "null"],
+              "title": "The Fullname Schema",
+              "default": "",
+              "examples": ["Journal of the American Chemical Society"],
+              "pattern": "^(.*)$"
+            }
+          }
+        },
+        "kind": {
+          "$id": "#/properties/reference/properties/kind",
+          "type": ["string", "null"],
+          "title": "The Kind Schema",
+          "default": "",
+          "examples": ["article"],
+          "pattern": "^(.*)$"
+        },
+        "page": {
+          "$id": "#/properties/reference/properties/page",
+          "type": ["string", "null"],
+          "title": "The Page Schema",
+          "default": "",
+          "examples": ["6912"],
+          "pattern": "^(.*)$"
+        },
+        "publishedAbstract": {
+          "$id": "#/properties/reference/properties/publishedAbstract",
+          "type": ["string"],
+          "title": "The Publishedabstract Schema",
+          "default": "",
+          "examples": ["Abstract"],
+          "pattern": "^(.*)$"
+        },
+        "school": {
+          "$id": "#/properties/reference/properties/school",
+          "type": ["string", "null"],
+          "title": "The School Schema",
+          "default": null,
+          "examples": [null]
+        },
+        "title": {
+          "$id": "#/properties/reference/properties/title",
+          "type": ["string"],
+          "title": "The Title Schema",
+          "default": "",
+          "examples": [
+            "Photoelectron spectra of aqueous solutions from first principle"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "volume": {
+          "$id": "#/properties/reference/properties/volume",
+          "type": ["string", "null"],
+          "title": "The Volume Schema",
+          "default": "",
+          "examples": ["138"],
+          "pattern": "^(.*)$"
+        },
+        "year": {
+          "$id": "#/properties/reference/properties/year",
+          "type": "integer",
+          "title": "The Year Schema",
+          "default": 0,
+          "examples": [2016]
+        }
+      }
+    },
+    "documentation": {
+      "$id": "#/properties/documentation",
+      "type": "object",
+      "title": "The Documentation Schema",
+      "properties": {
+        "readme": {
+          "$id": "#/properties/documentation/properties/readme",
+          "type": ["string", "null"],
+          "title": "The readme Schema",
+          "default": "",
+          "examples": ["This is additional information about my paper."],
+          "pattern": "^(.*)$"
+        }
+      }
+    },
+    "license": {
+      "$id": "#/properties/license",
+      "type": "string",
+      "title": "The License Schema",
+      "default": "",
+      "description": "The CC license for the data being made available"
+    },
+    "schema": {
+      "$id": "#/properties/schema",
+      "type": ["string"],
+      "title": "The Schema Schema",
+      "default": "",
+      "examples": ["http://paperstack.uchicago.edu/v1_2.json"],
+      "pattern": "^(.*)$"
+    },
+    "scripts": {
+      "$id": "#/properties/scripts",
+      "type": ["array", "null"],
+      "title": "The Scripts Schema",
+      "default": null,
+      "items": {
+        "$id": "#/properties/scripts/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "properties": {
+          "URLs": {
+            "$id": "#/properties/scripts/items/properties/URLs",
+            "type": ["array", "null"],
+            "title": "The Urls Schema",
+            "items": {
+              "$id": "#/properties/scripts/items/properties/URLs/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["www.example.com"],
+              "pattern": "^(.*)$"
+            }
+          },
+          "extraScriptFields": {
+            "$id": "#/properties/scripts/items/properties/extraScriptFields",
+            "type": ["array", "null"],
+            "title": "The Extrascriptfields Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/scripts/items/properties/extraScriptFields/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "properties": {
+                "extrakey": {
+                  "$id": "#/properties/scripts/items/properties/extraScriptFields/items/properties/extrakey",
+                  "type": ["string", "null"],
+                  "title": "The Extrakey Schema",
+                  "default": null,
+                  "examples": [null]
+                },
+                "extravalue": {
+                  "$id": "#/properties/scripts/items/properties/extraScriptFields/items/properties/extravalue",
+                  "type": ["string", "null"],
+                  "title": "The Extravalue Schema",
+                  "default": null,
+                  "examples": [null]
+                }
+              }
+            }
+          },
+          "files": {
+            "$id": "#/properties/scripts/items/properties/files",
+            "type": ["array", "null"],
+            "title": "The Files Schema",
+            "items": {
+              "$id": "#/properties/scripts/items/properties/files/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["charts/figure1/pes.plt"],
+              "pattern": "^(.*)$"
+            }
+          },
+          "id": {
+            "$id": "#/properties/scripts/items/properties/id",
+            "type": ["string", "null"],
+            "title": "The Id Schema",
+            "default": "",
+            "examples": ["s0"],
+            "pattern": "^(.*)$"
+          },
+          "readme": {
+            "$id": "#/properties/scripts/items/properties/readme",
+            "type": ["string", "null"],
+            "title": "The Readme Schema",
+            "default": "",
+            "examples": [
+              "gnuplot script to generate experimental PES plot of water overlayed with the orbitals for each DOS peak"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "required": ["files", "id"]
+      }
+    },
+    "tags": {
+      "$id": "#/properties/tags",
+      "type": ["array"],
+      "title": "The Tags Schema",
+      "items": {
+        "$id": "#/properties/tags/items",
+        "type": ["string"],
+        "title": "The Items Schema",
+        "default": "",
+        "examples": ["DFT", "MBPT"],
+        "pattern": "^(.*)$"
+      }
+    },
+    "tools": {
+      "$id": "#/properties/tools",
+      "type": ["array", "null"],
+      "title": "The Tools Schema",
+      "default": null,
+      "items": {
+        "$id": "#/properties/tools/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "properties": {
+          "URLs": {
+            "$id": "#/properties/tools/items/properties/URLs",
+            "type": ["array", "null"],
+            "title": "The Urls Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/tools/items/properties/URLs/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": [
+                "https://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1648&typoid"
+              ],
+              "pattern": "^(.*)$"
+            }
+          },
+          "description": {
+            "$id": "#/properties/tools/items/properties/description",
+            "type": ["string", "null"],
+            "title": "The Description Schema",
+            "default": null,
+            "examples": [null]
+          },
+          "extraToolFields": {
+            "$id": "#/properties/tools/items/properties/extraToolFields",
+            "type": ["array", "null"],
+            "title": "The Extratoolfields Schema",
+            "default": null,
+            "items": {
+              "$id": "#/properties/tools/items/properties/extraToolFields/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "properties": {
+                "extrakey": {
+                  "$id": "#/properties/tools/items/properties/extraToolFields/items/properties/extrakey",
+                  "type": ["string", "null"],
+                  "title": "The Extrakey Schema",
+                  "default": null,
+                  "examples": [null]
+                },
+                "extravalue": {
+                  "$id": "#/properties/tools/items/properties/extraToolFields/items/properties/extravalue",
+                  "type": ["string", "null"],
+                  "title": "The Extravalue Schema",
+                  "default": null,
+                  "examples": [null]
+                }
+              }
+            }
+          },
+          "facilityName": {
+            "$id": "#/properties/tools/items/properties/facilityName",
+            "type": ["string", "null"],
+            "title": "The Facilityname Schema",
+            "default": "",
+            "examples": ["Helmholtz-Zentrum Berlin"],
+            "pattern": "^(.*)$"
+          },
+          "id": {
+            "$id": "#/properties/tools/items/properties/id",
+            "type": ["string", "null"],
+            "title": "The Id Schema",
+            "default": "",
+            "examples": ["t0"],
+            "pattern": "^(.*)$"
+          },
+          "kind": {
+            "$id": "#/properties/tools/items/properties/kind",
+            "type": ["string", "null"],
+            "title": "The Kind Schema",
+            "default": "",
+            "examples": ["experiment"],
+            "pattern": "^(.*)$"
+          },
+          "measurement": {
+            "$id": "#/properties/tools/items/properties/measurement",
+            "type": ["string", "null"],
+            "title": "The Measurement Schema",
+            "default": "",
+            "examples": ["soft X-ray Photoemission"],
+            "pattern": "^(.*)$"
+          },
+          "packageName": {
+            "$id": "#/properties/tools/items/properties/packageName",
+            "type": ["string", "null"],
+            "title": "The Packagename Schema",
+            "default": null,
+            "examples": [null]
+          },
+          "patches": {
+            "$id": "#/properties/tools/items/properties/patches",
+            "type": ["array", "null"],
+            "title": "The Patches Schema",
+            "items": {
+              "$id": "#/properties/tools/items/properties/patches/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": [
+                "https://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1648&typoid"
+              ],
+              "pattern": "^(.*)$"
+            }
+          },
+          "programName": {
+            "$id": "#/properties/tools/items/properties/programName",
+            "type": ["string", "null"],
+            "title": "The Programname Schema",
+            "default": null,
+            "examples": [null]
+          },
+          "version": {
+            "$id": "#/properties/tools/items/properties/version",
+            "type": ["string", "null"],
+            "title": "The Version Schema",
+            "default": null,
+            "examples": [null]
+          }
+        }
+      }
+    },
+    "version": {
+      "$id": "#/properties/version",
+      "type": ["integer", "null"],
+      "title": "The Version Schema",
+      "default": 0,
+      "examples": [2]
+    },
+    "versions": {
+      "$id": "#/properties/versions",
+      "type": ["array", "null"],
+      "title": "The Versions Schema",
+      "default": null
+    },
+    "workflow": {
+      "$id": "#/properties/workflow",
+      "type": ["object", "null"],
+      "title": "The Workflow Schema",
+      "required": ["edges", "nodes"],
+      "properties": {
+        "edges": {
+          "$id": "#/properties/workflow/properties/edges",
+          "type": ["array", "null"],
+          "title": "The Edges Schema",
+          "items": {
+            "$id": "#/properties/workflow/properties/edges/items",
+            "type": ["array"],
+            "title": "The Items Schema",
+            "items": {
+              "$id": "#/properties/workflow/properties/edges/items/items",
+              "type": ["string"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["s4", "s6"],
+              "pattern": "^(.*)$"
+            }
+          }
+        },
+        "nodes": {
+          "$id": "#/properties/workflow/properties/nodes",
+          "type": ["array", "null"],
+          "title": "The Nodes Schema",
+          "items": {
+            "$id": "#/properties/workflow/properties/nodes/items",
+            "type": ["string"],
+            "title": "The Items Schema",
+            "default": "",
+            "examples": ["s4", "s9"],
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    }
+  }
+}

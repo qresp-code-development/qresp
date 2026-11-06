@@ -1,23 +1,65 @@
-version: "2"
+# docker-compose 1.22 on paperstack rejects a file with no version key, and
+# pids_limit needs the 2.x format.
+version: "2.4"
 
 services:
   backend:
     restart: always
     build: ./backend
+    depends_on:
+      - mongodb
+    # Docker 18.06 on paperstack: without these the backend hits the thread/pids
+    # limit and requests fail with "RuntimeError: can't start new thread"
+    # (same settings as docker-compose.dev.yml).
+    security_opt:
+      - seccomp:unconfined
+    pids_limit: -1
+    # Production secrets (OAuth, Flask key, SMTP, admins). Gitignored; copy
+    # .env.prod.example to .env.prod and fill it in.
+    env_file:
+      - .env.prod
     environment:
       - PYTHONUNBUFFERED=TRUE
+      # Docker-only MongoDB connectivity, read by project/config.py via QRESP_*.
+      # mongodb is the compose service name below (resolved on the backend net).
+      - QRESP_MONGODB_HOST=mongodb
+      - QRESP_MONGODB_PORT=27017
+      - QRESP_MONGODB_DB_NAME=explorer
     volumes:
-      - /usr/src/app/backend/project/static
       - ./backend:/home/flask/app/web/
     networks:
       - backend
-    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -w 4 -b :5000 project:app
+    # Connexion 3 is ASGI: serve `project:connexionapp` through uvicorn workers.
+    # Serving the bare Flask object (`project:app`) would bypass Connexion's
+    # request-validation / swagger-ui middleware.
+    command: /usr/local/bin/gunicorn --enable-stdio-inheritance -k uvicorn_worker.UvicornWorker -w 4 -b :5000 project:connexionapp
+
+  mongodb:
+    # mongo:6.0 verified against this backend (PyMongo 4.17) on a FRESH volume,
+    # 2026-07-02 -- see
+    # docs/archive/modernization/full-stack-modernization-report.md. Kept at 4.4 because
+    # the existing qresp_mongo_data volume holds 4.4-format data files: upgrading
+    # in place needs stepped 4.4 -> 5.0 -> 6.0 (FCV bumps) or mongodump/restore,
+    # and mongo >=5.0 requires an AVX-capable CPU.
+    image: mongo:4.4
+    restart: always
+    volumes:
+      - qresp_mongo_data:/data/db
+    networks:
+      - backend
 
   gui:
     restart: always
     build: ./frontend
+    environment:
+      # SSR-only base for /api fetches (pages/paperdetails): the public origin
+      # is not reachable from inside this container for same-origin targets.
+      # Never exposed to the browser (not NEXT_PUBLIC_*).
+      - QRESP_INTERNAL_API_URL=http://backend:5000
     networks:
       - frontend
+      # Reach the backend service directly for server-side rendering.
+      - backend
     command: pm2-runtime start yarn --name "QrespFrontend" --interpreter sh -- start
 
   nginx:
@@ -38,3 +80,6 @@ networks:
     driver: bridge
   backend:
     driver: bridge
+
+volumes:
+  qresp_mongo_data:

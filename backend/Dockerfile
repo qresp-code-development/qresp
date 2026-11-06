@@ -1,24 +1,18 @@
-FROM python:3.6-alpine
+# Python 3.14 slim: newest stable CPython, verified in-container on 2026-07-02
+# (pip install lock + GET / boot + nose2 29 tests). Debian-slim provides
+# manylinux wheels for lxml etc., so no apt build toolchain is required.
+# Installing the exact lockfile keeps the Docker dependency set identical to
+# the verified baseline (lock generated on win/3.11 -- see its header note).
+FROM python:3.14-slim
 
-# Add to dump logs to file without buffering
-ENV PYTHONUNBUFFERED 1
+# Dump logs without buffering
+ENV PYTHONUNBUFFERED=1
 
-# install ca-certificates so that HTTPS works consistently
-# the other runtime dependencies for Python are installed later
-RUN apk add --no-cache ca-certificates
-
-# Create the working directory (and set it as the working directory)
-RUN mkdir -p /home/flask/app/web
 WORKDIR /home/flask/app/web
 
-# Install the package dependencies 
-RUN apk add --no-cache curl pkgconfig openssl-dev libffi-dev musl-dev make gcc libxslt-dev
-RUN pip install lxml
-
-
-COPY requirements.txt /home/flask/app/web
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the exact, verified dependency set.
+COPY requirements.lock.txt /home/flask/app/web/
+RUN pip install --no-cache-dir --progress-bar off -r requirements.lock.txt
 
 # Copy the source code into the container
 COPY . /home/flask/app/web
-COPY project/static  /usr/src/app/web/project/static

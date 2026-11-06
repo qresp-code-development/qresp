@@ -1,11 +1,11 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 
-import { Grid, Box } from "@material-ui/core";
+import { Grid, Box } from "@mui/material";
 
 import { SelectInputField } from "../Form/InputFields";
 import { SubmitAndReset } from "../Form/Util";
@@ -17,15 +17,25 @@ import licenses from "../../data/licenses";
 import CuratorContext from "../../Context/Curator/curatorContext";
 
 const LicenseInfoForm = ({ editor }) => {
-  const { setLicense } = useContext(CuratorContext);
+  const { license, setLicense, registerDraftFlusher } =
+    useContext(CuratorContext);
 
   const schema = Yup.object({
-    license: Yup.string().required("Required"),
+    // Optional: a new record starts under CC BY 4.0 anyway.
+    license: Yup.string(),
   });
 
-  const { control, handleSubmit, errors } = useForm({
+  const { control, handleSubmit, formState: { errors }, getValues } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: { license: license || "" },
   });
+
+  useEffect(() => {
+    if (!registerDraftFlusher) return undefined;
+    return registerDraftFlusher("license", () => ({
+      license: getValues("license") || "",
+    }));
+  }, [getValues, registerDraftFlusher]);
 
   const onSubmit = (values) => {
     setLicense(values.license);
@@ -37,10 +47,10 @@ const LicenseInfoForm = ({ editor }) => {
   });
 
   return (
-    <Drawer heading="Choose a License" defaultOpen={true}>
+    <Drawer heading="Choose a License" defaultOpen={true} editing autoSave unsaved>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={1} direction="column">
-          <Grid item>
+          <Grid>
             <SelectInputField
               id="license"
               placeholder="Select the license under which the data will be published"
@@ -50,16 +60,15 @@ const LicenseInfoForm = ({ editor }) => {
               name="license"
               error={errors.license}
               control={control}
-              required
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <Grid container direction="row" spacing={1} alignItems="center">
-              <Grid item>
+              <Grid>
                 <SubmitAndReset submitText="Save" />
               </Grid>
-              <Grid item>
-                <Box mt={1}>
+              <Grid>
+                <Box sx={{ mt: 1 }}>
                   <RegularStyledButton
                     onClick={() =>
                       window.open("https://creativecommons.org/choose/")

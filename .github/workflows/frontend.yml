@@ -1,0 +1,35 @@
+name: frontend
+
+# Mirror of backend-smoke: runs on every push so a broken component or
+# utility is caught before it reaches develop.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Jest / RTL
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "yarn"
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install frontend dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Frontend tests (Jest / RTL, jsdom)
+        env:
+          # GitHub Actions runners have 2 cores; 4 workers is the measured
+          # sweet spot locally but 2 is safer on a shared runner.
+          JEST_WORKERS: 2
+        run: yarn test --ci --forceExit

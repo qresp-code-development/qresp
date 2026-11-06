@@ -1,7 +1,9 @@
 import { useReducer, useEffect, useContext } from "react";
 
 import SourceTreeContext from "./SourceTreeContext";
-import SourceTreeReducer from "./SourceTreeReducer";
+import SourceTreeReducer, {
+  DEFAULT_CONFIRM_LABEL,
+} from "./SourceTreeReducer";
 
 import CuratorContext from "../Curator/curatorContext";
 import { getList } from "../../Utils/Scraper";
@@ -15,6 +17,7 @@ import {
   SET_SAVE_BUTTON_ACTION,
   SET_CHILDREN,
   SET_TITLE,
+  SET_CONFIRM_LABEL,
 } from "../types";
 
 const SourceTreeState = (props) => {
@@ -25,6 +28,7 @@ const SourceTreeState = (props) => {
     title: "Please select the source directory on the server",
     multiple: false,
     save: null,
+    confirmLabel: DEFAULT_CONFIRM_LABEL,
   };
 
   const [state, dispatch] = useReducer(SourceTreeReducer, initialState);
@@ -74,6 +78,11 @@ const SourceTreeState = (props) => {
 
   const setTitle = (title) => dispatch({ type: SET_TITLE, payload: title });
 
+  // Wording of the selector's confirmation button. Call it AFTER
+  // setSaveMethod, which resets it to the default.
+  const setConfirmLabel = (label) =>
+    dispatch({ type: SET_CONFIRM_LABEL, payload: label });
+
   return (
     <SourceTreeContext.Provider
       value={{
@@ -84,6 +93,8 @@ const SourceTreeState = (props) => {
         title: state.title,
         multiple: state.multiple,
         save: state.save,
+        confirmLabel: state.confirmLabel,
+        setConfirmLabel,
         setTree,
         openSelector,
         closeSelector,

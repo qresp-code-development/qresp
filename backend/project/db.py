@@ -1,4 +1,4 @@
-from flask_mongoengine import MongoEngine
+import mongoengine
 from pymongo import errors
 from project import connexionapp
 app = connexionapp.app
@@ -22,16 +22,20 @@ class MongoDBConnection():
     @classmethod
     def __connectToDB(cls,**kwargs):
         if kwargs.get("hostname") is not None:
-            app.config['MONGODB_HOST'] = kwargs.get("hostname")
-            app.config['MONGODB_PORT'] = int(kwargs.get("port"))
-            app.config['MONGODB_USERNAME'] = kwargs.get("username")
-            app.config['MONGODB_PASSWORD'] = kwargs.get("password")
-            app.config['MONGODB_DB'] = kwargs.get("dbname")
             try:
                 cls.__db = None
-                cls.__db = MongoEngine()
-                cls.__db.init_app(app)
-            except errors.ConnectionFailure as e:
+                # The admin page can re-point the app at a different MongoDB at
+                # runtime; mongoengine refuses to reuse the default alias with
+                # new settings, so drop it first (no-op when not connected).
+                mongoengine.disconnect()
+                cls.__db = mongoengine.connect(
+                    db=kwargs.get("dbname"),
+                    host=kwargs.get("hostname"),
+                    port=int(kwargs.get("port")),
+                    username=kwargs.get("username") or None,
+                    password=kwargs.get("password") or None,
+                )
+            except (errors.ConnectionFailure, mongoengine.ConnectionFailure) as e:
                 print(e)
                 raise ConnectionError("Could not connect to server: %s" % e)
         return cls.__db

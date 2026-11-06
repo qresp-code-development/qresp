@@ -1,50 +1,86 @@
-version: "3.8"
+version: "2.4"
 
 services:
   db:
-    image: "mongo:3.6.18-xenial"
-    env_file:
-      - ~/Repositories/MongoDB/.env
+    # mongo:4.4 matches the production compose default. The previous
+    # mongo:3.6.18-xenial is EOL AND unsupported by PyMongo 4.17 (requires
+    # MongoDB server >= 4.0), so the dev DB would no longer connect at all.
+    image: "mongo:4.4"
+    # Named volume instead of hard-coded host paths. The old config required
+    # ~/Repositories/MongoDB/{.env,init-mongo.js,QrespData}, which don't exist on
+    # a clean checkout. A fresh no-auth dev DB needs no env_file/init script.
     volumes:
-      - ~/Repositories/MongoDB/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
-      - ~/Repositories/MongoDB/QrespData:/data/db
-    ports:
-      - "27017:27017"
-    networks: 
+      - qresp_mongo_dev_data:/data/db
+    networks:
       - backend
 
   backend:
     depends_on:
       - db
-    restart: always
+    restart: on-failure
+    # Connexion 3 wraps Flask (WSGI) with a2wsgi, which spawns a thread per
+    # request via run_in_executor(). Without these two settings the container
+    # hits the kernel thread/pids limit and every request fails with
+    # "RuntimeError: can't start new thread".
+    #   seccomp:unconfined — removes the seccomp filter (same as staging-full)
+    #   pids_limit: -1     — no cgroup pids cap on this container
+    security_opt:
+      - seccomp:unconfined
+    pids_limit: -1
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env.dev
     environment:
       - PYTHONUNBUFFERED=TRUE
+      # Connect to the dev "db" service (read by project/config.py via QRESP_*).
+      - QRESP_MONGODB_HOST=db
+      - QRESP_MONGODB_PORT=27017
+      - QRESP_MONGODB_DB_NAME=explorer
+      # Same as staging-full: RCC's TLS certificate expired 2024-08-14 and its
+      # server omits the intermediate, so folder analysis cannot verify it.
+      # This exempts ONLY that host; every other host still verifies.
+      - QRESP_FILESERVER_ROOTS=https://notebook.rcc.uchicago.edu/files
+      - QRESP_FILESERVER_INSECURE_TLS_HOSTS=notebook.rcc.uchicago.edu
+      # No mail server in dev: Publish shows the verification link on screen
+      # instead of emailing it (same as docker-compose.staging-full.yml).
+      - QRESP_PUBLISH_SKIP_EMAIL=1
+      # Origin for emailed links (account confirmation); never taken from
+      # request headers. Email sign-up is refused without it.
+      - QRESP_PUBLIC_URL=https://localhost:8444
     volumes:
-      - /usr/src/app/backend/project/static
       - ./backend:/home/flask/app/web/
-    environment: 
-      - FLASK_APP=run.py 
-      - FLASK_ENV=development
-    networks: 
+    networks:
       - backend
-    command: flask run --host 0.0.0.0
+    # Connexion 3 is ASGI. watchfiles (used by uvicorn --reload) panics on
+    # Python 3.14 in this environment; code is bind-mounted so changes are
+    # live without auto-reload.
+    # --loop asyncio and --http h11 force pure-Python implementations, bypassing
+    # uvloop and httptools (C extensions from connexion[uvicorn]→uvicorn[standard])
+    # that segfault (exit 139) on this host's Linux 4.15 kernel.
+    command: python -m uvicorn project:connexionapp --host 0.0.0.0 --port 5000 --loop asyncio --http h11
 
   gui:
     restart: always
-    depends_on: 
+    depends_on:
       - db
-    environment: 
+    environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
+      # Routes same-origin SSR fetches to the backend container directly,
+      # bypassing nginx/TLS (localhost is not reachable from inside Docker).
+      - QRESP_INTERNAL_API_URL=http://backend:5000
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
       - ./frontend:/usr/src/app
-    networks: 
+      # Preserve the node_modules installed during image build — the bind-mount
+      # above would otherwise overwrite /usr/src/app and wipe them out.
+      - /usr/src/app/node_modules
+    networks:
       - frontend
+      - backend
     command: yarn dev
   
   nginx:
@@ -56,8 +92,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile.dev
     ports:
-      - "443:443"
-      - "80:80"
+      - "8444:443"
+      - "8081:80"
     networks: 
       - frontend
       - backend
@@ -67,4 +103,7 @@ networks:
     driver: bridge
   backend:
     driver: bridge
+
+volumes:
+  qresp_mongo_dev_data:
       

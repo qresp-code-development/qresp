@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import DocumentationInfoForm from "../CuratorForms/DocumentationInfoForm";
 import Documentation from "../Paper/Documentation";

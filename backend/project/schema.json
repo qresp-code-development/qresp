@@ -13,32 +13,36 @@
     "license"
   ],
   "properties": {
+    "work_type": {
+      "$id": "#/properties/work_type",
+      "type": "string",
+      "title": "The Work Type Schema",
+      "enum": ["paper", "report", "software", "dataset", "other"],
+      "default": "paper",
+      "description": "What is being curated. Absent on records published before the field existed, which are published papers."
+    },
     "PIs": {
       "$id": "#/properties/PIs",
       "type": ["array"],
-      "minItems": 1,
       "title": "The Pis Schema",
       "items": {
         "$id": "#/properties/PIs/items",
         "type": "object",
         "title": "The Items Schema",
-        "required": ["firstName", "lastName"],
         "properties": {
           "firstName": {
             "$id": "#/properties/PIs/items/properties/firstName",
             "type": ["string"],
             "title": "The Firstname Schema",
             "default": "",
-            "examples": ["John"],
-            "minLength": 1
+            "examples": ["John"]
           },
           "lastName": {
             "$id": "#/properties/PIs/items/properties/lastName",
             "type": ["string"],
             "title": "The Lastname Schema",
             "default": "",
-            "examples": ["Doe"],
-            "minLength": 1
+            "examples": ["Doe"]
           },
           "middleName": {
             "$id": "#/properties/PIs/items/properties/middleName",
@@ -53,13 +57,12 @@
     "charts": {
       "$id": "#/properties/charts",
       "type": ["array"],
-      "minItems": 1,
       "title": "The Charts Schema",
       "items": {
         "$id": "#/properties/charts/items",
         "type": "object",
         "title": "The Items Schema",
-        "required": ["caption", "id", "imageFile", "number", "properties"],
+        "required": ["id"],
         "properties": {
           "caption": {
             "$id": "#/properties/charts/items/properties/caption",
@@ -179,13 +182,25 @@
     "datasets": {
       "$id": "#/properties/datasets",
       "type": ["array", "null"],
-      "minItems": 1,
       "title": "The Datasets Schema",
       "items": {
         "$id": "#/properties/datasets/items",
         "type": "object",
         "title": "The Items Schema",
         "properties": {
+          "keywords": {
+            "$id": "#/properties/datasets/items/properties/keywords",
+            "type": ["array", "null"],
+            "title": "The Keywords Schema",
+            "items": {
+              "$id": "#/properties/datasets/items/properties/keywords/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["density functional theory"],
+              "pattern": "^(.*)$"
+            }
+          },
           "URLs": {
             "$id": "#/properties/datasets/items/properties/URLs",
             "type": ["array", "null"],
@@ -249,7 +264,7 @@
           },
           "readme": {
             "$id": "#/properties/datasets/items/properties/readme",
-            "type": ["string", "null"],
+            "type": ["string"],
             "title": "The Readme Schema",
             "default": "",
             "examples": [
@@ -258,7 +273,7 @@
             "pattern": "^(.*)$"
           }
         },
-        "required": ["files", "id"]
+        "required": ["id"]
       }
     },
     "heads": {
@@ -395,8 +410,7 @@
               "examples": ["H."],
               "pattern": "^(.*)$"
             }
-          },
-          "required": ["firstName", "lastName", "emailId"]
+          }
         },
         "notebookFile": {
           "$id": "#/properties/info/properties/notebookFile",
@@ -430,14 +444,6 @@
       "$id": "#/properties/reference",
       "type": "object",
       "title": "The Reference Schema",
-      "required": [
-        "DOI",
-        "authors",
-        "kind",
-        "publishedAbstract",
-        "title",
-        "year"
-      ],
       "properties": {
         "DOI": {
           "$id": "#/properties/reference/properties/DOI",
@@ -457,14 +463,13 @@
         },
         "authors": {
           "$id": "#/properties/reference/properties/authors",
-          "type": ["array", "null"],
+          "type": ["array"],
           "title": "The Authors Schema",
           "items": {
             "$id": "#/properties/reference/properties/authors/items",
             "type": "object",
             "title": "The Items Schema",
-            "required": ["firstName", "lastName"],
-            "properties": {
+                "properties": {
               "firstName": {
                 "$id": "#/properties/reference/properties/authors/items/properties/firstName",
                 "type": ["string", "null"],
@@ -507,7 +512,7 @@
             },
             "fullName": {
               "$id": "#/properties/reference/properties/journal/properties/fullName",
-              "type": ["string", "null"],
+              "type": ["string"],
               "title": "The Fullname Schema",
               "default": "",
               "examples": ["Journal of the American Chemical Society"],
@@ -517,7 +522,7 @@
         },
         "kind": {
           "$id": "#/properties/reference/properties/kind",
-          "type": ["string", "null"],
+          "type": ["string"],
           "title": "The Kind Schema",
           "default": "",
           "examples": ["article"],
@@ -525,7 +530,7 @@
         },
         "page": {
           "$id": "#/properties/reference/properties/page",
-          "type": ["string", "null"],
+          "type": ["string"],
           "title": "The Page Schema",
           "default": "",
           "examples": ["6912"],
@@ -558,7 +563,7 @@
         },
         "volume": {
           "$id": "#/properties/reference/properties/volume",
-          "type": ["string", "null"],
+          "type": ["string"],
           "title": "The Volume Schema",
           "default": "",
           "examples": ["138"],
@@ -566,7 +571,7 @@
         },
         "year": {
           "$id": "#/properties/reference/properties/year",
-          "type": "integer",
+          "type": ["integer", "null"],
           "title": "The Year Schema",
           "default": 0,
           "examples": [2016]
@@ -595,6 +600,14 @@
       "default": "",
       "description": "The CC license for the data being made available"
     },
+    "institution": {
+      "$id": "#/properties/institution",
+      "type": ["string", "null"],
+      "title": "The Institution Schema",
+      "default": "",
+      "examples": ["University of Chicago"],
+      "description": "Optional. The institution associated with this record, entered by the curator -- not an assertion that every listed author belongs to it, and never inferred from authors, collections, the server, an email domain, or a DOI."
+    },
     "schema": {
       "$id": "#/properties/schema",
       "type": ["string"],
@@ -613,6 +626,19 @@
         "type": "object",
         "title": "The Items Schema",
         "properties": {
+          "keywords": {
+            "$id": "#/properties/scripts/items/properties/keywords",
+            "type": ["array", "null"],
+            "title": "The Keywords Schema",
+            "items": {
+              "$id": "#/properties/scripts/items/properties/keywords/items",
+              "type": ["string", "null"],
+              "title": "The Items Schema",
+              "default": "",
+              "examples": ["density functional theory"],
+              "pattern": "^(.*)$"
+            }
+          },
           "URLs": {
             "$id": "#/properties/scripts/items/properties/URLs",
             "type": ["array", "null"],
@@ -676,7 +702,7 @@
           },
           "readme": {
             "$id": "#/properties/scripts/items/properties/readme",
-            "type": ["string", "null"],
+            "type": ["string"],
             "title": "The Readme Schema",
             "default": "",
             "examples": [
@@ -685,7 +711,7 @@
             "pattern": "^(.*)$"
           }
         },
-        "required": ["files", "id"]
+        "required": ["id"]
       }
     },
     "tags": {
@@ -710,6 +736,8 @@
         "$id": "#/properties/tools/items",
         "type": "object",
         "title": "The Items Schema",
+        "comment_required": "A tool is either software or an experiment; the kind is set by the form. Nothing else is required: a package without a version, or a facility without a measurement, still publishes.",
+        "required": ["kind"],
         "properties": {
           "URLs": {
             "$id": "#/properties/tools/items/properties/URLs",
@@ -857,16 +885,46 @@
           "title": "The Edges Schema",
           "items": {
             "$id": "#/properties/workflow/properties/edges/items",
-            "type": ["array"],
-            "title": "The Items Schema",
-            "items": {
-              "$id": "#/properties/workflow/properties/edges/items/items",
-              "type": ["string"],
-              "title": "The Items Schema",
-              "default": "",
-              "examples": ["s4", "s6"],
-              "pattern": "^(.*)$"
-            }
+            "title": "One workflow connection",
+            "description": "A legacy untyped pair [from, to], or a typed connection {from, to, type, feedback?}. Which endpoints and relationships are allowed is checked by project/workflow.py.",
+            "anyOf": [
+              {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "examples": [
+                    "s4",
+                    "s6"
+                  ],
+                  "pattern": "^(.*)$"
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "feedback": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ]
           }
         },
         "nodes": {
@@ -884,5 +942,6 @@
         }
       }
     }
-  }
+  },
+  "comment_requirements": "Nothing a curator types is required to publish, for any work type: a record may be published with every field blank, so data can be shared first and described later. What stays required is STRUCTURE the curator form always emits -- the top-level keys, artifact ids, a tool's kind, the workflow's nodes/edges shape -- and value FORMATS still apply when a value is present."
 }

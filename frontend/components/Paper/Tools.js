@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-import { Typography, Box } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 import RecordTable from "../Table/Table";
 import Drawer from "../drawer";
@@ -40,7 +40,7 @@ const DetailsView = ({ rowdata }) => {
   );
 };
 
-const ToolsInfo = ({ tools, inDrawer, editColumn }) => {
+const ToolsInfo = ({ tools, inDrawer = true, editColumn = [] }) => {
   const columns = [
     {
       label: "Kind",
@@ -85,11 +85,6 @@ const ToolsInfo = ({ tools, inDrawer, editColumn }) => {
   ) : (
     <RecordTable rows={rows} columns={columns} />
   );
-};
-
-ToolsInfo.defaultProps = {
-  inDrawer: true,
-  editColumn: [],
 };
 
 ToolsInfo.propTypes = {

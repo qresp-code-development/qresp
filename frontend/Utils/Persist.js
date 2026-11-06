@@ -24,6 +24,12 @@ const WebStore = {
 
     return value;
   },
+  remove: function (key) {
+    if (!key) {
+      return;
+    }
+    localStorage.removeItem(key);
+  },
 };
 
 export default WebStore;

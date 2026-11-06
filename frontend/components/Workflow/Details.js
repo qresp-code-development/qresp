@@ -8,12 +8,13 @@ import {
   DialogTitle,
   DialogContent,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import LabelValue from "../labelvalue";
 import { IdTypeMap } from "./Types";
 
 import { capitalizeFirstLetter } from "../../Utils/utils";
+import { buildImageUrl } from "../../Utils/fileServerUrl";
 
 const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
   const handleClose = () => {
@@ -35,7 +36,7 @@ const DetailsDialog = ({ showDetails, details, setShowDetails }) => {
       content = (
         <Fragment>
           <img
-            src={details["server"] + "/" + details["imageFile"]}
+            src={buildImageUrl(details["server"], details["imageFile"])}
             style={{
               maxWidth: "100%",
               marginLeft: "auto",

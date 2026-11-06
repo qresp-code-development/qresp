@@ -1,51 +1,34 @@
-import React from "react";
-import { shallow } from "enzyme";
+import { render, screen } from "@testing-library/react";
 
 import StyledButton, {
   InternalStyledButton,
   ExternalStyledButton,
 } from "../components/button";
 
-import Link from "next/link";
-
 describe("Button Tests", () => {
   describe("StyledButton", () => {
-    const tree = shallow(<StyledButton>Click</StyledButton>);
-    it("should have correct text", () => {
-      expect(tree.text()).toEqual("Click");
+    it("renders a button with the given text", () => {
+      render(<StyledButton>Click</StyledButton>);
+      expect(
+        screen.getByRole("button", { name: "Click" })
+      ).toBeInTheDocument();
     });
   });
 
   describe("Internal Styled Button", () => {
-    const tree = shallow(
-      <InternalStyledButton
-        text="Click"
-        url="http://click.com"
-      ></InternalStyledButton>
-    );
-    it("should have href prop", () => {
-      expect(tree.find(Link).prop("href")).toEqual("http://click.com");
-    });
-    it("should have one Styled Button", () => {
-      expect(tree.children()).toHaveLength(1);
-    });
-    it("the styled button should have the text passed as text", () => {
-      expect(tree.find(StyledButton).text()).toEqual("Click");
+    it("renders a link with the given href and text", () => {
+      render(<InternalStyledButton text="Click" url="/explorer" />);
+      const link = screen.getByRole("link", { name: "Click" });
+      expect(link).toHaveAttribute("href", "/explorer");
     });
   });
 
   describe("External Styled Button", () => {
-    const tree = shallow(
-      <ExternalStyledButton
-        text="Click"
-        url="http://click.com"
-      ></ExternalStyledButton>
-    );
-    it("should have href prop", () => {
-      expect(tree.find(StyledButton).prop("href")).toEqual("http://click.com");
-    });
-    it("the styled button should have the text passed as text", () => {
-      expect(tree.find(StyledButton).text()).toEqual("Click");
+    it("renders an external link with the given href and text", () => {
+      render(<ExternalStyledButton text="Click" url="http://click.com" />);
+      const link = screen.getByRole("link", { name: "Click" });
+      expect(link).toHaveAttribute("href", "http://click.com");
+      expect(link).toHaveAttribute("target", "_blank");
     });
   });
 });
