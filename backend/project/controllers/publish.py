@@ -1,22 +1,32 @@
-from os import getcwd, listdir
+from os import getcwd, listdir, makedirs
 from sys import stderr
 import json
+import traceback
 from uuid import uuid4
 
-from project.utils.mail import mailClient
+from mongoengine.errors import FieldDoesNotExist, ValidationError
+
 from project.utils.validate import Validate
 from project.paperdao import PaperDAO
+
+
+# Written into a queue file once its link has been verified, so the same link
+# resolves to the same record however many times it is clicked.
+PUBLISHED_ID_KEY = '_published_id'
 
 
 class Publish:
     """
     Controller for Publishing Papers to the MongoDB database
-    Look at how publish works in dev_docs
+    See docs/curation/publishing.md for how publishing works
     """
 
     def __init__(self):
         self.dir_prefix = getcwd() + '/papers/publish/'
         self.id_prefix = 'PUBLISH_'
+        # Pending verification records are runtime state, not source files.
+        # Make the directory on demand because Git does not retain it empty.
+        makedirs(self.dir_prefix, exist_ok=True)
 
     def generateId(self):
         '''
@@ -43,22 +53,38 @@ class Publish:
         html error code, if error
         '''
         try:
-            with open("{}{}.json".format(self.dir_prefix, id), 'r') as f:
+            path = "{}{}.json".format(self.dir_prefix, id)
+            with open(path, 'r') as f:
                 paper = json.load(f)
-                id = PaperDAO().insertIntoPapers(paper)
-                if not id:
-                    return {"msg": "Paper Already Exists in the database (Same title or doi)", "code": 400}
-                return id
+            dao = PaperDAO()
+            # Idempotent per LINK, not per paper: a second click on the same
+            # verification link lands on the record that link created. The
+            # paper's title or DOI is never the key -- another curator's
+            # record of the same paper is a separate record, not this one.
+            published_id = paper.pop(PUBLISHED_ID_KEY, None)
+            if published_id and dao.paperExists(published_id):
+                return published_id
+            new_id = dao.insertIntoPapers(paper)
+            paper[PUBLISHED_ID_KEY] = new_id
+            with open(path, 'w') as f:
+                json.dump(paper, f, ensure_ascii=False)
+            return new_id
         except FileNotFoundError as e:
             print(e, file=stderr)
-            return {"msg": "Incorrect verify link, this paper is not present in the wait queue", "code": 400}
+            return {"msg": "This verification link is invalid or has already been used. If you just published, your paper may already be in the database.", "code": 404}
         except Exception as e:
             print(e, file=stderr)
             return {"msg": "Internal Server Error", "code": 500}
 
-    def publish(self, paper, server):
+    def publish(self, paper):
         '''
-        Generate a new link to verify the identity of the user and then publish
+        Validate the metadata and insert it as a new record straight away.
+
+        Publishing needs a signed-in session (api.publish), and every sign-in
+        provider has already proven the account's email -- email/password
+        accounts confirm theirs once, at sign-up -- so there is no second,
+        per-record email link any more. verify() stays for links that were
+        emailed before this change.
 
         Parameters
         -----------
@@ -67,8 +93,8 @@ class Publish:
 
         Return
         ------
-        200, if no errors
-        msg and html error code, if error
+        {"id": new record id}, if no errors
+        {"msg", "code"}, if error
         '''
 
         try:
@@ -81,43 +107,11 @@ class Publish:
             print(e, file=stderr)
             return {'msg': 'Schema not found, Internal Server Error', 'code': 500}
 
-        curatorDetails = paper['info']['insertedBy']
-
-        name = "{} {} {}".format(curatorDetails['firstName'],
-                                 curatorDetails['middleName'],
-                                 curatorDetails['lastName'])
-        name = name.replace("  ", " ")
-
-        id = self.generateId()
-
-        subject = 'Qresp Publish Verification'
-
-        if server.startswith('http://'):
-            server = server.replace('http://', 'https://', 1)
-
-        server = server.replace('http://', 'https://')
-        verifyLinkUrl = "{0}/verify/{1}?server={0}".format(server, id)
-        html = '''
-        <html>
-            <body>
-                <p>
-                    Hello {0},<br>
-                    Thank you, for publishing on Qresp. Here is the link to publish the paper below.<br>
-                    Click on the link below or paste it in the browser <br>
-                    <br>
-                    <a href={1}>{1}</a><br><br>
-                    Have a great day !<br>
-                    The Qresp Team
-                </p>
-            </body>
-        </html>
-        '''.format(name, verifyLinkUrl)
-
         try:
-            with open("{}{}.json".format(self.dir_prefix, id), 'w') as f:
-                json.dump(paper, f, ensure_ascii=False)
-                mailClient.send(subject, "", html, curatorDetails['emailId'])
-                return 200
-        except Exception as e:
-            print(e, file=stderr)
-            return {"msg": "Internal Server Error", "code": 500}
+            return {"id": PaperDAO().insertIntoPapers(paper)}
+        except (ValidationError, FieldDoesNotExist) as e:
+            return {"msg": "The record could not be saved: %s" % e, "code": 400}
+        except Exception:
+            traceback.print_exc(file=stderr)
+            return {"msg": "The record could not be saved. Please try again.",
+                    "code": 500}

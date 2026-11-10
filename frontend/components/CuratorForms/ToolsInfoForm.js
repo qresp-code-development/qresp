@@ -6,16 +6,25 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from "@material-ui/core";
-import { AddCircleOutline, DescriptionOutlined } from "@material-ui/icons";
+} from "@mui/material";
+import { AddCircleOutlined, DescriptionOutlined } from "@mui/icons-material";
 
 import { TextInputField, RadioInputField } from "../Form/InputFields";
-import ExtraFieldInput from "../Form/ExtraFieldInput";
+import ExtraFieldInput, {
+  cleanExtraFields,
+  extraFieldsSchema,
+} from "../Form/ExtraFieldInput";
 import { RegularStyledButton } from "../button";
+import {
+  FormConnection,
+  confirmLabel,
+  useRowLink,
+} from "./ConnectionSection";
 import StyledTooltip from "../tooltip";
 
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
+import { useInvalidFieldFocus } from "../../Utils/invalidField";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
@@ -25,17 +34,17 @@ import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperCont
 const Software = ({ errors, register, unregister, def, openFileSelector }) => {
   useEffect(() => {
     return () => {
-      unregister({ name: "packageName" });
-      unregister({ name: "version" });
-      unregister({ name: "executableName" });
-      unregister({ name: "patches" });
-      unregister({ name: "description" });
+      unregister("packageName");
+      unregister("version");
+      unregister("executableName");
+      unregister("patches");
+      unregister("description");
     };
   }, [def]);
 
   return (
     <Fragment>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="packageName"
           placeholder="Enter name of the software package"
@@ -43,12 +52,11 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           helperText="Enter name of the package (e.g. WEST)"
           label="Package Name"
           error={errors.packageName}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.packageName}
-          required
         />
       </Grid>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="version"
           placeholder="Enter version of the software package"
@@ -56,12 +64,11 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           helperText="Enter version number (e.g. 3.1.6) of the package"
           label="Version"
           error={errors.version}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.version}
-          required
         />
       </Grid>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="executableName"
           placeholder="Enter the name of the executable for the software package"
@@ -69,11 +76,11 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           helperText="e.g. wstat.x"
           label="Executable Name"
           error={errors.executableName}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.executableName}
         />
       </Grid>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="patches"
           placeholder="Select patch files using the picker"
@@ -81,7 +88,7 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           helperText="Enter the file name(s) containing the patches of publicly available or versioned software, customized by the authors to generate some of the resources for the paper. Use the file picker to select files"
           label="Patches"
           error={errors.patches}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.patches && def.patches.join(", ")}
           action={
             <IconButton size="small" onClick={openFileSelector}>
@@ -90,7 +97,7 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           }
         />
       </Grid>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="description"
           placeholder="Enter summary of the modifications made to the software package (if any)"
@@ -98,7 +105,7 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
           helperText="Enter summary of the modifications made to the software package (if any)"
           label="Description"
           error={errors.description}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.description}
         />
       </Grid>
@@ -109,14 +116,14 @@ const Software = ({ errors, register, unregister, def, openFileSelector }) => {
 const Experiment = ({ errors, register, unregister, def }) => {
   useEffect(() => {
     return () => {
-      unregister({ name: "facilityName" });
-      unregister({ name: "mesurement" });
+      unregister("facilityName");
+      unregister("mesurement");
     };
   }, [def]);
 
   return (
     <Fragment>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="facilityName"
           placeholder="Enter name of the facility where the experiment was conducted (e.g. Argonne National Lab)"
@@ -124,12 +131,11 @@ const Experiment = ({ errors, register, unregister, def }) => {
           helperText="Enter name of the facility where the experiment was conducted (e.g. Argonne National Lab)"
           label="Facility Name"
           error={errors.facilityName}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.facilityName}
-          required
         />
       </Grid>
-      <Grid item>
+      <Grid>
         <TextInputField
           id="measurement"
           placeholder="Enter type of measurement (e.g. soft X-ray photoemission)"
@@ -137,16 +143,19 @@ const Experiment = ({ errors, register, unregister, def }) => {
           helperText="Enter type of measurement (e.g. soft X-ray photoemission)"
           label="Measurement"
           error={errors.measurement}
-          inputRef={register}
+          register={register}
           defaultValue={def && def.measurement}
-          required
         />
       </Grid>
     </Fragment>
   );
 };
 
-const ToolsInfoForm = () => {
+// `hideTrigger` hides this form's own "Add" button while keeping the
+// dialog it opens. The figure workspace mounts the form for the dialog
+// and supplies its own contextual trigger, so showing both would put two
+// ways to do one thing side by side.
+const ToolsInfoForm = ({ hideTrigger = false }) => {
   const { tools, add, edit } = useContext(CuratorContext);
 
   const { toolsHelper, openForm, closeForm, setDefault } = useContext(
@@ -154,74 +163,103 @@ const ToolsInfoForm = () => {
   );
 
   const { def, open } = toolsHelper;
+  // What a NEW record from this form is for. Row-scoped when the form
+  // was opened from a resource row's LINK; see ConnectionSection.
+  const link = useRowLink("tool", toolsHelper.link);
 
   const { setSaveMethod, openSelector, setMultiple } = useContext(
     SourceTreeContext
   );
 
   const schema = Yup.object({
-    kind: Yup.string().required("Required"),
-    facilityName: Yup.string().when("kind", {
-      is: "experiment",
-      then: Yup.string().required("Required"),
-    }),
-    measurement: Yup.string().when("kind", {
-      is: "experiment",
-      then: Yup.string().required("Required"),
-    }),
-    packageName: Yup.string().when("kind", {
-      is: "software",
-      then: Yup.string().required("Required"),
-    }),
-    version: Yup.string().when("kind", {
-      is: "software",
-      then: Yup.string().required("Required"),
-    }),
-    executableName: Yup.string().when("kind", {
-      is: "software",
-      then: Yup.string(),
-    }),
-    patches: Yup.string().when("kind", {
-      is: "software",
-      then: Yup.string(),
-    }),
-    description: Yup.string().when("kind", {
-      is: "software",
-      then: Yup.string(),
-    }),
+    // Nothing is required to publish: a tool may be saved without its
+    // package name or version (software), or facility or measurement
+    // (experiment). The type is a choice with a default, not an input.
+    kind: Yup.string(),
+    facilityName: Yup.string(),
+    measurement: Yup.string(),
+    packageName: Yup.string(),
+    version: Yup.string(),
+    executableName: Yup.string(),
+    description: Yup.string(),
     urls: Yup.string(),
     patches: Yup.string(),
-    extraFields: Yup.array().of(
-      Yup.object().shape({
-        label: Yup.string().required("Required"),
-        value: Yup.string().required("Required"),
-      })
-    ),
+    extraFields: extraFieldsSchema,
   });
+
+  // RHF v7 only knows values present in defaultValues or touched by the
+  // user; visually preselected "Software" radio and prefilled inputs are NOT registered otherwise. This
+  // form's useForm outlives the dialog, so it is re-seeded on every open.
+  const toolFormDefaults = (tool) => ({
+    kind: (tool && tool.kind) || "software",
+    packageName: (tool && tool.packageName) || "",
+    version: (tool && tool.version) || "",
+    executableName: (tool && tool.executableName) || "",
+    patches:
+      (tool &&
+        tool.patches &&
+        (Array.isArray(tool.patches)
+          ? tool.patches.join(", ")
+          : tool.patches)) ||
+      "",
+    description: (tool && tool.description) || "",
+    facilityName: (tool && tool.facilityName) || "",
+    measurement: (tool && tool.measurement) || "",
+    extraFields: cleanExtraFields(tool && tool.extraFields),
+  });
+
+  // Save with a required field empty sends the curator to the first one in
+  // FORM order, instead of silently refusing.
+  const { formRef, focusFirstInvalid } = useInvalidFieldFocus();
+
 
   const {
     register,
     unregister,
     handleSubmit,
-    errors,
+    formState: { errors },
     control,
     watch,
     setValue,
+    reset,
   } = useForm({
+    // focusFirstInvalid below is the ONLY thing that moves focus on a
+    // failed Save. react-hook-form focuses its own first errored field
+    // AFTER the invalid handler runs, which landed on whichever element
+    // it holds a ref for and scrolled it into view its own way, undoing
+    // the block: "center" placement.
+    shouldFocusError: false,
     resolver: yupResolver(schema),
+    defaultValues: toolFormDefaults(def),
   });
+
+  useEffect(() => {
+    if (open) reset(toolFormDefaults(def));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [def, open]);
 
   const kindWatcher = watch("kind", def == null ? "software" : def.kind);
 
   const onSubmit = (values) => {
-    const extraFields = values.extraFields ? values.extraFields : [];
+    const extraFields = cleanExtraFields(values.extraFields);
+    values.extraFields = extraFields;
+    values.kind = values.kind || "software";
     if (values.kind == "software")
-      values.patches = values.patches.split(",").map((el) => el.trim());
+      values.patches = String(values.patches || "")
+        .split(",")
+        .map((el) => el.trim())
+        .filter(Boolean);
     if (def && tools.find((el) => el.id == def.id)) {
       edit("tool", { ...def, ...values, extraFields: extraFields });
     } else {
-      values["id"] = `t${tools.length}`;
-      add("tool", values);
+      if (link.rowScoped) {
+        // The record and its arrow, in one reducer change -- or neither,
+        // with the form left open to say why.
+        if (!link.createAndLink(values)) return;
+      } else {
+        values["id"] = `t${tools.length}`;
+        add("tool", values);
+      }
     }
     closeForm("tool");
   };
@@ -239,10 +277,11 @@ const ToolsInfoForm = () => {
 
   return (
     <Fragment>
+      {hideTrigger ? null : (
       <StyledTooltip title="Add a new tool" arrow>
         <RegularStyledButton
           fullWidth
-          endIcon={<AddCircleOutline />}
+          endIcon={<AddCircleOutlined />}
           onClick={() => {
             setDefault("tool", null);
             openForm("tool");
@@ -251,6 +290,7 @@ const ToolsInfoForm = () => {
           Add a Tool
         </RegularStyledButton>
       </StyledTooltip>
+      )}
       <Dialog
         open={open}
         onClose={() => {
@@ -264,10 +304,10 @@ const ToolsInfoForm = () => {
       >
         <DialogTitle>
           <Grid container direction="row" spacing={1} alignItems="center">
-            <Grid item xs={11}>
+            <Grid size="grow" sx={{ minWidth: 0 }}>
               Add a new tool
             </Grid>
-            <Grid item xs={1}>
+            <Grid size="auto">
               <RegularStyledButton
                 onClick={() => {
                   setDefault("tool", null);
@@ -281,9 +321,12 @@ const ToolsInfoForm = () => {
           </Grid>
         </DialogTitle>
         <DialogContent dividers>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit(onSubmit, focusFirstInvalid)}
+          >
             <Grid container direction="column" spacing={1}>
-              <Grid item>
+              <Grid>
                 <RadioInputField
                   id="kind"
                   name="kind"
@@ -292,9 +335,8 @@ const ToolsInfoForm = () => {
                   error={errors.kind}
                   options={radioOptions}
                   row={true}
-                  register={register}
+                  control={control}
                   defVal={def ? def.kind : "software"}
-                  required
                 />
               </Grid>
               {def == null ? (
@@ -330,7 +372,7 @@ const ToolsInfoForm = () => {
                   def={def}
                 />
               )}
-              <Grid item>
+              <Grid>
                 <TextInputField
                   id="urls"
                   placeholder="Enter URLs for the tools"
@@ -338,11 +380,11 @@ const ToolsInfoForm = () => {
                   helperText="Enter link(s) to package's official websites (e.g. https://www.west-code.org) or facility (e.g. https://aps.anl.gov)[comma seperated]"
                   label="URLs"
                   error={errors.urls}
-                  inputRef={register}
+                  register={register}
                   defaultValue={def && def.urls}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <ExtraFieldInput
                   control={control}
                   register={register}
@@ -350,11 +392,14 @@ const ToolsInfoForm = () => {
                   defaults={def && def.extraFields}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
+                <FormConnection control={control} newType="tool" link={link} />
+              </Grid>
+              <Grid>
                 <RegularStyledButton fullWidth type="submit">
                   {def && tools.find((el) => el.id == def.id) != undefined
                     ? "Update"
-                    : "Save"}
+                    : confirmLabel(link.intent, "Save")}
                 </RegularStyledButton>
               </Grid>
             </Grid>

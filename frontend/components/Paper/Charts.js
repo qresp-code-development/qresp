@@ -1,27 +1,78 @@
 import { Fragment, useState, useContext } from "react";
 import PropTypes from "prop-types";
 
-import { SRLWrapper, useLightbox } from "simple-react-lightbox";
+// simple-react-lightbox is dead (no React >=17 support); replaced with
+// yet-another-react-lightbox driven by plain open/index state.
+import Lightbox from "yet-another-react-lightbox";
+import Captions from "yet-another-react-lightbox/plugins/captions";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 
-import { Typography, Button } from "@material-ui/core";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from "@mui/material";
+import { Close, OpenInFull, PictureAsPdf } from "@mui/icons-material";
 
 import RecordTable from "../Table/Table";
 import Drawer from "../drawer";
-import Slider from "../HorizontalSlider";
+import {
+  buildDirectoryUrl,
+  buildFileUrl,
+  buildImageUrl,
+  isMixedContent,
+  isPdfFile,
+} from "../../Utils/fileServerUrl";
+import ChartActions from "./ChartActions";
 import StyledTooltip from "../tooltip";
 import ChartWorkflow from "./ChartWorkflow";
 import { formatData } from "../Workflow/util";
+import { figureLabel } from "../../Utils/artifactLabel";
 
 import { useRouter } from "next/router";
 import LoadingContext from "../../Context/Loading/loadingContext";
 import AlertContext from "../../Context/Alert/alertContext";
 import axios from "axios";
 
-const PropsView = ({ rowdata }) => {
+// PDF figures get the browser's own PDF viewer (the RCC file server sends no
+// frame restrictions). Re-exported for existing importers.
+export { isPdfFile, figureLabel };
+
+const DetailsView = ({ rowdata }) => {
+  const label = figureLabel(rowdata.number);
+  const keywords = (rowdata.properties || []).filter(Boolean);
   return (
-    <Typography variant="body2" color="secondary">
-      {rowdata["properties"].join(", ")}
-    </Typography>
+    <Box sx={{ textAlign: "left", minWidth: { md: 280 } }} data-testid="chart-details">
+      {label && (
+        <Typography variant="subtitle2" fontWeight={700} sx={{ color: "#800000" }}>
+          {label}
+        </Typography>
+      )}
+      <Typography
+        variant="body2"
+        sx={{ mt: 0.5, lineHeight: 1.6, color: rowdata.caption ? "text.primary" : "text.disabled" }}
+      >
+        {rowdata.caption || "No caption provided."}
+      </Typography>
+      {keywords.length > 0 && (
+        <Box sx={{ mt: 1.25 }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Key words
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+            {keywords.map((word) => (
+              <Chip key={word} size="small" variant="outlined" label={word} />
+            ))}
+          </Box>
+        </Box>
+      )}
+    </Box>
   );
 };
 
@@ -33,11 +84,7 @@ const FilesView = ({ rowdata }) => {
     }
     return (
       <a
-        href={
-          file[0] === "/"
-            ? rowdata["server"] + file
-            : rowdata["server"] + "/" + file
-        }
+        href={buildFileUrl(rowdata["server"], file)}
         key={index}
         style={{ color: "#007bff" }}
         target="_blank"
@@ -71,14 +118,16 @@ const ChartInfo = ({
   scripts,
   datasets,
   external,
-  showWorkflows,
+  showWorkflows = true,
   server,
-  showSlider,
-  inDrawer,
-  editColumn,
+  showSlider = true,
+  inDrawer = true,
+  editColumn = [],
 }) => {
-  // Light Box Controls
-  const { openLightbox } = useLightbox();
+  // Light Box Controls: the open slide index (-1 = closed).
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  // PDFs cannot go in the lightbox; they expand into a dialog instead.
+  const [expandedPdf, setExpandedPdf] = useState(null);
 
   // Chart Workflow Controls
   const [chartWorkflow, setChartWorkflow] = useState({});
@@ -113,78 +162,214 @@ const ChartInfo = ({
     : null;
 
   const FigureView = ({ rowdata }) => {
-    const datatreeLink =
-      rowdata.server +
-      "/" +
-      rowdata.imageFile.slice(
-        rowdata.imageFile.startsWith("/") ? 1 : 0,
-        rowdata.imageFile.lastIndexOf("/")
+    const datatreeLink = buildDirectoryUrl(rowdata.server, rowdata.imageFile);
+    const imageUrl = buildImageUrl(rowdata.server, rowdata.imageFile);
+    // Decided once, from the URL alone -- the browser will block this before
+    // any request is made, so it is knowable before the image errors.
+    const mixedContent = isMixedContent(imageUrl);
+
+    // Three different reasons produce no URL, and they need three different
+    // things from the reader: save the file server, pick an image, or fix a
+    // path that cannot be resolved. One shared sentence sent people looking
+    // in the wrong place.
+    if (!imageUrl) {
+      const reason = !rowdata.imageFile
+        ? "Figure Image not selected — set it on this chart."
+        : !rowdata.server
+        ? "File Server path not saved — save it in “Where is the paper”."
+        : "Invalid image path — it must be a relative path inside the paper " +
+          "folder, with no “..”, backslash or full URL.";
+      return (
+        <Typography
+          variant="caption"
+          color="error"
+          data-testid="chart-image-missing"
+          sx={{ display: "block", p: 1 }}
+        >
+          {reason}
+        </Typography>
       );
+    }
+
+    const pdf = isPdfFile(rowdata.imageFile);
 
     return (
       <Fragment>
+        {pdf ? (
+          <Box sx={{ width: { xs: "60vw", md: 240 }, maxWidth: 240, mx: "auto" }}>
+            {mixedContent ? (
+              <Typography
+                variant="caption"
+                color="error"
+                component="span"
+                data-testid="chart-image-error"
+                sx={{ display: "block", p: 1, overflowWrap: "anywhere" }}
+              >
+                Blocked: this page is HTTPS and the file server URL is HTTP.
+                Save an https:// file server path.{" "}
+                <a href={imageUrl} rel="noopener noreferrer" target="_blank">
+                  Open PDF
+                </a>
+              </Typography>
+            ) : (
+              <Box
+                component="object"
+                data={`${imageUrl}#toolbar=0&navpanes=0&view=FitH`}
+                type="application/pdf"
+                aria-label={rowdata.caption || rowdata.imageFile}
+                data-testid="chart-pdf"
+                sx={{
+                  display: "block",
+                  width: "100%",
+                  height: 180,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  bgcolor: "#fafafa",
+                }}
+              >
+                {/* Rendered only where the browser has no inline PDF viewer
+                    (e.g. some mobile browsers). */}
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                    p: 2,
+                  }}
+                >
+                  <PictureAsPdf sx={{ fontSize: 40, color: "#800000" }} />
+                  <Typography variant="body2" color="text.secondary">
+                    PDF figure
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                gap: 1,
+                mt: 0.75,
+                fontSize: "0.8rem",
+              }}
+            >
+              {!mixedContent && (
+                <Fragment>
+                  <a
+                    href={imageUrl}
+                    data-testid="chart-pdf-expand"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setExpandedPdf({ url: imageUrl, title: figureLabel(rowdata.number) || rowdata.imageFile, caption: rowdata.caption });
+                    }}
+                  >
+                    Expand
+                  </a>
+                  <span aria-hidden="true">·</span>
+                </Fragment>
+              )}
+              <a href={imageUrl} rel="noopener noreferrer" target="_blank" data-testid="chart-pdf-open">
+                Open PDF
+              </a>
+              <span aria-hidden="true">·</span>
+              <a href={datatreeLink} rel="noopener noreferrer" target="_blank">
+                Check file server access
+              </a>
+            </Box>
+          </Box>
+        ) : (
         <StyledTooltip title={rowdata.caption} placement="left" arrow>
-          <Button focusRipple onClick={() => openLightbox(rowdata.index)}>
+          <Button
+            focusRipple
+            onClick={() => setLightboxIndex(rowdata.index)}
+            aria-label={`Expand ${figureLabel(rowdata.number) || "figure"}`}
+            sx={{ flexDirection: "column", "&:hover .expand-hint": { opacity: 1 } }}
+          >
             <img
-              src={rowdata["server"] + "/" + rowdata["imageFile"]}
-              style={{ maxWidth: "30vw" }}
-              alt={rowdata.caption}
+              src={imageUrl}
+              style={{ maxWidth: "min(240px, 60vw)", maxHeight: 200, objectFit: "contain" }}
+              alt={rowdata.caption || rowdata.imageFile}
               loading="lazy"
+              data-testid="chart-image"
+              onError={(event) => {
+                // The server path is right but the file is not reachable:
+                // a labelled failure beats a silent empty box.
+                event.currentTarget.style.display = "none";
+                const note = event.currentTarget.nextElementSibling;
+                if (note) note.style.display = "block";
+              }}
             ></img>
+            <Typography
+              className="expand-hint"
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5, opacity: 0.7, textTransform: "none" }}
+            >
+              <OpenInFull sx={{ fontSize: 14 }} /> Click to expand
+            </Typography>
+            {/* One line, then the two ways out.
+                
+                WHY THIS IS SHORT. Almost every cause of a failed chart image
+                is on the RCC file server, not in Qresp: the file has moved,
+                the directory is not published, or -- observed in the field --
+                the server's TLS certificate has expired, which Chrome reports
+                as NET::ERR_CERT_DATE_INVALID and refuses before any bytes are
+                read. Qresp cannot tell those apart from inside the page, and
+                it must not try to work around any of them: no bypass proxy,
+                no relaxed verification, no credentials. So the message says
+                the one thing that is certainly true, and Open image is what
+                shows the reader the browser's own, specific reason.
+                
+                The single cause this code CAN establish is mixed content --
+                an http file server on an https page, refused before the
+                request -- because that one is fixed in Qresp, by saving an
+                https:// file-server path. */}
+            <Typography
+              variant="caption"
+              color="error"
+              component="span"
+              data-testid="chart-image-error"
+              sx={{ display: "none", p: 1, overflowWrap: "anywhere" }}
+            >
+              {mixedContent
+                ? "Blocked: this page is HTTPS and the file server URL is " +
+                  "HTTP. Save an https:// file server path."
+                : "Image unavailable from the RCC file server."}{" "}
+              <a href={imageUrl} rel="noopener noreferrer" target="_blank">
+                Open image
+              </a>{" "}
+              ·{" "}
+              <a href={datatreeLink} rel="noopener noreferrer" target="_blank">
+                Check file server access
+              </a>
+            </Typography>
           </Button>
         </StyledTooltip>
+        )}
         {showSlider && (
-          <Slider>
-            <a
-              href={datatreeLink}
-              rel="noopener noreferrer"
-              alt="View the data tree"
-              target="_blank"
-            >
-              <img src="/images/datatree.png" className="imgButton" />
-            </a>
-            {showWorkflows ? (
-              <a
-                onClick={(e) =>
-                  handleClick(e, rowdata.id, router.query.id, rowdata)
-                }
-                href="showChartWorkflow"
-              >
-                <img src="/images/workflow-icon.png" className="imgButton" />
-              </a>
-            ) : null}
-            <a
-              href={rowdata.downloadPath}
-              rel="noopener noreferrer"
-              alt="Download data associated to the paper Using Globus"
-              target="_blank"
-            >
-              <img src="/images/download-icon.png" className="imgButton" />
-            </a>
-            {rowdata.notebookFile ? (
-              <a
-                href={
-                  "https://nbviewer.jupyter.org/url/" +
+          <ChartActions
+            filesHref={datatreeLink}
+            onWorkflow={
+              showWorkflows
+                ? (e) => handleClick(e, rowdata.id, router.query.id, rowdata)
+                : undefined
+            }
+            downloadHref={rowdata.downloadPath || undefined}
+            notebookHref={
+              rowdata.notebookFile
+                ? "https://nbviewer.jupyter.org/url/" +
                   rowdata.server.replace(/(^\w+:|^)\/\//, "") +
                   "/" +
                   rowdata.notebookFile
-                }
-                rel="noopener noreferrer"
-                alt="View Default Notebook File"
-                target="_blank"
-              >
-                <img src="/images/jupyter-icon.png" className="imgButton" />
-              </a>
-            ) : null}
-          </Slider>
+                : undefined
+            }
+          />
         )}
-        <style jsx>{`
-          .imgButton {
-            margin: auto;
-            height: 32px;
-            width: 32px;
-          }
-        `}</style>
       </Fragment>
     );
   };
@@ -202,14 +387,14 @@ const ChartInfo = ({
       },
     },
     {
-      label: "Properties",
+      label: "Caption & key words",
       name: "props",
-      view: PropsView,
+      view: DetailsView,
       options: {
-        align: "center",
+        align: "left",
         sort: true,
         searchable: true,
-        value: (data) => data.properties.join(""),
+        value: (data) => `${data.caption || ""} ${(data.properties || []).join(" ")}`,
       },
     },
     {
@@ -227,32 +412,30 @@ const ChartInfo = ({
   ];
 
   const Gallery = [];
-  const options = {
-    settings: {
-      lightboxTransitionSpeed: 0.3,
-    },
-    caption: {
-      captionContainerPadding: "32px",
-    },
-    thumbnails: {
-      showThumbnails: false,
-    },
-  };
 
-  const rows = charts.map((row, index) => {
-    row["index"] = index;
+  const rows = charts.map((row) => {
     row["server"] = fileserverpath;
     row["downloadPath"] = downloadPath;
 
-    Gallery.push({
-      src: row["server"] + "/" + row["imageFile"],
-      caption: row["caption"],
-    });
+    // The lightbox only shows images, so PDF figures stay out of it and the
+    // index is the row's position among the image figures.
+    if (isPdfFile(row["imageFile"])) {
+      row["index"] = -1;
+    } else {
+      row["index"] = Gallery.length;
+      Gallery.push({
+        src: buildImageUrl(row["server"], row["imageFile"]),
+        title: figureLabel(row["number"]),
+        description: row["caption"],
+      });
+    }
     return {
       figure: row,
       props: {
         server: fileserverpath,
-        properties: row["properties"],
+        number: row["number"],
+        caption: row["caption"],
+        properties: row["properties"] || [],
       },
       files: {
         server: fileserverpath,
@@ -263,7 +446,49 @@ const ChartInfo = ({
 
   return (
     <Fragment>
-      <SRLWrapper images={Gallery} options={options} />
+      <Lightbox
+        open={lightboxIndex >= 0}
+        index={lightboxIndex >= 0 ? lightboxIndex : 0}
+        close={() => setLightboxIndex(-1)}
+        slides={Gallery}
+        plugins={[Captions]}
+        animation={{ fade: 300 }}
+      />
+      <Dialog
+        open={Boolean(expandedPdf)}
+        onClose={() => setExpandedPdf(null)}
+        maxWidth="lg"
+        fullWidth
+      >
+        {expandedPdf && (
+          <Fragment>
+            <DialogTitle sx={{ pr: 6 }}>
+              {expandedPdf.title}
+              <IconButton
+                aria-label="Close"
+                onClick={() => setExpandedPdf(null)}
+                sx={{ position: "absolute", right: 8, top: 8 }}
+              >
+                <Close />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent>
+              <Box
+                component="object"
+                data={`${expandedPdf.url}#view=FitH`}
+                type="application/pdf"
+                aria-label={expandedPdf.caption || expandedPdf.title}
+                sx={{ display: "block", width: "100%", height: "75vh", border: 0 }}
+              />
+              {expandedPdf.caption && (
+                <Typography variant="body2" sx={{ mt: 1.5, lineHeight: 1.6 }}>
+                  {expandedPdf.caption}
+                </Typography>
+              )}
+            </DialogContent>
+          </Fragment>
+        )}
+      </Dialog>
       {inDrawer ? (
         <Drawer heading="Charts">
           <RecordTable rows={rows} columns={columns} />
@@ -281,13 +506,6 @@ const ChartInfo = ({
       ) : null}
     </Fragment>
   );
-};
-
-ChartInfo.defaultProps = {
-  showWorkflows: true,
-  showSlider: true,
-  inDrawer: true,
-  editColumn: [],
 };
 
 ChartInfo.propTypes = {

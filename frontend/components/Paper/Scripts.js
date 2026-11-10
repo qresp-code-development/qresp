@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 import RecordTable from "../Table/Table";
 import Drawer from "../drawer";
@@ -51,7 +51,12 @@ const FilesView = ({ rowdata }) => {
   );
 };
 
-const ScriptsInfo = ({ scripts, fileserverpath, inDrawer, editColumn }) => {
+const ScriptsInfo = ({
+  scripts,
+  fileserverpath,
+  inDrawer = true,
+  editColumn = [],
+}) => {
   const columns = [
     {
       label: "Description",
@@ -94,11 +99,6 @@ const ScriptsInfo = ({ scripts, fileserverpath, inDrawer, editColumn }) => {
   ) : (
     <RecordTable rows={rows} columns={columns} />
   );
-};
-
-ScriptsInfo.defaultProps = {
-  inDrawer: true,
-  editColumn: [],
 };
 
 ScriptsInfo.propTypes = {

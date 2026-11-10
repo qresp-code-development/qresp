@@ -1,24 +1,18 @@
-FROM python:3.6-alpine
+# Dev image: same Python baseline as the production Dockerfile (python:3.14),
+# but installs from requirements.txt (floating) instead of the lock; source is
+# bind-mounted by docker-compose.dev.yml and served by uvicorn --reload.
+# (Was python:3.6-alpine, EOL, plus an apk build toolchain that Debian-slim's
+# manylinux wheels make unnecessary.)
+FROM python:3.11-slim
 
-# Add to dump logs to file without buffering
-ENV PYTHONUNBUFFERED 1
+# Dump logs without buffering
+ENV PYTHONUNBUFFERED=1
 
-# install ca-certificates so that HTTPS works consistently
-# the other runtime dependencies for Python are installed later
-RUN apk add --no-cache ca-certificates
-
-# Create the working directory (and set it as the working directory)
-RUN mkdir -p /home/flask/app/web
 WORKDIR /home/flask/app/web
 
-# Install the package dependencies 
-RUN apk add --no-cache curl pkgconfig openssl-dev libffi-dev musl-dev make gcc libxslt-dev
-RUN pip install lxml
+# Install the package dependencies
+COPY requirements.txt /home/flask/app/web/
+RUN pip install --no-cache-dir --progress-bar off -r requirements.txt
 
-
-COPY requirements.txt /home/flask/app/web
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the source code into the container
+# Copy the source code into the container (dev compose bind-mounts over it)
 COPY . /home/flask/app/web
-COPY project/static  /usr/src/app/web/project/static

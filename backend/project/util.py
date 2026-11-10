@@ -1,107 +1,9 @@
-import json
-import re
 import requests
-from jsonschema import Draft4Validator
-from requests_oauthlib import OAuth2Session
 from lxml import html
 from urllib.request import urlopen
-from project.config import Config
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-
-LOCALHOST = None
-
-
-class InvalidUsage(Exception):
-    """
-    Invalid page
-    """
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-
-class Servers():
-    """ Class providing information about servers for federated search.
-    """
-
-    def __init__(self):
-        self.__headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.90 Safari/537.36'}
-        self.__urlString = Config.get_setting('GLOBAL', 'QRESP_SERVER_URL')
-        self.__schemaString = Config.get_setting('GLOBAL', 'SCHEMA_URL')
-        self.__httpUrlString = Config.get_setting('GLOBAL', 'HTTP_SERVER_URL')
-
-    def getServersList(self):
-        """
-        Fetches list of servers
-        :return object data: Json object of data from server
-        """
-        url = requests.get(
-            self.__urlString, headers=self.__headers, verify=False)
-        data = json.loads(url.text)
-        return data
-
-    def getHttpServersList(self):
-        """
-        Fetches list of http servers
-        :return object data: Json object of http data
-        """
-        url = requests.get(self.__httpUrlString,
-                           headers=self.__headers, verify=False)
-        data = json.loads(url.text)
-        return data
-
-    def validateSchema(self, coll_data):
-        """
-        Validates schema
-        :param string coll_data:
-        :return list exceptions:
-        """
-        exceptions = []
-        try:
-            url = requests.get(self.__schemaString,
-                               headers=self.__headers, verify=False)
-            schema_coll_data = json.loads(url.text)
-            a = Draft4Validator(schema_coll_data)
-            for error in sorted(a.iter_errors(coll_data), key=str):
-                message = ""
-                try:
-                    exp = str(error.absolute_path[2]) + " is missing in " + str(error.absolute_path[0]) + " " + str(
-                        error.absolute_path[1])
-                    exceptions.append(exp)
-                except IndexError:
-                    try:
-                        message = error.message
-                        if "is not of type" or "is too short" in message:
-                            message = "Missing values"
-                        exp = str(
-                            message) + " in " + str(error.absolute_path[0]) + " " + str(error.absolute_path[1])
-                        exceptions.append(exp)
-                    except IndexError:
-                        try:
-                            message = error.message
-                            if "is not of type" or "is too short" in message:
-                                message = "Missing values"
-                            exp = str(message) + " in " + \
-                                str(error.absolute_path[0])
-                            exceptions.append(exp)
-                        except IndexError:
-                            exceptions.append(str(error.message))
-        except:
-            exceptions.append("Could not fetch schema")
-        return exceptions
 
 
 class Dtree():
@@ -212,315 +114,11 @@ class Dtree():
         return self.__serviceObjects
 
 
-class FetchDOI():
-    """ Fetches information using DOI
-    """
-
-    def __init__(self, doi):
-        self.__doi = doi
-
-    def find_word(self, text, search):
-        """Util Function to find exact match in words.
-        :return: Information of the References - Dictionary
-        """
-        result = re.findall('\\b' + text + '\\b', search, flags=re.IGNORECASE)
-        if len(result) > 0:
-            return True
-        else:
-            return False
-
-    def fetchFromDOI(self):
-        """Collects and Returns values given DOI for the Reference section of the drop down menu of the Curation step.
-        :return: Information of the References - Dictionary
-        """
-        try:
-            headers = {
-                'Accept': 'application/rdf+xml;q=0.5, application/vnd.citationstyles.csl+json;q=1.0',
-            }
-            res = requests.get('https://doi.org/' +
-                               str(self.__doi), headers=headers)
-            res.encoding = 'utf-8'
-            response = json.loads(res.text)
-            kind = "Journal"
-            title = ""
-            journalFull = ""
-            volume = ""
-            page = ""
-            year = 0
-            publishedAbstract = ""
-            url = ""
-            personList = []
-            for resp in response.keys():
-                if self.find_word(str(resp).strip(), "title"):
-                    title = str(response[resp])
-                elif self.find_word(str(resp).strip(), "container-title"):
-                    journalFull = str(response[resp])
-                elif self.find_word(str(resp).strip(), "container-title-short"):
-                    journalAbbr = str(response[resp])
-                elif self.find_word(str(resp).strip(), "volume"):
-                    volume = str(response[resp])
-                elif self.find_word(str(resp).strip(), "article-number") or self.find_word(str(resp).strip().lower(), "page"):
-                    page = str(response[resp])
-                elif self.find_word(str(resp).strip(), "created"):
-                    if "date-parts" in str(response['created']).strip():
-                        if len(response['created']['date-parts']) > 0:
-                            year = int(response['created']['date-parts'][0][0])
-                    if "date-time" in str(response['created']).strip().lower():
-                        publishedDate = str(response['created']['date-time'])
-                elif self.find_word(str(resp).strip(), "abstract"):
-                    publishedAbstract = str(response[resp])
-                elif self.find_word(str(resp).strip(), "URL"):
-                    url = str(response[resp])
-                elif self.find_word(str(resp).strip(), "author"):
-                    for eachAuth in response['author']:
-                        person = {}
-                        if "given" in eachAuth:
-                            first = ""
-                            middle = ""
-                            if ' ' in str(eachAuth["given"]):
-                                parts = str(eachAuth["given"]).split()
-                                first = str(parts[0])
-                                middle = str(parts[1])
-                                person["firstName"] = first
-                                person["middleName"] = middle
-                            else:
-                                first = str(eachAuth["given"])
-                                person["firstName"] = first
-                        if "family" in eachAuth:
-                            person["lastName"] = str(eachAuth["family"])
-                        personList.append(person)
-            referenceJSON = {}
-            referenceJSON["authors"] = personList
-            referenceJSON["journal"] = {"fullName": journalFull}
-            referenceJSON["URLs"] = url
-            referenceJSON["publishedAbstract"] = publishedAbstract
-            referenceJSON["year"] = year
-            referenceJSON["page"] = page
-            referenceJSON["volume"] = volume
-            referenceJSON["title"] = title
-            referenceJSON["DOI"] = self.__doi
-        except Exception as e:
-            print(e)
-            raise IOError
-        return referenceJSON
-
-
-class WorkflowCreator(object):
-    """Class to create stand alone final workflow for the metadata(JSON) format.
-    """
-
-    def __init__(self, fileServerPath=None):
-        self.desc = {}
-        self.desc["charts"] = []
-        self.desc["datasets"] = []
-        self.desc["scripts"] = []
-        self.desc["tools"] = []
-        self.desc["heads"] = []
-        self.desc["edges"] = []
-        self.desc["nodes"] = []
-        self.fileServerPath = fileServerPath
-
-    def addChart(self, chart):
-        image = '<img src="' + self.fileServerPath + "/" + \
-            chart.get("imageFile", "") + '" width="250px;" height="250px;"/>'
-        caption = "<b> Image: </b>" + image
-        chart_tooltip = {}
-        chart_tooltip['id'] = chart.get("id")
-        chart_tooltip['caption'] = caption
-        self.desc["charts"].append(chart_tooltip)
-
-    def addDataset(self, dataset):
-        caption = "<b> Description: </b>" + dataset.get("readme", "")
-        dataset_tooltip = {}
-        dataset_tooltip['id'] = dataset.get("id")
-        dataset_tooltip['caption'] = caption
-        self.desc["datasets"].append(dataset_tooltip)
-
-    def addScript(self, script):
-        caption = "<b> Description: </b>" + script.get("readme", "")
-        script_tooltip = {}
-        script_tooltip['id'] = script.get("id")
-        script_tooltip['caption'] = caption
-        self.desc["scripts"].append(script_tooltip)
-
-    def addTool(self, tool):
-        caption = None
-        if tool.get("packageName") and tool.get("version"):
-            caption = "<b> Package Name: </b>" + tool.get("packageName", "") + "<br/> <b> Version: </b>" + tool.get(
-                "version", "")
-        elif tool.get("facilityName") and tool.get("measurement"):
-            caption = "<b> Facility Name: </b>" + tool.get("facilityName",
-                                                           "") + " <br/> <b>Measurement: </b>" + tool.get(
-                "measurement", "")
-        tool_tooltip = {}
-        tool_tooltip['id'] = tool.get("id")
-        tool_tooltip['caption'] = caption
-        self.desc["tools"].append(tool_tooltip)
-
-    def addHead(self, head):
-        caption = None
-        if head.get("readme") or head.get("URLs"):
-            caption = "<b> Description: </b>" + \
-                head.get("readme", "") + "<br/> <b> URLs: </b>" + \
-                head.get("URLs", "")
-        else:
-            caption = ""
-        head_tooltip = {}
-        head_tooltip['id'] = head.get("id")
-        head_tooltip['caption'] = caption
-        head_tooltip['readme'] = head.get("readme", "")
-        head_tooltip['URLs'] = head.get("URLs", "")
-        self.desc["heads"].append(head_tooltip)
-
-    def addEdge(self, edge):
-        self.desc["edges"].append(edge)
-
-
-class GenerateId():
-    """
-    Generates Ids to charts, datasets,scripts,heads
-    """
-
-    def __init__(self, type):
-        self.index = 0
-        self.type = type
-
-    def addId(self, item):
-        item['id'] = self.type[0] + str(self.index)
-        self.index = self.index + 1
-        return item
-
-
-class ConvertField():
-    """
-    Util method to convert fields to List and list to String
-    """
-    def convertToList(fieldsList=[], formsList=[], data=None):
-        if fieldsList and formsList:
-            for forms in formsList:
-                for form in data.get(forms, []):
-                    for field in fieldsList:
-                        if isinstance(form.get(field), str):
-                            form[field] = [x.strip()
-                                           for x in form[field].split(",")]
-        else:
-            if isinstance(data, str):
-                data = [x.strip() for x in data.split(",")]
-        return data
-
-    def convertToString(fieldsList=[], formsList=[], data=None):
-        for forms in formsList:
-            for form in data.get(forms, []):
-                for field in fieldsList:
-                    if isinstance(form.get(field), list):
-                        form[field] = ", ".join(form.get(field))
-        return data
-
-
-class SendDescriptor():
-    """
-    Sends descriptor
-    """
-
-    def __init__(self, servername):
-        self.__servername = servername
-
-    def sendDescriptorToServer(self, data):
-        """
-        Sends email to server
-        :return: response: sends descriptor to server
-        """
-        url = self.__servername + "/getDescriptor"
-        payload = {'metadata': data, 'servername': self.__servername}
-        headers = {'Application': 'qresp', 'Accept': 'application/json',
-                   'Content-Type': 'application/json'}
-        response = requests.post(url, data=json.dumps(
-            payload), headers=headers, verify=False)
-        return response
-
-
-class FetchDataFromAPI():
-    """
-    Fetches data for search,paper details and chart details for explorer
-    """
-
-    def __init__(self, servernames=None, localServer=None):
-        serverList = []
-        global LOCALHOST
-        if servernames and isinstance(servernames, str):
-            serverList = servernames.split(",")
-        else:
-            serverslist = Servers()
-            serverList = [qrespserver['qresp_server_url'] for qrespserver in
-                          serverslist.getServersList()]
-        if localServer:
-            serverList.append(localServer)
-        elif LOCALHOST:
-            serverList.append(LOCALHOST)
-        self.__servernames = set(serverList)
-
-    def fetchOutput(self, apiname):
-        """
-        Fetches output to server
-        :return: object: sends descriptor to server
-        """
-        outDict = {}
-        self.__servernames = list(set(self.__servernames))
-        for snames in self.__servernames:
-            try:
-                url = snames + apiname
-                headers = {'Application': 'qresp', 'Accept': 'application/json',
-                           'Content-Type': 'application/json'}
-                response = requests.get(url, headers=headers, verify=False)
-                if response.status_code == 200 and response.content:
-                    if "paper" in apiname or "workflow" in apiname:
-                        outDict = response.json()
-                        return outDict
-                    elif "search" in apiname:
-                        outDict.update(
-                            {eachsearchObj['_Search__title']: eachsearchObj for eachsearchObj in response.json()})
-                    else:
-                        outDict.update(
-                            {eachsearchObj: eachsearchObj for eachsearchObj in response.json()})
-            except Exception as e:
-                print(e)
-        return list(outDict.values())
-
-
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
-
-
-class GoogleAuth():
-    """
-    Authorization for google.
-    """
-
-    def __init__(self, clientid=None, redirecturi=None, scope=None):
-        self.clientid = clientid
-        self.redirecturi = redirecturi
-        self.scope = scope
-
-    def getGoogleAuth(self, state=None, token=None):
-        if token:
-            return OAuth2Session(self.clientid, token=token)
-        if state:
-            return OAuth2Session(
-                self.clientid,
-                state=state,
-                redirect_uri=self.redirecturi)
-        oauth = OAuth2Session(
-            self.clientid, redirect_uri=self.redirecturi, scope=self.scope.split(","))
-        return oauth
-
-
-class SetLocalHost:
-    def __init__(self, localhost):
-        global LOCALHOST
-        LOCALHOST = localhost
 
 
 class WorkflowObject:
@@ -602,12 +200,13 @@ class WorkflowObject:
         """
         tooltip = ""
         if "d" in workflowtype:
-            tooltip = "<p><b>Dataset " + node.id + "</b>: <i>" + node.readme + "</i>"
+            # Descriptions and captions are optional and may be absent.
+            tooltip = "<p><b>Dataset " + node.id + "</b>: <i>" + (node.readme or "") + "</i>"
         elif "s" in workflowtype:
-            tooltip = "<p><b>Script " + node.id + "</b>: <i>" + node.readme + "</i>"
+            tooltip = "<p><b>Script " + node.id + "</b>: <i>" + (node.readme or "") + "</i>"
         elif "c" in workflowtype:
             tooltip = "<p><img src='" + fileServerPath + "/" + node.imageFile + "' class='img-responsive img-thumbnail'></p><p><b>" \
-                      + node.number + ": </b><i>" + node.caption + "</i></p>"
+                      + node.number + ": </b><i>" + (node.caption or "") + "</i></p>"
         return tooltip
 
     def _getExtraFields(self, node):
@@ -644,6 +243,18 @@ class Search(object):
         self.notebookPath = ""
         self.notebookFile = ""
         self.year = 0
+        # Optional, record-level -- see project.models.Paper.institution.
+        # Absent on records published before the field existed.
+        self.institution = ""
+        # Private records are listed only to sessions that can open them;
+        # the flag lets the explorer badge them.
+        self.is_private = False
+        # 'paper' | 'report' | 'software' | 'dataset' | 'other'; legacy
+        # records are 'paper'. Lets the explorer badge non-paper works.
+        self.work_type = "paper"
+        # The requesting session's role on the record ('owner', 'editor',
+        # 'viewer' or ''), so the explorer can label the reader's own records.
+        self.my_role = ""
 
     @property
     def id(self):
@@ -765,6 +376,38 @@ class Search(object):
     def year(self, val):
         self.__year = val
 
+    @property
+    def institution(self):
+        return self.__institution
+
+    @institution.setter
+    def institution(self, val):
+        self.__institution = val
+
+    @property
+    def is_private(self):
+        return self.__is_private
+
+    @is_private.setter
+    def is_private(self, val):
+        self.__is_private = val
+
+    @property
+    def work_type(self):
+        return self.__work_type
+
+    @work_type.setter
+    def work_type(self, val):
+        self.__work_type = val
+
+    @property
+    def my_role(self):
+        return self.__my_role
+
+    @my_role.setter
+    def my_role(self, val):
+        self.__my_role = val
+
     def __hash__(self):
         return hash(self.__title)
 
@@ -790,6 +433,10 @@ class PaperDetails(object):
     publication = ""
     abstract = ""
     doi = ""
+    # 'paper' (published, and every legacy record) | 'report' | 'software' |
+    # 'dataset' | 'other', and the reference URL (a code repository's URL).
+    work_type = "paper"
+    url = ""
     serverPath = ""
     folderAbsolutePath = ""
     fileServerPath = ""
@@ -807,6 +454,8 @@ class PaperDetails(object):
     timeStamp = ""
     documentation = ""
     license = ""
+    # Optional, record-level -- see project.models.Paper.institution.
+    institution = ""
 
 
 class WorkflowInfo:

@@ -1,4 +1,4 @@
-from os import getcwd, listdir
+from os import getcwd, listdir, makedirs
 from sys import stderr
 import json
 from uuid import uuid4
@@ -13,6 +13,9 @@ class Preview:
     def __init__(self):
         self.dir_prefix = getcwd() + '/papers/previews/'
         self.id_prefix = 'PREVIEW_'
+        # Preview metadata is runtime state, not a committed application asset.
+        # Git does not preserve empty directories, so create it when needed.
+        makedirs(self.dir_prefix, exist_ok=True)
 
     def generateId(self):
         '''

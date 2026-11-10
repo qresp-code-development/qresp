@@ -4,6 +4,19 @@ from project.models import *
 from project.util import WorkflowInfo, WorkflowNodeInfo, Search, PaperDetails, dotdict, WorkflowObject
 
 
+def publication_line(reference):
+    """"Journal 138, 6912" from a reference block, built only from the parts
+    that exist: a code repository, dataset or report may have no journal,
+    volume or page at all (and legacy records may hold None)."""
+    journal = getattr(getattr(reference, "journal", None), "fullName", "") or ""
+    volume = str(getattr(reference, "volume", "") or "")
+    page = str(getattr(reference, "page", "") or "")
+    line = " ".join(part for part in (journal, volume) if part)
+    if page:
+        line = "{}, {}".format(line, page) if line else page
+    return line
+
+
 class PaperDAO(MongoDBConnection, WorkflowObject):
     """
     Class providing data access objects
@@ -19,14 +32,14 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         """ fetches all collections from paper
         :return list: List of collections
         """
-        paperCollectionlist = Paper.objects.get_unique_values('collections')
+        paperCollectionlist = active_papers().get_unique_values('collections')
         return paperCollectionlist
 
     def getPublicationList(self):
         """ fetches all publications from paper
         :return list: List of publications
         """
-        paperPublicationlist = Paper.objects.get_unique_values(
+        paperPublicationlist = active_papers().get_unique_values(
             'reference.journal.fullName')
         return paperPublicationlist
 
@@ -34,7 +47,7 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         """ fetches all authors from paper
         :return list authorslist: List of all authors
         """
-        authorslist = Paper.objects.get_unique_names('reference.authors')
+        authorslist = active_papers().get_unique_names('reference.authors')
         return authorslist
 
     def getAllPapers(self):
@@ -133,24 +146,84 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         return allSearchobjects
 
     def insertIntoPapers(self, paperdata):
-        """ Inserts into collection"""
-        listoftitles = [paper.reference.title for paper in Paper.objects()]
-        if paperdata['reference']['title'] in listoftitles:
-            return None
+        """ Inserts a new record and returns its id.
+
+        Always a NEW record. Two curators can each curate the same paper
+        (same title, same DOI) and both records stand side by side; nothing
+        here looks up, replaces or refuses an existing one.
+        """
         paper = Paper(**paperdata)
         paper.save()
         return str(paper.id)
+
+    def paperExists(self, id):
+        """ True when a record with this id is in the collection. """
+        try:
+            return Paper.objects(id=id).first() is not None
+        except Exception:
+            return False
 
     def insertDOI(self, id, doi):
         """ Inserts into collection"""
         paper = Paper.objects(id=id).update(info__doi=doi)
         return paper
 
+    @staticmethod
+    def __sessionUser():
+        """The session user, or None. Outside a request (scripts, DAO unit
+        tests) there is no session: treat it as anonymous."""
+        from flask import has_request_context
+        from project.auth import get_current_user
+        return get_current_user() if has_request_context() else None
+
+    @staticmethod
+    def __visibleToSession(user):
+        """Query matching the records the session may list: public ones,
+        plus private ones it can open (see auth.can_view_paper)."""
+        from project.auth import is_admin
+        if is_admin(user):
+            return Q()
+        visible = Q(is_private__ne=True)
+        email = ((user or {}).get("email") or "").strip().lower()
+        if email:
+            visible = visible | Q(owner_email=email) | Q(
+                editor_emails=email) | Q(viewer_emails=email)
+        return visible
+
+    @staticmethod
+    def __myRole(paper, email):
+        """The session's own relationship to a listed record -- 'owner',
+        'editor', 'viewer' or '' -- so the explorer can label the reader's
+        records. Deliberately not 'admin': admin rights would label every
+        card. Only ever describes the requesting session."""
+        if not email:
+            return ""
+        if (getattr(paper, "owner_email", None) or "").strip().lower() == email:
+            return "owner"
+        if email in {(e or "").strip().lower()
+                     for e in (getattr(paper, "editor_emails", None) or [])}:
+            return "editor"
+        if getattr(paper, "is_private", None) is True and email in {
+                (e or "").strip().lower()
+                for e in (getattr(paper, "viewer_emails", None) or [])}:
+            return "viewer"
+        return ""
+
     def __filtersearchedPaper(self, filteredPaper):
         """ Produces search results after filter
         :return: list filteredSearchobjects: filtered search objects
         """
         filteredSearchobjects = []
+        # All search entry points funnel through here, so this is the single
+        # gate. Deactivated records never appear. Private records appear
+        # only for sessions allowed to open them (owner, editor, the
+        # accounts they are shared with, admins) -- anonymous and federated
+        # readers never see them. The `__ne` forms keep legacy records that
+        # predate the flags (fields absent => active, public).
+        filteredPaper = filteredPaper.filter(is_active__ne=False)
+        user = self.__sessionUser()
+        email = ((user or {}).get("email") or "").strip().lower()
+        filteredPaper = filteredPaper.filter(self.__visibleToSession(user))
         for paper in filteredPaper:
             search = Search()
             search.id = str(paper.id)
@@ -165,8 +238,7 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
                 search.authors.append("{} {} {}".format(author.firstName, author.middleName, author.lastName).replace("  "," "))
 
             search.authors = ", ".join(search.authors)
-            search.publication = paper.reference.journal.fullName + \
-                " " + paper.reference.volume + ", " + paper.reference.page
+            search.publication = publication_line(paper.reference)
             search.abstract = paper.reference.publishedAbstract
             search.doi = paper.reference.DOI
             search.serverPath = paper.info.serverPath
@@ -175,7 +247,11 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
             search.downloadPath = paper.info.downloadPath
             search.notebookPath = paper.info.notebookPath
             search.notebookFile = paper.info.notebookFile
-            search.year = int(paper.reference.year)
+            search.year = int(paper.reference.year or 0)
+            search.institution = getattr(paper, 'institution', '') or ''
+            search.is_private = getattr(paper, 'is_private', None) is True
+            search.work_type = work_type_of(paper)
+            search.my_role = self.__myRole(paper, email)
             filteredSearchobjects.append(search.__dict__)
         return filteredSearchobjects
 
@@ -205,8 +281,9 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
             paperDetails.PIs = [pi.firstName + " " +
                                 pi.lastName for pi in paper.PIs]
             paperDetails.PIs = ", ".join(paperDetails.PIs)
-        paperDetails.publication = paper.reference.journal.fullName + \
-            " " + paper.reference.volume + ", " + paper.reference.page
+        paperDetails.publication = publication_line(paper.reference)
+        paperDetails.work_type = work_type_of(paper)
+        paperDetails.url = getattr(paper.reference, 'URLs', '') or ''
         paperDetails.abstract = paper.reference.publishedAbstract
         paperDetails.doi = paper.reference.DOI
         paperDetails.serverPath = getattr(paper.info, 'serverPath', '')
@@ -217,7 +294,8 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
         paperDetails.notebookPath = getattr(paper.info, 'notebookPath', '')
         paperDetails.notebookFile = getattr(paper.info, 'notebookFile', '')
         paperDetails.ProjectName = getattr(paper.info, 'ProjectName', '')
-        paperDetails.year = int(paper.reference.year)
+        paperDetails.year = int(paper.reference.year or 0)
+        paperDetails.institution = getattr(paper, 'institution', '') or ''
         paperDetails.charts = paper.charts
         paperDetails.datasets = paper.datasets
         paperDetails.scripts = paper.scripts
@@ -249,7 +327,7 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
             self.workflowinfo.edges = paper.workflow.edges
             for node in paper.workflow.nodes:
                 self.__insertWorkflowNodeDetails(node, paper)
-            self.workflowinfo.workflowType = "paper: " + paper.reference.title
+            self.workflowinfo.workflowType = "paper: " + (paper.reference.title or "")
             return self.workflowinfo.__dict__
         except Exception as e:
             print(e)
@@ -414,7 +492,7 @@ class PaperDAO(MongoDBConnection, WorkflowObject):
                             workflownodeinfo.nodelabel = node
                         workflownodeinfo.hasNotebookFile = False
                         self.workflowinfo.nodes[node] = workflownodeinfo.__dict__
-                        self.workflowinfo.workflowType = chart.number + " of " + paper.reference.title
+                        self.workflowinfo.workflowType = (chart.number or "") + " of " + (paper.reference.title or "")
         except Exception as e:
             print(e)
 

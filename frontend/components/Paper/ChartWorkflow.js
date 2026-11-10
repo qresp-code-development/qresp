@@ -6,11 +6,7 @@ import {
   DialogActions,
   DialogTitle,
   DialogContent,
-  Grid,
-  useTheme,
-} from "@material-ui/core";
-
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+} from "@mui/material";
 
 import Graph from "../Workflow/Graph";
 import Legend from "../Workflow/Legend";
@@ -22,12 +18,6 @@ const ChartWorkflow = ({
   workflow,
   data,
 }) => {
-  const theme = useTheme();
-
-  const direction = useMediaQuery(theme.breakpoints.down("sm"))
-    ? "row"
-    : "column";
-
   const handleClose = () => {
     setShowChartWorkflow(false);
   };
@@ -36,19 +26,13 @@ const ChartWorkflow = ({
     <Dialog
       onClose={handleClose}
       open={showChartWorkflow}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
     >
-      {/* <DialogTitle>{title}</DialogTitle> */}
+      <DialogTitle>Workflow for this figure</DialogTitle>
       <DialogContent dividers>
-        <Grid container direction="row">
-          <Grid item xs={12} md={10}>
-            <Graph workflow={formatWorkflow(workflow)} data={data} />
-          </Grid>
-          <Grid item xs={12} md={2}>
-            <Legend direction={direction} />
-          </Grid>
-        </Grid>
+        <Legend />
+        <Graph workflow={formatWorkflow(workflow)} data={data} />
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={handleClose} color="primary">
@@ -59,7 +43,7 @@ const ChartWorkflow = ({
   );
 };
 
-ChartWorkflow.poprTypes = {
+ChartWorkflow.propTypes = {
   showChartWorkflow: PropTypes.bool.isRequired,
   setShowChartWorkflow: PropTypes.func.isRequired,
   workflow: PropTypes.object.isRequired,

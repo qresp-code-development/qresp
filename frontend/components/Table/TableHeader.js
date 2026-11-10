@@ -1,20 +1,25 @@
 import PropTypes from "prop-types";
 
 import {
+  Box,
   TableCell,
   TableHead,
   TableRow,
   TableSortLabel,
-  Hidden,
-  withStyles,
-} from "@material-ui/core";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { visuallyHidden } from "@mui/utils";
 
-const StyledTableCell = withStyles({
-  root: {
-    borderBottomColor: "#000",
-    padding: "8px",
-  },
-})(TableCell);
+const StyledTableCell = styled(TableCell)({
+  padding: "10px 12px",
+  backgroundColor: "#fafafa",
+  borderBottomColor: "rgba(0,0,0,0.12)",
+  color: "#555",
+  fontSize: "0.75rem",
+  fontWeight: 700,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+});
 
 const EnhancedTableHeader = (props) => {
   const { headers, orderBy, order, onRequestSort } = props;
@@ -26,7 +31,7 @@ const EnhancedTableHeader = (props) => {
   return (
     <TableHead>
       <TableRow>
-        {headers.map((header) => (
+        {headers.filter((h) => !h.hidden).map((header) => (
           <StyledTableCell
             key={header.label}
             align={header.options.align ? header.options.align : "left"}
@@ -40,9 +45,9 @@ const EnhancedTableHeader = (props) => {
             >
               {header.label}
               {orderBy === header.name ? (
-                <Hidden xlDown xlUp>
+                <Box component="span" sx={visuallyHidden}>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Hidden>
+                </Box>
               ) : null}
             </TableSortLabel>
           </StyledTableCell>

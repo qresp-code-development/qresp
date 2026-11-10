@@ -1,8 +1,8 @@
-import React from "react";
-import { mount } from "enzyme";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import AlertDialog from "../components/alert";
-import AlertState from "../Context/Alert/AlertState";
+import AlertContext from "../Context/Alert/alertContext";
 
 describe("Alert Tests", () => {
   const context = {
@@ -13,13 +13,23 @@ describe("Alert Tests", () => {
     unsetAlert: jest.fn(),
   };
 
-  const tree = mount(
-    <AlertState value={context}>
-      <AlertDialog />
-    </AlertState>
-  );
+  const renderAlert = () =>
+    render(
+      <AlertContext.Provider value={context}>
+        <AlertDialog />
+      </AlertContext.Provider>
+    );
 
-  it("should render", () => {
-    expect(tree.find(AlertDialog).exists()).toBe(true);
+  it("renders the dialog with its title and message", () => {
+    renderAlert();
+    expect(screen.getByText("Title")).toBeInTheDocument();
+    expect(screen.getByText("Message")).toBeInTheDocument();
+  });
+
+  it("dismisses through the Dismiss button", async () => {
+    const user = userEvent.setup();
+    renderAlert();
+    await user.click(screen.getByRole("button", { name: /dismiss/i }));
+    expect(context.unsetAlert).toHaveBeenCalled();
   });
 });

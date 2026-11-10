@@ -1,16 +1,15 @@
 import { Fragment, useContext } from "react";
-import { LinearProgress, withStyles, Box } from "@material-ui/core";
+import { LinearProgress, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 import LoadingContext from "../Context/Loading/loadingContext";
 
-const LinearLoader = withStyles({
-  colorPrimary: {
-    backgroundColor: "#415161",
-  },
-  barColorPrimary: {
+const LinearLoader = styled(LinearProgress)({
+  backgroundColor: "#415161",
+  "& .MuiLinearProgress-bar": {
     backgroundColor: "#1a252f",
   },
-})(LinearProgress);
+});
 
 const Loader = () => {
   const { loading } = useContext(LoadingContext);

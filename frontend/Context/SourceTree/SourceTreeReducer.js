@@ -9,7 +9,14 @@ import {
   SET_SAVE_BUTTON_ACTION,
   SET_CHILDREN,
   SET_TITLE,
+  SET_CONFIRM_LABEL,
 } from "../types";
+
+// Default label of the selector's confirmation button. Consumers that want
+// different wording call setConfirmLabel AFTER setSaveMethod; setting a new
+// save method resets it, so a consumer that does not opt in can never inherit
+// another form's wording.
+export const DEFAULT_CONFIRM_LABEL = "Save";
 
 export default (state, action) => {
   switch (action.type) {
@@ -24,7 +31,16 @@ export default (state, action) => {
     case SET_MULTIPLE:
       return { ...state, multiple: action.payload };
     case SET_SAVE_BUTTON_ACTION:
-      return { ...state, save: action.payload };
+      return {
+        ...state,
+        save: action.payload,
+        confirmLabel: DEFAULT_CONFIRM_LABEL,
+      };
+    case SET_CONFIRM_LABEL:
+      return {
+        ...state,
+        confirmLabel: action.payload || DEFAULT_CONFIRM_LABEL,
+      };
     case SET_TITLE:
       return { ...state, title: action.payload };
     case SET_CHILDREN:

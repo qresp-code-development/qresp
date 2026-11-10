@@ -1,28 +1,72 @@
-import { useContext } from "react";
+import { Fragment, useContext } from "react";
 import PropTypes from "prop-types";
-import { Grid, Typography, Box, InputLabel } from "@material-ui/core";
+import { Grid, Typography, Box, InputLabel } from "@mui/material";
 import { RegularStyledButton } from "../button";
 
 import CuratorContext from "../../Context/Curator/curatorContext";
 import CuratorHelperContext from "../../Context/CuratorHelpers/curatorHelperContext";
 
+// Text that is read aloud but not drawn. The standard clip-rect recipe, so a
+// screen reader gets a word where a sighted reader gets a symbol.
+const visuallyHidden = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: 0,
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
+
+// The required marker, in ONE place.
+//
+// A red `*` on its own carries the meaning in two channels a reader may not
+// have: colour, and a symbol whose convention has to be known. Screen readers
+// commonly announce it as "star" or skip it entirely, and somebody who cannot
+// distinguish the red is looking at ordinary punctuation.
+//
+// So the asterisk is marked `aria-hidden` — it is decoration — and the word
+// "required" is added beside it for assistive technology. `RequiredFieldLegend`
+// explains the same symbol to everyone who can see it.
+const RequiredMark = () => (
+  <Fragment>
+    <Box component="span" aria-hidden="true" sx={{ color: "error.main" }}>
+      {" *"}
+    </Box>
+    <Box component="span" sx={visuallyHidden}>
+      {" (required)"}
+    </Box>
+  </Fragment>
+);
+
 const FormInputLabel = ({ label, required, forId }) => {
   return (
-    <InputLabel htmlFor={forId}>
+    <InputLabel htmlFor={forId} sx={{ whiteSpace: "normal" }}>
       <Typography
-        color="secondary"
-        style={{ fontSize: "1.1rem", margin: "auto" }}
         component="div"
-        gutterBottom
+        sx={{ fontSize: "0.95rem", fontWeight: 600, color: "text.primary", mb: 0.5 }}
       >
-        <Box fontWeight="bold">
-          {label}
-          {required ? <span style={{ color: "red" }}> *</span> : null}
-        </Box>
+        {label}
+        {required ? <RequiredMark /> : null}
       </Typography>
     </InputLabel>
   );
 };
+
+// One line under a label saying what the field is for and why it matters.
+const FieldDescription = ({ children }) => (
+  <Typography
+    variant="body2"
+    color="text.secondary"
+    component="div"
+    sx={{ mb: 1, lineHeight: 1.5, maxWidth: 720 }}
+  >
+    {children}
+  </Typography>
+);
 
 FormInputLabel.propTypes = {
   label: PropTypes.string.isRequired,
@@ -30,17 +74,41 @@ FormInputLabel.propTypes = {
   forId: PropTypes.string.isRequired,
 };
 
-const SubmitAndReset = ({ submitText, reset }) => {
+// What the asterisk means, said once per form.
+//
+// Every curator form marks its required inputs with a coloured `*` and none
+// of them ever said what it stood for. The convention is widespread but not
+// universal, and it is invisible to a reader who cannot see the colour
+// difference; a legend costs one line and removes the guess.
+//
+// Placed at the TOP of a form, before the first field, so it is read before
+// the symbol it explains rather than after.
+const RequiredFieldLegend = () => (
+  <Typography
+    variant="body2"
+    color="secondary"
+    component="p"
+    data-testid="required-field-legend"
+    sx={{ mb: 1 }}
+  >
+    <Box component="span" aria-hidden="true" sx={{ color: "error.main" }}>
+      *
+    </Box>{" "}
+    Required field
+  </Typography>
+);
+
+const SubmitAndReset = ({ submitText, reset = false }) => {
   return (
-    <Box mt={1}>
+    <Box sx={{ mt: 1 }}>
       <Grid container direction="row" spacing={1}>
-        <Grid item xs={6} sm={2} md={1}>
-          <RegularStyledButton type="save" fullWidth>
+        <Grid size={{ xs: 6, sm: 2, md: 1 }}>
+          <RegularStyledButton type="submit" fullWidth>
             {submitText}
           </RegularStyledButton>
         </Grid>
         {reset ? (
-          <Grid item xs={6} sm={2} md={1}>
+          <Grid size={{ xs: 6, sm: 2, md: 1 }}>
             <RegularStyledButton type="reset" fullWidth>
               Reset
             </RegularStyledButton>
@@ -49,10 +117,6 @@ const SubmitAndReset = ({ submitText, reset }) => {
       </Grid>
     </Box>
   );
-};
-
-SubmitAndReset.defaultProps = {
-  reset: false,
 };
 
 SubmitAndReset.propTypes = {
@@ -98,12 +162,12 @@ const EditAndRemove = ({ rowdata }) => {
 
   return (
     <Grid container spacing={1} direction="column">
-      <Grid item>
+      <Grid>
         <RegularStyledButton onClick={methods.edit} fullWidth>
           Edit
         </RegularStyledButton>
       </Grid>
-      <Grid item>
+      <Grid>
         <RegularStyledButton onClick={methods.delete} fullWidth>
           Remove
         </RegularStyledButton>
@@ -116,4 +180,11 @@ EditAndRemove.propTypes = {
   rowdata: PropTypes.object.isRequired,
 };
 
-export { SubmitAndReset, FormInputLabel, EditAndRemove };
+export {
+  FieldDescription,
+  SubmitAndReset,
+  FormInputLabel,
+  RequiredFieldLegend,
+  RequiredMark,
+  EditAndRemove,
+};

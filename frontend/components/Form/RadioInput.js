@@ -10,12 +10,34 @@ import {
   Tooltip,
   Typography,
   Box,
-} from "@material-ui/core";
+} from "@mui/material";
 
+import { useController } from "react-hook-form";
+
+// Controlled through react-hook-form's useController: the previous
+// register-as-refs wiring left the group value unreadable under RHF v7 with
+// MUI v9 (a visually selected radio came back as undefined on submit and
+// clicks read back as undefined), so the RadioGroup is now driven by form
+// state directly. Callers pass `control` (from useForm) instead of register.
 const RadioInput = (props) => {
-  const { id, name, helperText, options, row, register, error, defVal } = props;
+  const {
+    id,
+    name,
+    helperText = "",
+    options,
+    row = false,
+    control,
+    error,
+    defVal,
+  } = props;
   const [hovering, setHovering] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const { field } = useController({
+    name,
+    control,
+    defaultValue: defVal || "",
+  });
 
   return (
     <Tooltip
@@ -26,15 +48,24 @@ const RadioInput = (props) => {
     >
       <RadioGroup
         id={id}
-        name={name}
-        style={{ width: "max-content" }}
+        name={field.name}
+        // As wide as its options, so the tooltip sits beside them -- but never
+        // wider than the column: `max-content` alone kept a row of options
+        // on one unbreakable line and widened the whole page on a phone.
+        style={{ width: "fit-content", maxWidth: "100%", flexWrap: "wrap" }}
         row={row}
         onFocus={() => setFocused(true)}
-        onBlur={(e) => setFocused(false)}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        onChange={(e) => setFocused(false)}
-        defaultValue={defVal || ""}
+        value={field.value == null ? "" : field.value}
+        onChange={(event) => {
+          setFocused(false);
+          field.onChange(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          field.onBlur(event);
+        }}
       >
         {options.map((option) => {
           return (
@@ -42,10 +73,9 @@ const RadioInput = (props) => {
               key={option.value}
               value={option.value}
               control={<Radio color="primary" />}
-              inputRef={register}
               label={
                 <Typography color="secondary">
-                  <Box fontWeight="bold" component="span">
+                  <Box component="span" sx={{ fontWeight: "bold" }}>
                     {option.label}
                   </Box>
                 </Typography>
@@ -63,17 +93,12 @@ const RadioInput = (props) => {
   );
 };
 
-RadioInput.defaultProps = {
-  helperText: "",
-  row: false,
-};
-
 RadioInput.protoTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   helperText: PropTypes.string.isRequired,
   options: PropTypes.array.isRequired,
-  register: PropTypes.func.isRequired,
+  control: PropTypes.object.isRequired,
   row: PropTypes.bool,
   defVal: PropTypes.string,
   error: PropTypes.object,

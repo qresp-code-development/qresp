@@ -42,6 +42,10 @@ class Mail:
         except Exception as e:
             print('Error Connecting to Mail Server', file=stderr)
             print(e, file=stderr)
+            # Propagate the REAL cause: swallowing it here used to make
+            # send() fail later with a misleading AttributeError, hiding the
+            # SMTP configuration problem from the publish error path.
+            raise
 
     def disconnect(self):
         '''

@@ -1,29 +1,10 @@
 import { Fragment, useState, useRef } from "react";
-import PropTypes from "prop-types";
 
-import {
-  Popover,
-  IconButton,
-  Paper,
-  Snackbar,
-  makeStyles,
-} from "@material-ui/core";
+import { Popover, IconButton, Snackbar, Alert } from "@mui/material";
 
-import { Share, Facebook, Twitter, Link, Email } from "@material-ui/icons";
-import { Alert } from "@material-ui/lab";
-
-const useStyles = makeStyles((theme) => ({
-  popover: {
-    pointerEvents: "none",
-  },
-  popoverContent: {
-    pointerEvents: "auto",
-  },
-}));
+import { Share, Facebook, Twitter, Link, Email } from "@mui/icons-material";
 
 const SocialShare = () => {
-  const classes = useStyles();
-
   const anchorEl = useRef(null);
 
   const [alert, setAlert] = useState({
@@ -102,10 +83,7 @@ const SocialShare = () => {
         <Share />
       </IconButton>
       <Popover
-        className={classes.popover}
-        classes={{
-          paper: classes.popoverContent,
-        }}
+        sx={{ pointerEvents: "none" }}
         anchorOrigin={{
           vertical: "center",
           horizontal: "right",
@@ -117,9 +95,12 @@ const SocialShare = () => {
         open={showPopover}
         anchorEl={anchorEl.current}
         disableRestoreFocus
-        PaperProps={{
-          onMouseEnter: handlePopoverOpen,
-          onMouseLeave: handlePopoverClose,
+        slotProps={{
+          paper: {
+            onMouseEnter: handlePopoverOpen,
+            onMouseLeave: handlePopoverClose,
+            sx: { pointerEvents: "auto" },
+          },
         }}
       >
         {/* <Paper> */}

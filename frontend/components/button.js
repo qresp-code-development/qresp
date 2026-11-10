@@ -1,50 +1,45 @@
 import PropTypes from "prop-types";
 import Link from "next/link";
-import { Button } from "@material-ui/core";
-import { withStyles, useTheme } from "@material-ui/core/styles";
+import { Button } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const StyledButton = withStyles({
-  root: {
-    backgroundColor: "#800000",
-    fontSize: "18px",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#B30000",
-      borderColor: "#800000",
-    },
+const StyledButton = styled(Button)({
+  backgroundColor: "#800000",
+  fontSize: "18px",
+  color: "#FFF",
+  whiteSpace: "nowrap",
+  "&:hover": {
+    backgroundColor: "#B30000",
+    borderColor: "#800000",
   },
-  disabled: {
+  "&.Mui-disabled": {
     backgroundColor: "#bdc3c7",
     borderColor: "#800000",
     textDecoration: "line-through",
   },
-})(Button);
+});
 
-const SmallStyledButton = withStyles({
-  root: {
-    backgroundColor: "#800000",
-    fontSize: "12px",
-    margin: "4px",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#9a0000",
-    },
+const SmallStyledButton = styled(Button)({
+  backgroundColor: "#800000",
+  fontSize: "12px",
+  margin: "4px",
+  color: "#FFF",
+  "&:hover": {
+    backgroundColor: "#9a0000",
   },
-})(Button);
+});
 
-const RegularStyledButton = withStyles({
-  root: {
-    backgroundColor: "#800000",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#9a0000",
-    },
+const RegularStyledButton = styled(Button)({
+  backgroundColor: "#800000",
+  color: "#FFF",
+  "&:hover": {
+    backgroundColor: "#9a0000",
   },
-  disabled: {
+  "&.Mui-disabled": {
     backgroundColor: "#bdc3c7",
     borderColor: "#800000",
   },
-})(Button);
+});
 
 const ExternalStyledButton = (props) => {
   const { text, url } = props;
@@ -64,14 +59,26 @@ const ExternalStyledButton = (props) => {
 };
 
 const InternalStyledButton = (props) => {
-  const { text, url } = props;
+  const { text, url, active, icon } = props;
 
+  // Next 13+ <Link> renders its own <a>; render the Link as the Button root
+  // instead of nesting a button inside an anchor.
   return (
-    <Link href={url}>
-      <StyledButton variant="text" color="inherit" size="large">
-        {text}
-      </StyledButton>
-    </Link>
+    <StyledButton
+      component={Link}
+      href={url}
+      variant="text"
+      color="inherit"
+      size="large"
+      startIcon={icon}
+      sx={active ? {
+        borderBottom: "3px solid #fff",
+        borderRadius: 0,
+        paddingBottom: "5px",
+      } : {}}
+    >
+      {text}
+    </StyledButton>
   );
 };
 
@@ -83,6 +90,8 @@ ExternalStyledButton.propTypes = {
 InternalStyledButton.propTypes = {
   text: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
+  active: PropTypes.bool,
+  icon: PropTypes.node,
 };
 
 export {

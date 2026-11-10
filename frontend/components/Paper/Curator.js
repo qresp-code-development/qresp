@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Drawer from "../drawer";
 import LabelValue from "../labelvalue";
 
-import { Box } from "@material-ui/core";
+import { Box } from "@mui/material";
 
 const CuratorInfo = ({ curator, editor, defaultOpen }) => {
   const { firstName, middleName, lastName, emailId, affiliation } = curator;
@@ -13,7 +13,7 @@ const CuratorInfo = ({ curator, editor, defaultOpen }) => {
       editor={editor}
       defaultOpen={defaultOpen}
     >
-      <Box my={1}>
+      <Box sx={{ my: 1 }}>
         <LabelValue
           label="Name"
           value={

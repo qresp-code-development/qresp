@@ -2,14 +2,14 @@ import PropTypes from "prop-types";
 
 import Drawer from "../drawer";
 
-import { Typography, Box } from "@material-ui/core";
+import { Typography, Box } from "@mui/material";
 
 const Documentation = ({ documentation, editor, defaultOpen }) => {
   return (
     <Drawer heading="Documentation" editor={editor} defaultOpen={defaultOpen}>
-      <Box my={1}>
+      <Box sx={{ my: 1 }}>
         <Typography variant="h6" component="div" color="secondary">
-          <Box fontWeight="bold">Readme</Box>
+          <Box sx={{ fontWeight: "bold" }}>Readme</Box>
         </Typography>
         <Typography color="secondary">{documentation}</Typography>
       </Box>

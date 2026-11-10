@@ -8,23 +8,22 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 
 import AlertContext from "../Context/Alert/alertContext";
 
-const Content = withStyles({
-  root: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "2px",
-  },
-})(DialogContent);
+const Content = styled(DialogContent)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  margin: "2px",
+});
 
 const AlertDialog = () => {
-  const { open, title, msg, buttons, unsetAlert } = useContext(AlertContext);
+  const { open, title, msg, buttons, hideDismiss, unsetAlert } =
+    useContext(AlertContext);
 
   const handleClose = () => {
     unsetAlert();
@@ -43,8 +42,21 @@ const AlertDialog = () => {
       <Content dividers>
         <Typography component="div">{msg}</Typography>
       </Content>
-      <DialogActions>
-        <RegularStyledButton onClick={handleClose}>Dismiss</RegularStyledButton>
+      <DialogActions
+        sx={{
+          alignItems: { xs: "stretch", sm: "center" },
+          flexDirection: { xs: "column", sm: "row" },
+          flexWrap: "wrap",
+          gap: 1,
+          justifyContent: "flex-end",
+          "& > *": { m: 0 },
+        }}
+      >
+        {hideDismiss ? null : (
+          <RegularStyledButton onClick={handleClose}>
+            Dismiss
+          </RegularStyledButton>
+        )}
         {buttons ? buttons : null}
       </DialogActions>
     </Dialog>

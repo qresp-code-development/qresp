@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-import { TextField, MenuItem, Typography, Box } from "@material-ui/core";
+import { TextField, MenuItem } from "@mui/material";
 
 const RowsPerPageSelector = (props) => {
   const { count, rowsPerPage, onChangeRowsPerPage } = props;
@@ -13,29 +13,21 @@ const RowsPerPageSelector = (props) => {
   ];
 
   return (
-    <Box m={1} mt={2} display="flex" alignItems="center">
-      <Box mr={1}>
-        <Typography variant="subtitle2">Show</Typography>
-      </Box>
-      <TextField
-        select
-        value={rowsPerPage}
-        onChange={onChangeRowsPerPage}
-        variant="outlined"
-        size="small"
-      >
-        {options.map((option) => {
-          return (
-            <MenuItem value={option.value} key={option.value}>
-              {option.label}
-            </MenuItem>
-          );
-        })}
-      </TextField>
-      <Box ml={1}>
-        <Typography variant="subtitle2">Records</Typography>
-      </Box>
-    </Box>
+    <TextField
+      select
+      label="Show"
+      value={rowsPerPage}
+      onChange={onChangeRowsPerPage}
+      variant="outlined"
+      size="small"
+      sx={{ minWidth: 96 }}
+    >
+      {options.map((option) => (
+        <MenuItem value={option.value} key={option.label}>
+          {option.label === "All" ? "All" : `${option.label} per page`}
+        </MenuItem>
+      ))}
+    </TextField>
   );
 };
 

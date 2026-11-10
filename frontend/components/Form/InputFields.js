@@ -1,37 +1,34 @@
 import { Fragment } from "react";
 import PropTypes from "prop-types";
-import { FormInputLabel } from "./Util";
-import { Grid } from "@material-ui/core";
+import { FormInputLabel, FieldDescription } from "./Util";
+import { Grid } from "@mui/material";
 
 import TextInput from "./TextInput";
 
 const TextInputField = (props) => {
-  const { id, label, required, action, ...rest } = props;
+  const { id, label, required = false, action, description, ...rest } = props;
   return (
       <Grid container spacing={0}>
-        <Grid
-          item
-          xs={12}
-          container
-          direction="row"
-          spacing={1}
-          alignItems="center"
-          alignContent="center"
-        >
-          <Grid item>
+        <Grid container direction="row" spacing={1} size={12} sx={{ alignItems: "center" }}>
+          <Grid>
             <FormInputLabel forId={id} label={label} required={required} />
           </Grid>
-          <Grid item>{action}</Grid>
+          <Grid>{action}</Grid>
         </Grid>
-        <Grid item xs={12}>
-          <TextInput id={id} {...rest} />
+        {description ? (
+          <Grid size={12}>
+            <FieldDescription>{description}</FieldDescription>
+          </Grid>
+        ) : null}
+        <Grid size={12}>
+          {/* `required` reaches the INPUT as well as the label: the visible
+              marker sits on the label, and the input itself carries
+              `aria-required` so the rule is announced when focus lands on
+              it. One rule, two channels, still one asterisk. */}
+          <TextInput id={id} required={required} {...rest} />
         </Grid>
       </Grid>
   );
-};
-
-TextInputField.defaultProps = {
-  required: false,
 };
 
 TextInputField.propTypes = {
@@ -43,6 +40,7 @@ TextInputField.propTypes = {
   helperText: PropTypes.string,
   required: PropTypes.bool,
   action: PropTypes.object,
+  description: PropTypes.node,
 };
 
 import NameInput from "./NameInput";
@@ -111,7 +109,7 @@ RadioInputField.propTypes = {
   name: PropTypes.string.isRequired,
   options: PropTypes.array.isRequired,
   helperText: PropTypes.string.isRequired,
-  register: PropTypes.func.isRequired,
+  control: PropTypes.object.isRequired,
   error: PropTypes.object,
   required: PropTypes.bool,
   defVal: PropTypes.string,

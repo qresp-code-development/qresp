@@ -1,4 +1,4 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography } from "@mui/material";
 import Picture from "./picture";
 
 const Footer = () => {
@@ -12,16 +12,8 @@ const Footer = () => {
   };
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-evenly"
-        flexWrap="wrap"
-        style={style.upper}
-        p={4}
-      >
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      <Box style={style.upper} sx={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", p: 4 }}>
         <a href="http://miccom-center.org/" target="_blank" rel="noopener">
           <Picture
             imgSrc="/images/MICCoMLogo"
@@ -44,14 +36,7 @@ const Footer = () => {
           />
         </a>
       </Box>
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="center"
-        style={style.lower}
-        p={1}
-      >
+      <Box style={style.lower} sx={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", p: 1 }}>
         <Typography variant="overline" color="secondary">
           Copyright ©2018-2020 All Rights Reserved
         </Typography>

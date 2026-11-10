@@ -1,35 +1,40 @@
-setuptools
+# Qresp backend dependencies.
+#
+# 2026-07-02 audit (see
+# docs/archive/modernization/dependency-audit-2026-07-02.md): removed every declared-but-never-
+# imported package (Flask-API, Flask-HTTPAuth, flask-profiler, Flask-WTF,
+# paramiko, schedule, py3dns, pyasn1, validate-email, pyOpenSSL,
+# swagger-spec-validator, coveralls) and redundant explicit transitives
+# (itsdangerous, Jinja2, urllib3). Added `requests` explicitly (used by
+# project/util.py; was previously satisfied only transitively).
+#
+# flask-mongoengine removed 2026-07-02: unmaintained and blocked Flask>=2.3;
+# it was only a connection shim (models are plain mongoengine) -- replaced with
+# direct mongoengine.connect() in project/__init__.py and project/db.py.
+#
+# Connexion migrated to 3.x and Flask/Werkzeug caps lifted on 2026-07-02 --
+# every backend dependency now floats to latest stable (exact verified set in
+# requirements.lock.txt). The app object to serve is `project:connexionapp`
+# via an ASGI server: production uses gunicorn with uvicorn workers (see
+# docker-compose.yml); `run.py` / `python -m project` serve through uvicorn.
 jsonschema
 Flask
-Flask-API
-Flask-Cors
-Flask-HTTPAuth
-flask-mongoengine
-flask-profiler
-Flask-Session
-Flask-WTF
-itsdangerous
-Jinja2
-mongoengine
-paramiko
-pre-commit
-py3dns
-pyasn1
-pymongo
-pyOpenSSL
-swagger-spec-validator
-swaggerpy
-urllib3
-validate-email
 Werkzeug
-WTForms
-schedule
-flask-sitemap
+Flask-Cors
+Flask-Session
+mongoengine
+pymongo
+requests
 requests_oauthlib
-mongomock
-connexion[swagger-ui]
-coverage
-nose2
-python-coveralls
+# OIDC ID-token validation for Microsoft Entra sign-in: maintained JWT
+# library with RS256/JWKS support — never hand-roll token verification.
+PyJWT[crypto]
 lxml
 gunicorn
+uvicorn-worker
+connexion[flask,swagger-ui,uvicorn]>=3.3
+# --- dev / test tools ---
+pre-commit
+mongomock
+coverage
+nose2
